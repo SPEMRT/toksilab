@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}img{max-width:100%}body{margin:0}</style>
+<title>ToksiLab Adli Vakalar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: tek sütun "vaka dosyası" — üstte delil etiketi, adım rayı, altta enstrüman ekranı gibi çalışan sahne */
+:root{
+  --bg:#E9EEEC; --surface:#FFFFFF; --sunk:#DCE4E1; --ink:#14201D; --muted:#566661; --line:#C3CFCB;
+  --accent:#0E6F66; --accent-ink:#FFFFFF; --tag:#F2C230; --tag-ink:#2A2100;
+  --ok:#1C7C3A; --ok-bg:#DDF2E3; --bad:#B42318; --bad-bg:#FBE3E0; --warn:#A15C00; --warn-bg:#FCEFD6;
+  --scope-bg:#0F1A18; --scope-grid:#22332F; --scope-ink:#B9CCC6; --trace:#3FE0C5; --qual:#FF9F43;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1312; --surface:#141F1D; --sunk:#1B2826; --ink:#E3ECE9; --muted:#8FA39D; --line:#2A3B37;
+  --accent:#34CDB8; --accent-ink:#04201C; --tag:#F2C230; --tag-ink:#2A2100;
+  --ok:#5BD483; --ok-bg:#12301E; --bad:#FF8A7A; --bad-bg:#3A1612; --warn:#F2B04A; --warn-bg:#33240C;
+  --scope-bg:#070D0C; --scope-grid:#1A2A27; --scope-ink:#9FB6AF; --trace:#3FE0C5; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1312; --surface:#141F1D; --sunk:#1B2826; --ink:#E3ECE9; --muted:#8FA39D; --line:#2A3B37;
+  --accent:#34CDB8; --accent-ink:#04201C; --tag:#F2C230; --tag-ink:#2A2100;
+  --ok:#5BD483; --ok-bg:#12301E; --bad:#FF8A7A; --bad-bg:#3A1612; --warn:#F2B04A; --warn-bg:#33240C;
+  --scope-bg:#070D0C; --scope-grid:#1A2A27; --scope-ink:#9FB6AF; --trace:#3FE0C5; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.label{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* Home */
+.hero{display:flex;flex-direction:column;gap:12px;padding-block:8px 4px}
+.hero h1{font-size:clamp(44px,12vw,76px);font-weight:800;letter-spacing:-.03em}
+.hero h1 span{color:var(--accent)}
+.hero p{max-width:56ch;color:var(--muted);font-size:17px}
+.flow{display:flex;flex-wrap:wrap;gap:6px}
+.flow span{font-family:var(--f-mono);font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:4px;color:var(--muted)}
+.cases{display:grid;gap:14px}
+.casecard{display:grid;grid-template-columns:auto 1fr;gap:14px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;transition:transform .15s,border-color .15s}
+.casecard:hover{transform:translateY(-2px);border-color:var(--accent)}
+.tagstub{width:58px;background:var(--tag);color:var(--tag-ink);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:8px 4px;position:relative}
+.tagstub::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--surface);box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+.tagstub b{font-family:var(--f-display);font-size:26px;line-height:1}
+.barcode{width:38px;height:16px;background:repeating-linear-gradient(90deg,var(--tag-ink) 0 1px,transparent 1px 3px,var(--tag-ink) 3px 5px,transparent 5px 6px)}
+.casecard h3{font-size:21px;margin-block:2px 6px}
+.casecard p{color:var(--muted);font-size:15px}
+.casecard .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pill{font-family:var(--f-mono);font-size:11.5px;padding:3px 8px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.pill.best{background:var(--ok-bg);color:var(--ok)}
+.foot{color:var(--muted);font-size:13px;max-width:60ch}
+
+/* Case view */
+.casebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.back{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:14px}
+.caseid{font-family:var(--f-mono);font-size:13px;background:var(--tag);color:var(--tag-ink);padding:4px 8px;border-radius:4px;font-weight:600}
+.scorebox{margin-left:auto;font-family:var(--f-mono);font-size:14px}
+.scorebox b{font-size:20px;color:var(--accent)}
+.rail{list-style:none;margin:0;padding:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.rail li{flex:1 0 auto;min-width:64px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:8px;border-top:3px solid var(--line)}
+.rail li.done{border-color:var(--accent);color:var(--ink)}
+.rail li.now{border-color:var(--tag);color:var(--ink);font-weight:600}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.stage h2{font-size:26px}
+.story{font-size:17px;max-width:62ch}
+.evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.ev{border:1px dashed var(--line);border-radius:8px;padding:10px;font-size:14px;display:flex;gap:8px;align-items:flex-start}
+.ev i{flex:none;width:10px;height:26px;border-radius:3px;margin-top:2px}
+.q{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1.25}
+.note{color:var(--muted);font-size:15px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:12px 14px;transition:border-color .15s,background .15s}
+.opt:not(:disabled):hover{border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt .key{flex:none;font-family:var(--f-mono);font-size:12px;font-weight:600;width:24px;height:24px;border-radius:5px;display:grid;place-items:center;background:var(--sunk);color:var(--muted)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.right .key{background:var(--ok);color:var(--surface)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.wrong .key{background:var(--bad);color:var(--surface)}
+.fb{border-radius:8px;padding:12px 14px;font-size:15px;display:flex;flex-direction:column;gap:4px}
+.fb.good{background:var(--ok-bg);color:var(--ink);border-left:4px solid var(--ok)}
+.fb.part{background:var(--warn-bg);color:var(--ink);border-left:4px solid var(--warn)}
+.fb.poor{background:var(--bad-bg);color:var(--ink);border-left:4px solid var(--bad)}
+.fb strong{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.btn{align-self:flex-start;background:var(--accent);color:var(--accent-ink);border:none;border-radius:8px;padding:12px 18px;font-weight:700;font-size:16px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:none;color:var(--ink);border:1.5px solid var(--line)}
+
+/* Analyzer */
+.analyzer{background:var(--scope-bg);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;color:var(--scope-ink)}
+.an-head{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.an-row{display:grid;grid-template-columns:48px 1fr 92px;gap:10px;align-items:center;font-family:var(--f-mono);font-size:13px}
+.an-bar{position:relative;height:12px;background:var(--scope-grid);border-radius:3px;overflow:hidden}
+.an-bar i{position:absolute;inset:0 auto 0 0;width:0;background:var(--trace);transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.an-bar i.pos{background:var(--tag)}
+.an-bar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--scope-ink);opacity:.7}
+.an-val{text-align:right;font-variant-numeric:tabular-nums}
+.an-val .p{color:var(--tag);font-weight:600}
+.an-legend{font-size:11px;font-family:var(--f-mono);opacity:.8}
+
+/* Chromatogram */
+.scope{background:var(--scope-bg);border-radius:10px;padding:10px 6px 4px;overflow-x:auto}
+.scope svg{display:block;width:100%;min-width:340px;height:auto}
+.scope text{font-family:var(--f-mono);font-size:11px;fill:var(--scope-ink)}
+.criteria{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.crit{background:var(--sunk);border-radius:8px;padding:10px;font-size:13.5px}
+.crit b{display:block;font-family:var(--f-mono);font-size:15px;color:var(--accent)}
+.peaks{display:grid;gap:10px}
+.peak{border:1.5px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.peak.hl{border-color:var(--tag)}
+.peak.ok{border-color:var(--ok)} .peak.no{border-color:var(--bad)}
+.peak-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pn{width:26px;height:26px;border-radius:50%;background:var(--tag);color:var(--tag-ink);display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:13px;flex:none}
+.peak-top h3{font-size:18px}
+.mrm{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.pdata{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pdata div{background:var(--bg);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--muted)}
+.pdata b{display:block;font-family:var(--f-mono);font-size:13.5px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.pdata .x b{color:var(--bad)} .pdata .v b{color:var(--ok)}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;align-self:flex-start}
+.seg button{background:none;border:none;padding:8px 14px;font-size:14px;font-weight:700;color:var(--muted)}
+.seg button+button{border-left:1.5px solid var(--line)}
+.seg button[aria-pressed="true"].y{background:var(--ok);color:var(--surface)}
+.seg button[aria-pressed="true"].n{background:var(--bad);color:var(--surface)}
+.seg button:disabled{cursor:default}
+.verdict{font-size:14px}
+
+/* Calibration */
+.calib{display:grid;gap:14px}
+.calplot{background:var(--sunk);border-radius:10px;padding:8px}
+.calplot svg{display:block;width:100%;height:auto}
+.calplot text{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
+.eq{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.eq div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px}
+.eq b{display:block;font-family:var(--f-mono);font-size:17px;font-variant-numeric:tabular-nums}
+.answer{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.answer input{font-family:var(--f-mono);font-size:18px;width:140px;padding:10px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink)}
+.answer span{font-family:var(--f-mono);color:var(--muted)}
+
+/* Final */
+.final-score{font-family:var(--f-display);font-weight:800;font-size:64px;line-height:1;color:var(--accent)}
+.rank{display:inline-block;background:var(--tag);color:var(--tag-ink);font-family:var(--f-mono);font-weight:600;padding:5px 10px;border-radius:4px;font-size:13px}
+.logt{width:100%;border-collapse:collapse;font-size:14px}
+.logt td{padding:8px 4px;border-bottom:1px solid var(--line)}
+.logt td:last-child{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+/* Pik Okulu */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px}
+.sec-head h2{font-size:26px}
+.lessons{display:grid;gap:8px}
+.lesson{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.lesson:hover{border-color:var(--accent)}
+.lesson .ln{width:34px;height:34px;border-radius:8px;background:var(--scope-bg);color:var(--trace);display:grid;place-items:center;font-family:var(--f-mono);font-weight:600}
+.lesson b{font-family:var(--f-display);font-size:17px;display:block;line-height:1.2}
+.lesson small{color:var(--muted);font-size:13.5px}
+.lesson .ck{font-family:var(--f-mono);font-size:12px;color:var(--ok)}
+.theory{display:flex;flex-direction:column;gap:10px;max-width:64ch}
+.rule{border-left:4px solid var(--tag);background:var(--sunk);padding:10px 12px;border-radius:0 8px 8px 0;font-size:15px}
+.rule b{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;color:var(--muted)}
+.xic{background:var(--scope-bg);border-radius:10px;padding:8px 4px 2px}
+.xic svg{display:block;width:100%;height:auto;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.xic text{font-family:var(--f-mono);font-size:11px;fill:var(--scope-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.ctrls{display:grid;gap:10px}
+.sl{display:grid;grid-template-columns:76px 1fr 62px;gap:10px;align-items:center;font-size:14px}
+.sl input{width:100%;accent-color:var(--accent)}
+.sl output{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.toggles{display:flex;flex-wrap:wrap;gap:8px}
+.tg{background:var(--bg);border:1.5px solid var(--line);border-radius:999px;padding:7px 14px;font-size:14px}
+.tg[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.readout div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;color:var(--muted);min-width:0}
+.readout b{display:block;font-family:var(--f-mono);font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums}
+.chip{display:inline-block;font-family:var(--f-mono);font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}.chip.bad{background:var(--bad-bg);color:var(--bad)}
+.task{border:1.5px dashed var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.task.met{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.task .st{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.task.met .st{color:var(--ok)}
+.seq{display:grid;gap:6px}
+.seqrow{display:grid;grid-template-columns:22px minmax(0,1.4fr) minmax(50px,1fr) 52px auto;gap:8px;align-items:center;text-align:left;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px}
+.seqrow.on{border-color:var(--tag)}
+.seqrow .sn{min-width:0;overflow-wrap:anywhere}
+.seqrow .sv{text-align:right;font-variant-numeric:tabular-nums}
+.seqrow .bar{height:8px;background:var(--sunk);border-radius:4px;overflow:hidden}
+.seqrow .bar i{display:block;height:100%;background:var(--accent)}
+@media (max-width:480px){.seqrow{grid-template-columns:20px minmax(0,1fr) 52px;}.seqrow .bar{grid-column:2/4}.seqrow>span:last-child{grid-column:2/4}}
+.labentry{display:grid;grid-template-columns:1fr;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.labentry-art svg{display:block;width:100%;height:auto}
+.labentry-body{padding:16px;display:flex;flex-direction:column;gap:10px}
+.labentry-body h2{font-size:28px}
+.labentry-body p{color:var(--muted);max-width:60ch}
+@media (min-width:640px){.labentry{grid-template-columns:1.1fr 1fr}.labentry-art{display:flex;align-items:center;background:#E7EEF1}}
+.labcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.labcard h3{font-size:20px}
+.stations{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.stn{flex:1 0 auto;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13.5px;font-weight:700}
+.stn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.stn.go{border-color:var(--tag);animation:pulse 1.4s infinite}
+.scene{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#E7EEF1}
+.scene svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none}
+.scene .sl{font-family:var(--f-mono);font-size:9px;fill:#2B3E44}
+.scene .bl{font-family:var(--f-mono);font-size:6.5px;fill:#2B3E44}
+.scene .it{cursor:pointer;outline:none}
+.scene .it .halo{fill:none;stroke:#F2C230;stroke-width:3;opacity:0}
+.scene .it:hover .halo,.scene .it:focus-visible .halo{opacity:.6}
+.scene .it.tgt .halo{animation:halo 1.3s ease-in-out infinite}
+.scene .an-vortex,.scene .an-etube{animation:shake .12s linear 8;transform-box:fill-box;transform-origin:center}
+.scene .an-centri .rotor{animation:spin .25s linear 5;transform-box:fill-box;transform-origin:center}
+.scene .drip{opacity:0}
+.scene .an-manifold .drip,.scene .an-stube~g .drip{animation:drip .5s ease-in 3}
+.scene .an-evap line{animation:shake .2s linear 5}
+@keyframes halo{0%,100%{opacity:.15}50%{opacity:1}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(242,194,48,.0)}50%{box-shadow:0 0 0 4px rgba(242,194,48,.45)}}
+@keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}100%{transform:translateX(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes drip{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(22px)}}
+.labdlg{background:var(--surface);border:1.5px solid var(--tag);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:420px){.stage{padding:16px}.pdata{grid-template-columns:1fr 1fr}.an-row{grid-template-columns:42px 1fr 80px}}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const CASES=[
+{id:"TX-26-0417",title:"Pansiyon odası",short:"Yatağın yanında folyo ve enjektör. Opiat mı, sentetik opioid mi?",level:"Başlangıç",
+steps:[
+{type:"brief",tag:"Dosya",story:"34 yaşında erkek, kiralık bir odada yatağın yanında ölü bulundu. Odada yanık folyo parçaları, çakmak ve kullanılmış bir enjektör var. Otopside akciğer ödemi ve köpüklü sekresyon görüldü. Otopsi, ölümden yaklaşık 18 saat sonra yapıldı.",
+ ev:[["Femoral kan","gri kapak, NaF","#8A9590"],["Kalp kanı","gri kapak","#8A9590"],["İdrar","25 mL","#E6C34A"],["Vitreus humor","1,8 mL","#9BC6D9"]]},
+{type:"choice",tag:"Numune",q:"Kantitatif kan sonucunu hangi numuneye dayandırırsın?",opts:[
+ {t:"Femoral kan",p:20,f:"Periferik kan postmortem redistribüsyondan en az etkilenen matrikstir. Kantitatif yorum buna dayanır."},
+ {t:"Kalp kanı",p:5,f:"Akciğer ve karaciğerden ilaç difüzyonu nedeniyle yapay olarak yüksek değer verebilir. Karşılaştırma için saklanır."},
+ {t:"İdrar",p:5,f:"İdrar maruziyeti gösterir; konsantrasyonu ölüm anındaki etkiyle ilişkilendirilemez."},
+ {t:"Vitreus humor",p:10,f:"Alkol ve elektrolitler için değerli bir destek matriksi. Opioid kantitasyonunda birincil seçim femoral kandır."}]},
+{type:"immuno",tag:"Tarama",matrix:"İdrar · EMIT ön tarama",panel:[["OPI",300,2000],["AMP",500,120],["COC",150,40],["THC",50,18],["BZD",200,90],["MTD",300,30]],
+ q:"Opiat paneli pozitif. Sonraki adım ne olmalı?",opts:[
+ {t:"LC-MS/MS ile doğrulama: morfin, kodein, 6-MAM ve fentanil dahil geniş opioid paneli",p:20,f:"İmmunoassay yalnızca ön tarama sonucudur. Fentanil opiat panelinde yakalanmaz; geniş panel bunu da kapsar."},
+ {t:"Opiat pozitif, eroin kullanımı kesin; raporla",p:0,f:"Kodein içeren ilaçlar ve haşhaş tohumu da opiat panelini pozitif yapar. Doğrulama olmadan rapor verilmez."},
+ {t:"Sadece morfini doğrula",p:10,f:"Morfin tek başına eroin, kodein ve morfin kaynağını ayırt etmez. Eroine özgü belirteç 6-MAM'dır."},
+ {t:"Pozitif sonuç yeterli, kalp kanını da tara",p:0,f:"Ön tarama pozitifliği doğrulama yerine geçmez."}]},
+{type:"choice",tag:"Hazırlık",q:"Morfin ve 6-MAM bazik, polar analitler. Femoral kan için hangi SPE stratejisi?",opts:[
+ {t:"Karışık mod katyon değiştirici (MCX); asidik yükleme, metanol yıkama, %5 NH₄OH/MeOH ile elüsyon",p:20,f:"Geri kazanım ≈ %88. Analitler iyonik olarak tutulur, metanol matriksi uzaklaştırır, bazik elüsyon iyonik etkileşimi kırar."},
+ {t:"C18 ters faz; %100 su ile elüsyon",p:0,f:"Su, analitleri C18'den alamaz. Geri kazanım ≈ %5."},
+ {t:"Karışık mod anyon değiştirici (MAX); asidik elüsyon",p:5,f:"MAX asidik analitler içindir (ör. THC-COOH). Bazik opioidler tutulmaz; geri kazanım ≈ %20."},
+ {t:"Asetonitril ile protein çöktürme",p:10,f:"Hızlı ama kirli. Ciddi iyon baskılanması beklenir; düşük düzeydeki 6-MAM'da duyarlılık kaybı riski var."}]},
+{type:"chrom",tag:"LC-MS/MS",xmax:6,peaks:[
+ {n:"Morfin",mrm:"286,1 → 165,1 / 201,1",rt:1.82,ert:1.80,r:.43,er:.45,sn:410,h:.9},
+ {n:"Kodein",mrm:"300,2 → 165,1 / 215,1",rt:2.66,ert:2.42,r:.52,er:.50,sn:55,h:.3},
+ {n:"6-MAM",mrm:"328,2 → 165,1 / 211,1",rt:3.12,ert:3.10,r:.60,er:.57,sn:38,h:.24},
+ {n:"Fentanil",mrm:"337,2 → 188,1 / 105,1",rt:5.01,ert:5.00,r:.91,er:.62,sn:22,h:.15}]},
+{type:"calib",tag:"Kantitasyon",analyte:"Morfin",unit:"ng/mL",m:.0125,b:.002,y:3.127,cal:[10,25,50,100,250,500]},
+{type:"choice",tag:"Rapor",q:"Femoral kanda serbest morfin 250 ng/mL, 6-MAM pozitif. En uygun yorum hangisi?",opts:[
+ {t:"6-MAM eroin kullanımını doğrular. Morfin düzeyi eroinle ilişkili ölümlerde bildirilen aralıklarla örtüşür; otopsi ve olay yeri bulgularıyla birlikte değerlendirilmeli.",p:20,f:"Toksikolog bulguyu ve bağlamını raporlar. Ölüm nedenini adli tabip tüm bulguları birleştirerek belirler."},
+ {t:"Morfin, kodein içeren ilaç kullanımını gösterir",p:0,f:"6-MAM kodein veya morfinden oluşmaz; yalnızca eroinden gelir."},
+ {t:"Ölüm nedeni kesin olarak eroin zehirlenmesidir",p:10,f:"Bulgular güçlü, ama tolerans konsantrasyon yorumunu değiştirir. Kesin hüküm toksikoloji raporunun işi değil."},
+ {t:"Kalp kanı ölçülmeden yorum yapılamaz",p:5,f:"Kalp kanı destekleyici bilgi verir; femoral kan sonucu yorum için yeterli dayanaktır."}]}
+]},
+{id:"TX-26-0522",title:"Banyo tuzu",short:"Hipertermi, ajitasyon, nöbet. Ön tarama tamamen negatif.",level:"Orta",
+steps:[
+{type:"brief",tag:"Dosya",story:"26 yaşında erkek, iki gece uykusuz kaldıktan sonra ajitasyon, 41,2 °C ateş ve nöbetle acile getirildi; üç saat sonra öldü. Cebinden \"bath salt\" etiketli beyaz kristal toz çıktı. Acil kabulde alınmış bir kan tüpü laboratuvarda duruyor.",
+ ev:[["Antemortem kan","acil kabul, mor kapak","#B07BC4"],["Femoral kan","postmortem, NaF","#8A9590"],["Kalp kanı","postmortem","#8A9590"],["İdrar","40 mL","#E6C34A"]]},
+{type:"choice",tag:"Numune",q:"Kantitatif yorum için önceliği hangi numuneye verirsin?",opts:[
+ {t:"Acil kabulde alınan antemortem kan",p:20,f:"Ölümden 3 saat önce alındı, redistribüsyondan etkilenmez ve klinik tabloya en yakın zamanı yansıtır. Varsa önceliklendirilir."},
+ {t:"Postmortem femoral kan",p:15,f:"İyi seçim, ama antemortem numune varken birincil o olmalı. İkisi birlikte yorumlanır."},
+ {t:"Kalp kanı",p:5,f:"Postmortem redistribüsyon riski en yüksek numune."},
+ {t:"İdrar",p:5,f:"Maruziyeti gösterir, düzeyi göstermez."}]},
+{type:"immuno",tag:"Tarama",matrix:"İdrar · EMIT ön tarama",panel:[["OPI",300,25],["AMP",500,180],["COC",150,30],["THC",50,12],["BZD",200,60],["MTD",300,15]],
+ q:"Panel tamamen negatif. Ne yaparsın?",opts:[
+ {t:"Hedefli LC-MS/MS ile sentetik katinon / NPS taraması",p:20,f:"Sentetik katinonların amfetamin immunoassay'lerindeki çapraz reaktivitesi genellikle düşüktür. Negatif tarama NPS'yi dışlamaz."},
+ {t:"Negatif olarak raporla",p:0,f:"Klinik tablo sempatomimetik toksisiteyi düşündürüyor. Panelin göremediği bir madde ihtimali yüksek."},
+ {t:"Cut-off'u düşürüp AMP'yi pozitif kabul et",p:5,f:"Cut-off'u sonuca göre değiştirmek valide edilmiş yöntemin dışına çıkmaktır."},
+ {t:"Sadece tozu analiz et, kanı atla",p:10,f:"Toz analizi maddenin kimliğini gösterir; kişinin maruziyetini ve düzeyini göstermez. İkisi birlikte yapılır."}]},
+{type:"choice",tag:"Hazırlık",q:"α-PVP gibi pirolidinofenonlar bazik ve ısıya duyarlı. Hangi hazırlık?",opts:[
+ {t:"MCX SPE, bazik elüsyon, düşük sıcaklıkta kısa kurutma",p:20,f:"Geri kazanım ≈ %85. Katinonlar bazik pH ve ısıda bozunmaya yatkındır; kurutma süresi kısa tutulur, numuneler dondurularak saklanır."},
+ {t:"pH 12'de hekzan ile LLE, 60 °C'de uzun kurutma",p:5,f:"Yüksek pH ve ısı katinon kaybına yol açar. Geri kazanım ≈ %40."},
+ {t:"MAX anyon değiştirici",p:5,f:"Bazik analitler anyon değiştiricide tutulmaz."},
+ {t:"Kanı seyreltip doğrudan enjekte et",p:10,f:"İdrar için işe yarayabilir; tam kanda matriks etkisi ve kolon kirlenmesi ciddi olur."}]},
+{type:"chrom",tag:"LC-MS/MS",xmax:6,peaks:[
+ {n:"Mefedron",mrm:"178,1 → 160,1 / 145,1",rt:3.01,ert:3.00,r:.30,er:.31,sn:2.1,h:.035},
+ {n:"α-PVP",mrm:"232,2 → 91,1 / 126,1",rt:4.21,ert:4.20,r:.37,er:.35,sn:260,h:.85},
+ {n:"MDPV",mrm:"276,2 → 126,1 / 135,0",rt:4.56,ert:4.57,r:.71,er:.52,sn:30,h:.2},
+ {n:"α-PHP",mrm:"246,2 → 91,1 / 140,1",rt:4.92,ert:4.90,r:.41,er:.43,sn:45,h:.28}]},
+{type:"calib",tag:"Kantitasyon",analyte:"α-PVP",unit:"ng/mL",m:.021,b:.005,y:2.315,cal:[5,10,25,50,100,250]},
+{type:"choice",tag:"Rapor",q:"Antemortem kanda α-PVP 110 ng/mL, α-PHP pozitif. En uygun yorum hangisi?",opts:[
+ {t:"α-PVP maruziyeti doğrulandı; hipertermi, ajitasyon ve nöbet sempatomimetik toksisiteyle uyumlu. α-PHP eşlik ediyor; tozun analiziyle karşılaştırılmalı.",p:20,f:"Katinon vakalarında konsantrasyon aralıkları geniş örtüşür; klinik tablo yorumda belirleyicidir."},
+ {t:"MDPV de pozitif olarak raporlanmalı",p:0,f:"MDPV iyon oranı kriterini geçemedi; raporlanamaz."},
+ {t:"Düzey düşük, ölümle ilişkisi yok",p:5,f:"Bu maddelerde tolerans ve bireysel yanıt çok değişkendir; klinik tablo ciddi toksisiteyi gösteriyor."},
+ {t:"İmmunoassay negatif olduğu için sonuç güvenilmez",p:0,f:"LC-MS/MS doğrulaması, ön taramadan bağımsız ve daha özgül bir tanımlamadır."}]}
+]},
+{id:"TX-26-0608",title:"Trafik kontrolü",short:"Tükürük testi THC pozitif. Savcılık soruyor: olay anında etki altında mıydı?",level:"İleri",
+steps:[
+{type:"brief",tag:"Dosya",story:"Sürücü şerit ihlali sonrası durduruldu. Gözlerde kızarıklık ve yavaş pupil yanıtı var. Tükürük ön testi THC pozitif çıktı. Numuneler olaydan 70 dakika sonra alındı. Savcılığın sorusu net: sürücü olay anında etki altında mıydı?",
+ ev:[["Venöz tam kan","olay + 70 dk","#8A9590"],["İdrar","60 mL","#E6C34A"],["Oral sıvı","toplama cihazı","#9BC6D9"],["Saç","3 cm, kök tarafı","#6E5A48"]]},
+{type:"choice",tag:"Numune",q:"Etki altında olma sorusuna hangi numune cevap verir?",opts:[
+ {t:"Venöz tam kan",p:20,f:"Etki değerlendirmesi kandaki aktif THC ile yapılır. THC kandan hızlı düştüğü için alım zamanı kritik."},
+ {t:"İdrar",p:5,f:"İdrarda THC-COOH günler, düzenli kullanıcılarda haftalar sonra bile saptanır; olay anını göstermez."},
+ {t:"Oral sıvı",p:10,f:"Yakın kullanımı gösterir, ama konsantrasyonu etkiyle iyi ilişkilendirilemez. Kan doğrulaması gerekir."},
+ {t:"Saç",p:0,f:"Saç aylar boyunca kullanım öyküsünü gösterir; tek bir olay anını değil."}]},
+{type:"immuno",tag:"Tarama",matrix:"Kan · ELISA ön tarama",panel:[["OPI",20,3],["AMP",50,8],["COC",25,4],["THC",10,46],["BZD",50,12],["MTD",25,2]],
+ q:"Kannabinoid paneli pozitif. Doğrulamada hangi analitler ölçülmeli?",opts:[
+ {t:"THC, 11-OH-THC ve THC-COOH birlikte",p:20,f:"Aktif THC ve aktif metabolit 11-OH-THC etkiyle, inaktif THC-COOH ise kullanım öyküsüyle ilgilidir. Oranları kullanımın ne kadar yakın olduğuna ipucu verir."},
+ {t:"Sadece THC-COOH",p:5,f:"İnaktif metabolittir; etkiyi göstermez."},
+ {t:"Sadece THC",p:10,f:"Temel analit doğru, ama metabolitler yorumu güçlendirir."},
+ {t:"Tükürük pozitif, doğrulamaya gerek yok",p:0,f:"Ön test sonuçları adli raporda tek başına kullanılmaz."}]},
+{type:"choice",tag:"Hazırlık",q:"THC çok lipofilik, THC-COOH asidik. Hangi hazırlık?",opts:[
+ {t:"Asidik koşulda LLE (hekzan:etil asetat 9:1), cam malzeme ile",p:20,f:"Asidik pH'ta THC-COOH nötr hale gelir ve THC ile birlikte organik faza geçer. Cam malzeme THC'nin plastiğe tutunmasını önler."},
+ {t:"MCX, bazik elüsyon",p:5,f:"THC-COOH katyon değiştiricide tutulmaz; geri kazanım düşük."},
+ {t:"Protein çöktürme, polipropilen tüplerde bekletme",p:5,f:"THC plastik yüzeye adsorbe olur; bekletme süresince kayıp büyür."},
+ {t:"Sulu tamponla seyreltip enjekte et",p:0,f:"Lipofilik THC sulu ortamda çözünmez, duyarlılık yetersiz kalır."}]},
+{type:"chrom",tag:"LC-MS/MS",xmax:7.5,note:"THC ve CBD aynı MRM geçişlerini paylaşır (izobarik). Bu çiftte ayrımı yalnızca alıkonma zamanı sağlar.",peaks:[
+ {n:"THC-COOH",mrm:"343,2 → 299,2 / 245,2 (ESI−)",rt:5.62,ert:5.60,r:.48,er:.50,sn:300,h:.85},
+ {n:"11-OH-THC",mrm:"331,2 → 313,2 / 193,1",rt:6.21,ert:6.20,r:.79,er:.77,sn:40,h:.22},
+ {n:"CBD",mrm:"315,2 → 193,1 / 259,2",rt:6.49,ert:6.47,r:.66,er:.63,sn:2.4,h:.03},
+ {n:"THC",mrm:"315,2 → 193,1 / 259,2",rt:6.81,ert:6.80,r:.54,er:.52,sn:120,h:.5}]},
+{type:"calib",tag:"Kantitasyon",analyte:"THC",unit:"ng/mL",m:.085,b:.010,y:.435,cal:[.5,1,2.5,5,10,25]},
+{type:"choice",tag:"Rapor",q:"Kanda THC 5,0 ng/mL, 11-OH-THC ve THC-COOH pozitif. En uygun yorum hangisi?",opts:[
+ {t:"Aktif THC ve 11-OH-THC yakın zamanda kullanımı gösterir; gözlenen klinik bulgularla birlikte olay anında etki altında olmayla uyumludur.",p:20,f:"Konsantrasyon tek başına etki eşiği kanıtlamaz; klinik gözlem ve zaman çizelgesiyle birlikte sunulur."},
+ {t:"Yalnızca geçmiş kullanım var, etki yok",p:0,f:"Aktif THC'nin kanda bu düzeyde bulunması yakın kullanımı gösterir."},
+ {t:"5 ng/mL kesin etki demektir",p:5,f:"Yasal eşikler ülkeden ülkeye değişir; düzenli kullanıcılarda tolerans gelişir ve konsantrasyon-etki ilişkisi zayıftır."},
+ {t:"Tükürük pozitif olduğu için kan sonucuna gerek yoktu",p:0,f:"Ön test yalnızca kan alımını gerekçelendirir."}]}
+]}
+];
+
+const RT_TOL=.10, IR_TOL=.20, SN_MIN=3;
+const app=document.getElementById('app');
+let S={c:0,i:0,score:0,log:[]};
+const fmt=(n,d=2)=>n.toFixed(d).replace('.',',');
+function loadBest(){try{return JSON.parse(localStorage.getItem('toksilab-best')||'{}')}catch(e){return {}}}
+function saveBest(id,pct){try{const b=loadBest();if(!(b[id]>=pct)){b[id]=pct;localStorage.setItem('toksilab-best',JSON.stringify(b))}}catch(e){}}
+function stepMax(s){if(s.type==='choice'||s.type==='immuno')return Math.max(...s.opts.map(o=>o.p));if(s.type==='chrom')return s.peaks.length*10;if(s.type==='calib')return 20;return 0}
+function caseMax(c){return c.steps.reduce((a,s)=>a+stepMax(s),0)}
+function isPos(p){return Math.abs(p.rt-p.ert)<=RT_TOL&&Math.abs(p.r-p.er)/p.er<=IR_TOL&&p.sn>=SN_MIN}
+
+function home(){
+  const best=loadBest();
+  app.innerHTML=`<header class="hero">
+    <span class="label">Adli toksikoloji simülatörü</span>
+    <h1>Toksi<span>Lab</span></h1>
+    <p>Önce Pik Okulu'nda LC-MS/MS integrasyonunu ve madde tanımlamayı elinle dene: pik sınırları, kuyruklanma, taban, girişim, iyon oranı ve S/N. Sonra öğrendiklerini gerçek iş akışıyla vakalarda kullan.</p>
+  </header>
+  <div class="labentry"><div class="labentry-art"><svg viewBox="0 0 400 150" aria-hidden="true">${labHeroArt()}</svg></div>
+   <div class="labentry-body"><span class="label">Örnek hazırlama laboratuvarı</span><h2>Laboratuvara gir</h2><p>Önlüğünü giy, numuneyi teslim al ve morfin için MCX SPE ekstraksiyonunu tezgah tezgah kendin yap. Her seçimin sonucu en sonda kendi kromatogramında görünür.</p>
+   <div class="row"><button class="btn" id="lg">Rehberli başla</button><button class="btn ghost" id="le">Sınav modu</button></div></div></div>
+  <div class="sec-head"><h2>Pik Okulu</h2><span class="label">${LESSONS.length} ders · sürükle, entegre et, karar ver</span></div>
+  <div class="lessons">${LESSONS.map((l,k)=>`<button class="lesson" data-l="${k}"><span class="ln">${k+1}</span><span><b>${l.title}</b><small>${l.analyte} · ${l.tag}</small></span><span class="ck">${K.done[k]?'✓ '+K.done[k]:''}</span></button>`).join('')}</div>
+  <div class="sec-head"><h2>Vakalar</h2><span class="label">Numune → tarama → hazırlık → LC-MS/MS → rapor</span></div>
+  <div class="cases">${CASES.map((c,k)=>`<button class="casecard" data-k="${k}">
+    <div class="tagstub"><b>${k+1}</b><div class="barcode"></div></div>
+    <div><span class="label">${c.id}</span><h3>${c.title}</h3><p>${c.short}</p>
+    <div class="meta"><span class="pill">${c.level}</span><span class="pill">${caseMax(c)} puan</span>${best[c.id]!=null?`<span class="pill best">En iyi: %${best[c.id]}</span>`:''}</div></div>
+  </button>`).join('')}</div>
+  <p class="foot">Vakalar kurgusaldır ve eğitim amaçlıdır. Tanımlama kriterleri (RT ±0,10 dk, iyon oranı ±%20, S/N ≥ 3) bu simülasyon için seçilmiştir; kendi laboratuvarınızın valide yöntem kriterleri geçerlidir.</p>`;
+  app.querySelectorAll('.casecard').forEach(b=>b.onclick=()=>start(+b.dataset.k));
+  app.querySelectorAll('.lesson').forEach(b=>b.onclick=()=>lesson(+b.dataset.l));
+  document.getElementById('lg').onclick=()=>labStart('guide');document.getElementById('le').onclick=()=>labStart('exam');
+  window.scrollTo(0,0);
+}
+function start(k){S={c:k,i:0,score:0,log:[]};render()}
+function award(tag,p,max){S.score+=p;S.log.push({tag,p,max});const sb=document.getElementById('sc');if(sb)sb.textContent=S.score}
+
+function render(){
+  const c=CASES[S.c],s=c.steps[S.i];
+  app.innerHTML=`<div class="casebar"><button class="back" id="back">← Vakalar</button><span class="caseid">${c.id}</span><span class="mono" style="font-size:14px">${c.title}</span>
+   <span class="scorebox">Puan <b id="sc">${S.score}</b> / ${caseMax(c)}</span></div>
+   <ol class="rail">${c.steps.map((x,k)=>`<li class="${k<S.i?'done':k===S.i?'now':''}">${x.tag}</li>`).join('')}</ol>
+   <section class="stage" id="stage"></section>`;
+  document.getElementById('back').onclick=home;
+  const st=document.getElementById('stage');
+  ({brief,choice,immuno,chrom,calib})[s.type](s,st);
+  window.scrollTo(0,0);
+}
+function next(){const c=CASES[S.c];if(S.i<c.steps.length-1){S.i++;render()}else final()}
+function nextBtn(root,label){const b=document.createElement('button');b.className='btn';b.textContent=label||(S.i<CASES[S.c].steps.length-1?'Sonraki adım →':'Vakayı kapat →');b.onclick=next;root.appendChild(b);b.focus({preventScroll:true});b.scrollIntoView({behavior:'smooth',block:'nearest'})}
+
+function brief(s,st){
+  st.innerHTML=`<span class="label">Vaka dosyası</span><h2>${CASES[S.c].title}</h2><p class="story">${s.story}</p>
+  <div><span class="label">Teslim alınan numuneler</span></div>
+  <div class="evidence">${s.ev.map(e=>`<div class="ev"><i style="background:${e[2]}"></i><div><b>${e[0]}</b><br><span class="mono" style="font-size:12px;color:var(--muted)">${e[1]}</span></div></div>`).join('')}</div>`;
+  nextBtn(st,'Numuneleri teslim al →');
+}
+function choiceBlock(s,root){
+  const box=document.createElement('div');box.style.cssText='display:flex;flex-direction:column;gap:14px';
+  box.innerHTML=`<p class="q">${s.q}</p><div class="opts">${s.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="key">${'ABCD'[k]}</span><span>${o.t}</span></button>`).join('')}</div>`;
+  root.appendChild(box);
+  const best=Math.max(...s.opts.map(o=>o.p));
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const o=s.opts[+b.dataset.k];
+    box.querySelectorAll('.opt').forEach((x,k)=>{x.disabled=true;if(s.opts[k].p===best)x.classList.add('right')});
+    if(o.p!==best)b.classList.add('wrong');
+    award(s.tag,o.p,best);
+    const fb=document.createElement('div');
+    fb.className='fb '+(o.p===best?'good':o.p>=best/2?'part':'poor');
+    fb.innerHTML=`<strong>+${o.p} puan · ${o.p===best?'Doğru':o.p>0?'Kısmen':'Hatalı'}</strong><span>${o.f}</span>${o.p!==best?`<span><b>En iyi seçim:</b> ${s.opts.find(x=>x.p===best).f}</span>`:''}`;
+    box.appendChild(fb);nextBtn(root);
+  });
+}
+function choice(s,st){st.innerHTML=`<span class="label">${s.tag}</span>`;choiceBlock(s,st)}
+
+function immuno(s,st){
+  st.innerHTML=`<span class="label">${s.tag}</span><h2>Ön tarama analizörü</h2>
+  <div class="analyzer"><div class="an-head"><span>${s.matrix}</span><span id="anst">Hazır</span></div>
+  ${s.panel.map(p=>`<div class="an-row"><span>${p[0]}</span><div class="an-bar"><i data-w="${Math.min(p[2]/p[1]/2,1)*100}" class="${p[2]>=p[1]?'pos':''}"></i></div><span class="an-val" data-v="${p[2]>=p[1]?`<span class='p'>${p[2]>=2000?'>2000':p[2]} POZ</span>`:`${p[2]} neg`}">—</span></div>`).join('')}
+  <div class="an-legend">Çizgi = cut-off. Değerler ng/mL eşdeğeri. Cut-off: ${s.panel.map(p=>p[0]+' '+p[1]).join(' · ')}</div></div>`;
+  const run=document.createElement('button');run.className='btn';run.textContent='Paneli çalıştır';st.appendChild(run);
+  run.onclick=()=>{run.remove();document.getElementById('anst').textContent='Ölçülüyor…';
+    st.querySelectorAll('.an-bar i').forEach(i=>i.style.width=i.dataset.w+'%');
+    setTimeout(()=>{document.getElementById('anst').textContent='Tamamlandı';st.querySelectorAll('.an-val').forEach(v=>v.innerHTML=v.dataset.v);choiceBlock(s,st)},1200)};
+}
+
+function chrom(s,st){
+  const W=640,H=230,L=34,R=628,T=24,B=196,xm=s.xmax;
+  const X=x=>L+(x/xm)*(R-L),Y=y=>B-y*(B-T);
+  let seed=7;const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+  let d='';for(let x=0;x<=xm;x+=.01){let y=.012+rnd()*.012;s.peaks.forEach(p=>{const sg=.035;y+=p.h*Math.exp(-((x-p.rt)**2)/(2*sg*sg))});d+=(d?'L':'M')+X(x).toFixed(1)+' '+Y(Math.min(y,1)).toFixed(1)}
+  let grid='';for(let t=0;t<=xm;t+=1){grid+=`<line x1="${X(t)}" x2="${X(t)}" y1="${T}" y2="${B}" stroke="var(--scope-grid)"/><text x="${X(t)}" y="${B+16}" text-anchor="middle">${t}</text>`}
+  for(let k=0;k<=4;k++){const y=T+k*(B-T)/4;grid+=`<line x1="${L}" x2="${R}" y1="${y}" y2="${y}" stroke="var(--scope-grid)"/>`}
+  const marks=s.peaks.map((p,k)=>`<g class="pm" data-k="${k}" style="cursor:pointer"><circle cx="${X(p.rt)}" cy="${Math.max(Y(p.h+.03)-10,T+2)}" r="10" fill="var(--tag)"/><text x="${X(p.rt)}" y="${Math.max(Y(p.h+.03)-10,T+2)+4}" text-anchor="middle" style="fill:var(--tag-ink);font-weight:600">${k+1}</text></g>`).join('');
+  st.innerHTML=`<span class="label">${s.tag}</span><h2>Pikleri değerlendir</h2>
+  <p class="note">Her aday pik için kabul kriterlerini kontrol et ve <b>Pozitif</b> ya da <b>Negatif</b> olarak işaretle. Numaralı işaretlere dokunarak ilgili piki bulabilirsin.</p>
+  <div class="scope"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Toplam MRM kromatogramı">${grid}
+   <path d="${d}" fill="none" stroke="var(--trace)" stroke-width="1.6"/>${marks}
+   <text x="${R}" y="${H-2}" text-anchor="end">dk</text><text x="${L}" y="14">MRM · göreli yoğunluk</text></svg></div>
+  ${s.note?`<p class="note">${s.note}</p>`:''}
+  <div class="criteria"><div class="crit"><b>±0,10 dk</b>Alıkonma zamanı, referans standarda göre</div><div class="crit"><b>±%20</b>İyon oranı (nitel/nicel) sapması, bağıl</div><div class="crit"><b>S/N ≥ 3</b>Sinyal/gürültü, nitel iyon dahil</div></div>
+  <div class="peaks">${s.peaks.map((p,k)=>`<div class="peak" id="pk${k}"><div class="peak-top"><span class="pn">${k+1}</span><h3>${p.n}</h3><span class="mrm">${p.mrm}</span></div>
+   <div class="pdata"><div>RT (dk)<b>${fmt(p.rt)}</b></div><div>Referans RT<b>${fmt(p.ert)}</b></div><div>S/N<b>${p.sn<10?fmt(p.sn,1):Math.round(p.sn)}</b></div>
+   <div>İyon oranı<b>${fmt(p.r)}</b></div><div>Referans oran<b>${fmt(p.er)}</b></div><div class="dv">Sapma<b>?</b></div></div>
+   <div class="seg" role="group" aria-label="${p.n} kararı"><button class="y" aria-pressed="false" data-k="${k}" data-v="1">Pozitif</button><button class="n" aria-pressed="false" data-k="${k}" data-v="0">Negatif</button></div>
+   <div class="verdict" hidden></div></div>`).join('')}</div>`;
+  const pick={};
+  const sub=document.createElement('button');sub.className='btn';sub.textContent='Kararları onayla';sub.disabled=true;st.appendChild(sub);
+  st.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;pick[k]=b.dataset.v==='1';b.parentNode.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));sub.disabled=Object.keys(pick).length<s.peaks.length});
+  st.querySelectorAll('.pm').forEach(g=>g.onclick=()=>{const el=document.getElementById('pk'+g.dataset.k);st.querySelectorAll('.peak').forEach(p=>p.classList.remove('hl'));el.classList.add('hl');el.scrollIntoView({behavior:'smooth',block:'center'})});
+  sub.onclick=()=>{sub.remove();let pts=0;
+    s.peaks.forEach((p,k)=>{const el=document.getElementById('pk'+k),truth=isPos(p),ok=pick[k]===truth;if(ok)pts+=10;
+      el.classList.remove('hl');el.classList.add(ok?'ok':'no');el.querySelectorAll('.seg button').forEach(b=>b.disabled=true);
+      const dev=(p.r-p.er)/p.er*100,drt=p.rt-p.ert;
+      const dv=el.querySelector('.dv');dv.className=Math.abs(dev)/100<=IR_TOL?'v':'x';dv.querySelector('b').textContent=(dev>0?'+':'')+fmt(dev,0)+'%';
+      const why=[];if(Math.abs(drt)>RT_TOL+1e-9)why.push(`RT farkı ${fmt(Math.abs(drt))} dk, tolerans dışı`);if(Math.abs(dev)/100>IR_TOL)why.push(`iyon oranı %${fmt(Math.abs(dev),0)} sapmış`);if(p.sn<SN_MIN)why.push(`S/N ${fmt(p.sn,1)}, tespit sınırının altında`);
+      const v=el.querySelector('.verdict');v.hidden=false;
+      v.innerHTML=`<b style="color:var(--${ok?'ok':'bad'})">${ok?'Doğru karar':'Hatalı karar'}</b> · ${truth?'Tüm kriterler sağlanıyor, pozitif.':'Negatif: '+why.join('; ')+'.'}`});
+    award(s.tag,pts,s.peaks.length*10);
+    const fb=document.createElement('div');const mx=s.peaks.length*10;fb.className='fb '+(pts===mx?'good':pts>=mx/2?'part':'poor');
+    fb.innerHTML=`<strong>+${pts} puan</strong><span>Pozitif kabul edilen: ${s.peaks.filter(isPos).map(p=>p.n).join(', ')}. Tek bir kriterin bile sağlanmaması tanımlamayı geçersiz kılar.</span>`;
+    st.appendChild(fb);nextBtn(st)};
+}
+
+function calib(s,st){
+  const ans=(s.y-s.b)/s.m,cmax=s.cal[s.cal.length-1];
+  const W=600,H=260,L=48,R=584,T=16,B=222,ymax=s.m*cmax+s.b;
+  const X=x=>L+x/cmax*(R-L),Y=y=>B-y/ymax*(B-T);
+  let seed=11;const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+  const pts=s.cal.map(c=>[c,(s.m*c+s.b)*(1+(rnd()-.5)*.06)]);
+  let ax='';for(let k=0;k<=4;k++){const v=cmax*k/4,yv=ymax*k/4;ax+=`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${B}" stroke="var(--line)"/><text x="${X(v)}" y="${B+16}" text-anchor="middle">${+v.toFixed(2)}</text><text x="${L-6}" y="${Y(yv)+4}" text-anchor="end">${fmt(yv,yv<1?2:1)}</text>`}
+  st.innerHTML=`<span class="label">${s.tag}</span><h2>${s.analyte} konsantrasyonu</h2>
+  <p class="note">Doğrusal kalibrasyon (1/x ağırlıklı). Numunenin analit/iç standart alan oranından konsantrasyonu hesapla.</p>
+  <div class="calib"><div class="calplot"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kalibrasyon eğrisi">${ax}
+   <line x1="${X(0)}" y1="${Y(s.b)}" x2="${X(cmax)}" y2="${Y(s.m*cmax+s.b)}" stroke="var(--accent)" stroke-width="2"/>
+   ${pts.map(p=>`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>`).join('')}
+   <g id="smp" hidden><line x1="${L}" x2="${X(ans)}" y1="${Y(s.y)}" y2="${Y(s.y)}" stroke="var(--tag)" stroke-dasharray="4 4"/><line x1="${X(ans)}" x2="${X(ans)}" y1="${Y(s.y)}" y2="${B}" stroke="var(--tag)" stroke-dasharray="4 4"/><circle cx="${X(ans)}" cy="${Y(s.y)}" r="7" fill="var(--tag)"/></g>
+   <text x="${R}" y="${H-4}" text-anchor="end">${s.unit}</text><text x="${L}" y="${T-4}">alan oranı</text></svg></div>
+  <div class="eq"><div><span class="label">Eğim (m)</span><b>${fmt(s.m,4)}</b></div><div><span class="label">Kesişim (b)</span><b>${fmt(s.b,3)}</b></div><div><span class="label">R²</span><b>0,9987</b></div><div><span class="label">Numune oranı (y)</span><b>${fmt(s.y,3)}</b></div></div>
+  <p class="note">x = (y − b) / m. Sonucu ${s.unit} olarak gir; ±%3 tolerans kabul edilir.</p>
+  <div class="answer"><input id="calin" inputmode="decimal" placeholder="örn. 42,0" aria-label="Konsantrasyon"><span>${s.unit}</span><button class="btn" id="calbtn">Kontrol et</button></div>
+  <div id="calfb"></div></div>`;
+  let tries=0;const inp=document.getElementById('calin'),btn=document.getElementById('calbtn'),fbw=document.getElementById('calfb');
+  const check=()=>{const v=parseFloat(inp.value.replace(',','.'));if(isNaN(v)){fbw.innerHTML=`<div class="fb part"><span>Bir sayı gir, örneğin ${fmt(12.5,1)}.</span></div>`;return}
+    tries++;const ok=Math.abs(v-ans)/ans<=.03;
+    if(ok||tries>=2){const p=ok?(tries===1?20:10):0;award(s.tag,p,20);inp.disabled=btn.disabled=true;document.getElementById('smp').hidden=false;
+      fbw.innerHTML=`<div class="fb ${p===20?'good':p?'part':'poor'}"><strong>+${p} puan · ${ok?'Doğru':'Hatalı'}</strong><span>(${fmt(s.y,3)} − ${fmt(s.b,3)}) / ${fmt(s.m,4)} = <b class="mono">${fmt(ans,1)} ${s.unit}</b>. Sonuç kalibrasyon aralığı (${s.cal[0]}–${cmax} ${s.unit}) içinde; seyreltme gerekmez.</span></div>`;nextBtn(st)}
+    else fbw.innerHTML=`<div class="fb poor"><strong>Tekrar dene</strong><span>Önce kesişimi çıkar, sonra eğime böl. Bir hakkın kaldı.</span></div>`};
+  btn.onclick=check;inp.onkeydown=e=>{if(e.key==='Enter')check()};
+}
+
+function final(){
+  const c=CASES[S.c],mx=caseMax(c),pct=Math.round(S.score/mx*100);saveBest(c.id,pct);
+  const rank=pct>=90?'Laboratuvar sorumlusu':pct>=75?'Uzman toksikolog':pct>=55?'Analist':'Stajyer';
+  const agg={};S.log.forEach(l=>{agg[l.tag]=agg[l.tag]||{p:0,m:0};agg[l.tag].p+=l.p;agg[l.tag].m+=l.max});
+  app.innerHTML=`<div class="casebar"><button class="back" id="back">← Vakalar</button><span class="caseid">${c.id}</span></div>
+  <section class="stage"><span class="label">Vaka kapatıldı · ${c.title}</span>
+   <div class="row" style="align-items:flex-end;gap:16px"><div class="final-score">%${pct}</div><div><span class="rank">${rank}</span><p class="mono" style="margin-top:6px;color:var(--muted)">${S.score} / ${mx} puan</p></div></div>
+   <table class="logt">${Object.entries(agg).map(([t,v])=>`<tr><td>${t}</td><td>${v.p} / ${v.m}</td></tr>`).join('')}</table>
+   <div class="row"><button class="btn" id="again">Vakayı tekrar oyna</button>${S.c<CASES.length-1?`<button class="btn ghost" id="nx">Sonraki vaka →</button>`:''}</div></section>`;
+  document.getElementById('back').onclick=home;document.getElementById('again').onclick=()=>start(S.c);
+  const nx=document.getElementById('nx');if(nx)nx.onclick=()=>start(S.c+1);window.scrollTo(0,0);
+}
+/* ===================== PİK OKULU ===================== */
+const G=(rt,s,h,on,o)=>Object.assign({rt,sl:s,sr:s,h,on,a:on==='both'},o||{});
+const LESSONS=[
+{tag:"Sınırlar",title:"Pik başlangıcı ve bitişi",analyte:"Morfin",mrmQ:"286,1 → 165,1",mrmq:"286,1 → 201,1",er:.45,seed:3,
+ xr:[1.60,2.00],comps:[G(1.80,.022,1,'both')],noise:{Q:.01,q:.01},drift:{Q:[.02,0],q:[.012,0]},init:[1.785,1.815],
+ task:{min:.97,max:1.03,maxW:.20,text:"Başlangıç ve bitiş çizgilerini sürükle (ya da kaydırıcıları kullan). Alanı gerçek alanın %97–103'üne getir, pencereyi 0,20 dk'dan geniş tutma."},
+ theory:["İntegrasyon penceresi, sinyalin tabandan ayrıldığı noktada başlar ve tabana geri döndüğü noktada biter. Simetrik (Gauss) bir pikte tepe noktasının ±3σ uzağı alanın %99,7'sini kapsar.","Pencere dar kalırsa alan eksik ölçülür ve konsantrasyon düşük çıkar. Gereğinden geniş olursa gürültü ve komşu girişimler alana eklenir."],
+ rule:"Nicel ve nitel iyon her zaman aynı pencereyle entegre edilir.",
+ q:{q:"Pencereyi yalnızca yarı yükseklikteki genişlik (FWHM) kadar alsaydın ne olurdu?",opts:[
+  {t:"Alanın yaklaşık %76'sı ölçülür; konsantrasyon olduğundan düşük hesaplanır",p:20,f:"FWHM ≈ 2,355σ. Bu aralık Gauss pikin alanının yalnızca %76'sını kapsar."},
+  {t:"Alan değişmez, çünkü tepe yüksekliği aynı",p:0,f:"Alan, pencere içindeki tüm sinyalin toplamıdır; yükseklik değil."},
+  {t:"Alanın %50'si ölçülür",p:5,f:"Yarı yükseklik yarı alan demek değildir; Gauss pikte bu aralık %76'yı kapsar."},
+  {t:"Gürültü azaldığı için sonuç daha doğru olur",p:0,f:"Gürültü azalır ama sistematik alan kaybı çok daha büyük bir hatadır."}]}},
+{tag:"Kuyruk",title:"Kuyruklanan pik",analyte:"6-MAM",mrmQ:"328,2 → 165,1",mrmq:"328,2 → 211,1",er:.57,seed:9,showAs:true,
+ xr:[2.95,3.45],comps:[G(3.10,.018,1,'both',{sr:.045})],noise:{Q:.01,q:.01},drift:{Q:[.02,0],q:[.012,0]},init:[3.05,3.13],
+ task:{min:.97,max:1.03,maxW:.40,text:"Otomatik pencere kuyruğu erken kesmiş. Bitiş noktasını kuyruğun tabana döndüğü yere taşı ve alanı %97–103'e getir."},
+ theory:["Kuyruklanma %10 yükseklikte ölçülür: tepe noktasından öne (a) ve arkaya (b) olan genişlikler. Asimetri faktörü As = b/a. 1,0 simetriktir; 1,5'in üstü belirgin kuyruklanmadır.","Tipik nedenler: kolondaki aktif silanol grupları ile bazik analit etkileşimi, ölü hacim, başlangıç mobil fazından güçlü enjeksiyon çözücüsü ve kolon kirlenmesi.","Otomatik integrasyon kuyruğu sıklıkla erken keser. Kalibratörlerde kuyruk daha azsa numune sistematik olarak düşük hesaplanır."],
+ rule:"Bitiş noktası kuyruğun tabana döndüğü yerdir; tepe noktasına göre simetrik değildir.",
+ q:{q:"Bu pik için en doğru yaklaşım hangisi?",opts:[
+  {t:"Pencereyi kuyruğun bittiği yere uzat; kaynak sorun (kolon, enjeksiyon çözücüsü) için düzeltici işlem planla",p:20,f:"Doğru integrasyon bugünkü sonucu kurtarır. As, sistem uygunluk kriterini aşıyorsa kromatografi düzeltilmeli."},
+  {t:"Kuyruğu kes, pik daha simetrik görünsün",p:0,f:"Görüntü için alan kaybetmek konsantrasyonu sistematik olarak düşürür."},
+  {t:"Alan yerine pik yüksekliğiyle hesapla",p:10,f:"Yöntem yüksekliği valide ettiyse ve kalibratörler de öyle hesaplanıyorsa mümkün. Ama kuyruklanma numuneden numuneye değişirse yükseklik de güvenilmez olur."},
+  {t:"Tepe noktasından dikey çizgi bırakıp ön yarının iki katını al",p:0,f:"Asimetrik pikte ön yarıyı ikiyle çarpmak kuyruğu yok sayar."}]}},
+{tag:"Taban",title:"Yükselen taban çizgisi",analyte:"THC",mrmQ:"315,2 → 193,1",mrmq:"315,2 → 259,2",er:.52,seed:21,base:'zero',baseToggle:true,
+ xr:[6.55,7.05],comps:[G(6.80,.028,1,'both')],noise:{Q:.012,q:.012},drift:{Q:[.06,.55],q:[.04,.20]},init:[6.72,6.88],
+ task:{min:.95,max:1.05,maxW:.30,needBase:'line',text:"Yöntem sıfıra kadar entegre ediyor. Taban türünü değiştir, alanı %95–105'e getir. İyon oranının da nasıl düzeldiğine bak."},
+ theory:["Gradyan ilerledikçe veya matriksten gelen bileşenler kolondan sızdıkça taban yükselebilir. Tabanın altında kalan alan analite ait değildir.","Sıfıra kadar entegre edersen taban alanı da sayılır. Pik başlangıcı ile bitişi arasına doğrusal taban çizmek bu katkıyı çıkarır.","Taban nicel ve nitel iyonda farklı yükseldiği için yanlış taban iyon oranını da bozar."],
+ rule:"Taban algoritması tüm seride aynı olmalı. Düz tabanlı bir kalibratörde doğrusal taban ile sıfır taban aynı alanı verir; fark yalnızca taban yükseldiğinde ortaya çıkar.",
+ q:{q:"Kalibratörler MeOH'te hazırlanmış, tabanları düz ve sıfıra entegre ediliyor. Numunede matriks tabanı yükseltiyor. Doğru yaklaşım hangisi?",opts:[
+  {t:"Tüm seride tek bir taban algoritması (doğrusal / vadiden vadiye) kullan. Matriks etkisini ayrıca matriks-eşli kalibratör veya izotop işaretli iç standartla kontrol et",p:20,f:"Doğrusal taban MeOH kalibratörlerinde sonucu değiştirmez, numunede taban katkısını çıkarır. Taban yükselmesi koelüe olan matriksi gösterir; bu matriks iyon baskılanmasına da yol açabilir, bunu MeOH kalibrasyonu yakalamaz."},
+  {t:"Hepsini sıfıra entegre et, kural aynı kalsın",p:0,f:"Kural aynı ama sonuç yanlış: numunede tabanın altındaki alan analit sayılır ve konsantrasyon yüksek çıkar."},
+  {t:"Kalibratörü sıfıra, numuneyi doğrusal tabana entegre et",p:10,f:"Bu kalibratörlerde iki yol aynı alanı verir, sonuç doğru çıkar. Ama yöntemde iki ayrı kural tanımlanmış olur ve kalibratör tabanı da yükselirse hata başlar. Tek algoritma tanımlamak daha sağlam."},
+  {t:"Kalibratörlere matriks eklemeden bu numune ölçülemez",p:5,f:"Matriks-eşli kalibrasyon iyi bir uygulama, ama taban sorunu integrasyonla çözülür. Matriksin asıl riski iyon baskılanması ve ekstraksiyon verimidir."}]}},
+{tag:"Omuz",title:"Nitel iyonda girişim",analyte:"α-PVP",mrmQ:"232,2 → 126,1",mrmq:"232,2 → 91,1",er:.35,seed:33,scaleToggle:true,scaleOn:true,base:'zero',baseToggle:true,
+ xr:[4.00,4.45],comps:[G(4.20,.025,1,'both'),G(4.235,.025,.30,'q')],noise:{Q:.01,q:.01},drift:{Q:[0,0],q:[0,0]},init:[4.12,4.32],
+ task:null,explore:"Pencereyi daraltıp genişlet ve iyon oranının nasıl değiştiğini izle. Sonra bitiş çizgisini tepe noktasına (4,20 dk) çekip pikin yalnızca ön yarısını entegre et ve oranın ne olduğuna bak.",
+ theory:["m/z 91 (tropilyum iyonu) benzil grubu taşıyan çok sayıda bileşikten oluşur; özgüllüğü düşüktür. Bu geçişte yakın elüe olan bir matriks bileşeni pikte omuz oluşturabilir.","RT referansla uyumlu olsa bile, girişim yalnızca bir iyonu etkiliyorsa iyon oranı bozulur.","Nitel iyonu nicel iyon ölçeğine getir ve iki pikin şeklini karşılaştır. Aynı maddeden gelen iki iyonun şekli üst üste oturmalı."],
+ rule:"Pencere, oran tutsun diye değiştirilmez.",
+ q:{q:"Pencereyi pikin ön yarısına daraltınca oran kriteri geçti. Ne yaparsın?",opts:[
+  {t:"Kabul etmem. Girişim var: kromatografiyi iyileştiririm, daha özgül bir nitel geçiş kullanırım, olmazsa \"doğrulanamadı\" raporlarım",p:20,f:"İntegrasyon kuralı sonuca bakılarak seçilemez. Şekil uyumsuzluğu girişimin kendisidir."},
+  {t:"Oran tuttuğu için pozitif raporlarım",p:0,f:"Sonuca göre pencere seçmek veri manipülasyonudur ve audit trail'de görünür."},
+  {t:"Nicel alanı da dar pencereyle ölçüp ikiyle çarparım",p:0,f:"Hem keyfi hem de girişimi ortadan kaldırmıyor."},
+  {t:"Nitel iyonu yok sayıp yalnızca nicel iyonla tanımlarım",p:0,f:"Tek geçişle tanımlama, LC-MS/MS için gereken tanımlama noktası şartını karşılamaz."}]}},
+{tag:"Oran",title:"RT uyumlu, iyon oranı sapmış",analyte:"MDPV",mrmQ:"276,2 → 126,1",mrmq:"276,2 → 135,0",er:.52,seed:44,scaleToggle:true,
+ xr:[4.40,4.75],comps:[G(4.57,.024,1,'both',{qf:.71})],noise:{Q:.01,q:.01},drift:{Q:[.02,0],q:[.015,0]},init:[4.53,4.61],
+ task:{min:.97,max:1.03,maxW:.25,text:"Önce piki doğru entegre et (%97–103). Sonra ölçekle düğmesiyle iki iyonu üst üste koy."},
+ theory:["Alıkonma zamanı tek başına tanımlama için yeterli değildir. Pozisyon izomerleri ve yapısal analoglar aynı RT'ye çok yakın elüe olabilir ve aynı öncül iyonu paylaşabilir.","Bu durumda pikler temiz ve simetrik görünür; sorun yalnızca iyon oranında ortaya çıkar. Referans oran, aynı seride enjekte edilen kalibratörlerin ortalamasıdır.","Ölçekle düğmesiyle nitel iyonu referans orana göre büyüt: pik şekli aynı, yükseklik uymuyor."],
+ rule:"RT ve iyon oranı birlikte sağlanmadan pozitif denmez.",
+ q:{q:"Doğru integrasyonla bile oran yaklaşık %37 sapıyor. Sonuç?",opts:[
+  {t:"Doğrulanamadı. İzomer veya analog şüphesi; ilgili referans standartlarla yeniden enjeksiyon, gerekirse ek geçiş",p:20,f:"Oran sapması temiz bir pikte bile farklı bir maddeye işaret edebilir."},
+  {t:"RT tuttuğu için MDPV pozitif",p:0,f:"RT gerekli ama yeterli değil."},
+  {t:"Toleransı %40'a genişlet",p:0,f:"Tolerans valide yöntemde sabittir; vakaya göre değiştirilmez."},
+  {t:"Oranı tutan başka bir nitel geçişi sonradan seç",p:5,f:"Ek geçiş meşrudur ama önceden tanımlanmış ve valide edilmiş olmalı. Sonuca bakıp geçiş seçmek yanlılık yaratır."}]}},
+{tag:"Gürültü",title:"Nitel iyon gürültü seviyesinde",analyte:"6-MAM",mrmQ:"328,2 → 165,1",mrmq:"328,2 → 152,1",er:.08,seed:57,showSN:true,
+ xr:[2.85,3.30],comps:[G(3.10,.022,1,'both')],noise:{Q:.03,q:.08},drift:{Q:[.03,0],q:[.02,0]},noiseRegion:[2.87,3.00],init:[3.04,3.16],
+ task:null,explore:"Nicel iyon net görünüyor. Nitel iyona bak: gri bölge gürültünün ölçüldüğü boş alan. Pencereyi oynatınca iyon oranının ne kadar zıpladığına dikkat et.",
+ theory:["S/N, pik yüksekliğinin taban gürültüsüne oranıdır. Burada Avrupa Farmakopesi yaklaşımı kullanılıyor: S/N = 2H / h. H pik yüksekliği, h pikin önündeki boş bölgede tepeden tepeye gürültü.","Düşük konsantrasyonda nicel iyon net görünürken zayıf nitel iyon gürültüye gömülebilir. Bu durumda iyon oranı da güvenilmez olur; değeri tesadüfen toleransa düşebilir.","Eroinin özgül belirteci 6-MAM'da yanlış pozitif ağır sonuç doğurur. Kriterler burada esnetilmez."],
+ rule:"Her iki geçişin de S/N ≥ 3 olması gerekir.",
+ q:{q:"Nicel iyon net, nitel iyonun S/N'si 3'ün altında. Rapor?",opts:[
+  {t:"6-MAM doğrulanamadı (nitel iyon tespit sınırı altında). Mümkünse daha büyük numune hacmi veya konsantre ekstraktla yeniden analiz",p:20,f:"Tanımlama iki geçişin de kriterleri sağlamasını gerektirir. Yeniden analiz duyarlılığı artırabilir."},
+  {t:"Nicel iyon net, pozitif raporla",p:0,f:"Nicel iyon tek başına tanımlama değildir."},
+  {t:"Nitel iyona yumuşatma (smoothing) uygulayıp S/N'yi 3'ün üstüne çıkar",p:5,f:"Smoothing tüm seride aynı valide parametrelerle uygulanıyorsa meşrudur. Tek numunede kriteri geçirmek için uygulanırsa değildir."},
+  {t:"Konsantrasyonu \"yaklaşık\" olarak raporla",p:0,f:"Tanımlanamayan maddenin konsantrasyonu raporlanmaz."}]}},
+{type:'snrep',tag:"S/N",title:"S/N neden en az 3?",analyte:"6-MAM",mrmQ:"328,2 → 165,1",mrmq:"328,2 → 152,1",er:.08,seed:70,
+ xr:[2.85,3.30],rt:3.10,sig:.022,hPer:.5,c0:2,noise:{Q:.03,q:.08},drift:{Q:[.03,0],q:[.02,0]},noiseRegion:[2.87,3.00],
+ task:{text:"Konsantrasyonu 0'dan başlatıp yükselt. Nitel iyonun 40 tekrarın en az %95'inde S/N ≥ 3 verdiği en düşük konsantrasyonu bul. Bu, yöntemin deneysel tespit sınırıdır (LOD)."},
+ theory:["Gürültü, dedektör sinyalindeki rastgele dalgalanmadır. Hiç analit yokken bile taban sürekli küçük tepecikler üretir. Bir pikin gerçek olup olmadığını, bu tepeciklerden ne kadar büyük olduğuna bakarak anlarız.",
+  "Burada Avrupa Farmakopesi formülü kullanılıyor: S/N = 2H / h. H pik yüksekliği, h boş bölgedeki tepeden tepeye gürültü. S/N = 2, pikin gürültünün kendi dalgalanma genişliği kadar yüksek olduğu anlamına gelir. Yani gürültü tek başına o büyüklükte bir tepecik üretebilir.",
+  "S/N ≥ 3, sinyalin gürültüden kabul edilebilir güvenle ayırt edildiği uzlaşı eşiğidir ve tespit sınırını (LOD) tanımlar. Kantitasyon için daha yüksek bir eşik aranır, çoğunlukla S/N ≥ 10 (LOQ).",
+  "Eşiğin altında iki sorun var. Birincisi, pik gerçek olmayabilir; bu yanlış pozitif riskidir. İkincisi, pik gerçek olsa bile alanı gürültü yüzünden büyük belirsizlik taşır, bu yüzden iyon oranı tekrardan tekrara savrulur. Aşağıdaki 40 tekrar enjeksiyon bunu gösteriyor.",
+  "Not: yazılımlar S/N'yi farklı yöntemlerle hesaplar (tepeden tepeye, RMS, 2H/h). Aynı pik bir yazılımda 3, diğerinde 8 çıkabilir. Laboratuvarın valide ettiği yöntem esas alınır."],
+ rule:"S/N eşiği tek bir enjeksiyonda tesadüfen geçilen bir sınır değil, yöntemin güvenle tekrarlayabildiği bir düzeydir.",
+ q:{q:"Nitel iyonun S/N'si 2,5 olan bir numunede iyon oranı tolerans içinde çıktı. Bu oran güvenilir mi?",opts:[
+  {t:"Hayır. Bu S/N'de oran tekrardan tekrara geniş savrulur; toleransa düşmesi tesadüftür ve tanımlama kanıtı sayılmaz",p:20,f:"Düşük konsantrasyonda tekrarların bir kısmı bandın içine, bir kısmı dışına düştü. Tek bir 'tutan' sonuç bilgi taşımaz."},
+  {t:"Evet, oran tuttuğuna göre madde doğrulanmıştır",p:0,f:"Oranın güvenilir olması için önce her iki pikin de gürültüden ayırt edilebilmesi gerekir."},
+  {t:"İki kez enjekte edip ikisi de tutarsa kabul edilir",p:5,f:"Tekrarlar bilgi verir, ama S/N eşiği yine sağlanmalı. Dağılımı gördün: iki tutan sonuç bu S/N'de nadir değildir."},
+  {t:"Smoothing ile S/N 3'e çıkarılırsa kabul edilir",p:5,f:"Smoothing yalnızca valide edilmiş ve tüm seride aynı uygulanan bir işlemse meşrudur."}]}},
+{tag:"Kantite?",title:"Nitel iyon gürültüde: nicel iyonla kantite edilir mi?",analyte:"Fentanil",mrmQ:"337,2 → 188,1",mrmq:"337,2 → 105,1",er:.15,seed:86,showSN:true,
+ xr:[4.80,5.25],comps:[G(5.00,.022,1,'both')],noise:{Q:.03,q:.15},drift:{Q:[.03,0],q:[.04,0]},noiseRegion:[4.82,4.95],init:[4.935,5.065],calc:{true:.85,loq:.5,unit:'ng/mL'},
+ task:null,explore:"Nitel iyonda pikin yerinde küçük bir kabarma var. S/N'ye ve nicel iyondan hesaplanan konsantrasyona bak. Kabarma gözle görülüyor; peki gürültüden ayırt edilebiliyor mu?",
+ theory:["Kantitasyonu yalnızca nicel iyon yapar; nitel iyonun görevi kimliği doğrulamaktır. Yani teknik olarak nicel iyondan her zaman bir sayı hesaplanabilir.",
+  "Ama sıra önemli: önce madde tanımlanır, sonra miktarı raporlanır. Nitel iyon gürültüdeyse madde doğrulanmamıştır, ve doğrulanmamış bir maddenin konsantrasyonu pozitif sonuç olarak raporlanmaz.",
+  "Validasyon mantığı: yöntemin LOQ'su, o konsantrasyonda nitel iyon dahil tüm tanımlama kriterlerinin sağlandığı düzeyde belirlenir. Nicel iyon LOQ'nun üstünde bir değer verirken nitel iyon gürültüde kalıyorsa bu bir çelişkidir. İki olası açıklama var: nicel iyonda bir girişim sinyali şişiriyor, ya da nitel geçiş bu yöntem için fazla zayıf ve LOQ yanlış belirlenmiş.",
+  "Hesaplanan değer iç karar için yine de işe yarar: yeniden analiz gerekip gerekmediğine, daha fazla numune hacmi veya daha duyarlı bir geçiş kullanılıp kullanılmayacağına karar vermek gibi."],
+ rule:"Önce tanımlama, sonra kantitasyon. Tanımlanamayan maddeye sayı verilmez.",
+ q:{q:"Nicel iyondan 0,85 ng/mL hesaplandı (LOQ 0,5). Nitel iyonun S/N'si 3'ün altında. Ne yaparsın?",opts:[
+  {t:"Fentanil doğrulanamadı, sayısal değer raporlanmaz. Blank ve nicel pik şeklinde girişim kontrolü yapılır; daha büyük hacim, konsantre ekstrakt, daha duyarlı nitel geçiş veya HRMS ile yeniden analiz",p:20,f:"Hesaplanan değer yeniden analiz kararı için kullanılır. Laboratuvar politikasına göre 'şüpheli, doğrulanamadı' gibi bir ifade raporlanabilir, ama konsantrasyon verilmez."},
+  {t:"0,85 ng/mL fentanil raporla; kantitasyon zaten nicel iyondan yapılıyor",p:0,f:"Kantitasyon nicel iyondan yapılır, ama raporlanması tanımlamaya bağlıdır."},
+  {t:"\"< 0,5 ng/mL\" olarak raporla",p:0,f:"Hesaplanan değer LOQ'nun üstünde; bu ifade hem yanlış hem de tanımlanmamış bir madde hakkında bilgi veriyor."},
+  {t:"Nitel iyonda kabarma görüldüğü için pozitif kabul et",p:5,f:"Göz kabarmayı görür, ama S/N 3'ün altında bu kabarma gürültüden ayırt edilemez. Önceki dersteki 40 tekrarı hatırla."}]}},
+{tag:"Manuel",title:"Otomatik integrasyonu düzeltmek",analyte:"11-OH-THC",mrmQ:"331,2 → 313,2",mrmq:"331,2 → 193,1",er:.77,seed:61,
+ xr:[6.05,6.40],comps:[G(6.20,.026,1,'both')],noise:{Q:.012,q:.012},drift:{Q:[.02,0],q:[.015,0]},init:[6.17,6.30],
+ task:{min:.97,max:1.03,maxW:.22,text:"Yazılım gürültüdeki bir sıçrama yüzünden pik başlangıcını yükselen kenarın ortasına koymuş; taban çizgisi pikin içinden geçiyor. Başlangıcı düzelt, alanı %97–103'e getir."},
+ theory:["İntegrasyon yazılımı pik başlangıcını eğim eşiği ve gürültü ayarlarına göre belirler. Gürültüdeki bir sıçrama başlangıcı kaydırabilir ve taban çizgisi pikin içinden geçer.","Manuel integrasyon yapılabilir ama kuralları vardır: gerekçe kaydı, orijinal integrasyonun audit trail'de saklanması, aynı kuralın kalibratör ve QC'lere uygulanması ve ikinci kişinin gözden geçirmesi."],
+ rule:"Önce yöntem parametrelerini düzelt; manuel integrasyon istisna olmalı.",
+ q:{q:"Manuel düzeltmeden sonra hangisi zorunlu?",opts:[
+  {t:"Gerekçe yazılır, orijinal ve düzeltilmiş integrasyon audit trail'de kalır, ikinci kişi gözden geçirir",p:20,f:"Veri bütünlüğü (ALCOA+) yapılan her değişikliğin izlenebilir olmasını ister."},
+  {t:"Orijinal integrasyon silinir, dosya temiz kalsın",p:0,f:"Orijinali silmek veri bütünlüğü ihlalidir."},
+  {t:"Manuel integrasyon yalnızca pozitif numunelerde yapılır",p:0,f:"Seçici düzeltme yanlılık yaratır; kural tüm seriye aynı uygulanır."},
+  {t:"Sonuç doğruysa gerekçe gerekmez",p:0,f:"Doğruluğu üçüncü bir kişi ancak kayıttan değerlendirebilir."}]}},
+{type:'matrix',tag:"Matriks",title:"Matriks etkisi ve iç standart",analyte:"Morfin",rt:1.80,seed:91,
+ task:{text:"Numune matriks yükünü %80'in üstüne çıkar. Hesaplanan konsantrasyonu ±%5 içinde tutan iç standart ve kalibrasyon düzenini bul."},
+ theory:["Elektrosprey iyonlaşmada (ESI) analitle aynı anda kaynağa giren matriks bileşenleri (fosfolipitler, tuzlar) yük için analitle yarışır. Sonuç çoğunlukla iyon baskılanması, bazen de artırılmasıdır. Pik temiz görünse bile yanıt düşmüş olabilir.",
+  "Post-kolon infüzyon bunu görünür kılar: analit çözeltisi kolondan sonra sabit hızla verilir, blank matriks ekstraktı enjekte edilir. Düz olması gereken sinyaldeki çukurlar baskılanma bölgeleridir.",
+  "Matriks faktörü MF = matriksteki yanıt / çözücüdeki yanıt. MF 0,60, %40 baskılanma demektir. İç standart analitle aynı baskılanmayı yaşarsa analit/İS oranı değişmez ve hata telafi edilir.",
+  "Döteryumlu iç standart analitle neredeyse aynı anda elüe olur. Yine de döteryum RT'yi çok az öne kaydırabilir; çok dar çukurlarda bu bile fark yaratır (¹³C/¹⁵N etiketli standartlar kaymaz). Yapısal analog ise farklı RT'de, farklı baskılanmayla elüe olur.",
+  "MeOH kalibratörleri ne baskılanmayı ne de ekstraksiyon verimini yansıtır. Matriks-eşli kalibrasyon yardımcı olur, ama kalibratörde kullanılan blank kan ile postmortem numunenin matriksi aynı değildir."],
+ rule:"İç standart yalnızca analitle aynı baskılanmayı yaşadığı sürece düzeltir.",
+ q:{q:"Yapısal analog iç standart analitten farklı RT'de elüe oluyor. Kirli bir postmortem numunede ne beklersin?",opts:[
+  {t:"Analog baskılanma çukurunun dışında kalırsa telafi etmez; matriks etkisi doğrudan sonuca yansır. Matriks etkisi validasyonda farklı lotlar ve kirli matrikslerle değerlendirilmeli",p:20,f:"Derste gördüğün gibi analog İS, iç standart yokken olan hatayı neredeyse aynen bıraktı."},
+  {t:"Her iç standart her matriks etkisini telafi eder",p:0,f:"Telafi, analit ve İS aynı anda aynı baskılanmayı yaşarsa olur."},
+  {t:"Analog daha iyidir, çünkü analitle karışmaz",p:5,f:"Ayrı RT kromatografik çakışmayı önler, ama baskılanmayı paylaşmamak düzeltmeyi bozar."},
+  {t:"Matriks-eşli kalibrasyon varsa iç standart gereksizdir",p:5,f:"Kalibratör matriksi ile numune matriksi farklıdır; bu derste matriks-eşli kalibrasyonda bile sapma kaldığını gördün."}]}},
+{type:'carry',tag:"Taşınma",title:"Taşınma ve blank yorumu",analyte:"Morfin",lloq:5,uloq:500,
+ task:{text:"Seriyi öyle ayarla ki tüm blanklar kabul kriterini geçsin ve Numune B'nin sonucu taşınmadan etkilenmesin (ölçülen < %20 LLOQ)."},
+ theory:["Taşınma (carryover), bir enjeksiyondan geride kalan analitin bir sonraki enjeksiyonda sinyal vermesidir. Kaynakları enjeksiyon iğnesi ve döngüsü, valf rotoru ve kolon başıdır. Lipofilik ve bazik analitlerde daha belirgindir.",
+  "Blank türleri farklı soruları cevaplar. Çift blank (matriks, iç standart yok) analit ve İS kanallarında girişim olup olmadığını gösterir. Sıfır blank (matriks + İS) iç standardın analit kanalına katkısını gösterir; buna etiketsiz safsızlık veya çapraz konuşma neden olabilir. Yüksek örneklerden sonra enjekte edilen blank ise taşınmayı kontrol eder.",
+  "Bu simülasyondaki kriter: blank'taki yanıt LLOQ yanıtının %20'sini geçmemeli. Validasyonda taşınma, en yüksek kalibratörden (ULOQ) sonra blank enjekte edilerek değerlendirilir. ULOQ'nun çok üstündeki bir numune bu kapsamın dışındadır ve ardından gelen enjeksiyonlar şüphelidir.",
+  "Her satıra dokunarak o enjeksiyonun XIC'sini gör. Blank'ta küçük bir pik, taşınmanın görünen yüzüdür."],
+ rule:"Çok yüksek bir numuneden hemen sonra gelen pozitif sonuç, temiz bir blank'tan sonra tekrarlanmadan raporlanmaz.",
+ q:{q:"Rutin seride ULOQ'nun 10 katı bir numunenin hemen ardından gelen Numune B'de morfin 12 ng/mL çıktı (LLOQ 5). Ne yaparsın?",opts:[
+  {t:"Taşınma şüphesi var. B'yi temiz olduğu gösterilmiş bir blank'tan sonra yeniden enjekte ederim; sonuç tekrar doğrulanırsa raporlarım. Yüksek numuneyi de seyreltip yeniden analiz ederim",p:20,f:"Yeniden enjeksiyon, taşınma ile gerçek pozitifi birbirinden ayırır. ULOQ üstü numune zaten seyreltme gerektirir."},
+  {t:"LLOQ'nun üstünde olduğu için raporlarım",p:0,f:"Değerin bir kısmı ya da tamamı önceki numuneden gelmiş olabilir."},
+  {t:"Önceki numunenin %0,25'ini sonuçtan çıkarırım",p:5,f:"Taşınma oranı sabit değildir; analite, yıkamaya ve sistemin durumuna göre değişir. Hesapla düzeltilmez, yeniden analizle doğrulanır."},
+  {t:"Taşınma olduğunu varsayıp B'yi negatif raporlarım",p:5,f:"B gerçekten pozitif de olabilir. Karar varsayımla değil, yeniden analizle verilir."}]}}
+];
+let K={i:0,pts:{},done:{}};
+const kScore=()=>Object.values(K.pts).reduce((s,v)=>s+(v.t||0)+(v.q||0),0);
+const kMax=()=>LESSONS.reduce((s,l)=>s+(l.task?10:0)+Math.max(...l.q.opts.map(o=>o.p)),0);
+
+function lData(L){
+  let seed=L.seed||5;const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+  const dx=.002,xs=[];for(let x=L.xr[0];x<=L.xr[1]+1e-9;x+=dx)xs.push(+x.toFixed(4));
+  const model=(tr,x)=>{let y=0;L.comps.forEach(c=>{if(c.on!=='both'&&c.on!==tr)return;const h=tr==='q'&&c.on==='both'?c.h*(c.qf??L.er):c.h;const s=x<c.rt?c.sl:c.sr;y+=h*Math.exp(-((x-c.rt)**2)/(2*s*s))});return y};
+  const raw=tr=>xs.map(x=>{const d=L.drift[tr];return model(tr,x)+d[0]+d[1]*(x-L.xr[0])+(rnd()+rnd()-1)*L.noise[tr]});
+  const sm=a=>a.map((v,i)=>(a[Math.max(i-1,0)]+v+a[Math.min(i+1,a.length-1)])/3);
+  return {xs,dx,Q:sm(raw('Q')),q:sm(raw('q'))};
+}
+const trueArea=L=>L.comps.filter(c=>c.a).reduce((s,c)=>s+c.h*Math.sqrt(2*Math.PI)*(c.sl+c.sr)/2,0);
+const idx=(D,x)=>Math.max(0,Math.min(D.xs.length-1,Math.round((x-D.xs[0])/D.dx)));
+function endAvg(a,i){let s=0,n=0;for(let k=i-3;k<=i+3;k++)if(k>=0&&k<a.length){s+=a[k];n++}return s/n}
+function measure(L,D,a,b,base){
+  const ia=idx(D,a),ib=idx(D,b),o={};
+  ['Q','q'].forEach(tr=>{const y=D[tr],ya=base==='line'?endAvg(y,ia):0,yb=base==='line'?endAvg(y,ib):0;
+    const bl=i=>ya+(yb-ya)*(i-ia)/Math.max(ib-ia,1);
+    let A=0,H=-1,iH=ia;for(let i=ia;i<ib;i++){A+=((y[i]-bl(i))+(y[i+1]-bl(i+1)))/2*D.dx;const v=y[i]-bl(i);if(v>H){H=v;iH=i}}
+    o[tr]={A,H,iH,ya,yb}});
+  o.ratio=o.q.A/o.Q.A;o.dev=(o.ratio-L.er)/L.er;o.rec=o.Q.A/trueArea(L);o.rt=D.xs[o.Q.iH];
+  if(L.noiseRegion){const i0=idx(D,L.noiseRegion[0]),i1=idx(D,L.noiseRegion[1]);
+    ['Q','q'].forEach(tr=>{const seg=D[tr].slice(i0,i1+1);o[tr].sn=2*o[tr].H/(Math.max(...seg)-Math.min(...seg))})}
+  return o;
+}
+function taskState(L,m,a,b,base){const t=L.task;if(!t)return null;const w=b-a;
+  if(t.needBase&&base!==t.needBase)return{ok:false,msg:`Taban sıfıra çekiliyor; yükselen tabanın altındaki alan da sayılıyor (alan %${fmt(m.rec*100,0)}).`};
+  if(m.rec<t.min)return{ok:false,msg:`Alan eksik (%${fmt(m.rec*100,0)}): pencere pikin bir kısmını kesiyor.`};
+  if(m.rec>t.max)return{ok:false,msg:`Alan fazla (%${fmt(m.rec*100,0)}): pencere pike ait olmayan sinyali de alıyor.`};
+  if(w>t.maxW+1e-9)return{ok:false,msg:`Alan doğru ama pencere ${fmt(w)} dk; ${fmt(t.maxW)} dk'yı aşınca gürültü ve komşu pikler alana girer.`};
+  return{ok:true,msg:`Hedefte: alan %${fmt(m.rec*100,0)}, pencere ${fmt(w)} dk.`}}
+
+function lesson(i){
+  if(LESSONS[i].type==='snrep')return snLesson(i);
+  if(LESSONS[i].type==='matrix')return mLesson(i);
+  if(LESSONS[i].type==='carry')return cLesson(i);
+  K.i=i;K.pts[i]={};delete K.done[i];
+  const L=LESSONS[i],D=lData(L),ert=L.comps[0].rt;
+  let a=L.init[0],b=L.init[1],base=L.base||'line',scale=!!L.scaleOn,met=false,qShown=false,drag=null,M;
+  const W=640,H=270,PL=40,PR=630,PT=14,PB=236,span=L.xr[1]-L.xr[0];
+  const X=x=>PL+(x-L.xr[0])/span*(PR-PL),iX=px=>L.xr[0]+(px-PL)/(PR-PL)*span;
+  app.innerHTML=`<div class="casebar"><button class="back" id="back">← Ana sayfa</button><span class="caseid">PİK OKULU ${i+1}/${LESSONS.length}</span>
+   <span class="scorebox">Puan <b id="ksc">${kScore()}</b> / ${kMax()}</span></div>
+   <ol class="rail">${LESSONS.map((l,k)=>`<li class="${K.done[k]?'done':''} ${k===i?'now':''}">${l.tag}</li>`).join('')}</ol>
+   <section class="stage" id="stage">
+    <span class="label">Ders ${i+1} · ${L.analyte}</span><h2>${L.title}</h2>
+    <div class="theory">${L.theory.map(t=>`<p>${t}</p>`).join('')}</div>
+    <div class="rule"><b>Kural</b>${L.rule}</div>
+    <div class="legend"><span><i style="background:var(--trace)"></i>Nicel ${L.mrmQ}</span><span><i style="background:var(--qual)"></i>Nitel ${L.mrmq}</span><span>Referans oran ${fmt(L.er)} · RT ${fmt(ert)} dk</span></div>
+    <div class="xic"><svg id="xs" viewBox="0 0 ${W} ${H}" role="img" aria-label="${L.analyte} XIC kromatogramı, sürüklenebilir integrasyon penceresi"></svg></div>
+    <div class="ctrls">
+     <label class="sl"><span>Başlangıç</span><input type="range" id="sa" min="${L.xr[0]}" max="${L.xr[1]}" step="0.002"><output id="oa"></output></label>
+     <label class="sl"><span>Bitiş</span><input type="range" id="sb" min="${L.xr[0]}" max="${L.xr[1]}" step="0.002"><output id="ob"></output></label>
+     <div class="toggles">${L.baseToggle?`<button class="tg" id="tb0" aria-pressed="false">Taban: sıfır</button><button class="tg" id="tb1" aria-pressed="false">Taban: doğrusal</button>`:''}
+      ${L.scaleToggle?`<button class="tg" id="tsc" aria-pressed="false">Nitel iyonu ölçekle (÷${fmt(L.er)})</button>`:''}</div>
+    </div>
+    <div class="readout" id="ro"></div>
+    <div class="task" id="tk"></div>
+    <div id="qz"></div>
+   </section>`;
+  document.getElementById('back').onclick=home;
+  const svg=document.getElementById('xs'),sa=document.getElementById('sa'),sb=document.getElementById('sb');
+  function draw(){
+    const f=scale?1/L.er:1,ym=Math.max(...D.Q,...D.q.map(v=>v*f))*1.12,Y=v=>PB-v/ym*(PB-PT);
+    const path=(arr,k=1)=>arr.map((v,j)=>(j?'L':'M')+X(D.xs[j]).toFixed(1)+' '+Y(v*k).toFixed(1)).join('');
+    const step=span>.42?.1:.05;let g='';
+    for(let t=Math.ceil(L.xr[0]/step-1e-9)*step;t<=L.xr[1]+1e-9;t+=step)g+=`<line x1="${X(t)}" x2="${X(t)}" y1="${PT}" y2="${PB}" stroke="var(--scope-grid)"/><text x="${X(t)}" y="${PB+16}" text-anchor="middle">${fmt(t)}</text>`;
+    for(let k=0;k<=4;k++){const y=PT+k*(PB-PT)/4;g+=`<line x1="${PL}" x2="${PR}" y1="${y}" y2="${y}" stroke="var(--scope-grid)"/>`}
+    const ia=idx(D,a),ib=idx(D,b);
+    const shade=(tr,k,col,op)=>{const y=D[tr],m=M[tr];let p='';for(let j=ia;j<=ib;j++)p+=(j===ia?'M':'L')+X(D.xs[j]).toFixed(1)+' '+Y(y[j]*k).toFixed(1);
+      return `<path d="${p}L${X(D.xs[ib]).toFixed(1)} ${Y(m.yb*k).toFixed(1)}L${X(D.xs[ia]).toFixed(1)} ${Y(m.ya*k).toFixed(1)}Z" fill="${col}" fill-opacity="${op}"/>`};
+    const nr=L.noiseRegion?`<rect x="${X(L.noiseRegion[0])}" y="${PT}" width="${X(L.noiseRegion[1])-X(L.noiseRegion[0])}" height="${PB-PT}" fill="var(--scope-ink)" fill-opacity=".09"/><text x="${(X(L.noiseRegion[0])+X(L.noiseRegion[1]))/2}" y="${PT+14}" text-anchor="middle">gürültü bölgesi</text>`:'';
+    const hd=(x,lab)=>`<line x1="${X(x)}" x2="${X(x)}" y1="${PT}" y2="${PB}" stroke="var(--tag)" stroke-width="2"/><rect x="${X(x)-13}" y="${PT}" width="26" height="22" rx="5" fill="var(--tag)"/><text x="${X(x)}" y="${PT+15}" text-anchor="middle" style="fill:var(--tag-ink);font-weight:600">${lab}</text>`;
+    svg.innerHTML=`${g}${nr}${shade('Q',1,'var(--trace)',.22)}${shade('q',f,'var(--qual)',.22)}
+     <path d="${path(D.q,f)}" fill="none" stroke="var(--qual)" stroke-width="1.5" ${scale?'stroke-dasharray="5 3"':''}/>
+     <path d="${path(D.Q)}" fill="none" stroke="var(--trace)" stroke-width="1.8"/>
+     <line x1="${X(D.xs[ia])}" y1="${Y(M.Q.ya)}" x2="${X(D.xs[ib])}" y2="${Y(M.Q.yb)}" stroke="var(--scope-ink)" stroke-width="1.4" stroke-dasharray="3 3"/>
+     ${hd(a,'B')}${hd(b,'S')}<text x="${PR}" y="${H-4}" text-anchor="end">dk</text><text x="${PL+4}" y="${PB-6}">${scale?'nitel ×'+fmt(1/L.er,1):''}</text>`;
+  }
+  function update(){
+    M=measure(L,D,a,b,base);draw();
+    sa.value=a;sb.value=b;document.getElementById('oa').textContent=fmt(a,3);document.getElementById('ob').textContent=fmt(b,3);
+    if(L.baseToggle){document.getElementById('tb0').setAttribute('aria-pressed',base==='zero');document.getElementById('tb1').setAttribute('aria-pressed',base==='line')}
+    if(L.scaleToggle)document.getElementById('tsc').setAttribute('aria-pressed',scale);
+    const rtOk=Math.abs(M.rt-ert)<=RT_TOL,irOk=Math.abs(M.dev)<=IR_TOL,cnt=v=>Math.round(v*2e5).toLocaleString('tr-TR');
+    const snOk=L.showSN?(M.Q.sn>=SN_MIN&&M.q.sn>=SN_MIN):null;
+    const ch=(ok,t)=>`<span class="chip ${ok?'ok':'bad'}">${t}</span>`;
+    let h=`<div>RT (tepe)<b>${fmt(M.rt)} dk ${ch(rtOk,rtOk?'✓':'✗')}</b></div>
+      <div>Nicel alan<b>${cnt(M.Q.A)}</b></div><div>Nitel alan<b>${cnt(M.q.A)}</b></div>
+      <div>İyon oranı (ref ${fmt(L.er)})<b>${fmt(M.ratio)} ${ch(irOk,(M.dev>0?'+':'')+fmt(M.dev*100,0)+'%')}</b></div>`;
+    if(L.task)h+=`<div>Gerçek alana göre<b>%${fmt(M.rec*100,1)}</b></div>`;
+    if(L.calc){const cc=M.rec*L.calc.true;h+=`<div>Nicel iyondan hesap<b>${fmt(cc,2)} ${L.calc.unit} ${ch(cc>=L.calc.loq,'LOQ '+fmt(L.calc.loq,1))}</b></div>`}
+    if(L.showAs){const c=L.comps[0];h+=`<div>Asimetri As (%10)<b>${fmt(c.sr/c.sl,1)} ${ch(false,'>1,5')}</b></div>`}
+    if(L.showSN)h+=`<div>S/N nicel<b>${fmt(M.Q.sn,0)} ${ch(M.Q.sn>=SN_MIN,M.Q.sn>=SN_MIN?'✓':'✗')}</b></div><div>S/N nitel<b>${fmt(M.q.sn,1)} ${ch(M.q.sn>=SN_MIN,M.q.sn>=SN_MIN?'✓':'✗')}</b></div>`;
+    const idOk=rtOk&&irOk&&(snOk!==false);
+    h+=`<div>Tanımlama<b>${idOk?ch(true,'Kriterler sağlanıyor'):ch(false,'Kriter dışı')}</b></div>`;
+    document.getElementById('ro').innerHTML=h;
+    const tk=document.getElementById('tk'),ts=taskState(L,M,a,b,base);
+    if(ts){tk.className='task'+(ts.ok?' met':'');tk.innerHTML=`<span class="label">Görev</span><span>${L.task.text}</span><span class="st">${ts.ok?'✓ ':''}${ts.msg}</span>`;
+      if(ts.ok&&!met){met=true;K.pts[i].t=10;document.getElementById('ksc').textContent=kScore()}}
+    else tk.innerHTML=`<span class="label">Keşfet</span><span>${L.explore}</span>`;
+    if((met||!L.task)&&!qShown){qShown=true;lessonQ(L,i)}
+  }
+  const setX=(which,x)=>{x=Math.max(L.xr[0],Math.min(L.xr[1],x));if(which==='a')a=Math.min(x,b-.01);else b=Math.max(x,a+.01);update()};
+  const toVB=e=>{const r=svg.getBoundingClientRect();return (e.clientX-r.left)/r.width*W};
+  svg.addEventListener('pointerdown',e=>{const px=toVB(e);drag=Math.abs(px-X(a))<=Math.abs(px-X(b))?'a':'b';try{svg.setPointerCapture(e.pointerId)}catch(_){};setX(drag,iX(px))});
+  svg.addEventListener('pointermove',e=>{if(drag)setX(drag,iX(toVB(e)))});
+  ['pointerup','pointercancel'].forEach(t=>svg.addEventListener(t,()=>drag=null));
+  sa.oninput=()=>setX('a',+sa.value);sb.oninput=()=>setX('b',+sb.value);
+  if(L.baseToggle){document.getElementById('tb0').onclick=()=>{base='zero';update()};document.getElementById('tb1').onclick=()=>{base='line';update()}}
+  if(L.scaleToggle)document.getElementById('tsc').onclick=()=>{scale=!scale;update()};
+  update();window.scrollTo(0,0);
+}
+function kHead(i){return `<div class="casebar"><button class="back" id="back">← Ana sayfa</button><span class="caseid">PİK OKULU ${i+1}/${LESSONS.length}</span>
+ <span class="scorebox">Puan <b id="ksc">${kScore()}</b> / ${kMax()}</span></div>
+ <ol class="rail">${LESSONS.map((l,k)=>`<li class="${K.done[k]?'done':''} ${k===i?'now':''}">${l.tag}</li>`).join('')}</ol>`}
+function kIntro(i,L){return `<span class="label">Ders ${i+1} · ${L.analyte}</span><h2>${L.title}</h2><div class="theory">${L.theory.map(t=>`<p>${t}</p>`).join('')}</div><div class="rule"><b>Kural</b>${L.rule}</div>`}
+function kTask(i,ok,msg,text){const tk=document.getElementById('tk');tk.className='task'+(ok?' met':'');tk.innerHTML=`<span class="label">Görev</span><span>${text}</span><span class="st">${ok?'✓ ':''}${msg}</span>`;
+  if(ok&&!K.pts[i].t){K.pts[i].t=10;document.getElementById('ksc').textContent=kScore()}}
+
+/* S/N tekrar deneyi */
+function snSim(L,c,seed){const Lx=Object.assign({},L,{seed,comps:[G(L.rt,L.sig,c*L.hPer,'both')]});const D=lData(Lx);
+  return {D,m:measure(Lx,D,L.rt-3*L.sig,L.rt+3*L.sig,'line')}}
+function snStats(L,c){let sn=0,ib=0;const pts=[];for(let k=0;k<40;k++){const {m}=snSim(L,c,L.seed*7+k*131+1);pts.push(m);if(m.q.sn>=SN_MIN)sn++;if(Math.abs(m.dev)<=IR_TOL)ib++}return{pts,sn:sn/40,ib:ib/40}}
+function snLesson(i){
+  K.i=i;K.pts[i]={};delete K.done[i];const L=LESSONS[i];let c=L.c0,inj=0,qShown=false;
+  let lod=null;for(let x=.5;x<=10;x+=.5){if(snStats(L,x).sn>=.95){lod=x;break}}
+  app.innerHTML=kHead(i)+`<section class="stage">${kIntro(i,L)}
+   <div class="legend"><span><i style="background:var(--qual)"></i>Nitel ${L.mrmq}</span><span>Gri bölge: gürültü ölçümü · sarı çizgiler: sabit pencere</span></div>
+   <div class="xic"><svg id="xs" viewBox="0 0 640 250" role="img" aria-label="Nitel iyon XIC"></svg></div>
+   <div class="ctrls"><label class="sl"><span>Konsantr.</span><input type="range" id="cs" min="0" max="10" step="0.5"><output id="co"></output></label>
+    <div class="toggles"><button class="tg" id="rj">Yeniden enjekte et</button></div></div>
+   <div class="readout" id="ro"></div>
+   <span class="label">40 tekrar enjeksiyonda iyon oranı (nitel / nicel)</span>
+   <div class="calplot"><svg id="scp" viewBox="0 0 640 230" role="img" aria-label="40 tekrarın iyon oranı dağılımı"></svg></div>
+   <div class="legend"><span>Bant: referans oran ${fmt(L.er)} ±%20</span><span>● nitel S/N ≥ 3 · ○ nitel S/N &lt; 3</span></div>
+   <div class="task" id="tk"></div><div id="qz"></div></section>`;
+  document.getElementById('back').onclick=home;
+  const cs=document.getElementById('cs');
+  function drawX(D){const W=640,H=250,PL=40,PR=630,PT=14,PB=216,span=L.xr[1]-L.xr[0],X=x=>PL+(x-L.xr[0])/span*(PR-PL);
+    const ym=Math.max(...D.q,.12)*1.15,Y=v=>PB-v/ym*(PB-PT);let g='';
+    for(let t=2.9;t<=3.3001;t+=.1)g+=`<line x1="${X(t)}" x2="${X(t)}" y1="${PT}" y2="${PB}" stroke="var(--scope-grid)"/><text x="${X(t)}" y="${PB+16}" text-anchor="middle">${fmt(t)}</text>`;
+    const nr=L.noiseRegion,a=L.rt-3*L.sig,b=L.rt+3*L.sig;
+    document.getElementById('xs').innerHTML=`${g}<rect x="${X(nr[0])}" y="${PT}" width="${X(nr[1])-X(nr[0])}" height="${PB-PT}" fill="var(--scope-ink)" fill-opacity=".09"/><text x="${(X(nr[0])+X(nr[1]))/2}" y="${PT+14}" text-anchor="middle">gürültü bölgesi</text>
+     <line x1="${X(a)}" x2="${X(a)}" y1="${PT}" y2="${PB}" stroke="var(--tag)" stroke-width="1.5" stroke-dasharray="4 3"/><line x1="${X(b)}" x2="${X(b)}" y1="${PT}" y2="${PB}" stroke="var(--tag)" stroke-width="1.5" stroke-dasharray="4 3"/>
+     <path d="${D.q.map((v,j)=>(j?'L':'M')+X(D.xs[j]).toFixed(1)+' '+Y(v).toFixed(1)).join('')}" fill="none" stroke="var(--qual)" stroke-width="1.6"/><text x="${PR}" y="${H-4}" text-anchor="end">dk</text>`}
+  function drawS(st){const W=640,H=230,PL=44,PR=628,PT=12,PB=200,ymx=L.er*3,Y=v=>PB-Math.max(0,Math.min(ymx,v))/ymx*(PB-PT),X=k=>PL+(k+.5)/40*(PR-PL);
+    let g='';for(let k=0;k<=3;k++){const v=L.er*k;g+=`<line x1="${PL}" x2="${PR}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${PL-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`}
+    g+=`<rect x="${PL}" y="${Y(L.er*1.2)}" width="${PR-PL}" height="${Y(L.er*.8)-Y(L.er*1.2)}" fill="var(--ok)" fill-opacity=".16"/><line x1="${PL}" x2="${PR}" y1="${Y(L.er)}" y2="${Y(L.er)}" stroke="var(--ok)" stroke-dasharray="4 3"/>`;
+    g+=st.pts.map((m,k)=>{const inb=Math.abs(m.dev)<=IR_TOL,col=inb?'var(--ok)':'var(--bad)',full=m.q.sn>=SN_MIN;return `<circle cx="${X(k)}" cy="${Y(m.ratio)}" r="5" fill="${full?col:'var(--sunk)'}" stroke="${col}" stroke-width="2"/>`}).join('');
+    g+=`<text x="${PR}" y="${H-8}" text-anchor="end">tekrar enjeksiyon 1 → 40</text>`;document.getElementById('scp').innerHTML=g}
+  function update(){cs.value=c;document.getElementById('co').textContent=fmt(c,1)+' ng/mL';
+    const one=snSim(L,c,L.seed+inj*977),st=snStats(L,c),m=one.m;drawX(one.D);drawS(st);
+    const ch=(ok,t)=>`<span class="chip ${ok?'ok':'bad'}">${t}</span>`;
+    let h=`<div>Bu enjeksiyon: S/N nicel<b>${fmt(m.Q.sn,1)}</b></div><div>Bu enjeksiyon: S/N nitel<b>${fmt(m.q.sn,1)} ${ch(m.q.sn>=SN_MIN,m.q.sn>=SN_MIN?'✓':'✗')}</b></div>
+     <div>Bu enjeksiyon: oran<b>${c?fmt(m.ratio):'—'} ${c?ch(Math.abs(m.dev)<=IR_TOL,(m.dev>0?'+':'')+fmt(m.dev*100,0)+'%'):''}</b></div>
+     <div>40 tekrar: nitel S/N ≥ 3<b>%${fmt(st.sn*100,0)}</b></div><div>40 tekrar: oran toleransta<b>%${fmt(st.ib*100,0)}</b></div>`;
+    if(c===0)h+=`<div>Blank: gürültü "piki" S/N ≥ 3<b>${Math.round(st.sn*40)} / 40 ${ch(false,'yanlış pozitif')}</b></div>`;
+    document.getElementById('ro').innerHTML=h;
+    const ok=lod!==null&&c===lod;
+    kTask(i,ok,ok?`Hedefte: ${fmt(c,1)} ng/mL'de tekrarların %${fmt(st.sn*100,0)}'i S/N ≥ 3. Bir alt düzeyde bu oran %95'in altına düşüyor.`:st.sn>=.95?`Tekrarların %${fmt(st.sn*100,0)}'i S/N ≥ 3, ama daha düşük bir konsantrasyon da yetebilir.`:`Tekrarların yalnızca %${fmt(st.sn*100,0)}'i S/N ≥ 3. Daha yükseğe çık.`,L.task.text);
+    if(!qShown&&(K.pts[i].t||c>=6)){qShown=true;lessonQ(L,i)}}
+  cs.oninput=()=>{c=+cs.value;update()};document.getElementById('rj').onclick=()=>{inj++;update()};
+  update();window.scrollTo(0,0);
+}
+
+/* Matriks etkisi */
+function mLesson(i){
+  K.i=i;K.pts[i]={};delete K.done[i];const L=LESSONS[i];
+  const ISS={d3:{n:'Morfin-d₃',rt:1.79,lab:'izotop'},an:{n:'Nalorfin',rt:2.42,lab:'yapısal analog'},no:{n:'Yok',rt:null,lab:''}};
+  let is='no',cal='meoh',load=70,qShown=false;
+  const S=(t,d)=>1-d*Math.exp(-((t-1.80)**2)/(2*.07*.07))-.5*Math.exp(-((t-.72)**2)/(2*.05*.05));
+  app.innerHTML=kHead(i)+`<section class="stage">${kIntro(i,L)}
+   <div class="legend"><span><i style="background:var(--trace)"></i>Numune ekstraktı</span><span><i style="background:var(--qual)"></i>Kalibratör matriksi</span><span>Post-kolon infüzyon, morfin yanıtı (%)</span></div>
+   <div class="xic"><svg id="ms" viewBox="0 0 640 260" role="img" aria-label="Post-kolon infüzyon kromatogramı"></svg></div>
+   <div class="ctrls">
+    <div class="toggles"><span class="label" style="align-self:center">İç standart</span>${Object.entries(ISS).map(([k,v])=>`<button class="tg" data-is="${k}">${v.n}${v.lab?' · '+v.lab:''}</button>`).join('')}</div>
+    <div class="toggles"><span class="label" style="align-self:center">Kalibrasyon</span><button class="tg" data-cal="meoh">MeOH içinde</button><button class="tg" data-cal="mm">Matriks-eşli (blank kan)</button></div>
+    <label class="sl"><span>Matriks yükü</span><input type="range" id="ml" min="0" max="100" step="5"><output id="mo"></output></label>
+   </div>
+   <div class="readout" id="ro"></div><div class="task" id="tk"></div><div id="qz"></div></section>`;
+  document.getElementById('back').onclick=home;const ml=document.getElementById('ml');
+  function update(){
+    const ds=load/100*.8,dc=cal==='mm'?.35:0,I=ISS[is];
+    const mfa=S(L.rt,ds),mfi=I.rt?S(I.rt,ds):1,mfac=S(L.rt,dc),mfic=I.rt?S(I.rt,dc):1;
+    const conc=100*(mfa/mfi)/(mfac/mfic),bias=conc/100-1;
+    const W=640,H=260,PL=44,PR=628,PT=14,PB=224,x0=.4,x1=3.0,X=t=>PL+(t-x0)/(x1-x0)*(PR-PL),Y=v=>PB-v/1.15*(PB-PT);
+    let seed=L.seed;const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+    const tr=d=>{let p='';for(let t=x0;t<=x1+1e-9;t+=.005)p+=(p?'L':'M')+X(t).toFixed(1)+' '+Y(S(t,d)+(rnd()-.5)*.025).toFixed(1);return p};
+    let g='';for(let t=.5;t<=3.0001;t+=.5)g+=`<line x1="${X(t)}" x2="${X(t)}" y1="${PT}" y2="${PB}" stroke="var(--scope-grid)"/><text x="${X(t)}" y="${PB+16}" text-anchor="middle">${fmt(t,1)}</text>`;
+    [0,.5,1].forEach(v=>g+=`<line x1="${PL}" x2="${PR}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--scope-grid)"/><text x="${PL-6}" y="${Y(v)+4}" text-anchor="end">${v*100}</text>`);
+    const mk=(t,col,lab,dy)=>`<line x1="${X(t)}" x2="${X(t)}" y1="${PT+18}" y2="${PB}" stroke="${col}" stroke-width="2"/><text x="${X(t)+(t>2.6?-4:4)}" y="${PT+12+dy}" ${t>2.6?'text-anchor="end"':''} style="fill:${col};font-weight:600">${lab}</text>`;
+    document.getElementById('ms').innerHTML=`${g}<path d="${tr(dc)}" fill="none" stroke="var(--qual)" stroke-width="1.4" ${cal==='meoh'?'stroke-dasharray="5 4"':''}/><path d="${tr(ds)}" fill="none" stroke="var(--trace)" stroke-width="1.8"/>
+     ${mk(L.rt,'var(--scope-ink)','Morfin 1,80',0)}${I.rt?mk(I.rt,'var(--tag)',I.n+' '+fmt(I.rt),I.rt<1.9?16:0):''}<text x="${X(.72)}" y="${Y(.42)}" text-anchor="middle">tuzlar</text><text x="${PR}" y="${H-4}" text-anchor="end">dk</text>`;
+    ml.value=load;document.getElementById('mo').textContent='%'+load;
+    document.querySelectorAll('[data-is]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.is===is));
+    document.querySelectorAll('[data-cal]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cal===cal));
+    const ch=(ok,t)=>`<span class="chip ${ok?'ok':'bad'}">${t}</span>`;
+    document.getElementById('ro').innerHTML=`<div>MF morfin (numune)<b>${fmt(mfa)}</b></div><div>MF iç standart (numune)<b>${I.rt?fmt(mfi):'—'}</b></div>
+     <div>MF morfin (kalibratör)<b>${fmt(mfac)}</b></div><div>İS-normalize MF<b>${I.rt?fmt(mfa/mfi):'—'}</b></div>
+     <div>Hesaplanan (gerçek 100)<b>${fmt(conc,0)} ng/mL</b></div><div>Sapma<b>${(bias>0?'+':'')+fmt(bias*100,0)}% ${ch(Math.abs(bias)<=.2,Math.abs(bias)<=.2?'±%20 içinde':'kabul dışı')}</b></div>`;
+    const ok=load>=80&&Math.abs(bias)<=.05;
+    kTask(i,ok,ok?`Hedefte: matriks yükü %${load}, sapma ${fmt(bias*100,1)}%.`:load<80?`Matriks yükü %${load}; önce %80'in üstüne çık.`:`Sapma ${fmt(bias*100,0)}%; iç standardı veya kalibrasyonu değiştir.`,L.task.text);
+    if(!qShown&&K.pts[i].t){qShown=true;lessonQ(L,i)}}
+  document.querySelectorAll('[data-is]').forEach(b=>b.onclick=()=>{is=b.dataset.is;update()});
+  document.querySelectorAll('[data-cal]').forEach(b=>b.onclick=()=>{cal=b.dataset.cal;update()});
+  ml.oninput=()=>{load=+ml.value;update()};update();window.scrollTo(0,0);
+}
+/* Taşınma */
+function cLesson(i){
+  K.i=i;K.pts[i]={};delete K.done[i];const L=LESSONS[i];
+  let wash='weak',extra=false,sel=null,qShown=false;
+  app.innerHTML=kHead(i)+`<section class="stage">${kIntro(i,L)}
+   <div class="ctrls"><div class="toggles"><span class="label" style="align-self:center">İğne yıkama</span><button class="tg" data-w="weak">Zayıf (%10 MeOH)</button><button class="tg" data-w="strong">Güçlü (ACN:IPA:su + asit)</button></div>
+    <div class="toggles"><button class="tg" id="xb">Numune A'dan sonra blank ekle</button></div></div>
+   <span class="label">Enjeksiyon sırası · LLOQ ${L.lloq} · ULOQ ${L.uloq} ng/mL · blank kriteri &lt; ${fmt(L.lloq*.2,1)} ng/mL</span>
+   <div class="seq" id="sq"></div>
+   <div class="legend" id="xl"></div>
+   <div class="xic"><svg id="cx" viewBox="0 0 640 210" role="img" aria-label="Seçili enjeksiyonun XIC'si"></svg></div>
+   <div class="task" id="tk"></div><div id="qz"></div></section>`;
+  document.getElementById('back').onclick=home;
+  function seq(){const r=[{n:'Çift blank',t:0,k:'blank'},{n:'Sıfır blank (matriks + İS)',t:0,k:'blank'},{n:'Kalibratör 1 (LLOQ)',t:5,k:'cal'},{n:'Kalibratör 6 (ULOQ)',t:500,k:'cal'},{n:'Blank',t:0,k:'blank'},{n:'Numune A',t:4800,k:'smp'}];
+    if(extra)r.push({n:'Blank (eklenen)',t:0,k:'blank'});r.push({n:'Numune B',t:0,k:'smp',b:1},{n:'Numune C',t:30,k:'smp'});
+    const f=wash==='weak'?.0025:.0002;let prev=0;r.forEach(x=>{x.m=x.t+f*prev;prev=x.m});return r}
+  function xic(x){const W=640,H=210,PL=40,PR=630,PT=12,PB=180,x0=1.6,x1=2.0,X=t=>PL+(t-x0)/(x1-x0)*(PR-PL);
+    let seed=17+(x?Math.round(x.m*7):0);const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+    const h=x?x.m/L.lloq:0,ys=[];for(let t=x0;t<=x1+1e-9;t+=.002)ys.push([t,h*Math.exp(-((t-1.8)**2)/(2*.022*.022))+.02+(rnd()+rnd()-1)*.04]);
+    const ym=Math.max(h,.35)*1.15,Y=v=>PB-v/ym*(PB-PT);let g='';
+    for(let t=1.6;t<=2.0001;t+=.1)g+=`<line x1="${X(t)}" x2="${X(t)}" y1="${PT}" y2="${PB}" stroke="var(--scope-grid)"/><text x="${X(t)}" y="${PB+16}" text-anchor="middle">${fmt(t)}</text>`;
+    g+=`<line x1="${PL}" x2="${PR}" y1="${Y(1.02)}" y2="${Y(1.02)}" stroke="var(--tag)" stroke-dasharray="4 4"/><text x="${PL+4}" y="${Y(1.02)-4}" style="fill:var(--tag)">LLOQ yüksekliği</text>`;
+    g+=`<path d="${ys.map((p,j)=>(j?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('')}" fill="none" stroke="var(--trace)" stroke-width="1.6"/>`;
+    g+=`<text x="${PR}" y="${PT+12}" text-anchor="end">${x?x.n+' · '+fmt(x.m,x.m<10?2:0)+' ng/mL':''}</text><text x="${PR}" y="${H-4}" text-anchor="end">dk</text>`;
+    document.getElementById('cx').innerHTML=g}
+  function update(){
+    const r=seq(),ch=(ok,t)=>`<span class="chip ${ok?'ok':'bad'}">${t}</span>`,lim=L.lloq*.2,mx=Math.log10(1+5000);
+    document.getElementById('sq').innerHTML=r.map((x,k)=>{let v='';
+      if(x.k==='blank')v=ch(x.m<lim,`%${fmt(x.m/L.lloq*100,0)} LLOQ`);
+      else if(x.k==='cal')v=`<span class="chip ok">kalibratör</span>`;
+      else if(x.t>L.uloq)v=ch(false,'ULOQ üstü · seyrelt');
+      else if(x.b)v=x.m>=L.lloq?ch(false,'pozitif? (gerçek 0)'):x.m>=lim?ch(false,'şüpheli sinyal'):ch(true,'temiz');
+      else v=ch(true,x.m>=L.lloq?'pozitif':'negatif');
+      return `<button class="seqrow${sel===k?' on':''}" data-k="${k}"><span class="mono">${k+1}</span><span class="sn">${x.n}</span><span class="bar"><i style="width:${Math.log10(1+x.m)/mx*100}%"></i></span><span class="mono sv">${fmt(x.m,x.m<10?2:0)}</span><span>${v}</span></button>`}).join('');
+    document.querySelectorAll('.seqrow').forEach(b=>b.onclick=()=>{sel=+b.dataset.k;update()});
+    document.querySelectorAll('[data-w]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===wash));
+    document.getElementById('xb').setAttribute('aria-pressed',extra);
+    document.getElementById('xl').innerHTML=`<span>Çubuklar logaritmik ölçekte · ölçülen ng/mL</span><span>Taşınma oranı bu ayarda: %${fmt((wash==='weak'?.0025:.0002)*100,2)}</span>`;
+    xic(sel!==null?r[sel]:r.find(x=>x.b));
+    const blanksOk=r.filter(x=>x.k==='blank').every(x=>x.m<lim),B=r.find(x=>x.b),ok=blanksOk&&B.m<lim;
+    kTask(i,ok,ok?'Hedefte: tüm blanklar temiz, Numune B etkilenmiyor.':!blanksOk?'En az bir blank kriteri geçemiyor; sistem taşıma yapıyor.':`Blanklar temiz ama Numune B'de ${fmt(B.m,2)} ng/mL taşınma sinyali var.`,L.task.text);
+    if(!qShown&&K.pts[i].t){qShown=true;lessonQ(L,i)}}
+  document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{wash=b.dataset.w;update()});
+  document.getElementById('xb').onclick=()=>{extra=!extra;sel=null;update()};
+  update();window.scrollTo(0,0);
+}
+function lessonQ(L,i){
+  const s=L.q,box=document.getElementById('qz');box.style.cssText='display:flex;flex-direction:column;gap:14px';
+  box.innerHTML=`<span class="label">Karar</span><p class="q">${s.q}</p><div class="opts">${s.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="key">${'ABCD'[k]}</span><span>${o.t}</span></button>`).join('')}</div>`;
+  const best=Math.max(...s.opts.map(o=>o.p));
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const o=s.opts[+b.dataset.k];
+    box.querySelectorAll('.opt').forEach((x,k)=>{x.disabled=true;if(s.opts[k].p===best)x.classList.add('right')});if(o.p!==best)b.classList.add('wrong');
+    K.pts[i].q=o.p;K.done[i]=((K.pts[i].t||0)+o.p)+'/'+((L.task?10:0)+best);document.getElementById('ksc').textContent=kScore();
+    const fb=document.createElement('div');fb.className='fb '+(o.p===best?'good':o.p>=best/2?'part':'poor');
+    fb.innerHTML=`<strong>+${o.p} puan · ${o.p===best?'Doğru':o.p>0?'Kısmen':'Hatalı'}</strong><span>${o.f}</span>${o.p!==best?`<span><b>En iyi seçim:</b> ${s.opts.find(x=>x.p===best).f}</span>`:''}`;
+    box.appendChild(fb);
+    const nb=document.createElement('button');nb.className='btn';const last=i===LESSONS.length-1;nb.textContent=last?'Okulu bitir, vakalara geç →':'Sonraki ders →';
+    nb.onclick=()=>last?home():lesson(i+1);box.appendChild(nb);nb.focus({preventScroll:true});nb.scrollIntoView({behavior:'smooth',block:'nearest'})});
+}
+/* ===================== LABORATUVAR ===================== */
+function labHeroArt(){let s=`<rect width="400" height="150" fill="#E7EEF1"/>`;for(let x=0;x<400;x+=40)s+=`<line x1="${x}" y1="0" x2="${x}" y2="104" stroke="#D8E2E6"/>`;
+ s+=`<rect y="104" width="400" height="10" fill="#56696F"/><rect y="114" width="400" height="36" fill="#3F4F54"/><rect x="20" y="40" width="140" height="5" rx="2" fill="#AFC0C6"/>`;
+ [['#7FB4E6','#2B5E9A',30],['#F2F2EE','#7A2E8C',62],['#E1ECD9','#3E7A3A',94],['#C98A2E','#5A3A10',126]].forEach(([b,c,x])=>s+=`<rect x="${x}" y="12" width="24" height="28" rx="4" fill="${b}" stroke="#8D9FA5"/><rect x="${x+7}" y="5" width="10" height="8" rx="2" fill="${c}"/>`);
+ s+=`<rect x="180" y="62" width="120" height="42" rx="6" fill="#F6F8F9" stroke="#8D9FA5"/>`;for(let k=0;k<6;k++)s+=`<rect x="${190+k*17}" y="40" width="10" height="24" rx="2" fill="#DDF0F6" stroke="#7FA6B2"/><rect x="${191.5+k*17}" y="52" width="7" height="10" fill="${['#B4664E','#D8E8EE','#B4664E','#F1EEE4','#D8E8EE','#B4664E'][k]}"/>`;
+ s+=`<rect x="316" y="20" width="70" height="84" rx="6" fill="#1E2A29"/><rect x="322" y="28" width="58" height="40" fill="#0F1A18"/><path d="M326 62 L345 62 Q349 62 351 36 Q353 62 357 62 L376 62" fill="none" stroke="#3FE0C5" stroke-width="2"/>`;
+ for(let k=0;k<3;k++)s+=`<rect x="${40+k*22}" y="58" width="11" height="46" rx="5" fill="#DDF0F6" stroke="#7FA6B2"/><rect x="${41.5+k*22}" y="${80}" width="8" height="21" fill="${k===1?'#C77B5A':'#7A1424'}"/>`;
+ return s}
+
+const STATIONS=['Numune kabul','Hazırlık tezgahı','SPE tezgahı','LC-MS/MS'];
+const LSTEPS=[
+ {id:'ppe',st:0,items:['coat','gloves','goggles'],t:'Kişisel koruyucu ekipmanı giy',g:'Laboratuvar önlüğünü, nitril eldiveni ve koruyucu gözlüğü al. Biyolojik numuneyle çalışmadan önce üçü de zorunlu.'},
+ {id:'custody',st:0,item:'rack',t:'Numuneyi teslim al',g:'Femoral kan tüpünü raftan al ve etiketini kontrol et.',ch:{q:'Etiket: TX-26-0417 · Femoral kan · 10 mL · mühür sağlam. Ne yaparsın?',opts:[
+  {t:'Etiketi ve mührü kayıt formuyla karşılaştırır, mührü açtığımı tarih, saat ve imzayla kayda geçiririm',ok:2,f:'Delil zinciri (chain of custody) her el değiştirmede belgelenir. Mührün açılması da bir kayıttır.'},
+  {t:'Mührü açar, kaydı iş bitince toplu yazarım',ok:0,f:'Sonradan yazılan kayıt delil zincirinde boşluk bırakır; numunenin bütünlüğü mahkemede sorgulanabilir.',flag:'Delil zinciri kaydı geç yapıldı'},
+  {t:'Etiket doğru görünüyor, doğrudan çalışırım',ok:0,f:'Kayıt formuyla karşılaştırılmadan numune karışması fark edilemez.',flag:'Numune kimliği kayıtla doğrulanmadı'}]}},
+ {id:'pip',st:1,item:'pipette',t:'Numuneyi pipetle',g:'Yöntem 1,0 mL kan ister. Pipeti al ve hacmi seç.',ch:{q:'Pipet hacmi?',opts:[
+  {t:'1,0 mL (P1000, ucu bir kez ön ıslatarak)',ok:2,f:'Kan viskozdur; ön ıslatma ve yavaş çekiş hacim doğruluğunu artırır.'},
+  {t:'0,5 mL',ok:0,f:'Hesap 1 mL’ye göre yapılır; sonuç yarıya düşer. İç standart sabit miktarda eklendiği için bu hatayı düzeltmez.',vol:.5},
+  {t:'2,0 mL',ok:0,f:'Sonuç iki katına çıkar. İç standart numune hacmi hatasını düzeltmez.',vol:2}]}},
+ {id:'is',st:1,item:'isb',t:'İç standardı ekle',g:'50 µL morfin-d₃ çalışma çözeltisi (100 ng/mL). Ekstraksiyondan önce eklenir ki sonraki tüm kayıpları telafi etsin.'},
+ {id:'buf',st:1,item:'bufb',t:'Tampon ekle',g:'Analiti iyonize tutacak pH’a getir.',ch:{q:'Hangi çözelti?',opts:[
+  {t:'2 mL 0,1 M fosfat tamponu, pH 6,0',ok:2,f:'pH 6’da morfinin amin grubu protonlanır (katyonik) ve MCX sorbentinin sülfonik asit gruplarına iyonik olarak bağlanır.'},
+  {t:'2 mL 0,1 M NaOH (pH ≈ 13)',ok:0,f:'Bazik pH’ta morfin nötr olur ve katyon değiştiriciye bağlanmaz; yüklemede kartuştan geçip kaybolur.',rec:.2},
+  {t:'2 mL saf su',ok:1,f:'Kan kendi tamponlamasıyla pH’ı 7 civarında tutar; bağlanma kısmen olur ama pH kontrolsüz kalır.',rec:.7}]}},
+ {id:'vor',st:1,item:'vortex',t:'Vorteksle',g:'Tüpü 30 saniye vortekste karıştır. İç standart ve tampon kanla tamamen karışmalı.'},
+ {id:'cen',st:1,item:'centri',t:'Santrifüjle',g:'Proteinleri ve hücre artıklarını çöktür: 3000 g, 10 dakika.',ch:{q:'Rotoru nasıl yüklersin?',opts:[
+  {t:'Karşı pozisyona eşit hacimde su dolu tüp koyup dengelerim',ok:2,f:'Dengesiz rotor titreşir; tüp kırılabilir ve kan aerosolü oluşabilir.'},
+  {t:'Tek tüp hafif, dengelemeye gerek yok',ok:0,f:'Tek tüp bile rotoru dengesiz bırakır. Cihaz titreşim alarmıyla durdu; tüpü dengeleyip yeniden çalıştırdın.',flag:'Santrifüj dengesiz çalıştırıldı'}]}},
+ {id:'cond',st:2,item:'manifold',t:'Kartuşu şartlandır',g:'MCX kartuşu (60 mg / 3 mL) önce organik çözücüyle, sonra tamponla şartlandır. Sorbent kurumamalı.',ch:{q:'Şartlandırma sırası?',opts:[
+  {t:'3 mL MeOH → 3 mL fosfat tamponu pH 6',ok:2,f:'Metanol polimer zincirlerini solvate eder, tampon sorbenti yükleme pH’ına getirir.'},
+  {t:'3 mL tampon → 3 mL MeOH',ok:0,f:'Kartuş metanolle kalır; sulu numune sorbentle iyi temas etmez, bağlanma düşer.',rec:.6},
+  {t:'3 mL MeOH, sonra kartuşu 10 dk açık bırak',ok:0,f:'Sorbent kurur, solvasyon kaybolur; ters faz tutulması zayıflar.',rec:.75}]}},
+ {id:'load',st:2,item:'stube',t:'Numuneyi yükle',g:'Santrifüjlenmiş tüpün üst fazını (süpernatant) kartuşa aktar.',ch:{q:'Akış hızı?',opts:[
+  {t:'1–2 mL/dk, düşük basınç',ok:2,f:'İyon değişimi yavaş bir süreçtir; analitin sorbentle temas süresi yeterli olmalı.'},
+  {t:'Maksimum basınç, olabildiğince hızlı',ok:0,f:'Analitin bir kısmı bağlanmadan geçer (breakthrough).',rec:.7}]}},
+ {id:'wash',st:2,item:'manifold',t:'Kartuşu yıka',g:'Matriks bileşenlerini uzaklaştır; analit iyonik olarak bağlı kalsın.',ch:{q:'Yıkama sırası?',opts:[
+  {t:'3 mL su → 3 mL 0,1 M HCl → 3 mL MeOH',ok:2,f:'Su tuzları, asit polar bileşenleri, metanol nötr ve lipofilik girişimleri uzaklaştırır. Analit iyonik bağ sayesinde metanolde bile kartuşta kalır.'},
+  {t:'3 mL %5 NH₄OH içeren MeOH',ok:0,f:'Bu bir elüsyon çözeltisidir. Bazik metanol iyonik bağı kırar ve analiti atığa gönderir.',rec:.08},
+  {t:'Yıkamayı atla, zaman kazan',ok:1,f:'Analit kaybolmaz ama ekstrakt kirli kalır: iyon baskılanması ve gürültülü taban beklenir.',dirty:1}]}},
+ {id:'dry',st:2,item:'manifold',t:'Kartuşu kurut',g:'Kalan suyu uzaklaştır ki elüsyon çözeltisi sorbentle iyi temas etsin.',ch:{q:'Kurutma?',opts:[
+  {t:'5 dk tam basınçta azotla',ok:2,f:'Kalan su organik elüsyon çözeltisini seyreltir ve buharlaştırmayı uzatır.'},
+  {t:'Kurutmadan doğrudan elüe et',ok:1,f:'Elüat sulu kalır; elüsyon verimi düşer, buharlaştırma uzar.',rec:.85}]}},
+ {id:'elu',st:2,item:'manifold',t:'Elüe et',g:'Toplama tüplerini yerleştir ve analiti kartuştan al.',ch:{q:'Elüsyon çözeltisi?',opts:[
+  {t:'3 mL DCM:IPA:NH₄OH (78:20:2), aynı gün hazırlanmış',ok:2,f:'Amonyak analiti nötralize ederek iyonik bağı kırar, organik faz onu çözer. Amonyak uçucu olduğu için çözelti taze hazırlanır.'},
+  {t:'3 mL %2 formik asit içeren MeOH',ok:0,f:'Asidik ortamda analit katyonik kalır ve sorbentte tutunmaya devam eder.',rec:.1},
+  {t:'Geçen hafta hazırlanmış DCM:IPA:NH₄OH',ok:1,f:'Amonyak buharlaşmış olabilir; elüsyon eksik kalır.',rec:.75}]}},
+ {id:'evap',st:2,item:'evap',t:'Buharlaştır',g:'Elüatı azot akımı altında kuruluğa kadar buharlaştır.',ch:{q:'Koşullar?',opts:[
+  {t:'Azot altında 40 °C, kuruluğa ulaşınca hemen durdur',ok:2,f:'Ilımlı ısı ve zamanında durdurma, uçucu ve ısıya duyarlı analit kaybını önler.'},
+  {t:'70 °C, hızlı olsun',ok:0,f:'Yüksek ısı uçucu aminlerde ve ısıya duyarlı analitlerde (ör. 6-MAM) kayba yol açar.',rec:.8},
+  {t:'Kuruluktan sonra 20 dk daha bekle',ok:1,f:'Kuru kalıntı cam yüzeye adsorbe olur ve kayıp artar.',rec:.85}]}},
+ {id:'rec',st:2,item:'vials',t:'Rekonstitüe et ve viale aktar',g:'Kalıntıyı küçük hacimde çöz ve insertli viale aktar.',ch:{q:'Rekonstitüsyon?',opts:[
+  {t:'100 µL başlangıç mobil fazı (%95 sulu)',ok:2,f:'Enjeksiyon çözücüsü başlangıç mobil fazına uyunca analit kolon başında odaklanır ve pik keskin olur.'},
+  {t:'100 µL saf metanol',ok:1,f:'Güçlü enjeksiyon çözücüsü analiti kolon başında odaklanmadan taşır: pik öne yatar veya yarılır.',split:1},
+  {t:'1 mL başlangıç mobil fazı',ok:1,f:'Ekstrakt 10 kat seyrelir; geri kazanım değişmez ama duyarlılık düşer.',dil:.1}]}},
+ {id:'seq',st:3,item:'lcms',t:'Seriyi başlat',g:'Viali otomatik örnekleyiciye yerleştir ve enjeksiyon sırasını kur.',ch:{q:'Enjeksiyon sırası?',opts:[
+  {t:'Çift blank → sıfır blank → kalibratörler → blank → QC → numuneler → QC',ok:2,f:'Kalibrasyon önce kurulur, QC’ler seriyi çevreler, yüksek kalibratörden sonraki blank taşınmayı kontrol eder.'},
+  {t:'Önce numune, sonra kalibratörler',ok:1,f:'Sonuç hesaplanabilir ama sistem uygunluğu ve taşınma numuneden önce gösterilmemiş olur.',flag:'Sistem uygunluğu numuneden önce gösterilmedi'},
+  {t:'Sadece numune; kalibrasyon önceki seriden',ok:0,f:'Kantitatif sonuç aynı seride kurulan kalibrasyonla hesaplanır.',flag:'Seri içinde kalibrasyon yok'}]}}
+];
+const LINFO={meoh:'Metanol (LC-MS saflığında): şartlandırma ve yıkama çözücüsü.',water:'Ultra saf su: yıkama ve mobil faz hazırlığı.',hcl:'0,1 M HCl: asidik yıkama. Bazik analitleri katyonik tutar, polar girişimleri uzaklaştırır.',elub:'Elüsyon çözeltisi DCM:IPA:NH₄OH (78:20:2). Her gün taze hazırlanır.',naohb:'0,1 M NaOH. Bu yöntemde kullanılmıyor; LLE’de bazik ekstraksiyon için kullanılır.',fridge:'+4 °C numune buzdolabı. Delil numuneleri kilitli ve sıcaklık kayıtlı tutulur.',clip:'Numune kabul ve delil zinciri formu.',hood:'Çeker ocak. DCM ve amonyak buharları için elüsyon ve buharlaştırma burada yapılır.',mobile:'Mobil faz A: %0,1 formik asitli su · B: %0,1 formik asitli asetonitril.'};
+let LB=null;
+function labStart(mode){LB={mode,i:0,st:0,ppe:{},ch:{},mist:0,hints:0,msg:null,dlg:false,anim:null,showHint:false};labRender()}
+function labCur(){return LSTEPS[LB.i]}
+function labPhase(id){return LSTEPS.findIndex(s=>s.id===id)}
+function done(id){return LB.i>labPhase(id)}
+/* ---- çizim yardımcıları ---- */
+const SC={wall:'#E7EEF1',tile:'#D8E2E6',shelf:'#AFC0C6',bench:'#56696F',front:'#3F4F54',ink:'#2B3E44',glass:'#DDF0F6',gl:'#7FA6B2',dev:'#F6F8F9',devs:'#8D9FA5',teal:'#24A894',blood:'#7A1424'};
+function itm(id,x,y,w,h,inner,label){const L=LB,c=labCur()||{},tg=L.mode==='guide'&&!L.dlg&&(c.item===id||(c.items&&c.items.includes(id)&&!L.ppe[id]));
+  return `<g class="it${tg?' tgt':''}${L.anim===id?' an-'+id:''}" data-id="${id}" tabindex="0" role="button" aria-label="${label||id}"><rect class="halo" x="${x-5}" y="${y-5}" width="${w+10}" height="${h+10}" rx="8"/>${inner}<rect x="${x-4}" y="${y-4}" width="${w+8}" height="${h+8}" fill="transparent"/>${label?`<text x="${x+w/2}" y="${y+h+12}" text-anchor="middle" class="sl">${label}</text>`:''}</g>`}
+function bottle(x,yb,w,h,body,cap,lab){return `<rect x="${x}" y="${yb-h}" width="${w}" height="${h}" rx="5" fill="${body}" stroke="${SC.devs}" stroke-width="1.2"/><rect x="${x+w*.28}" y="${yb-h-9}" width="${w*.44}" height="11" rx="2" fill="${cap}"/><rect x="${x+3}" y="${yb-h*.68}" width="${w-6}" height="${h*.4}" rx="2" fill="#fff" opacity=".9"/><text x="${x+w/2}" y="${yb-h*.43}" text-anchor="middle" class="bl">${lab[0]}</text>${lab[1]?`<text x="${x+w/2}" y="${yb-h*.33}" text-anchor="middle" class="bl">${lab[1]}</text>`:''}`}
+function tube(x,yb,layers,cap){let s=`<rect x="${x}" y="${yb-48}" width="13" height="48" rx="6" fill="${SC.glass}" stroke="${SC.gl}"/>`;let y=yb-3;
+  layers.forEach(([f,c])=>{const h=f*40;s+=`<rect x="${x+1.5}" y="${y-h}" width="10" height="${h}" rx="${y===yb-3?4:0}" fill="${c}"/>`;y-=h});
+  return s+(cap?`<rect x="${x-1}" y="${yb-54}" width="15" height="8" rx="2" fill="${cap}"/>`:'')}
+function bg(){let s=`<rect width="400" height="300" fill="${SC.wall}"/>`;for(let x=0;x<400;x+=40)s+=`<line x1="${x}" y1="0" x2="${x}" y2="200" stroke="${SC.tile}"/>`;for(let y=40;y<200;y+=40)s+=`<line x1="0" y1="${y}" x2="400" y2="${y}" stroke="${SC.tile}"/>`;
+  return s+`<rect y="200" width="400" height="12" fill="${SC.bench}"/><rect y="212" width="400" height="88" fill="${SC.front}"/><rect y="212" width="400" height="4" fill="#33424A"/>`}
+const shelf=(x1,x2)=>`<rect x="${x1}" y="96" width="${x2-x1}" height="6" rx="2" fill="${SC.shelf}"/><rect x="${x1+6}" y="102" width="4" height="10" fill="${SC.shelf}"/><rect x="${x2-10}" y="102" width="4" height="10" fill="${SC.shelf}"/>`;
+function extTube(){const L=LB;if(!done('pip'))return [];if(!done('buf'))return [[.25,SC.blood]];if(!done('cen'))return [[.75,'#9B2A38']];return [[.16,'#4A0E16'],[.58,'#C77B5A']]}
+/* ---- istasyonlar ---- */
+function scene(st){const L=LB;let s=bg();
+ if(st===0){
+  s+=`<rect x="300" y="30" width="80" height="170" rx="4" fill="#DDE6EA" stroke="${SC.devs}"/><rect x="306" y="40" width="68" height="70" rx="2" fill="#C9D9DF"/><text x="340" y="80" text-anchor="middle" class="bl">+4 °C</text><rect x="368" y="118" width="4" height="30" rx="2" fill="${SC.devs}"/>`;
+  s=s.replace('<rect x="300"',`<g class="it" data-id="fridge"><rect x="300"`).replace('fill="${SC.devs}"/>','')+'</g>';
+  s+=`<rect x="20" y="30" width="22" height="6" rx="3" fill="${SC.devs}"/>`;
+  if(!L.ppe.coat)s+=itm('coat',14,36,62,128,`<path d="M30 36 L60 36 L74 70 L66 74 L64 160 L26 160 L24 74 L16 70 Z" fill="#FFFFFF" stroke="${SC.devs}" stroke-width="1.5"/><line x1="45" y1="40" x2="45" y2="160" stroke="${SC.devs}"/><circle cx="48" cy="80" r="2" fill="${SC.devs}"/><circle cx="48" cy="100" r="2" fill="${SC.devs}"/>`,'Önlük');
+  s+=shelf(100,240);
+  if(!L.ppe.goggles)s+=itm('goggles',112,72,56,24,`<rect x="114" y="76" width="22" height="16" rx="7" fill="#BFE6F2" stroke="${SC.ink}" stroke-width="1.6"/><rect x="142" y="76" width="22" height="16" rx="7" fill="#BFE6F2" stroke="${SC.ink}" stroke-width="1.6"/><line x1="136" y1="84" x2="142" y2="84" stroke="${SC.ink}" stroke-width="2"/>`,'Gözlük');
+  s+=itm('clip',190,60,36,36,`<rect x="192" y="60" width="32" height="38" rx="3" fill="#C9A66B"/><rect x="196" y="66" width="24" height="28" fill="#fff"/><line x1="199" y1="73" x2="216" y2="73" stroke="${SC.devs}"/><line x1="199" y1="79" x2="216" y2="79" stroke="${SC.devs}"/><line x1="199" y1="85" x2="211" y2="85" stroke="${SC.devs}"/>`,'');
+  s+=itm('gloves',100,166,58,34,`<rect x="100" y="168" width="58" height="32" rx="3" fill="#5B8FD9"/><rect x="112" y="166" width="34" height="6" rx="3" fill="#3F6FB8"/>${L.ppe.gloves?'':`<path d="M122 166 q4 -12 10 0" fill="#9CC0F2"/>`}<text x="129" y="190" text-anchor="middle" class="bl" style="fill:#fff">NİTRİL M</text>`,'Eldiven');
+  const tubes=[[0,'#8A9590','#C6CDD0'],[1,SC.blood,'#8A9590'],[2,'#E6C34A','#F0E2A0'],[3,'#9BC6D9','#CFE6EE']];
+  let r=`<rect x="186" y="186" width="96" height="16" rx="3" fill="#E3E9EC" stroke="${SC.devs}"/>`;
+  tubes.forEach(([k,c,cap])=>{if(k===1&&done('custody'))return;r+=tube(194+k*22,196,[[.8,k===0?SC.blood:c]],k===0?'#8A9590':cap)});
+  s+=itm('rack',186,138,96,64,r,'Numune rafı');
+ }
+ if(st===1){
+  s+=shelf(14,200);
+  s+=itm('isb',26,58,30,40,bottle(26,96,30,36,'#C98A2E','#5A3A10',['İS','d₃']),'');
+  s+=itm('bufb',70,46,38,52,bottle(70,96,38,48,'#7FB4E6','#2B5E9A',['Tampon','pH 6,0']),'');
+  s+=itm('naohb',122,52,34,46,bottle(122,96,34,42,'#EDEDED','#B33A3A',['NaOH','0,1 M']),'');
+  s+=itm('water',166,46,30,52,bottle(166,96,30,48,'#E6F5FA','#3C8DA8',['H₂O','']),'');
+  s+=itm('pipette',18,120,40,80,`<rect x="20" y="196" width="36" height="6" rx="2" fill="${SC.devs}"/><rect x="36" y="128" width="4" height="68" fill="${SC.devs}"/><rect x="40" y="124" width="12" height="40" rx="4" fill="#E9EEF0" stroke="${SC.devs}"/><rect x="42" y="118" width="8" height="8" rx="2" fill="#2E6FD0"/><path d="M43 164 L49 164 L46.5 186 L45.5 186 Z" fill="#F4F4F4" stroke="${SC.devs}"/>`,'P1000 pipet');
+  let et=`<rect x="80" y="188" width="44" height="14" rx="3" fill="#E3E9EC" stroke="${SC.devs}"/>`;
+  if(!done('cen'))et+=tube(95,196,extTube(),'#F2F2F2');
+  s+=itm('etube',80,140,44,62,et,'Ekstr. tüpü');
+  s+=itm('vortex',142,150,56,52,`<rect x="142" y="174" width="56" height="28" rx="6" fill="${SC.dev}" stroke="${SC.devs}"/><circle cx="182" cy="188" r="5" fill="${SC.teal}"/><path d="M156 174 q14 -26 28 0 Z" fill="#3B4A4F"/>${done('buf')&&!done('cen')?tube(163,170,extTube(),'#F2F2F2'):''}`,'Vorteks');
+  s+=itm('centri',214,130,112,72,`<rect x="214" y="150" width="112" height="52" rx="10" fill="${SC.dev}" stroke="${SC.devs}"/><ellipse cx="270" cy="150" rx="44" ry="14" fill="#D3DEE2" stroke="${SC.devs}"/><g class="rotor"><line x1="246" y1="150" x2="294" y2="150" stroke="${SC.devs}" stroke-width="3"/><line x1="270" y1="141" x2="270" y2="159" stroke="${SC.devs}" stroke-width="3"/></g><rect x="290" y="170" width="26" height="12" rx="2" fill="#0F1A18"/><text x="303" y="179" text-anchor="middle" class="bl" style="fill:#3FE0C5">3000g</text>${done('cen')?tube(232,196,extTube(),'#F2F2F2'):''}`,'Santrifüj');
+  s+=itm('hood',336,30,56,160,`<rect x="336" y="30" width="56" height="168" rx="3" fill="#CBD8DD" stroke="${SC.devs}"/><rect x="342" y="40" width="44" height="100" fill="#EAF5F8" stroke="${SC.devs}"/><text x="364" y="160" text-anchor="middle" class="bl">çeker</text><text x="364" y="170" text-anchor="middle" class="bl">ocak</text>`,'');
+ }
+ if(st===2){
+  s+=shelf(14,210);
+  s+=itm('meoh',24,46,34,52,bottle(24,96,34,48,'#F2F2EE','#7A2E8C',['MeOH','']),'');
+  s+=itm('water',70,46,30,52,bottle(70,96,30,48,'#E6F5FA','#3C8DA8',['H₂O','']),'');
+  s+=itm('hcl',112,52,32,46,bottle(112,96,32,42,'#F4EFD2','#B33A3A',['HCl','0,1 M']),'');
+  s+=itm('elub',156,40,44,58,bottle(156,96,44,54,'#E1ECD9','#3E7A3A',['Elüsyon','78:20:2']),'');
+  const cc=!done('cond')?'#F1EEE4':!done('load')?'#D8E8EE':!done('wash')?'#B4664E':!done('elu')?'#E3C8B8':'#EFE7E2';
+  let m=`<rect x="16" y="150" width="170" height="52" rx="6" fill="${SC.dev}" stroke="${SC.devs}"/><rect x="24" y="166" width="120" height="30" rx="3" fill="#CFE0E6"/><circle cx="166" cy="174" r="11" fill="#fff" stroke="${SC.devs}"/><line x1="166" y1="174" x2="${done('dry')?172:162}" y2="${done('dry')?166:167}" stroke="#B33A3A" stroke-width="2"/><text x="166" y="196" text-anchor="middle" class="bl">bar</text>`;
+  for(let k=0;k<6;k++){const x=28+k*19;m+=`<rect x="${x}" y="118" width="12" height="32" rx="2" fill="${SC.glass}" stroke="${SC.gl}"/><rect x="${x+1.5}" y="136" width="9" height="12" fill="${k===0?cc:'#F1EEE4'}"/>${k===0&&done('elu')&&!done('evap')?`<rect x="${x+1}" y="178" width="10" height="16" rx="3" fill="#E9F6FA" stroke="${SC.gl}"/>`:''}${k===0?`<circle class="drip" cx="${x+6}" cy="156" r="2" fill="#7FB4E6"/>`:''}`}
+  s+=itm('manifold',16,112,170,90,m,'Pozitif basınç SPE');
+  if(done('cen')&&!done('load'))s+=itm('stube',196,140,24,62,`<rect x="194" y="196" width="28" height="6" rx="2" fill="${SC.devs}"/>${tube(201,196,extTube(),'#F2F2F2')}`,'Tüp');
+  s+=itm('evap',228,128,78,74,`<rect x="228" y="166" width="78" height="36" rx="6" fill="${SC.dev}" stroke="${SC.devs}"/><rect x="236" y="130" width="62" height="6" fill="${SC.devs}"/>${[0,1,2,3].map(k=>`<line x1="${244+k*15}" y1="136" x2="${244+k*15}" y2="156" stroke="${SC.devs}" stroke-width="2"/>`).join('')}<rect x="278" y="176" width="22" height="12" rx="2" fill="#0F1A18"/><text x="289" y="185" text-anchor="middle" class="bl" style="fill:#3FE0C5">40°C</text>${done('elu')?`<rect x="239" y="150" width="10" height="20" rx="3" fill="${SC.glass}" stroke="${SC.gl}"/>${!done('evap')?`<rect x="240.5" y="160" width="7" height="9" fill="#E9F6FA"/>`:`<rect x="240.5" y="166" width="7" height="3" fill="#E9DCC8"/>`}`:''}`,'N₂ buharlaştırıcı');
+  let v=`<rect x="318" y="186" width="70" height="16" rx="3" fill="#E3E9EC" stroke="${SC.devs}"/>`;for(let k=0;k<4;k++){const x=324+k*16;v+=`<rect x="${x}" y="160" width="11" height="28" rx="2" fill="${SC.glass}" stroke="${SC.gl}"/><rect x="${x-.5}" y="154" width="12" height="7" rx="1.5" fill="${k===0?'#2E6FD0':'#B8C4C8'}"/>${k===0&&done('rec')?`<rect x="${x+2}" y="176" width="7" height="10" fill="#F5E6B8"/>`:''}`}
+  s+=itm('vials',318,150,70,52,v,'Vial');
+  s+=itm('hood',318,14,72,110,`<rect x="318" y="14" width="72" height="112" rx="3" fill="#CBD8DD" stroke="${SC.devs}"/><rect x="324" y="22" width="60" height="70" fill="#EAF5F8" stroke="${SC.devs}"/><text x="354" y="108" text-anchor="middle" class="bl">çeker ocak</text>`,'');
+ }
+ if(st===3){
+  s+=itm('mobile',20,44,90,54,bottle(24,96,36,48,'#E6F5FA','#3C8DA8',['A','su']) + bottle(66,96,36,48,'#EEF0F8','#6A5AA8',['B','ACN']),'');
+  s+=shelf(14,120);
+  const scr=done('seq')?`<path d="M152 70 L210 70 Q216 70 218 40 Q220 70 226 70 L262 70" fill="none" stroke="#3FE0C5" stroke-width="2"/>`:`<text x="207" y="62" text-anchor="middle" class="bl" style="fill:#9FB6AF">hazır</text>`;
+  s+=itm('lcms',130,24,250,178,`<rect x="140" y="24" width="140" height="62" rx="4" fill="#1E2A29" stroke="${SC.devs}"/><rect x="146" y="30" width="128" height="50" fill="#0F1A18"/>${scr}
+   <rect x="130" y="100" width="74" height="102" rx="5" fill="${SC.dev}" stroke="${SC.devs}"/><rect x="138" y="108" width="58" height="30" rx="3" fill="#D3DEE2"/><text x="167" y="127" text-anchor="middle" class="bl">otomatik örnekleyici</text>${done('seq')?`<rect x="150" y="146" width="8" height="16" rx="2" fill="#2E6FD0"/>`:''}
+   <rect x="208" y="100" width="44" height="102" rx="5" fill="${SC.dev}" stroke="${SC.devs}"/><text x="230" y="150" text-anchor="middle" class="bl">kolon</text><text x="230" y="160" text-anchor="middle" class="bl">fırını</text>
+   <rect x="256" y="92" width="124" height="110" rx="8" fill="#E9EEF0" stroke="${SC.devs}"/><rect x="266" y="104" width="60" height="6" rx="3" fill="${SC.teal}"/><text x="318" y="160" text-anchor="middle" class="bl">üçlü kuadrupol MS</text><circle cx="360" cy="112" r="4" fill="${done('seq')?'#3FE0C5':'#E3A63A'}"/>`,'LC-MS/MS');
+ }
+ return s}
+function labRender(){
+ const L=LB,c=labCur(),fin=L.i>=LSTEPS.length;
+ if(fin)return labFinal();
+ app.innerHTML=`<div class="casebar"><button class="back" id="back">← Ana sayfa</button><span class="caseid">LAB · ${L.mode==='guide'?'Rehberli':'Sınav'}</span><span class="scorebox">Hata <b>${L.mist}</b>${L.mode==='exam'?` · İpucu <b>${L.hints}</b>`:''}</span></div>
+  <ol class="rail">${LSTEPS.map((s,k)=>`<li class="${k<L.i?'done':k===L.i?'now':''}" title="${s.t}">${k+1}</li>`).join('')}</ol>
+  <div class="labcard"><span class="label">Adım ${L.i+1} / ${LSTEPS.length} · ${STATIONS[c.st]}</span>
+   ${L.mode==='guide'||L.showHint?`<h3>${c.t}</h3><p>${c.g}</p>`:`<h3>Sıradaki adımı sen bul</h3><p>Doğru tezgaha geç ve doğru ekipmana dokun. Raftaki çözeltilere dokunmak bilgi verir, puan götürmez.</p><button class="btn ghost" id="hint">İpucu göster (−2)</button>`}
+   ${c.items?`<p class="mono" style="font-size:13px">${c.items.map(x=>({coat:'Önlük',gloves:'Eldiven',goggles:'Gözlük'})[x]+(L.ppe[x]?' ✓':' ○')).join(' · ')}</p>`:''}</div>
+  <div class="stations">${STATIONS.map((n,k)=>`<button class="stn${k===L.st?' on':''}${L.mode==='guide'&&k===c.st&&k!==L.st?' go':''}" data-s="${k}">${n}</button>`).join('')}</div>
+  <div class="scene"><svg viewBox="0 0 400 300" id="scn" role="img" aria-label="${STATIONS[L.st]}">${scene(L.st)}</svg></div>
+  <div id="lp"></div>`;
+ document.getElementById('back').onclick=home;
+ const h=document.getElementById('hint');if(h)h.onclick=()=>{L.hints++;L.showHint=true;labRender()};
+ document.querySelectorAll('.stn').forEach(b=>b.onclick=()=>{L.st=+b.dataset.s;L.msg=null;labRender()});
+ document.querySelectorAll('#scn .it').forEach(g=>{const go=()=>labTap(g.dataset.id);g.onclick=go;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
+ const lp=document.getElementById('lp');
+ if(L.dlg)labDialog(lp);else if(L.msg)lp.innerHTML=`<div class="fb ${L.msg.k}"><strong>${L.msg.h}</strong><span>${L.msg.t}</span></div>`;
+ if(L.anim){const a=L.anim;setTimeout(()=>{if(LB&&LB.anim===a){LB.anim=null}},1300)}
+}
+function labTap(id){const L=LB,c=labCur();if(L.dlg)return;L.showHint=L.showHint&&true;
+ if(LINFO[id]){L.msg={k:'part',h:'Bilgi',t:LINFO[id]};return labRender()}
+ if(c.id==='ppe'){if(c.items.includes(id)){L.ppe[id]=1;L.msg={k:'good',h:'Giyildi',t:({coat:'Önlük giyildi.',gloves:'Nitril eldiven takıldı. Yırtılırsa hemen değiştir.',goggles:'Gözlük takıldı. Kan ve çözücü sıçramasına karşı.'})[id]};
+   if(c.items.every(x=>L.ppe[x])){L.i++;L.showHint=false;L.msg={k:'good',h:'Hazırsın',t:'KKD tamam. Şimdi numuneyi teslim al.'}}return labRender()}
+  L.mist++;L.msg={k:'poor',h:'Önce koruyucu ekipman',t:'Numuneye ve cihazlara dokunmadan önce önlük, eldiven ve gözlük gerekiyor.'};return labRender()}
+ if(id===c.item){if(c.ch){L.dlg=true;L.msg=null;return labRender()}
+  labAdvance(null);return}
+ const k=LSTEPS.findIndex(s=>s.item===id);L.mist++;
+ if(k>L.i)L.msg={k:'poor',h:'Henüz değil',t:L.mode==='guide'?`Şimdiki adım: ${c.t}.`:'Bu ekipmanın sırası daha sonra gelecek.'};
+ else if(k>=0&&k<L.i)L.msg={k:'part',h:'Bu adım tamamlandı',t:L.mode==='guide'?`Şimdiki adım: ${c.t}.`:'Sıradaki adımı ara.'};
+ else L.msg={k:'poor',h:'Bu adımda gerekmiyor',t:L.mode==='guide'?`Şimdiki adım: ${c.t}.`:'Başka bir ekipman dene.'};
+ if(c.st!==L.st&&L.mode==='guide')L.msg.t+=` Bu adım "${STATIONS[c.st]}" bölümünde.`;
+ labRender()}
+function labDialog(lp){const c=labCur();
+ lp.innerHTML=`<div class="labdlg"><span class="label">${c.t}</span><p class="q">${c.ch.q}</p><div class="opts">${c.ch.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="key">${'ABC'[k]}</span><span>${o.t}</span></button>`).join('')}</div><button class="btn ghost" id="cx">Vazgeç</button></div>`;
+ lp.querySelectorAll('.opt').forEach(b=>b.onclick=()=>labAdvance(c.ch.opts[+b.dataset.k]));
+ document.getElementById('cx').onclick=()=>{LB.dlg=false;labRender()};
+ lp.scrollIntoView({behavior:'smooth',block:'nearest'})}
+function labAdvance(o){const L=LB,c=labCur();L.dlg=false;if(o)L.ch[c.id]=o;
+ L.anim=c.item;L.i++;L.showHint=false;
+ const nx=LSTEPS[L.i];
+ if(o)L.msg={k:o.ok===2?'good':o.ok===1?'part':'poor',h:o.ok===2?'Doğru':o.ok===1?'Kısmen':'Hatalı seçim',t:o.f+(nx?'':'')};
+ else L.msg={k:'good',h:'Tamam',t:({is:'50 µL morfin-d₃ eklendi. Bundan sonraki kayıplar iç standartla birlikte yaşanacak ve oran sabit kalacak.',vor:'30 saniye karıştırıldı.'})[c.id]||'Tamamlandı.'};
+ if(nx&&nx.st!==c.st&&L.mode==='guide')L.msg.t+=` Sıradaki adım "${STATIONS[nx.st]}" bölümünde.`;
+ labRender()}
+function labFinal(){const L=LB;let rec=1,vol=1,dil=1,split=0,dirty=0,pen=0;const flags=[];
+ LSTEPS.forEach(s=>{const o=L.ch[s.id];if(!o)return;rec*=o.rec||1;vol*=o.vol||1;dil*=o.dil||1;split|=o.split||0;dirty|=o.dirty||0;pen+=o.ok===2?0:o.ok===1?5:10;if(o.flag)flags.push(o.flag)});
+ const absRec=.88*rec,h=absRec*vol*dil*(dirty?.6:1),sn=Math.round(70*h/(dirty?2.5:1)),conc=250*vol;
+ const score=Math.max(0,100-pen-3*L.mist-2*L.hints);
+ let seed=5;const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+ const W=640,H=220,PL=36,PR=628,PT=14,PB=190,x0=1.5,x1=2.1,X=t=>PL+(t-x0)/(x1-x0)*(PR-PL);
+ const pts=[];for(let t=x0;t<=x1;t+=.002){let y=split?h*.55*Math.exp(-((t-1.765)**2)/(2*.02*.02))+h*.5*Math.exp(-((t-1.81)**2)/(2*.022*.022)):h*Math.exp(-((t-1.8)**2)/(2*.022*.022));
+   y+=.02+(rnd()+rnd()-1)*(dirty?.05:.012)+(dirty?.12*Math.exp(-((t-1.7)**2)/(2*.08*.08)):0);pts.push([t,y])}
+ const ym=Math.max(1,...pts.map(p=>p[1]))*1.1,Y=v=>PB-v/ym*(PB-PT);
+ let g='';for(let t=1.5;t<=2.1001;t+=.1)g+=`<line x1="${X(t)}" x2="${X(t)}" y1="${PT}" y2="${PB}" stroke="var(--scope-grid)"/><text x="${X(t)}" y="${PB+16}" text-anchor="middle">${fmt(t)}</text>`;
+ g+=`<path d="${pts.map((p,j)=>(j?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('')}" fill="none" stroke="var(--trace)" stroke-width="1.8"/><text x="${PR}" y="${PT+12}" text-anchor="end">Morfin 286,1 → 165,1</text>`;
+ const ch=(ok,t)=>`<span class="chip ${ok?'ok':'bad'}">${t}</span>`;
+ const notes=[];
+ if(rec<.95)notes.push(`Mutlak geri kazanım %${fmt(absRec*100,0)}'e düştü. İç standart ekstraksiyondan önce eklendiği için aynı kaybı yaşadı; analit/İS oranı ve hesaplanan konsantrasyon yine doğru. Bedeli duyarlılık: S/N ve LOQ kötüleşir.`);
+ if(vol!==1)notes.push(`Numune hacmi yanlış (${fmt(vol,1)} mL). İç standart sabit miktarda eklendiği için bu hata düzeltilmez: sonuç ${fmt(conc,0)} ng/mL çıktı, gerçek değer 250.`);
+ if(dil!==1)notes.push('Ekstrakt 10 kat seyreltildi. Konsantrasyon doğru hesaplanır ama pik küçüldü; düşük düzeyli analitler LOQ altına düşebilir.');
+ if(split)notes.push('Saf metanolde rekonstitüsyon pik şeklini bozdu (yarılma ve öne yatma). Bu pik integrasyonda sorun çıkarır; Pik Okulu Ders 1–2.');
+ if(dirty)notes.push('Yıkama atlandı: taban gürültülü, analitin önünde bir matriks tümseği var ve yanıt baskılandı. Pik Okulu Ders 3 ve 10.');
+ if(!notes.length)notes.push('Temiz ekstrakt, keskin pik, yüksek geri kazanım. Bu kromatogram doğrudan integrasyona hazır.');
+ app.innerHTML=`<div class="casebar"><button class="back" id="back">← Ana sayfa</button><span class="caseid">LAB · Tamamlandı</span></div>
+  <section class="stage"><span class="label">Örnek hazırlama sonucu · TX-26-0417 femoral kan</span>
+   <div class="row" style="align-items:flex-end;gap:16px"><div class="final-score">${score}</div><div><span class="rank">${score>=90?'Bağımsız çalışabilir':score>=70?'Gözetimle çalışabilir':'Tekrar eğitimi'}</span><p class="mono" style="margin-top:6px;color:var(--muted)">100 üzerinden · hata ${L.mist} · ipucu ${L.hints}</p></div></div>
+   <div class="xic"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Senin ekstraktının kromatogramı">${g}</svg></div>
+   <div class="readout"><div>Mutlak geri kazanım<b>%${fmt(absRec*100,0)}</b></div><div>S/N<b>${sn} ${ch(sn>=10,sn>=10?'LOQ üstü':'LOQ altı')}</b></div><div>Hesaplanan (gerçek 250)<b>${fmt(conc,0)} ng/mL ${ch(vol===1,vol===1?'doğru':'hatalı')}</b></div><div>Pik şekli<b>${split?ch(false,'bozuk'):ch(true,'keskin')}</b></div></div>
+   <div class="theory">${notes.map(n=>`<p>${n}</p>`).join('')}</div>
+   ${flags.length?`<div class="rule"><b>Kalite / güvenlik kayıtları</b>${flags.join(' · ')}</div>`:''}
+   <table class="logt">${LSTEPS.filter(s=>s.ch).map(s=>{const o=L.ch[s.id];return `<tr><td>${s.t}<br><small style="color:var(--muted)">${o.t}</small></td><td>${o.ok===2?'✓':o.ok===1?'~':'✗'}</td></tr>`}).join('')}</table>
+   <div class="row"><button class="btn" id="again">Tekrar dene</button><button class="btn ghost" id="exam">${L.mode==='guide'?'Sınav modunda dene':'Rehberli moda geç'}</button></div></section>`;
+ document.getElementById('back').onclick=home;document.getElementById('again').onclick=()=>labStart(L.mode);
+ document.getElementById('exam').onclick=()=>labStart(L.mode==='guide'?'exam':'guide');window.scrollTo(0,0)}
+
+home();
+</script>
+
+</body>
+</html>
