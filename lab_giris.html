@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MY ToksiLab · Laboratuvar Girişi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0E1518;--card:#1E2A30;--card2:#25333A;--line:#34454D;--ink:#EAF2F3;--muted:#9BB0B6;--blue:#2F7DE1;--ok:#2DBE5B;--bad:#E5484D;--warn:#F2B632;
+ --f-display:'Barlow Condensed',system-ui,sans-serif;--f-body:'Source Sans 3',system-ui,sans-serif;--f-mono:'IBM Plex Mono',ui-monospace,monospace}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0E1518}}
+:root[data-theme="light"]{--bg:#0E1518}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(ellipse at 30% 0%,#1A2A30,var(--bg) 60%);color:var(--ink);font-family:var(--f-body);min-height:100vh;padding:14px 16px 28px}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:12px}
+.hdr{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}.brand b{font:700 24px/1 var(--f-display)}.brand b i{font-style:normal;color:#2BD9C0}
+.pill{font:600 10.5px var(--f-mono);letter-spacing:.1em;border-radius:999px;padding:4px 9px;background:var(--warn);color:#2A2000}
+.hdr a{color:#7FDCD0;font-weight:600;font-size:14px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:12px;align-items:start}
+.stage{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);background:#DDE3E6}
+#cv3{position:relative;width:100%;aspect-ratio:9/7;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+#cv3 canvas{display:block;width:100%!important;height:100%!important}
+#ov{position:absolute;left:0;top:0;pointer-events:none}
+#ov .pl{pointer-events:auto;cursor:pointer}#ov .pl:hover rect.lb{stroke:#2F7DE1;stroke-width:2}
+.snav{position:absolute;left:8px;top:8px;z-index:4;display:grid;gap:6px;background:#16242A;border-radius:12px;padding:6px;width:74px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.snav button{border:0;border-radius:9px;background:#25333A;color:#fff;display:grid;place-items:center;gap:2px;font:600 11px var(--f-body);padding:8px 2px;line-height:1.1}
+.snav button span{font-size:20px;line-height:1}.snav button.on{background:var(--blue)}
+.dsp{position:absolute;right:10px;top:10px;z-index:3;width:210px;background:rgba(20,30,34,.92);border-radius:14px;padding:10px 12px;display:grid;gap:4px;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none}
+.dsp[hidden]{display:none}.dsp small{font:600 10px var(--f-mono);letter-spacing:.08em;color:#9BB0B6}
+.dsp .val{font:600 25px var(--f-mono);color:#EAF6F8;text-align:right;letter-spacing:-.5px}.dsp .mg{font:500 12.5px var(--f-mono);color:#7CF2D8;text-align:right}
+.dsp .st{display:flex;justify-content:space-between;font:600 11px var(--f-mono)}.stb{color:#2DBE5B}.ust{color:#F2B632}
+.lvrow{display:flex;align-items:center;gap:10px;margin-top:4px;padding-top:6px;border-top:1px solid #34454D}.lvrow svg{width:64px;height:64px;flex:none}.lvrow span{font:600 11.5px var(--f-mono);line-height:1.35}
+.fpop{position:absolute;z-index:5;transform:translate(-50%,calc(-100% - 18px));background:#16242A;border-radius:12px;padding:7px;display:grid;gap:5px;box-shadow:0 8px 20px rgba(0,0,0,.4);text-align:center}.fpop[hidden]{display:none}.fpop b{font-size:12px;color:#fff}.fpop div{display:flex;gap:6px}.fpop button{width:48px;height:42px;border:0;border-radius:9px;background:#2F7DE1;color:#fff;font-size:24px;font-weight:700}
+.smenu{position:absolute;z-index:6;transform:translate(-50%,calc(-100% - 16px));width:200px;background:#16242A;border-radius:12px;padding:10px;display:grid;gap:6px;box-shadow:0 10px 24px rgba(0,0,0,.45)}.smenu[hidden]{display:none}.smenu b{color:#fff;font:700 17px var(--f-display)}.smenu .sub{color:#9BB0B6}.smenu button{border:0;border-radius:9px;background:#25333A;color:#fff;padding:9px;font-weight:700;font-size:14px}.smenu button.on{background:#2F7DE1}.smenu .u2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.smenu .x{background:#3A4B53}
+@keyframes hwP{0%,100%{box-shadow:0 0 0 2px #E5484D}50%{box-shadow:0 0 0 4px #FF1F1F,0 0 16px rgba(255,40,40,.85)}}.hw{animation:hwP 1s infinite}
+.tip{position:absolute;z-index:7;max-width:270px;background:rgba(18,28,32,.95);color:#EAF2F3;border-radius:11px;padding:9px 12px;font-size:13.5px;line-height:1.4;pointer-events:none;box-shadow:0 8px 22px rgba(0,0,0,.35);border-left:4px solid #2BD9C0}.tip[hidden]{display:none}.tip b{display:block;font:700 16px var(--f-display);color:#7CF2D8;margin-bottom:2px}
+.held{position:absolute;left:96px;bottom:10px;z-index:3;background:rgba(47,125,225,.95);color:#fff;font-weight:700;font-size:13.5px;border-radius:999px;padding:6px 12px;pointer-events:none}
+.held[hidden]{display:none}
+.rot{position:absolute;right:10px;bottom:10px;z-index:3;font:600 11px var(--f-mono);color:#3E4C52;background:rgba(255,255,255,.75);border-radius:999px;padding:4px 10px;pointer-events:none}
+.nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:#132228;font-size:16px}
+.nogl[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:7px}
+.card h2{font:700 21px/1 var(--f-display)}.card h3{font:700 15px var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.sub{font:500 11px var(--f-mono);color:var(--muted)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:5px}.acts3{grid-template-columns:1fr 1fr 1fr}
+.bt{border-radius:10px;padding:7px;font-weight:700;font-size:13.5px;background:var(--card2);border:1px solid var(--line)}
+.bt.on{background:var(--blue);border-color:var(--blue);color:#fff}.bt.full{grid-column:1/-1}.bt:disabled{opacity:.4;cursor:not-allowed}
+.tband{grid-template-columns:1fr auto;align-items:center;padding:10px 14px}.tband b{display:block;font:700 18px var(--f-display);margin-top:2px}
+.steps{list-style:none;display:grid;gap:3px}.steps li{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.steps li i{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#33444C;font-size:11px;font-weight:700;font-style:normal}
+.steps li.done{color:var(--ink)}.steps li.done i{background:var(--ok)}.steps li.cur{color:#fff}.steps li.cur i{background:var(--blue)}
+.mentor{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;background:#F4F8F9;color:#132228;border-radius:14px;padding:12px 14px;border-left:6px solid #0E6B68}
+.mentor img{width:52px;height:52px;border-radius:50%;object-fit:cover}.mentor .nm{font:600 11px var(--f-mono);letter-spacing:.08em;color:#0E6B68}.mentor p{font-size:15.5px;line-height:1.4}
+.res{border-width:2px}.res.ok{border-color:var(--ok)}.res.bad{border-color:var(--bad)}.res b.big{font:700 22px var(--f-display)}
+.res ul{padding-left:18px;display:grid;gap:3px;font-size:14px;color:#C7D6DA}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px}.kv span{color:var(--muted)}.kv b{font:600 14px var(--f-mono);text-align:right}
+.tasks{display:grid;gap:6px}
+.task{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:center;text-align:left;background:var(--card2);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
+.task.on{border-color:var(--blue)}.task span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#3A4B53;font-size:12px;font-weight:700}.task.done span{background:var(--ok)}
+.task small{display:block;color:var(--muted);font-size:12.5px}
+dialog.tdlg{margin:auto;width:min(460px,92vw);border:0;border-radius:16px;background:var(--card);color:var(--ink);padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+dialog.tdlg::backdrop{background:rgba(5,10,12,.65)}dialog.tdlg h3{font:700 22px var(--f-display);margin-bottom:10px}
+.tdlg .close{width:100%;margin-top:12px;background:var(--blue);border:0;color:#fff}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.snav{position:static;display:flex;width:auto;border-radius:0;padding:5px;gap:5px}.snav button{flex:1;font-size:10px;padding:6px 1px}.snav button span{font-size:17px}
+ #cv3{aspect-ratio:1/1.02}.dsp{width:150px;padding:8px}.dsp .val{font-size:17px}.lvrow svg{width:46px;height:46px}.lvrow span{font-size:10px}.held{left:10px;font-size:12px}.rot{display:none}}
+
+/* ===== tam sayfa düzen ===== */
+html,body{height:100%;overflow:hidden}body{padding:0;background:#0E1518}
+.wrap,.grid{display:block;max-width:none;margin:0}
+.stage{position:fixed;inset:0;border-radius:0;box-shadow:none;z-index:1}
+#cv3{aspect-ratio:auto!important;width:100vw;height:100vh;height:100dvh}
+.hdr{position:fixed;top:10px;left:96px;z-index:6;background:rgba(14,21,24,.82);backdrop-filter:blur(6px);border-radius:12px;padding:7px 12px;gap:12px}
+.hdr .brand b{font-size:20px}
+#tband{position:fixed;top:58px;left:96px;z-index:6;padding:7px 12px;background:rgba(30,42,48,.9);backdrop-filter:blur(6px);gap:12px;max-width:430px}
+#tband b{font-size:16px}#tband .bt{padding:5px 10px}
+.mentor{position:fixed;z-index:6;left:50%;bottom:14px;transform:translateX(-50%);width:min(680px,calc(100vw - 600px));min-width:380px;box-shadow:0 10px 30px rgba(0,0,0,.4);background:rgba(244,248,249,.96);transition:left .3s}
+.mentor p{font-size:15px}
+.mentor.pop{animation:mpop .6s ease}@keyframes mpop{0%{transform:translateX(-50%) scale(.97);box-shadow:0 0 0 4px #2BD9C0}100%{transform:translateX(-50%) scale(1)}}
+.stepc{position:fixed;z-index:6;left:12px;bottom:14px;width:270px;max-height:calc(100vh - 140px);overflow:auto;background:rgba(30,42,48,.92);backdrop-filter:blur(6px);gap:5px}
+.stepc h3{cursor:pointer;display:flex;justify-content:space-between}.stepc.col li:not(.cur){display:none}.stepc:not(.col) h3 span{transform:rotate(90deg)}.stepc h3 span{display:inline-block;transition:transform .2s}
+#side{position:fixed;z-index:9;top:0;right:0;bottom:0;width:370px;overflow:auto;padding:12px;background:rgba(14,21,24,.94);backdrop-filter:blur(8px);display:grid;gap:12px;align-content:start;transform:translateX(105%);transition:transform .3s;box-shadow:-10px 0 30px rgba(0,0,0,.4)}
+body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;width:calc(100vw - 676px);min-width:0;animation:none}body.panel .rot{display:none}body.panel .dsp{right:382px}
+.sideX{justify-self:end;border:0;border-radius:9px;background:#25333A;color:#fff;padding:6px 12px;font-weight:700}
+#mPanel.on{background:#2F7DE1}
+.held{left:50%;transform:translateX(-50%);bottom:auto;top:64px}
+#res{position:fixed;z-index:15;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 24px));max-height:80vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.6);border-radius:14px}
+#res:empty,#res[hidden]{display:none}#res .resX{position:sticky;top:0;float:right;margin:6px;z-index:2;border:0;border-radius:9px;background:#25333A;color:#fff;padding:5px 10px;font-weight:700}
+.rot{bottom:auto;top:12px;right:auto;left:calc(100vw - 520px)}
+@media (max-width:900px){
+ .hdr{display:none}
+ .snav{position:fixed!important;top:0;left:0;right:0;z-index:8}
+ #tband{top:60px;left:8px;right:8px;max-width:none;padding:6px 10px}#tband .sub{display:none}#tband b{font-size:14px;margin:0}
+ .stepc{top:108px;bottom:auto;left:8px;width:calc(100vw - 200px);max-height:45vh;padding:8px 10px}.stepc h3{font-size:13px}.stepc li{font-size:12px}
+ .dsp{top:108px!important;right:8px!important}
+ .mentor{left:8px;right:8px;width:auto;min-width:0;transform:none;bottom:8px;grid-template-columns:38px 1fr;gap:8px;padding:8px 10px;max-height:28vh;overflow:auto}.mentor img{width:38px;height:38px}.mentor p{font-size:13.5px}
+ .mentor.pop{animation:none}body.panel .mentor{left:8px}
+ #side{top:auto;left:0;width:auto;height:auto;max-height:72vh;border-radius:16px 16px 0 0;transform:translateY(105%)}body.panel #side{transform:none}body.panel .dsp{right:8px}
+ .held{top:auto;bottom:calc(28vh + 20px);left:50%}.dsp{width:175px}
+}
+</style>
+</head>
+<body>
+<style>
+#cv3{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;z-index:1}
+#cv3 canvas{display:block;width:100%!important;height:100%!important}
+.hdr2{position:fixed;top:10px;left:96px;z-index:6;background:rgba(14,21,24,.82);backdrop-filter:blur(6px);border-radius:12px;padding:7px 12px;display:flex;gap:12px;align-items:center}
+.hdr2 b{font:700 20px/1 var(--f-display)}.hdr2 b i{font-style:normal;color:#2BD9C0}
+.snav2{position:fixed;left:8px;top:8px;z-index:6;display:grid;gap:6px;background:#16242A;border-radius:12px;padding:6px;width:74px}
+.snav2 button{border:0;border-radius:9px;background:#25333A;color:#fff;display:grid;place-items:center;gap:2px;font:600 11px var(--f-body);padding:8px 2px;line-height:1.1}.snav2 button span{font-size:20px;line-height:1}.snav2 button.on{background:var(--blue)}
+.mentor{position:fixed;z-index:6;left:50%;bottom:14px;transform:translateX(-50%);width:min(680px,calc(100vw - 420px));min-width:340px;box-shadow:0 10px 30px rgba(0,0,0,.4);background:rgba(244,248,249,.96)}
+.mentor p{font-size:15px}.mentor.pop{animation:mpop .6s ease}@keyframes mpop{0%{box-shadow:0 0 0 4px #2BD9C0}}
+.map{position:fixed;top:10px;right:10px;z-index:6;background:rgba(14,21,24,.86);backdrop-filter:blur(6px);border-radius:14px;padding:8px 10px;width:220px}
+.map small{font:600 10px var(--f-mono);letter-spacing:.08em;color:#9BB0B6}.map svg{width:100%;height:auto;display:block;margin-top:4px}.map .dr{cursor:pointer}.map .dr:hover rect{stroke:#fff}
+.moves{position:fixed;z-index:6;right:14px;bottom:14px;display:grid;grid-template-columns:repeat(3,52px);gap:6px}
+.moves button{height:48px;border:0;border-radius:12px;background:rgba(22,36,42,.9);color:#fff;font-size:22px;font-weight:700;box-shadow:0 6px 16px rgba(0,0,0,.3)}.moves button:active{background:#2F7DE1}
+.moves .sp{visibility:hidden}
+.keys{position:fixed;z-index:5;right:14px;bottom:124px;font:600 11px var(--f-mono);color:#EAF2F3;background:rgba(14,21,24,.7);border-radius:999px;padding:4px 10px}
+.room{position:fixed;z-index:12;right:14px;top:50%;transform:translateY(-50%);width:min(380px,calc(100vw - 28px));background:rgba(30,42,48,.97);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:10px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.room[hidden]{display:none}.room .no{font:700 12px var(--f-mono);letter-spacing:.1em}.room h2{font:700 26px/1.05 var(--f-display)}.room p{font-size:14.5px;color:#C7D6DA;line-height:1.45}
+.room.wide{width:min(560px,calc(100vw - 28px));max-height:92vh;overflow:auto}
+.bub{position:fixed;z-index:7;transform:translate(-50%,-100%);background:#fff;color:#132228;font:700 15px var(--f-body);padding:7px 12px;border-radius:14px;pointer-events:none;box-shadow:0 6px 16px rgba(0,0,0,.25)}.bub::after{content:'';position:absolute;left:50%;bottom:-8px;margin-left:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}.bub[hidden]{display:none}
+.devchip{position:fixed;z-index:6;transform:translate(-50%,-100%);border:0;border-radius:999px;padding:8px 14px;font:600 14px var(--f-body);color:#062126;background:linear-gradient(90deg,#2BD9C0,#7CF2D8);box-shadow:0 6px 18px rgba(0,0,0,.3);white-space:nowrap;animation:pulse 2s infinite}.devchip[hidden]{display:none}
+.backb{position:fixed;z-index:7;left:96px;bottom:14px;border:0;border-radius:12px;padding:11px 16px;font-weight:700;font-size:15px;color:#fff;background:#1F9A97;box-shadow:0 6px 16px rgba(0,0,0,.3)}.backb[hidden]{display:none}@media (max-width:900px){.backb{left:8px;bottom:auto;top:60px}}
+.room ul{padding-left:18px;font-size:14px;color:#C7D6DA;display:grid;gap:3px}.room .x{position:absolute;right:10px;top:10px;border:0;border-radius:9px;background:#25333A;color:#fff;padding:5px 10px;font-weight:700}
+.room .go{border:0;border-radius:11px;padding:11px;font-weight:700;font-size:15px;color:#fff;background:#2F7DE1}.room .go:disabled{background:#3A4B53;color:#9BB0B6}
+.room .devs{display:grid;grid-template-columns:1fr 1fr;gap:6px}.room .devs a{display:block;text-align:center;text-decoration:none;color:#fff;background:#25333A;border:1px solid var(--line);border-radius:10px;padding:8px;font-weight:700;font-size:13.5px}.room .devs a:hover{border-color:#2BD9C0}
+/* giriş ekranı */
+#intro{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,rgba(14,40,46,.55),rgba(5,10,12,.92) 70%);transition:opacity 1s ease,transform 1.2s ease}
+#intro.out{opacity:0;transform:scale(1.15);pointer-events:none}
+.ibox{display:grid;justify-items:center;gap:14px;text-align:center;padding:20px}
+.ilogo{width:170px;height:170px}.ilogo circle.r1{stroke-dasharray:500;stroke-dashoffset:500;animation:draw 1.6s .2s ease forwards}.ilogo circle.r2{stroke-dasharray:420;stroke-dashoffset:420;animation:draw 1.6s .6s ease forwards}
+.ilogo .lt{opacity:0;animation:fadeup .8s 1.2s ease forwards}.ilogo .mol{opacity:0;animation:fadeup .8s 1.5s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.it1{font:700 15px var(--f-mono);letter-spacing:.35em;color:#7CF2D8;opacity:0;animation:fadeup .8s 1.7s forwards}
+.it2{font:700 clamp(30px,5.4vw,58px)/1.02 var(--f-display);color:#fff;opacity:0;animation:fadeup .9s 2s forwards;max-width:900px}.it2 i{font-style:normal;color:#2BD9C0}
+.it3{font-size:clamp(14px,1.6vw,18px);color:#C7D6DA;max-width:620px;line-height:1.5;opacity:0;animation:fadeup .9s 2.4s forwards}
+.ibtn{margin-top:10px;border:0;border-radius:999px;padding:15px 34px;font:700 19px var(--f-body);color:#062126;background:linear-gradient(90deg,#2BD9C0,#7CF2D8);box-shadow:0 0 0 0 rgba(43,217,192,.6);opacity:0;animation:fadeup .8s 2.9s forwards,pulse 2s 3.7s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(43,217,192,.55)}70%{box-shadow:0 0 0 22px rgba(43,217,192,0)}100%{box-shadow:0 0 0 0 rgba(43,217,192,0)}}
+.iskip{font:600 12px var(--f-mono);color:#9BB0B6;opacity:0;animation:fadeup .8s 3.2s forwards}
+.fade{position:fixed;inset:0;z-index:19;background:#000;opacity:0;pointer-events:none;transition:opacity .6s}
+@media (max-width:900px){.hdr2{display:none}.snav2{position:fixed;top:0;left:0;right:0;width:auto;display:flex;border-radius:0;padding:5px}.snav2 button{flex:1;font-size:10px;padding:6px 1px}
+ .map{top:60px;right:8px;width:150px;padding:6px 8px}.mentor{left:8px;right:8px;width:auto;min-width:0;transform:none;bottom:8px;grid-template-columns:38px 1fr;gap:8px;padding:8px 10px;max-height:24vh;overflow:auto}.mentor img{width:38px;height:38px}.mentor p{font-size:13.5px}
+ .moves{right:auto;left:50%;transform:translateX(-50%);bottom:calc(24vh + 18px);grid-template-columns:repeat(3,56px)}.keys{display:none}.room{top:auto;bottom:8px;transform:none;max-height:70vh;overflow:auto}.ilogo{width:130px;height:130px}}
+</style>
+<nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mMap" class="on"><span>▦</span>Harita</button><button id="mIntro"><span>↺</span>Baştan</button></nav>
+<div class="hdr2"><b>MY_<i>ToksiLab</i></b><span class="pill">LABORATUVAR GİRİŞİ · 3B</span></div>
+<div id="cv3"></div>
+<div class="map" id="map"><small>KAT PLANI · BULUNDUĞUN YER</small><svg id="mapS" viewBox="0 0 220 120"></svg></div>
+<div class="keys">Sürükle: etrafa bak · ↑↓ / W S: yürü · ← → : dön</div>
+<div class="moves" id="moves"><span class="sp"></span><button id="mvF" aria-label="İleri">▲</button><span class="sp"></span><button id="mvL" aria-label="Sola dön">⟲</button><button id="mvB" aria-label="Geri">▼</button><button id="mvR" aria-label="Sağa dön">⟳</button></div>
+<div class="mentor"><img id="av" alt=""><div><div class="nm">UZM. MY</div><p id="say"></p></div></div>
+<div class="room" id="room" hidden></div>
+<div class="fade" id="fade"></div><button class="devchip" id="devchip" hidden></button><button class="backb" id="back" hidden>‹ Koridora dön</button><div class="bub" id="bub" hidden></div>
+<div id="intro"><div class="ibox">
+ <svg class="ilogo" viewBox="0 0 200 200" aria-hidden="true"><circle class="r1" cx="100" cy="100" r="80" fill="none" stroke="#2BD9C0" stroke-width="6"/><circle class="r2" cx="100" cy="100" r="66" fill="none" stroke="#7CF2D8" stroke-width="2" stroke-opacity=".7"/>
+  <g class="mol" stroke="#7CF2D8" stroke-width="3" fill="#0E1518"><line x1="62" y1="62" x2="84" y2="50"/><line x1="84" y1="50" x2="106" y2="62"/><line x1="106" y1="62" x2="128" y2="50"/><circle cx="62" cy="62" r="5"/><circle cx="84" cy="50" r="5"/><circle cx="106" cy="62" r="5"/><circle cx="128" cy="50" r="5" fill="#2BD9C0"/></g>
+  <g class="lt"><text x="100" y="122" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="54" fill="#fff">MY</text><text x="100" y="150" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="24" fill="#2BD9C0" letter-spacing="2">TOKSİLAB</text></g></svg>
+ <div class="it1">ADLİ TOKSİKOLOJİ EĞİTİM LABORATUVARI</div>
+ <div class="it2">MY <i>Toksikoloji Laboratuvarı</i>’na<br>hoş geldiniz</div>
+ <div class="it3">Numune kabulden raporlamaya kadar gerçek bir toksikoloji laboratuvarında adım adım çalışacaksınız. Önlüğünü giy, eldivenini tak; içeri girelim.</div>
+ <button class="ibtn" id="enter">Laboratuvara gir ›</button>
+ <div class="iskip">Kapıya yaklaşınca sensör kapıları açar</div></div></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+const AVATAR='data:image/jpeg;base64,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';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
+const say=t=>{$('#say').innerHTML=t;const m=$('.mentor');m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')};
+const BASE=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';
+const ROOMS=[
+ {no:1,z:-5,n:'Kromatografi Laboratuvarı',k:'KROMATOGRAFİ',c:'#2F7DE1',ic:'⚗',haz:null,sub:'Cihaz alanı · yetkili personel',d:'Ayrıştırma ve tanımlama burada yapılır: hazırlanan ekstraktlar cihazlara verilir, analitler ayrılır ve kütle spektrumlarıyla tanımlanır.',l:['LC-MS/MS · ilaç ve uyuşturucu taraması','GC-MS · doğrulama analizleri','HS-GC-MS / GC-FID · kanda alkol','Veri işleme ve raporlama'],st:'soon'},
+ {no:2,z:-11,n:'Örnek Hazırlama Laboratuvarı',k:'ÖRNEK HAZIRLAMA',c:'#1F9A97',ic:'🧪',haz:'bio',sub:'KKD zorunlu · biyolojik risk',d:'Numuneler analize burada hazırlanır: tartım, pipetleme, karıştırma, ekstraksiyon ve santrifüj. Biyolojik numunelerle çalışıldığı için KKD zorunludur.',l:['Analitik terazi','Otomatik pipetler · döner stand','Vorteks · santrifüj','Çeker ocak · SPE · buzdolabı'],st:'open'},
+ {no:3,z:-17,n:'İnorganik Analiz Laboratuvarı',k:'İNORGANİK ANALİZ',c:'#E0862A',ic:'⚛',haz:'cor',sub:'Asit ve aşındırıcı madde',d:'Metal ve eser element analizleri yapılır. Numuneler asitle mikrodalgada yakılır ve ICP-MS ile ölçülür.',l:['ICP-MS · eser elementler (Pb, As, Hg, Cd…)','Mikrodalga yakma ünitesi','Asit çeker ocağı','Ultra saf su sistemi'],st:'soon'},
+ {no:4,z:-23,n:'Kimyasal Depo',k:'KİMYASAL DEPO',c:'#C2312B',ic:'☢',haz:'fla',sub:'Yetkisiz giriş yasaktır',d:'Çözücüler, asitler, bazlar ve referans standartlar burada saklanır. Uyumsuz kimyasallar ayrı dolaplarda tutulur; giriş-çıkış kayda geçer.',l:['Yanıcı madde dolabı (havalandırmalı)','Asit / baz dolapları','Referans standart buzdolabı (+4 °C / −20 °C)','Kimyasal envanter ve SDS dosyaları'],st:'soon'},
+ {no:5,z:-28.9,n:'Gaz Tüp Odası',k:'GAZ TÜP ODASI',c:'#E8B923',ic:'⬣',haz:'gas',sub:'Basınçlı gaz · sigara içilmez',d:'Basınçlı gaz tüpleri tek bir odada toplanır; tüpler duvara zincirle sabitlenir, manifold ve regülatörlerden ince paslanmaz borularla odalara dağıtılır.',l:['Azot (N₂) → Örnek Hazırlama, Kromatografi','Helyum (He) → Kromatografi, İnorganik Analiz, Yangın ve Patlayıcı','Argon (Ar) → Kromatografi, İnorganik Analiz','Gaz kaçak dedektörü · havalandırma'],st:'info',small:true},
+ {no:6,z:-11,side:'L',n:'Yangın ve Patlayıcı Analiz Laboratuvarı',k:'YANGIN VE PATLAYICI',c:'#6A4FB3',ic:'💥',haz:'exp',sub:'Yangın ve patlayıcı analiz laboratuvarı',d:'Yangın yerinden alınan enkazda hızlandırıcı (benzin, tiner, gazyağı vb.) kalıntıları ile patlama sonrası örneklerde patlayıcı madde kalıntıları analiz edilir.',l:['GC-MS · yangın hızlandırıcı kalıntısı (ILR) analizi','Headspace ve aktif karbon şeritle örnekleme','Patlayıcı kalıntı analizi (TNT, RDX, PETN…)','Delil saklama ve delil zinciri kaydı'],st:'soon'}];
+/* ============ sahne ============ */
+const box=$('#cv3');const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;box.appendChild(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color('#BFD9E6');scene.fog=new THREE.Fog('#BFD9E6',30,90);
+const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;
+const cam=new THREE.PerspectiveCamera(62,1,.05,300);cam.rotation.order='YXZ';
+scene.add(new THREE.HemisphereLight('#FFFFFF','#8A9599',.55));
+const sun=new THREE.DirectionalLight('#FFF1DC',2.0);sun.position.set(-12,20,18);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-20,right:20,top:20,bottom:-20,near:1,far:60});scene.add(sun);
+function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');draw(x,w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t}
+const add=(geo,mat,x,y,z,par=scene,sh=false)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=sh;m.receiveShadow=true;par.add(m);return m};
+const RB=(w,h,d,r)=>new RoundedBoxGeometry(w,h,d,3,r);
+const HOT=[];const hot=(o,id)=>{o.userData.hot=id;HOT.push(o);return o};
+const M={wall:new THREE.MeshStandardMaterial({color:'#E9EDEC',roughness:.85}),wall2:new THREE.MeshStandardMaterial({color:'#DCE4E3',roughness:.85}),
+ band:new THREE.MeshStandardMaterial({color:'#7FA6A8',roughness:.6}),rail:new THREE.MeshStandardMaterial({color:'#C9D1D3',metalness:.4,roughness:.35}),
+ alu:new THREE.MeshStandardMaterial({color:'#B9C2C6',metalness:.8,roughness:.3}),dark:new THREE.MeshStandardMaterial({color:'#2E373C',roughness:.5}),steel:new THREE.MeshStandardMaterial({color:'#D3D9DC',metalness:.95,roughness:.18}),
+ glass:new THREE.MeshPhysicalMaterial({color:'#D9F1F3',roughness:.02,transparent:true,opacity:.28,clearcoat:1,envMapIntensity:2.2,depthWrite:false,side:THREE.DoubleSide}),
+ ceil:new THREE.MeshStandardMaterial({color:'#F4F6F6',roughness:.9}),light:new THREE.MeshBasicMaterial({color:'#FFFFFF'}),
+ facade:new THREE.MeshStandardMaterial({color:'#EEF1F1',roughness:.7}),teal:new THREE.MeshPhysicalMaterial({color:'#1F9A97',roughness:.4,clearcoat:.5}),graph:new THREE.MeshStandardMaterial({color:'#3A464B',roughness:.6})};
+/* zemin dokuları */
+const floorT=canvasTex(512,512,(c,w,h)=>{c.fillStyle='#C8D2CF';c.fillRect(0,0,w,h);const d=c.getImageData(0,0,w,h);for(let i=0;i<d.data.length;i+=4){const v=(Math.random()-.5)*14;d.data[i]+=v;d.data[i+1]+=v;d.data[i+2]+=v}c.putImageData(d,0,0);c.strokeStyle='rgba(90,105,105,.35)';c.lineWidth=2;for(let i=0;i<=4;i++){c.beginPath();c.moveTo(i*128,0);c.lineTo(i*128,h);c.stroke();c.beginPath();c.moveTo(0,i*128);c.lineTo(w,i*128);c.stroke()}});
+floorT.wrapS=floorT.wrapT=THREE.RepeatWrapping;floorT.repeat.set(2,16);
+const paveT=canvasTex(512,512,(c,w,h)=>{c.fillStyle='#A8ADA8';c.fillRect(0,0,w,h);for(let y=0;y<8;y++)for(let x=0;x<4;x++){const o=y%2?64:0;c.fillStyle=`hsl(40,6%,${58+Math.random()*10}%)`;c.fillRect(x*128+o+3,y*64+3,122,58)}});paveT.wrapS=paveT.wrapT=THREE.RepeatWrapping;paveT.repeat.set(12,6);
+/* ---- dış mekan ---- */
+add(new THREE.PlaneGeometry(80,30),new THREE.MeshStandardMaterial({map:paveT,roughness:.9}),0,0,15).rotation.x=-Math.PI/2;
+add(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:'#8FA88A',roughness:1}),0,-.02,60).rotation.x=-Math.PI/2;
+/* cephe (kapı boşluklu) */
+const FH=6.2;add(new THREE.BoxGeometry(14,FH,.4),M.facade,-8.3,FH/2,-.2,scene,true);add(new THREE.BoxGeometry(14,FH,.4),M.facade,8.3,FH/2,-.2,scene,true);add(new THREE.BoxGeometry(2.6,FH-2.55,.4),M.facade,0,2.55+(FH-2.55)/2,-.2,scene,true);
+add(new THREE.BoxGeometry(30.6,.35,.5),M.teal,0,3.3,0);add(new THREE.BoxGeometry(30.6,.25,.6),M.graph,0,FH,0);
+for(let i=0;i<4;i++){[-1,1].forEach(s=>{const x=s*(4+i*3.2);add(new THREE.BoxGeometry(2.2,1.6,.08),M.glass,x,1.6,.02);add(new THREE.BoxGeometry(2.3,.08,.12),M.alu,x,2.42,.03);add(new THREE.BoxGeometry(2.2,1.6,.08),M.glass,x,4.7,.02);add(new THREE.BoxGeometry(2.3,.08,.12),M.alu,x,5.52,.03)})}
+/* tabela */
+add(new THREE.BoxGeometry(9.2,1.1,.12),M.graph,0,4.6,.06);
+add(new THREE.PlaneGeometry(9,1),new THREE.MeshBasicMaterial({map:canvasTex(1800,200,(c,w,h)=>{c.fillStyle='#2E373C';c.fillRect(0,0,w,h);c.fillStyle='#2BD9C0';c.beginPath();c.arc(100,100,64,0,7);c.lineWidth=12;c.strokeStyle='#2BD9C0';c.stroke();c.font='700 64px "Barlow Condensed",sans-serif';c.textAlign='center';c.fillText('MY',100,122);c.fillStyle='#F4FBFB';c.textAlign='left';c.font='700 92px "Barlow Condensed","Source Sans 3",sans-serif';c.fillText('MY TOKSİKOLOJİ LABORATUVARI',200,128);c.font='600 34px "Source Sans 3",sans-serif';c.fillStyle='#9FD9D2';c.fillText('Adli Toksikoloji Eğitim ve Uygulama Birimi',204,178)}),toneMapped:false}),0,4.6,.125);
+/* saksılar ve bariyerler */
+[-3.4,3.4].forEach(x=>{add(RB(1.1,.9,1.1,.12),M.graph,x,.45,1.4,scene,true);const b=add(new THREE.SphereGeometry(.65,16,12),new THREE.MeshStandardMaterial({color:'#4F7F48',roughness:.9}),x,1.25,1.4,scene,true);b.scale.y=.85});
+/* ---- sensörlü cam kapılar ---- */
+const leaves=[];const logoHalf=s=>canvasTex(512,1024,(c,w,h)=>{c.clearRect(0,0,w,h);const cx=s<0?w:0,cy=h*.46,R=230;c.save();c.beginPath();c.rect(0,0,w,h);c.clip();
+ c.fillStyle='rgba(14,30,34,.88)';c.beginPath();c.arc(cx,cy,R,0,7);c.fill();c.lineWidth=18;c.strokeStyle='#2BD9C0';c.beginPath();c.arc(cx,cy,R-14,0,7);c.stroke();c.lineWidth=5;c.strokeStyle='#7CF2D8';c.beginPath();c.arc(cx,cy,R-44,0,7);c.stroke();
+ c.fillStyle='#FFFFFF';c.font='700 170px "Barlow Condensed","Source Sans 3",sans-serif';c.textAlign='center';c.fillText('MY',cx,cy+40);c.fillStyle='#2BD9C0';c.font='700 62px "Barlow Condensed","Source Sans 3",sans-serif';c.fillText('TOKSİLAB',cx,cy+118);
+ c.strokeStyle='#7CF2D8';c.lineWidth=7;c.beginPath();c.moveTo(cx-96,cy-96);c.lineTo(cx-46,cy-124);c.lineTo(cx+4,cy-96);c.lineTo(cx+54,cy-124);c.stroke();[[-96,-96],[-46,-124],[4,-96],[54,-124]].forEach(([dx,dy],i)=>{c.fillStyle=i===3?'#2BD9C0':'#0E1E22';c.beginPath();c.arc(cx+dx,cy+dy,13,0,7);c.fill();c.stroke()});c.restore();
+ c.fillStyle='rgba(255,255,255,.85)';c.fillRect(0,h*.84,w,26);c.fillStyle='#1F9A97';c.font='700 34px "Source Sans 3",sans-serif';c.textAlign='center';c.fillText(s<0?'OTOMATİK':'KAPI',w/2,h*.84+24)});
+[-1,1].forEach(s=>{const g=new THREE.Group();g.position.set(s*.6,0,.12);scene.add(g);
+ add(new THREE.BoxGeometry(1.2,2.5,.03),M.glass,0,1.25,0,g);add(new THREE.BoxGeometry(1.2,.07,.07),M.alu,0,2.47,0,g);add(new THREE.BoxGeometry(1.2,.12,.07),M.alu,0,.06,0,g);add(new THREE.BoxGeometry(.06,2.5,.07),M.alu,s*.57,1.25,0,g);add(new THREE.BoxGeometry(.04,2.5,.07),M.alu,-s*.58,1.25,0,g);
+ add(new THREE.PlaneGeometry(1.2,2.4),new THREE.MeshBasicMaterial({map:logoHalf(s),transparent:true,toneMapped:false,side:THREE.DoubleSide}),0,1.26,.02,g);leaves.push({g,s})});
+add(new THREE.BoxGeometry(2.8,.28,.32),M.alu,0,2.66,.12);
+const sensor=add(new THREE.BoxGeometry(.5,.12,.14),M.dark,0,2.86,.2);const sLed=add(new THREE.SphereGeometry(.035,10,8),new THREE.MeshBasicMaterial({color:'#E5484D'}),.16,2.86,.28);
+/* ---- koridor ---- */
+const CL=30;
+add(new THREE.PlaneGeometry(4,CL),new THREE.MeshStandardMaterial({map:floorT,roughness:.35,metalness:.05}),0,.001,-CL/2).rotation.x=-Math.PI/2;
+add(new THREE.PlaneGeometry(4,CL),M.ceil,0,3,-CL/2).rotation.x=Math.PI/2;
+const lw=add(new THREE.PlaneGeometry(CL,3),M.wall,-2,1.5,-CL/2);lw.rotation.y=Math.PI/2;
+[[0,-10.44],[-11.56,-CL]].forEach(([a,b])=>{const m=add(new THREE.PlaneGeometry(Math.abs(b-a),3),M.wall,2,1.5,(a+b)/2);m.rotation.y=-Math.PI/2});{const m=add(new THREE.PlaneGeometry(1.12,.8),M.wall,2,2.6,-11);m.rotation.y=-Math.PI/2}
+add(new THREE.PlaneGeometry(4,3),M.wall2,0,1.5,-CL);
+[-1,1].forEach(s=>{add(new THREE.BoxGeometry(.05,.18,CL),M.rail,s*1.97,.95,-CL/2);add(new THREE.BoxGeometry(.03,.12,CL),M.band,s*1.985,.08,-CL/2)});
+/* tavan ışıkları */
+{let k=0;for(let z=-2.5;z>-CL;z-=3.2,k++){add(new THREE.BoxGeometry(1.2,.03,.6),M.light,0,2.985,z);if(k%2===0){const p=new THREE.PointLight('#FFF6EA',6,10,1.4);p.position.set(0,2.7,z-1.6);scene.add(p)}}}
+/* kapılar */
+const HAZ={gas:'⬣',bio:'☣',cor:'⚠',fla:'🔥',exp:'💥'};
+function hazardTex(k){return canvasTex(256,256,(c,w,h)=>{c.translate(128,128);c.rotate(Math.PI/4);c.fillStyle='#fff';c.fillRect(-82,-82,164,164);c.strokeStyle='#C2312B';c.lineWidth=14;c.strokeRect(-82,-82,164,164);c.rotate(-Math.PI/4);c.fillStyle='#111';c.font='700 92px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(HAZ[k],0,6)})}
+const doorG={};
+ROOMS.forEach(r=>{const g=new THREE.Group();const L=r.side==='L';g.position.set(L?-1.995:1.995,0,r.z);g.rotation.y=L?Math.PI/2:-Math.PI/2;scene.add(g);doorG[r.no]=g;
+ if(r.no===2){add(new THREE.BoxGeometry(.12,2.32,.16),M.graph,-.62,1.16,0,g);add(new THREE.BoxGeometry(.12,2.32,.16),M.graph,.62,1.16,0,g);add(new THREE.BoxGeometry(1.36,.12,.16),M.graph,0,2.26,0,g)}else add(new THREE.BoxGeometry(1.36,2.32,.08),M.graph,0,1.16,.02,g);
+ const pivot=new THREE.Group();pivot.position.set(-.56,0,.07);g.add(pivot);
+ const lm=new THREE.MeshPhysicalMaterial({color:r.c,roughness:.45,clearcoat:.3});const leaf=add(new THREE.BoxGeometry(1.12,2.18,.05),lm,.56,1.1,0,pivot);
+ add(new THREE.BoxGeometry(.24,.9,.055),M.glass,.86,1.45,0,pivot);add(new THREE.BoxGeometry(.3,.96,.04),M.dark,.86,1.45,-.004,pivot);
+ const h1=add(new THREE.BoxGeometry(.22,.04,.06),M.steel,.9,1.02,.05,pivot);add(new THREE.CylinderGeometry(.03,.03,.08,10),M.steel,1.0,1.02,.03,pivot).rotation.x=Math.PI/2;
+ add(new THREE.BoxGeometry(.3,.3,.01),M.steel,.56,.3,.03,pivot);
+ const num=canvasTex(256,256,(c,w,h)=>{c.fillStyle='#fff';c.beginPath();c.arc(128,128,110,0,7);c.fill();c.fillStyle=r.c;c.font='700 150px "Barlow Condensed",sans-serif';c.textAlign='center';c.fillText(String(r.no),128,180)});
+ add(new THREE.PlaneGeometry(.26,.26),new THREE.MeshBasicMaterial({map:num,transparent:true}),.3,1.8,.03,pivot);
+ if(r.haz)add(new THREE.PlaneGeometry(.26,.26),new THREE.MeshBasicMaterial({map:hazardTex(r.haz),transparent:true}),.3,1.45,.03,pivot);
+ if(r.small){[0,1,2,3,4].forEach(i=>add(new THREE.BoxGeometry(.7,.03,.02),M.dark,.56,.18+i*.06,.035,pivot))}
+ pivot.userData.leaf=leaf;g.userData.pivot=pivot;
+ /* kapı üstü tabela */
+ const sign=canvasTex(1024,180,(c,w,h)=>{c.fillStyle='#2E373C';c.fillRect(0,0,w,h);c.fillStyle=r.c;c.fillRect(0,0,150,h);c.fillStyle='#fff';c.font='700 120px "Barlow Condensed",sans-serif';c.textAlign='center';c.fillText(String(r.no),75,130);c.textAlign='left';c.font='700 76px "Barlow Condensed","Source Sans 3",sans-serif';c.fillText(r.k,180,108);c.font='600 30px "Source Sans 3",sans-serif';c.fillStyle='#9FD9D2';c.fillText(r.sub,182,152)});
+ add(new THREE.PlaneGeometry(1.7,.3),new THREE.MeshBasicMaterial({map:sign,toneMapped:false}),0,2.5,.03,g);
+ /* bayrak tabela (koridora dik) */
+ const fl=canvasTex(512,200,(c,w,h)=>{c.fillStyle='#F4FBFB';c.fillRect(0,0,w,h);c.fillStyle=r.c;c.fillRect(0,0,110,h);c.fillStyle='#fff';c.font='700 120px "Barlow Condensed",sans-serif';c.textAlign='center';c.fillText(String(r.no),55,145);c.fillStyle='#24333B';c.textAlign='left';c.font='700 56px "Barlow Condensed",sans-serif';const w2=r.k.split(' ');const l1=w2.length>2?w2.slice(0,2).join(' '):w2[0],l2=w2.length>2?w2.slice(2).join(' '):(w2[1]||'');c.fillText(l1,128,90);if(l2)c.fillText(l2,128,150)});
+ const fg=new THREE.Group();fg.position.set(.82,2.55,.32);g.add(fg);add(new THREE.BoxGeometry(.02,.06,.4),M.alu,0,.24,-.2,fg);
+ [1,-1].forEach(sd=>{const fp=add(new THREE.PlaneGeometry(.62,.24),new THREE.MeshBasicMaterial({map:fl}),sd*.006,0,0,fg);fp.rotation.y=sd*Math.PI/2;fp.position.z=.12});
+ /* bilgi panosu */
+ const info=canvasTex(512,640,(c,w,h)=>{c.fillStyle='#FFFFFF';c.fillRect(0,0,w,h);c.fillStyle=r.c;c.fillRect(0,0,w,70);c.fillStyle='#fff';c.font='700 40px "Barlow Condensed",sans-serif';c.fillText(`ODA ${r.no}`,24,48);c.fillStyle='#132228';c.font='700 46px "Barlow Condensed","Source Sans 3",sans-serif';
+  const wrap=(t,x,y,mw,lh,f)=>{c.font=f;const ws=t.split(' ');let l='';for(const ww of ws){if(c.measureText(l+ww).width>mw){c.fillText(l,x,y);y+=lh;l=''}l+=ww+' '}c.fillText(l,x,y);return y+lh};
+  let y=wrap(r.n,24,124,460,48,'700 44px "Barlow Condensed","Source Sans 3",sans-serif');c.fillStyle='#3E4C52';y=wrap(r.d,24,y+6,460,30,'400 23px "Source Sans 3",sans-serif');c.fillStyle='#132228';r.l.forEach(t=>{y=wrap('• '+t,24,y+4,460,28,'600 22px "Source Sans 3",sans-serif')})});
+ add(new THREE.BoxGeometry(.76,.96,.03),M.alu,1.25,1.45,.0,g);add(new THREE.PlaneGeometry(.72,.9),new THREE.MeshStandardMaterial({map:info,roughness:.5}),1.25,1.45,.02,g);
+ hot(add(new THREE.BoxGeometry(2.4,2.4,.6),new THREE.MeshBasicMaterial({visible:false}),.4,1.2,.3,g),'door:'+r.no)});
+/* ================= ODA 2 · ÖRNEK HAZIRLAMA (iç mekan) ================= */
+const DEVS=[];const DEVI={
+ bal:{ic:'⚖',n:'Analitik mikroterazi',f:'terazi_pilot.html',d:'0,000001 g (1 µg) okunabilirlikli mikroterazi. Sarsıntısız tartım masasında durur; yan kapıları sensörle açılır. Referans standartları burada tartarsın.',t:['Seviye ve iç kalibrasyon','10 mg referans standart tartımı','mg biriminde tartım · serbest tartım']},
+ cen:{ic:'◎',n:'Masaüstü santrifüj',f:'santrifuj_pilot.html',d:'Açılı rotor (12 × 5 mL) ve mikrotüp rotoru (24 × 1,5 mL). Kanı plazmadan ayırır, ekstraksiyon fazlarını ayırır, proteinleri çöktürür.',t:['Kan: plazma ayırma','Sıvı-sıvı ekstraksiyon: faz ayırma','Eppendorf: protein çöktürme']},
+ vor:{ic:'🌀',n:'Vorteks karıştırıcı',f:'vorteks_pilot.html',d:'Tüpteki sıvıyı girdapla hızla karıştırır. O / ON / TOUCH anahtarı ve 0–3000 rpm hız düğmesi var.',t:['HS vialini TOUCH modunda karıştırma','Sıvı-sıvı ekstraksiyon: 30 s yüksek hız']},
+ pip:{ic:'💧',n:'Döner pipet standı',f:'pipet_pilot.html',d:'P10, P20, P100, P200, P1000 ve P5000 otomatik pipetler. Kullanılmayan pipet standda dik asılı durur.',t:['150 µL su (ileri pipetaj)','200 µL kan (ters pipetaj)','5 µL ara stok · 100 µL DCM']}};
+const R2={x0:2,x1:10,z0:-14,z1:-8,dz:-11};const OBST=[];const R2INFO={};
+{const RM=new THREE.Group();scene.add(RM);const A=(geo,mat,x,y,z,sh=true,par=RM)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=sh;m.receiveShadow=true;par.add(m);return m};
+ const info=(m,id,t,d)=>{R2INFO[id]=[t,d];hot(m,'r2:'+id);return m};
+ const mat={floor:new THREE.MeshStandardMaterial({map:canvasTex(512,512,(c,w,h)=>{c.fillStyle='#D5DCDC';c.fillRect(0,0,w,h);for(let i=0;i<5000;i++){c.fillStyle=`rgba(${Math.random()<.5?'120,135,138':'255,255,255'},${Math.random()*.35})`;c.fillRect(Math.random()*w,Math.random()*h,2,2)}}),roughness:.4}),
+  wall:new THREE.MeshStandardMaterial({color:'#F1F4F3',roughness:.85}),cab:new THREE.MeshPhysicalMaterial({color:'#E9EDEE',roughness:.45,clearcoat:.3}),door:new THREE.MeshPhysicalMaterial({color:'#F7F9F9',roughness:.35,clearcoat:.4}),
+  top:new THREE.MeshPhysicalMaterial({color:'#2A3135',roughness:.35,clearcoat:.5}),kick:new THREE.MeshStandardMaterial({color:'#3A464B',roughness:.6}),handle:new THREE.MeshStandardMaterial({color:'#1F9A97',roughness:.35,metalness:.3}),
+  steel:new THREE.MeshStandardMaterial({color:'#C9CFD2',metalness:.9,roughness:.25}),teal:new THREE.MeshPhysicalMaterial({color:'#1F9A97',roughness:.4,clearcoat:.4}),glass:M.glass,
+  granite:new THREE.MeshPhysicalMaterial({map:canvasTex(256,256,(c,w,h)=>{c.fillStyle='#1C1F21';c.fillRect(0,0,w,h);for(let i=0;i<2500;i++){c.fillStyle=`rgba(${[200,200,200]},${Math.random()*.5})`;c.fillRect(Math.random()*w,Math.random()*h,1.5,1.5)}}),roughness:.15,clearcoat:1})};
+ mat.floor.map.wrapS=mat.floor.map.wrapT=THREE.RepeatWrapping;mat.floor.map.repeat.set(4,3);
+ /* kabuk */
+ A(new THREE.PlaneGeometry(8,6),mat.floor,6,.002,-11,false).rotation.x=-Math.PI/2;
+ A(new THREE.PlaneGeometry(8,6),M.ceil,6,3,-11,false).rotation.x=Math.PI/2;
+ const rw2=A(new THREE.PlaneGeometry(8,3),mat.wall,6,1.5,-8.01,false);rw2.rotation.y=Math.PI;
+ A(new THREE.PlaneGeometry(8,3),mat.wall,6,1.5,-13.99,false);
+ /* ön duvar (oda içi) kapı boşluklu */
+ [[-8,-10.44],[-11.56,-14]].forEach(([a,b])=>{const m=A(new THREE.PlaneGeometry(Math.abs(b-a),3),mat.wall,2.035,1.5,(a+b)/2,false);m.rotation.y=Math.PI/2});
+ {const m=A(new THREE.PlaneGeometry(1.12,.8),mat.wall,2.035,2.6,-11,false);m.rotation.y=Math.PI/2}
+ [[-8,1],[-14,1]].forEach(([z])=>{});
+ /* süpürgelik */
+ [[6,-8.02,8,0],[6,-13.98,8,0]].forEach(([x,z,l])=>A(new THREE.BoxGeometry(l,.1,.02),mat.kick,x,.05,z,false));
+ /* arka duvar: pencere */
+ const WX=9.99,wz0=-13.1,wz1=-8.9,wy0=1.05,wy1=2.65;
+ const back=(z0,z1,y0,y1)=>{const m=A(new THREE.PlaneGeometry(Math.abs(z1-z0),y1-y0),mat.wall,WX,(y0+y1)/2,(z0+z1)/2,false);m.rotation.y=-Math.PI/2};
+ back(-14,-8,0,wy0);back(-14,-8,wy1,3);back(-14,wz0,wy0,wy1);back(wz1,-8,wy0,wy1);
+ const fr=new THREE.MeshStandardMaterial({color:'#D5DBDE',metalness:.6,roughness:.3});
+ A(new THREE.BoxGeometry(.12,.06,wz1-wz0+.12),fr,WX-.02,wy0,(wz0+wz1)/2);A(new THREE.BoxGeometry(.12,.06,wz1-wz0+.12),fr,WX-.02,wy1,(wz0+wz1)/2);
+ [wz0,(wz0+wz1)/2,wz1].forEach(z=>A(new THREE.BoxGeometry(.12,wy1-wy0,.06),fr,WX-.02,(wy0+wy1)/2,z));A(new THREE.BoxGeometry(.1,.04,wz1-wz0),fr,WX-.02,1.95,(wz0+wz1)/2);
+ A(new THREE.BoxGeometry(.3,.04,wz1-wz0+.3),new THREE.MeshStandardMaterial({color:'#E3E7E8',roughness:.4}),WX-.15,wy0-.03,(wz0+wz1)/2);
+ const wg=A(new THREE.PlaneGeometry(wz1-wz0,wy1-wy0),new THREE.MeshPhysicalMaterial({color:'#CFEAF5',transparent:true,opacity:.18,roughness:0,clearcoat:1,depthWrite:false}),WX-.01,(wy0+wy1)/2,(wz0+wz1)/2,false);wg.rotation.y=-Math.PI/2;info(wg,'win','Pencere','Doğal ışık ve havalandırma sağlar. Çalışırken pencere kapalı tutulur: hava akımı terazide ve çeker ocakta ölçümleri bozar.');
+ const view=canvasTex(1024,512,(c,w,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#8FC3E6');g.addColorStop(.6,'#D7ECF6');g.addColorStop(.61,'#9DB58F');g.addColorStop(1,'#6E8B62');c.fillStyle=g;c.fillRect(0,0,w,h);
+  for(let i=0;i<9;i++){const x=i*120+Math.random()*40,bw=70+Math.random()*60,bh=80+Math.random()*120;c.fillStyle=`hsl(200,8%,${62+Math.random()*16}%)`;c.fillRect(x,310-bh,bw,bh);c.fillStyle='rgba(255,255,255,.4)';for(let y=310-bh+10;y<300;y+=18)for(let xx=x+8;xx<x+bw-8;xx+=16)c.fillRect(xx,y,8,9)}
+  for(let i=0;i<14;i++){const x=Math.random()*w;c.fillStyle=`hsl(${100+Math.random()*30},30%,${30+Math.random()*12}%)`;c.beginPath();c.arc(x,330,30+Math.random()*30,0,7);c.fill()}
+  c.fillStyle='rgba(255,255,255,.8)';[[180,80],[640,60]].forEach(([x,y])=>{c.beginPath();c.ellipse(x,y,70,18,0,0,7);c.fill()})});
+ const vw=A(new THREE.PlaneGeometry(9,4.5),new THREE.MeshBasicMaterial({map:view,fog:false,toneMapped:false}),13.5,1.9,-11,false);vw.rotation.y=-Math.PI/2;
+ /* jaluzi (yarım) */
+ for(let i=0;i<8;i++)A(new THREE.BoxGeometry(.01,.03,wz1-wz0-.1),new THREE.MeshStandardMaterial({color:'#EEF1F2'}),WX-.12,wy1-.05-i*.05,(wz0+wz1)/2,false).rotation.z=.6;
+ A(new THREE.BoxGeometry(.06,.06,wz1-wz0),fr,WX-.12,wy1+.03,(wz0+wz1)/2);
+ /* ışıklar */
+ [[4,-11],[6.6,-11],[9,-11]].forEach(([x,z],i)=>{A(new THREE.BoxGeometry(1.2,.03,1.2),M.light,x,2.985,z,false);if(i!==1){const p=new THREE.PointLight('#FFF6EA',7,9,1.3);p.position.set(x,2.6,z);RM.add(p)}});
+ /* ---- dolaplı tezgah ---- */
+ function bench(x0,x1,zw,dir,deep=.72){const L=x1-x0,cx=(x0+x1)/2,zc=zw+dir*deep/2;
+  A(new THREE.BoxGeometry(L,.1,deep-.08),mat.kick,cx,.05,zc-dir*.04);
+  A(new THREE.BoxGeometry(L,.78,deep-.04),mat.cab,cx,.49,zc-dir*.02);
+  const n=Math.max(1,Math.round(L/.6)),w=L/n,fz=zw+dir*(deep-.01);
+  for(let i=0;i<n;i++){const x=x0+w*i+w/2;
+   const dr=A(new THREE.BoxGeometry(w-.02,.15,.02),mat.door,x,.795,fz,false);A(new THREE.BoxGeometry(w*.5,.018,.03),mat.handle,x,.77,fz+dir*.015,false);
+   const d=A(new THREE.BoxGeometry(w-.02,.58,.02),mat.door,x,.42,fz,false);A(new THREE.BoxGeometry(.02,.16,.03),mat.handle,x+(i%2?-1:1)*(w/2-.07),.56,fz+dir*.015,false)}
+  A(new THREE.BoxGeometry(L+.02,.035,deep+.03),mat.top,cx,.9,zw+dir*(deep+.03)/2);
+  A(new THREE.BoxGeometry(L,.1,.015),mat.top,cx,.97,zw+dir*.008);
+  /* priz bandı ve raf */
+  A(new THREE.BoxGeometry(L-.2,.07,.04),new THREE.MeshStandardMaterial({color:'#DDE2E4',roughness:.5}),cx,1.15,zw+dir*.03);
+  for(let x=x0+.4;x<x1-.2;x+=.9){A(new THREE.BoxGeometry(.09,.05,.01),new THREE.MeshStandardMaterial({color:'#FFFFFF'}),x,1.15,zw+dir*.052,false);A(new THREE.BoxGeometry(.012,.012,.01),M.dark,x-.02,1.15,zw+dir*.06,false);A(new THREE.BoxGeometry(.012,.012,.01),M.dark,x+.02,1.15,zw+dir*.06,false)}
+  A(new THREE.BoxGeometry(L-.1,.025,.32),new THREE.MeshStandardMaterial({color:'#E6EAEB',roughness:.4}),cx,1.78,zw+dir*.17);
+  for(let x=x0+.2;x<=x1-.15;x+=1.2)A(new THREE.BoxGeometry(.02,.2,.3),mat.steel,x,1.69,zw+dir*.16);
+  const hb=A(new THREE.BoxGeometry(L,.95,deep),new THREE.MeshBasicMaterial({visible:false}),cx,.48,zc,false);
+  OBST.push({x0:x0-.02,x1:x1+.02,z0:Math.min(zw,zw+dir*deep),z1:Math.max(zw,zw+dir*deep)});return hb}
+ info(bench(4.85,9.97,-8.0,-1),'benchR','Yan tezgah (sağ)','Kimyasal dayanımlı epoksi tezgah; altında kapaklı dolaplar ve çekmeceler var. Duvarda priz bandı ve raf bulunur. Cihazlar (vorteks, santrifüj, buzdolabı) buraya yerleştirilecek.');
+ info(bench(4.45,9.97,-14.0,1),'benchL','Yan tezgah (sol)','Uzun çalışma tezgahı; altı dolaplı. Pipetleme, numune etiketleme ve çözelti hazırlama burada yapılır.');
+ /* orta tezgah (ada) */
+ {const x0=4.7,x1=8.5,zc=-11,w=1.3,cx=(x0+x1)/2,L=x1-x0;
+  A(new THREE.BoxGeometry(L,.1,w-.16),mat.kick,cx,.05,zc);A(new THREE.BoxGeometry(L,.78,w-.08),mat.cab,cx,.49,zc);
+  [-1,1].forEach(sd=>{const n=Math.round(L/.6),ww=L/n,fz=zc+sd*(w/2-.03);for(let i=0;i<n;i++){const x=x0+ww*i+ww/2;A(new THREE.BoxGeometry(ww-.02,.15,.02),mat.door,x,.795,fz,false);A(new THREE.BoxGeometry(ww*.5,.018,.03),mat.handle,x,.77,fz+sd*.015,false);A(new THREE.BoxGeometry(ww-.02,.58,.02),mat.door,x,.42,fz,false);A(new THREE.BoxGeometry(.02,.16,.03),mat.handle,x+(i%2?-1:1)*(ww/2-.07),.56,fz+sd*.015,false)}});
+  [x0,x1].forEach(x=>A(new THREE.BoxGeometry(.02,.78,w-.08),mat.door,x+(x===x0?-.01:.01),.49,zc,false));
+  A(new THREE.BoxGeometry(L+.06,.035,w+.04),mat.top,cx,.9,zc);
+  /* üst reaktif rafı */
+  [x0+.15,cx,x1-.15].forEach(x=>A(new THREE.BoxGeometry(.04,.75,.04),mat.steel,x,1.29,zc));
+  [1.25,1.62].forEach(y=>A(new THREE.BoxGeometry(L-.1,.025,.34),new THREE.MeshPhysicalMaterial({color:'#EEF2F3',roughness:.2,transparent:true,opacity:.85}),cx,y,zc));
+  A(new THREE.BoxGeometry(L-.1,.12,.08),new THREE.MeshStandardMaterial({color:'#DDE2E4'}),cx,1.02,zc);
+  for(let x=x0+.4;x<x1-.2;x+=.75)[-1,1].forEach(sd=>A(new THREE.BoxGeometry(.09,.06,.01),new THREE.MeshStandardMaterial({color:'#FFFFFF'}),x,1.02,zc+sd*.045,false));
+  info(A(new THREE.BoxGeometry(L,1.7,w),new THREE.MeshBasicMaterial({visible:false}),cx,.85,zc,false),'island','Orta çalışma tezgahı (ada)','İki taraftan kullanılan orta tezgah. Üstündeki rafta sık kullanılan reaktif ve sarf malzemeleri, ortasında priz bandı bulunur. Numuneler burada açılır ve dağıtılır.');
+  OBST.push({x0:x0-.03,x1:x1+.03,z0:zc-w/2,z1:zc+w/2})}
+ /* sarsıntısız tartım masası */
+ {const x=3.55,z=-13.45,G2=new THREE.Group();G2.position.set(x,0,z);RM.add(G2);const B=(geo,m,a,b,c)=>A(geo,m,a,b,c,true,G2);
+  const fm=new THREE.MeshStandardMaterial({color:'#5E6C73',metalness:.5,roughness:.4});
+  [[-.45,-.3],[.45,-.3],[-.45,.3],[.45,.3]].forEach(([a,c])=>B(new THREE.BoxGeometry(.07,.74,.07),fm,a,.37,c));
+  B(new THREE.BoxGeometry(1.0,.05,.72),fm,0,.76,0);B(new THREE.BoxGeometry(.96,.04,.04),fm,0,.2,-.3);B(new THREE.BoxGeometry(.96,.04,.04),fm,0,.2,.3);
+  [[-.3,-.2],[.3,-.2],[-.3,.2],[.3,.2]].forEach(([a,c])=>B(new THREE.CylinderGeometry(.04,.04,.03,12),new THREE.MeshStandardMaterial({color:'#111'}),a,.8,c));
+  B(new THREE.BoxGeometry(.86,.07,.6),mat.granite,0,.85,0);
+  [[-.38,-.26],[.38,-.26],[-.38,.26],[.38,.26]].forEach(([a,c])=>B(new THREE.CylinderGeometry(.035,.045,.02,10),new THREE.MeshStandardMaterial({color:'#2E373C'}),a,0.01,c));
+  const lab=canvasTex(512,96,(c,w,h)=>{c.fillStyle='#1F9A97';c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='700 40px "Barlow Condensed",sans-serif';c.textAlign='center';c.fillText('SARSINTISIZ TARTIM MASASI',w/2,62)});
+  const lp=B(new THREE.PlaneGeometry(.6,.11),new THREE.MeshBasicMaterial({map:lab}),0,.72,.362);
+  info(B(new THREE.BoxGeometry(1.05,.95,.75),new THREE.MeshBasicMaterial({visible:false}),0,.47,0),'wt','Sarsıntısız tartım masası','Ağır granit tabla, kauçuk takozlarla ayrı bir çelik çerçeveye oturur; tezgaha ve duvara değmez. Böylece yürüme, kapı ve cihaz titreşimi teraziye geçmez. Analitik terazi buraya konacak.');
+  OBST.push({x0:x-.55,x1:x+.55,z0:z-.4,z1:z+.4})}
+ /* göz duşu */
+ {const x=2.55,z=-8.0;const G3=new THREE.Group();G3.position.set(x,0,z);RM.add(G3);const B=(geo,m,a,b,c)=>A(geo,m,a,b,c,true,G3);const ye=new THREE.MeshStandardMaterial({color:'#F2C230',roughness:.4}),gr=new THREE.MeshStandardMaterial({color:'#2E7D32',roughness:.4});
+  B(new THREE.CylinderGeometry(.035,.035,.95,12),ye,0,.47,-.18);B(new THREE.CylinderGeometry(.16,.12,.04,24),ye,0,.03,-.18);
+  const bowl=B(new THREE.CylinderGeometry(.2,.12,.12,28,1,true),mat.steel,0,1.0,-.24);bowl.material=new THREE.MeshStandardMaterial({color:'#C9CFD2',metalness:.9,roughness:.25,side:THREE.DoubleSide});
+  [-.06,.06].forEach(a=>{B(new THREE.CylinderGeometry(.018,.018,.08,12),gr,a,1.02,-.24);B(new THREE.CylinderGeometry(.03,.03,.02,12),gr,a,1.07,-.24)});
+  B(new THREE.BoxGeometry(.04,.22,.18),gr,.22,.97,-.18);B(new THREE.BoxGeometry(.32,.2,.04),gr,-.0,.85,-.06).visible=false;
+  const sg=canvasTex(256,256,(c,w,h)=>{c.fillStyle='#2E7D32';c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='120px sans-serif';c.textAlign='center';c.fillText('👁',w/2,140);c.font='700 40px "Barlow Condensed",sans-serif';c.fillText('GÖZ DUŞU',w/2,220)});
+  const sp=B(new THREE.PlaneGeometry(.32,.32),new THREE.MeshBasicMaterial({map:sg}),0,1.75,-.012);sp.rotation.y=Math.PI;
+  info(B(new THREE.BoxGeometry(.55,1.9,.5),new THREE.MeshBasicMaterial({visible:false}),0,.95,-.25),'eye','Göz duşu','Göze kimyasal ya da biyolojik sıçramada ilk müdahale. Kapağı it, iki fıskiyeden su akar; gözleri açık tutarak en az 15 dakika yıka. Kapının hemen yanında, her an ulaşılabilir yerde olmalı.');
+  OBST.push({x0:x-.3,x1:x+.3,z0:-8.5,z1:-8})}
+ /* tekerlekli çeker ocak */
+ {const x=3.85,z=-8.0,w=1.5,d=.85;const G4=new THREE.Group();G4.position.set(x,0,z);RM.add(G4);const B=(geo,m,a,b,c,sh=true)=>A(geo,m,a,b,c,sh,G4);
+  const wh=new THREE.MeshStandardMaterial({color:'#F4F6F6',roughness:.4}),dk=new THREE.MeshStandardMaterial({color:'#2E373C',roughness:.5});
+  [[-w/2+.1,-.1],[w/2-.1,-.1],[-w/2+.1,-d+.12],[w/2-.1,-d+.12]].forEach(([a,c])=>{B(new THREE.CylinderGeometry(.05,.05,.04,16),dk,a,.06,c).rotation.z=Math.PI/2;B(new THREE.BoxGeometry(.06,.05,.06),mat.steel,a,.11,c)});
+  B(new THREE.BoxGeometry(w,.72,d-.05),mat.cab,0,.5,-d/2);
+  [-1,1].forEach(sd=>{B(new THREE.BoxGeometry(w/2-.03,.66,.02),mat.door,sd*w/4,.5,-d+.04,false);B(new THREE.BoxGeometry(.02,.18,.03),mat.handle,sd*.06,.6,-d+.02,false)});
+  const yl=canvasTex(256,64,(c,w,h)=>{c.fillStyle='#F2C230';c.fillRect(0,0,w,h);c.fillStyle='#111';c.font='700 30px "Barlow Condensed",sans-serif';c.textAlign='center';c.fillText('YANICI DOLAP',w/2,44)});const yp=B(new THREE.PlaneGeometry(.3,.075),new THREE.MeshBasicMaterial({map:yl}),-w/4,.72,-d+.025,false);yp.rotation.y=Math.PI;
+  const H0=.88,H1=2.35;
+  [-1,1].forEach(sd=>B(new THREE.BoxGeometry(.08,H1-H0,d),wh,sd*(w/2-.04),(H0+H1)/2,-d/2));
+  B(new THREE.BoxGeometry(w,.12,d),wh,0,H1,-d/2);B(new THREE.BoxGeometry(w,.32,.08),mat.teal,0,H1-.14,-d+.03);
+  B(new THREE.BoxGeometry(w-.16,H1-H0-.1,.04),new THREE.MeshStandardMaterial({color:'#E6EBEC',roughness:.5}),0,(H0+H1)/2,-.04);
+  for(let i=0;i<3;i++)B(new THREE.BoxGeometry(w-.3,.02,.01),dk,0,1.1+i*.35,-.065,false);
+  B(new THREE.BoxGeometry(w-.16,.03,d-.08),new THREE.MeshStandardMaterial({color:'#FFFFFF',roughness:.2}),0,H0+.015,-d/2);
+  B(new THREE.BoxGeometry(w-.16,.05,.06),mat.steel,0,H0+.03,-d+.03);
+  const SY=1.42;B(new THREE.BoxGeometry(w-.16,.04,.04),mat.steel,0,SY,-d+.02);B(new THREE.BoxGeometry(w-.16,.04,.04),mat.steel,0,SY+.82,-d+.02);
+  B(new THREE.BoxGeometry(w-.18,.8,.012),M.glass,0,SY+.41,-d+.02,false);
+  B(new THREE.BoxGeometry(w-.3,.03,.3),M.light,0,H1-.08,-d/2,false);
+  const dsp=canvasTex(256,128,(c,w,h)=>{c.fillStyle='#10181B';c.fillRect(0,0,w,h);c.fillStyle='#3CFF6E';c.font='700 46px "IBM Plex Mono",monospace';c.fillText('0,50',20,62);c.font='600 26px "IBM Plex Mono",monospace';c.fillText('m/s  ● OK',20,104)});
+  B(new THREE.PlaneGeometry(.22,.11),new THREE.MeshBasicMaterial({map:dsp,toneMapped:false}),w/2-.2,H1-.14,-d-.012,false).rotation.y=Math.PI;
+  const lg=canvasTex(512,96,(c,w,h)=>{c.fillStyle='#1F9A97';c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='700 50px "Barlow Condensed",sans-serif';c.fillText('MY-ÇEKER OCAK',20,66)});B(new THREE.PlaneGeometry(.6,.11),new THREE.MeshBasicMaterial({map:lg}),-.25,H1-.14,-d-.012,false).rotation.y=Math.PI;
+  B(new THREE.CylinderGeometry(.13,.13,3-H1-.06,20),new THREE.MeshStandardMaterial({color:'#B9C2C6',metalness:.7,roughness:.35}),0,(3+H1)/2,-d/2);
+  info(B(new THREE.BoxGeometry(w,2.4,d),new THREE.MeshBasicMaterial({visible:false}),0,1.2,-d/2,false),'hood','Tekerlekli çeker ocak','Uçucu çözücü ve kimyasallarla bu ocak içinde çalışılır; fan, kirli havayı tavandaki kanaldan dışarı atar. Ön camı (sürgüyü) çalışma yüksekliğinde tut; ekranda hava hızı (0,5 m/s) yeşil olmalı. Altındaki dolap yanıcı çözücüler için, tekerlekleri kilitlenebilir.');
+  OBST.push({x0:x-w/2-.05,x1:x+w/2+.05,z0:z-d-.05,z1:z})}
+ /* N2 çıkışı (sağ duvar, tezgah üstü) */
+ {const x=7.6,z=-8.02;A(new THREE.BoxGeometry(.18,.24,.06),new THREE.MeshStandardMaterial({color:'#E6EAEB'}),x,1.42,z-.03);A(new THREE.CylinderGeometry(.02,.02,.12,10),mat.steel,x,1.4,z-.1).rotation.x=Math.PI/2;A(new THREE.BoxGeometry(.05,.05,.05),new THREE.MeshStandardMaterial({color:'#1E1E1E'}),x,1.47,z-.08);
+  const t=canvasTex(128,64,(c,w,h)=>{c.fillStyle='#1E1E1E';c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='700 36px "Barlow Condensed",sans-serif';c.textAlign='center';c.fillText('N₂',w/2,46)});const p=A(new THREE.PlaneGeometry(.12,.06),new THREE.MeshBasicMaterial({map:t}),x,1.58,z-.005,false);p.rotation.y=Math.PI;
+  info(A(new THREE.BoxGeometry(.3,.4,.2),new THREE.MeshBasicMaterial({visible:false}),x,1.45,z-.1,false),'n2','Azot (N₂) çıkışı','Gaz tüp odasından gelen azot hattının oda içindeki çıkışı. Ekstraktların azot altında uçurulması (evaporatör) için kullanılır.')}
+ /* KKD istasyonu (ön duvar, kapının solu) */
+ {const x=2.03,z=-12.3;[0,1,2].forEach(i=>{A(new THREE.BoxGeometry(.08,.14,.26),new THREE.MeshStandardMaterial({color:['#3B6FD8','#8E5BC7','#1F9A97'][i]}),x+.04,1.2+i*.17,z,false)});
+  const t=canvasTex(256,96,(c,w,h)=>{c.fillStyle='#fff';c.fillRect(0,0,w,h);c.fillStyle='#24333B';c.font='700 34px "Barlow Condensed",sans-serif';c.textAlign='center';c.fillText('ELDİVEN · S M L',w/2,60)});const p=A(new THREE.PlaneGeometry(.3,.1),new THREE.MeshBasicMaterial({map:t}),x+.01,1.75,z,false);p.rotation.y=Math.PI/2;
+  [0,1].forEach(i=>{A(new THREE.CylinderGeometry(.015,.015,.08,8),mat.steel,x+.05,1.75,z-.5-i*.25).rotation.z=Math.PI/2;const coat=A(new THREE.BoxGeometry(.06,.9,.36),new THREE.MeshStandardMaterial({color:'#FAFBFB',roughness:.8}),x+.08,1.3,z-.5-i*.25)});
+  info(A(new THREE.BoxGeometry(.2,1,.9),new THREE.MeshBasicMaterial({visible:false}),x+.1,1.4,z-.3,false),'ppe','KKD istasyonu','Odaya girerken önlüğünü giy, eldivenini tak. Eldiven kutuları S–M–L bedenlerde. Biyolojik numuneyle çalıştığın için çıkarken eldiveni tıbbi atığa at ve elini yıka.')}
+ /* oda 2 için kapı çerçevesi boşluğu: koridor duvarını delik yap */
+ /* ---------- cihazlar ---------- */
+ const D=(x,y,z,ry=0)=>{const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=ry;RM.add(g);return g};
+ const B=(g,geo,m,x,y,z,sh=true)=>A(geo,m,x,y,z,sh,g);
+ const wht=new THREE.MeshPhysicalMaterial({color:'#F1F3F4',roughness:.4,clearcoat:.4}),blk=new THREE.MeshPhysicalMaterial({color:'#15191B',roughness:.2,clearcoat:1}),rub=new THREE.MeshStandardMaterial({color:'#1A1E20',roughness:.9});
+ const scr=(w,h,draw)=>new THREE.MeshBasicMaterial({map:canvasTex(w,h,draw),toneMapped:false});
+ /* terazi (tartım masası) — kapıdan bakınca karşıya dönük */
+ {const g=D(3.55,.885,-13.5,0);
+  B(g,RB(.3,.03,.42,.01),wht,0,.015,0);B(g,RB(.24,.26,.1,.015),wht,0,.16,-.16);
+  const lg=B(g,new THREE.PlaneGeometry(.16,.03),scr(256,48,(c,w,h)=>{c.fillStyle='#F1F3F4';c.fillRect(0,0,w,h);c.fillStyle='#3E4C52';c.font='700 30px "Source Sans 3",sans-serif';c.textAlign='center';c.fillText('MY-TERAZİ µ6',w/2,34)}),0,.27,-.109,false);
+  [[0,.155,.105,.24,.24,.004],[0,.275,-.01,.24,.004,.23],[-.12,.155,-.01,.004,.24,.23],[.12,.155,-.01,.004,.24,.23]].forEach(([x,y,z,a,b,c])=>B(g,new THREE.BoxGeometry(a,b,c),M.glass,x,y,z,false));
+  B(g,new THREE.CylinderGeometry(.045,.045,.006,24),M.steel,0,.04,0);
+  const t=new THREE.Group();t.position.set(0,.04,.17);t.rotation.x=-1.0;g.add(t);B(t,RB(.2,.1,.015,.006),blk,0,0,0);
+  B(t,new THREE.PlaneGeometry(.18,.08),scr(400,180,(c,w,h)=>{c.fillStyle='#EAF2F5';c.fillRect(0,0,w,h);c.fillStyle='#24333B';c.fillRect(0,0,w,26);c.fillStyle='#132228';c.font='600 64px "IBM Plex Mono",monospace';c.textAlign='right';c.fillText('0,000000 g',w-14,108);c.fillStyle='#1E9E4A';c.font='700 22px "IBM Plex Mono",monospace';c.textAlign='left';c.fillText('● KARARLI',14,140)}),0,0,.008,false);
+  DEVS.push({k:'bal',g,x:3.55,z:-13.5,y:1.25})}
+ /* santrifüj — sol tezgah, pencereye yakın */
+ {const g=D(9.05,.918,-13.6,0);
+  B(g,RB(.5,.3,.56,.04),wht,0,.15,0);B(g,RB(.5,.2,.14,.03),new THREE.MeshPhysicalMaterial({color:'#2C9EA3',roughness:.3,clearcoat:.7}),0,.1,.24);
+  B(g,new THREE.PlaneGeometry(.2,.05),scr(320,80,(c,w,h)=>{c.fillStyle='#F2A81D';c.fillRect(0,0,w,h);c.fillStyle='#3A1C00';c.font='700 44px "IBM Plex Mono",monospace';c.fillText('4000  05:00',12,58)}),0,.16,.311,false);
+  [-.13,-.06,.01,.08].forEach(x=>{const k=B(g,new THREE.CylinderGeometry(.012,.012,.01,14),new THREE.MeshStandardMaterial({color:'#D5DEE2'}),x,.1,.312);k.rotation.x=Math.PI/2});
+  const s=B(g,new THREE.CylinderGeometry(.016,.016,.01,14),new THREE.MeshStandardMaterial({color:'#D23A3A'}),.16,.1,.312);s.rotation.x=Math.PI/2;
+  B(g,RB(.5,.035,.5,.02),wht,0,.31,-.02);B(g,new THREE.CylinderGeometry(.17,.17,.006,40),new THREE.MeshStandardMaterial({color:'#8DB0B4',roughness:.4}),0,.33,-.04);
+  B(g,new THREE.PlaneGeometry(.3,.03),scr(400,40,(c,w,h)=>{c.fillStyle='#2C9EA3';c.fillRect(0,0,w,h);c.fillStyle='#F4FBFB';c.font='700 30px "Barlow Condensed",sans-serif';c.fillText('MY-CENTRİ 320',8,30)}),-.05,.04,.311,false);
+  DEVS.push({k:'cen',g,x:9.05,z:-13.6,y:1.42})}
+ /* vorteks — aralık bırakarak */
+ {const g=D(7.95,.918,-13.62,0);
+  [[-.05,-.05],[.05,-.05],[-.05,.05],[.05,.05]].forEach(([a,b])=>B(g,new THREE.CylinderGeometry(.012,.014,.008,12),rub,a,.004,b));
+  B(g,RB(.15,.13,.15,.02),new THREE.MeshPhysicalMaterial({color:'#25A8A1',roughness:.3,clearcoat:.7}),0,.073,0);
+  B(g,new THREE.CylinderGeometry(.04,.045,.02,24),rub,0,.15,0);const cup=B(g,new THREE.CylinderGeometry(.035,.02,.012,24,1,true),rub,0,.163,0);cup.material=new THREE.MeshStandardMaterial({color:'#1A1E20',roughness:.9,side:THREE.DoubleSide});
+  const kn=B(g,new THREE.CylinderGeometry(.018,.02,.014,20),new THREE.MeshStandardMaterial({color:'#1C8C86'}),.035,.09,.079);kn.rotation.x=Math.PI/2;
+  B(g,new THREE.BoxGeometry(.03,.022,.006),blk,-.035,.06,.077);B(g,new THREE.SphereGeometry(.005,8,6),new THREE.MeshBasicMaterial({color:'#3CFF6E'}),-.035,.095,.077);
+  DEVS.push({k:'vor',g,x:7.95,z:-13.62,y:1.3})}
+ /* döner pipet standı — orta tezgah */
+ {const g=D(5.55,.918,-10.62,0);const pm=new THREE.MeshStandardMaterial({color:'#2E373C',roughness:.5});
+  B(g,new THREE.CylinderGeometry(.1,.11,.02,32),pm,0,.01,0);B(g,new THREE.CylinderGeometry(.008,.008,.3,12),M.steel,0,.16,0);
+  B(g,new THREE.CylinderGeometry(.11,.11,.012,6),new THREE.MeshPhysicalMaterial({color:'#1F9A97',roughness:.35,clearcoat:.6}),0,.31,0);
+  [['#C9D0D4'],['#E9ECEE'],['#FFE16B'],['#FFD74A'],['#5AA0F5'],['#A884E0']].forEach(([c],i)=>{const a=i/6*Math.PI*2,x=Math.cos(a)*.09,z=Math.sin(a)*.09;
+   B(g,new THREE.CylinderGeometry(.009,.004,.06,10),wht,x,.13,z);B(g,new THREE.CylinderGeometry(.012,.011,.15,14),wht,x,.235,z);B(g,new THREE.CylinderGeometry(.009,.009,.02,12),new THREE.MeshStandardMaterial({color:'#B9C1C5'}),x,.32,z);
+   B(g,new THREE.CylinderGeometry(.008,.008,.016,12),new THREE.MeshPhysicalMaterial({color:c,roughness:.3,clearcoat:.6}),x,.34,z)});
+  DEVS.push({k:'pip',g,x:5.55,z:-10.62,y:1.38})}
+ DEVS.forEach(d=>{const b=new THREE.Box3().setFromObject(d.g);const s=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
+  const hm=A(new THREE.BoxGeometry(s.x+.12,s.y+.1,s.z+.12),new THREE.MeshBasicMaterial({visible:false}),c.x,c.y,c.z,false);hot(hm,'dev:'+d.k);
+  const ring=A(new THREE.RingGeometry(Math.max(s.x,s.z)*.62,Math.max(s.x,s.z)*.62+.025,40),new THREE.MeshBasicMaterial({color:'#2BD9C0',transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide}),c.x,b.min.y+.003,c.z,false);ring.rotation.x=-Math.PI/2;d.ring=ring});
+ RM.userData.ok=true;}
+
+/* sol duvar: poster sunumları + yangın tüpü */
+const POSTERS=[
+ {t:'Kanda etanol tayini için HS-GC-FID yönteminin validasyonu',k:'P-03',c:'#1F9A97',g:'calib',a:'Doğrusallık 0,05–4 g/L (r² > 0,999); LOQ 0,02 g/L; tekrarlanabilirlik %RSD < 3.'},
+ {t:'Postmortem kanda sentetik katinonların LC-MS/MS ile taranması',k:'P-07',c:'#2F7DE1',g:'chrom',a:'27 katinon 9 dakikada ayrıldı; en sık α-PVP ve 3-MMC saptandı.'},
+ {t:'İdrarda opioid analizi için katı faz ekstraksiyonunun optimizasyonu',k:'P-11',c:'#6A4FB3',g:'bars',a:'Karışık mod SPE ile geri kazanım %85–102; matriks etkisi < %15.'},
+ {t:'Saçta uyuşturucu madde analizi: segmental yaklaşımla kullanım geçmişi',k:'P-14',c:'#C2312B',g:'seg',a:'3 cm segmentlerde kokain ve metaboliti; kullanım örüntüsü aylık izlendi.'},
+ {t:'ICP-MS ile kanda kurşun, arsenik ve kadmiyum tayini',k:'P-18',c:'#E0862A',g:'bars2',a:'Mikrodalga yakma sonrası LOQ: Pb 0,5 µg/L, As 0,2 µg/L, Cd 0,05 µg/L.'},
+ {t:'Postmortem redistribüsyon: femoral ve kalp kanı oranlarının karşılaştırılması',k:'P-22',c:'#2E7D32',g:'scatter',a:'C/P oranı > 2 olan ilaçlarda yorumlama dikkat gerektirir.'}];
+function posterCanvas(p){const c=document.createElement('canvas');c.width=900;c.height=1280;const x=c.getContext('2d');const W=900,H=1280;
+ x.fillStyle='#FFFFFF';x.fillRect(0,0,W,H);x.fillStyle=p.c;x.fillRect(0,0,W,250);x.fillStyle='rgba(255,255,255,.18)';x.fillRect(0,250,W,8);
+ x.fillStyle='#fff';x.font='600 24px "IBM Plex Mono",monospace';x.fillText('XIV. Ulusal Adli Toksikoloji Sempozyumu · Poster '+p.k,36,46);
+ const wrap=(t,X,Y,mw,lh,f,col)=>{x.font=f;x.fillStyle=col;const ws=t.split(' ');let l='';for(const w of ws){if(x.measureText(l+w).width>mw){x.fillText(l,X,Y);Y+=lh;l=''}l+=w+' '}x.fillText(l,X,Y);return Y+lh};
+ let y=wrap(p.t,36,104,828,52,'700 46px "Barlow Condensed","Source Sans 3",sans-serif','#fff');
+ x.font='600 22px "Source Sans 3",sans-serif';x.fillStyle='rgba(255,255,255,.92)';x.fillText('M. Y.¹*, ToksiLab Ekibi¹  ·  ¹MY ToksiLab Adli Toksikoloji Eğitim Laboratuvarı',36,226);
+ const sec=(t,X,Y,w)=>{x.fillStyle=p.c;x.fillRect(X,Y,w,40);x.fillStyle='#fff';x.font='700 26px "Barlow Condensed",sans-serif';x.fillText(t,X+12,Y+29);return Y+56};
+ const lines=(X,Y,w,n)=>{x.fillStyle='#C9D3D7';for(let i=0;i<n;i++){x.fillRect(X,Y+i*20,w*(i===n-1?.6:.92+Math.random()*.08),9)}return Y+n*20+8};
+ let yl=sec('GİRİŞ',30,290,410);yl=lines(30,yl,410,6);yl=sec('YÖNTEM',30,yl+6,410);
+ ['Numune','Hazırlama','Analiz','Veri'].forEach((t,i)=>{x.fillStyle='#F1F5F6';x.strokeStyle=p.c;x.lineWidth=3;x.fillRect(30+i*104,yl,90,52);x.strokeRect(30+i*104,yl,90,52);x.fillStyle='#24333B';x.font='700 17px "Source Sans 3",sans-serif';x.textAlign='center';x.fillText(t,75+i*104,yl+32);x.textAlign='left';if(i<3){x.fillStyle=p.c;x.fillText('›',122+i*104,yl+33)}});yl=lines(30,yl+70,410,5);
+ let yr=sec('BULGULAR',460,290,410);const gx=470,gy=yr,gw=390,gh=260;x.strokeStyle='#24333B';x.lineWidth=2;x.beginPath();x.moveTo(gx,gy);x.lineTo(gx,gy+gh);x.lineTo(gx+gw,gy+gh);x.stroke();
+ x.strokeStyle=p.c;x.fillStyle=p.c;x.lineWidth=3;
+ if(p.g==='chrom'){x.beginPath();x.moveTo(gx,gy+gh-6);for(let i=0;i<=gw;i++){const pk=[[60,150],[110,90],[150,200],[210,120],[260,60],[300,170],[345,100]].reduce((a,[c,h])=>a+h*Math.exp(-((i-c)**2)/18),0);x.lineTo(gx+i,gy+gh-6-pk)}x.stroke()}
+ else if(p.g==='calib'){[[.05,.03],[.1,.06],[.5,.27],[1,.52],[2,1.03],[4,2.0]].forEach(([a,b])=>{x.beginPath();x.arc(gx+a/4*gw*.95,gy+gh-b/2*gh*.9,6,0,7);x.fill()});x.beginPath();x.moveTo(gx,gy+gh);x.lineTo(gx+gw*.95,gy+gh-gh*.9);x.stroke();x.fillStyle='#24333B';x.font='600 20px "IBM Plex Mono",monospace';x.fillText('r² = 0,9994',gx+20,gy+30)}
+ else if(p.g==='scatter'){for(let i=0;i<26;i++){const a=Math.random(),b=a*(.5+Math.random()*.9);x.beginPath();x.arc(gx+a*gw*.95,gy+gh-b*gh*.7,5,0,7);x.fill()}x.setLineDash([8,6]);x.beginPath();x.moveTo(gx,gy+gh);x.lineTo(gx+gw,gy+gh-gh*.7);x.stroke();x.setLineDash([])}
+ else{const n=p.g==='seg'?6:p.g==='bars2'?3:5;for(let i=0;i<n;i++){const h=(p.g==='seg'?[.3,.55,.9,.7,.4,.2]:p.g==='bars2'?[.75,.45,.25]:[.88,.95,.82,1,.9])[i]*gh*.9;const bw=gw/n*.6;x.fillRect(gx+10+i*gw/n,gy+gh-h,bw,h)}}
+ yr=gy+gh+20;x.fillStyle='#24333B';x.font='600 18px "Source Sans 3",sans-serif';x.fillText('Şekil 1.',460,yr);yr=lines(540,yr-12,330,2);
+ x.strokeStyle='#C9D3D7';x.lineWidth=1.5;for(let i=0;i<5;i++){x.strokeRect(460,yr+i*30,410,30)}x.fillStyle=p.c;x.fillRect(460,yr,410,30);yr+=170;
+ let ys=Math.max(yl,yr)+6;ys=sec('SONUÇ',30,ys,840);ys=wrap(p.a,30,ys+10,830,32,'600 26px "Source Sans 3",sans-serif','#24333B');lines(30,ys,840,3);
+ x.fillStyle='#F1F5F6';x.fillRect(0,H-70,W,70);x.fillStyle='#5E6C73';x.font='600 20px "IBM Plex Mono",monospace';x.fillText('* iletişim: mytoksilab · Kaynaklar: 1–12',30,H-28);
+ x.fillStyle=p.c;x.beginPath();x.arc(W-60,H-36,24,0,7);x.fill();x.fillStyle='#fff';x.font='700 22px "Barlow Condensed",sans-serif';x.textAlign='center';x.fillText('MY',W-60,H-28);x.textAlign='left';return c}
+const PZ=[-3.4,-7.4,-14.6,-18.8,-23,-27];POSTERS.forEach((p,i)=>{const z=PZ[i];const cv=posterCanvas(p);p.url=cv.toDataURL('image/jpeg',.85);const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;
+ add(new THREE.BoxGeometry(.04,1.36,.98),M.alu,-1.975,1.62,z);const m=add(new THREE.PlaneGeometry(.92,1.31),new THREE.MeshStandardMaterial({map:t,roughness:.55}),-1.95,1.62,z);m.rotation.y=Math.PI/2;hot(m,'poster:'+i);
+ add(new THREE.BoxGeometry(.5,.04,.08),M.dark,-1.8,2.3,z);add(new THREE.BoxGeometry(.46,.02,.05),M.light,-1.8,2.28,z)});
+add(new THREE.CylinderGeometry(.09,.09,.55,16),new THREE.MeshStandardMaterial({color:'#C62828',roughness:.4}),-1.85,.6,-9.2);add(new THREE.CylinderGeometry(.03,.03,.1,8),M.dark,-1.85,.92,-9.2);
+{const m=add(new THREE.PlaneGeometry(.32,.32),new THREE.MeshStandardMaterial({map:canvasTex(128,128,(c)=>{c.fillStyle='#C62828';c.fillRect(0,0,128,128);c.fillStyle='#fff';c.font='700 70px sans-serif';c.textAlign='center';c.fillText('🧯',64,92)})}),-1.98,1.45,-9.2);m.rotation.y=Math.PI/2}
+/* gaz hatları (tavanda) */
+const GAS=[{k:'N₂',n:'Azot',c:'#1E1E1E',x:1.5,to:[2,1]},{k:'He',n:'Helyum',c:'#7B4A24',x:1.63,to:[3,6,1]},{k:'Ar',n:'Argon',c:'#2F6B3A',x:1.76,to:[3,1]}];
+const pipeM=new THREE.MeshStandardMaterial({color:'#C9CFD2',metalness:.9,roughness:.25});const GY=2.86;
+function seg(a,b,mat,rad){const v=new THREE.Vector3().subVectors(b,a);const L=v.length();const m=add(new THREE.CylinderGeometry(rad,rad,L,10),mat,(a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());return m}
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+GAS.forEach((g,gi)=>{const cm=new THREE.MeshStandardMaterial({color:g.c,roughness:.5});const z0=-29.25-gi*.0;const yy=GY-gi*.0;
+ const endZ=Math.max(...g.to.map(n=>ROOMS[n-1].z-.8-gi*.12));
+ seg(V(2,yy,z0-gi*.12),V(g.x,yy,z0-gi*.12),pipeM,.018);seg(V(g.x,yy,z0-gi*.12),V(g.x,yy,endZ),pipeM,.018);
+ g.to.forEach(n=>{const RR=ROOMS[n-1],wx=RR.side==='L'?-2:2,vx=RR.side==='L'?-1.9:1.9;const zd=RR.z-.8-gi*.12;seg(V(g.x,yy,zd),V(wx,yy,zd),pipeM,.018);add(new THREE.CylinderGeometry(.034,.034,.05,12),new THREE.MeshStandardMaterial({color:'#D9A800',roughness:.4}),vx,yy-.05,zd).rotation.z=0;add(new THREE.BoxGeometry(.06,.05,.05),new THREE.MeshStandardMaterial({color:'#C62828'}),vx,yy-.09,zd)});
+ for(let z=z0;z<endZ-.2;z+=1.5){const b=add(new THREE.CylinderGeometry(.024,.024,.09,10),cm,g.x,yy,z);b.rotation.x=Math.PI/2}
+ for(let z=z0+1.2;z<endZ-.5;z+=3.6){const t=canvasTex(256,64,(c,w,h)=>{c.fillStyle=g.c;c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='700 40px "Barlow Condensed","Source Sans 3",sans-serif';c.fillText(g.k+'  '+g.n+'  ⟶',12,46)});const m=add(new THREE.PlaneGeometry(.36,.09),new THREE.MeshBasicMaterial({map:t,side:THREE.DoubleSide}),g.x-.0,yy-.075,z+gi*.4);m.rotation.y=-Math.PI/2;m.rotation.x=0}});
+for(let z=-29;z<-4.5;z+=1.8){add(new THREE.BoxGeometry(.42,.02,.03),M.dark,1.63,GY+.035,z);add(new THREE.BoxGeometry(.02,.12,.03),M.dark,1.42,GY+.08,z)}
+/* ================= EKİP ================= */
+const PI2=Math.PI/2;
+const TEAM=[
+ {n:'Prof. Dr. Selda Mercan',s:'Prof. Dr. Selda Mercan',r:'Laboratuvar Direktörü · Laboratuvar Sorumlusu',room:0,h:1.66,hair:'bob',hc:'#3A2A22',skin:'#E9C6A9',gl:true,top:'#2F5E9E',f:[0,-3.6],home:{x:-1.35,z:-2.7,ry:PI2},g:'Hoş geldin! Ben <b>Prof. Dr. Selda Mercan</b>, laboratuvarımızın direktörüyüm. MY ToksiLab ekibi olarak seni aramızda görmekten mutluluk duyuyoruz.'},
+ {n:'Dr. Öğr. Üyesi Merve Kuloğlu Genç',s:'Dr. Öğr. Üyesi Merve K. Genç',r:'Direktör Yardımcısı · Laboratuvar Sorumlu Yardımcısı',room:0,h:1.67,hair:'long',hc:'#1F1714',skin:'#E3BC9C',gl:false,top:'#7B3F61',f:[-.75,-3.85],home:{x:-1.35,z:-1.95,ry:PI2},g:'Ben <b>Dr. Öğr. Üyesi Merve Kuloğlu Genç</b>, direktör yardımcısıyım. Bir sorun olursa bize her zaman ulaşabilirsin.'},
+ {n:'Uzm. Biyolog Murat Yayla',s:'Uzm. Bio. Murat Yayla',r:'Rehber (Uzm. MY) · Analist · İnorganik Analiz Laboratuvarı Sorumlusu',room:3,h:1.78,hair:'short',hc:'#241A15',skin:'#DDB291',gl:false,beard:true,male:true,top:'#3E5A6B',f:[.75,-3.85],home:{x:1.35,z:-17.95,ry:-PI2},g:'Ben de <b>Uzm. MY</b>, yani <b>Murat Yayla</b>. Bu turda rehberin olacağım; inorganik laboratuvarı da benden sorulur!'},
+ {n:'Laborant Ayfer Ortaoğlan',s:'Laborant Ayfer Ortaoğlan',r:'Kromatografi Sorumlu Analisti · Örnek Hazırlama',room:1,h:1.62,hair:'bun',hc:'#5A3A26',skin:'#E6C2A2',gl:false,top:'#2E7D6B',f:[-1.3,-4.7],home:{x:1.35,z:-5.95,ry:-PI2},g:''},
+ {n:'Dr. Mihriban Dilan Kılınç',s:'Dr. Mihriban Dilan Kılınç',r:'Yangın ve Patlayıcı Analiz Laboratuvarı Analisti · Kromatografi Sorumlu Yardımcısı',room:6,h:1.65,hair:'pony',hc:'#2B1D18',skin:'#EBCBB0',gl:true,top:'#8C5A2B',f:[-.45,-4.85],home:{x:-1.35,z:-9.85,ry:PI2},g:''},
+ {n:'Dr. Elvan',s:'Dr. Elvan',r:'Örnek Hazırlama · Kromatografi Sorumlu Yardımcısı',room:2,h:1.64,hair:'shoulder',hc:'#6B3E24',skin:'#E8C3A3',gl:false,top:'#4A4E8C',f:[.45,-4.85],home:{x:1.35,z:-11.95,ry:-PI2},g:''},
+ {n:'Dr. Simge Zengin',s:'Dr. Simge Zengin',r:'İnorganik Analiz Laboratuvarı Sorumlu Yardımcısı',room:3,h:1.63,hair:'long2',hc:'#3D2A1E',skin:'#E4BE9E',gl:false,top:'#A33B3B',f:[1.3,-4.7],home:{x:1.35,z:-18.65,ry:-PI2},g:''}];
+const ROOMN={6:'6 · Yangın ve Patlayıcı Analiz Laboratuvarı',0:'Koridor · Yönetim',1:'1 · Kromatografi Laboratuvarı',2:'2 · Örnek Hazırlama Laboratuvarı',3:'3 · İnorganik Analiz Laboratuvarı'};
+function person(o){const root=new THREE.Group();const g=new THREE.Group();root.add(g);const s=o.h/1.70;g.scale.setScalar(s);
+ const skin=new THREE.MeshStandardMaterial({color:o.skin,roughness:.62});const hair=new THREE.MeshStandardMaterial({color:o.hc,roughness:.7});
+ const coat=new THREE.MeshPhysicalMaterial({color:'#FAFBFB',roughness:.75,sheen:.4,sheenColor:new THREE.Color('#FFFFFF')});
+ const pants=new THREE.MeshStandardMaterial({color:o.male?'#2C3440':'#2F3238',roughness:.8});const shoe=new THREE.MeshStandardMaterial({color:'#1E2226',roughness:.5});
+ const top=new THREE.MeshStandardMaterial({color:o.top,roughness:.8});const dark=new THREE.MeshStandardMaterial({color:'#20262A',roughness:.4});
+ const A=(geo,mat,x,y,z,p=g)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;p.add(m);return m};
+ /* bacaklar */
+ const legs=[];[-1,1].forEach(sd=>{const hip=new THREE.Group();hip.position.set(sd*.085,.86,0);g.add(hip);A(new THREE.CylinderGeometry(.068,.058,.8,14),pants,0,-.42,0,hip);
+  const sh=A(new THREE.BoxGeometry(.1,.07,.24),shoe,0,-.83,.045,hip);sh.geometry.translate(0,0,0);legs.push(hip)});
+ /* önlük */
+ const prof=[[.0,.43],[.235,.43],[.225,.7],[.2,.95],[.205,1.12],[.215,1.28],[.205,1.40],[.15,1.46],[.0,1.47]].map(([r,y])=>new THREE.Vector2(r*(o.male?1.08:1),y));
+ const body=A(new THREE.LatheGeometry(prof,28),coat,0,0,0);body.scale.z=.78;
+ /* ön açıklık ve iç kıyafet */
+ const v=new THREE.Shape();v.moveTo(-.075,1.42);v.lineTo(.075,1.42);v.lineTo(0,1.1);v.closePath();const vm=A(new THREE.ShapeGeometry(v),top,0,0,.164*(o.male?1.08:1)+.004);
+ A(new THREE.BoxGeometry(.012,.66,.01),new THREE.MeshStandardMaterial({color:'#E3E7E9'}),0,.76,.168*(o.male?1.08:1));
+ [1.02,.86,.70].forEach(y=>A(new THREE.SphereGeometry(.012,8,6),new THREE.MeshStandardMaterial({color:'#D9DEE1'}),.02,y,.172*(o.male?1.08:1)));
+ [-1,1].forEach(sd=>{A(new THREE.BoxGeometry(.12,.11,.012),coat,sd*.11,.7,.165).rotation.y=sd*.25;A(new THREE.BoxGeometry(.13,.008,.014),new THREE.MeshStandardMaterial({color:'#D3D8DB'}),sd*.11,.755,.17).rotation.y=sd*.25});
+ const lap=new THREE.MeshPhysicalMaterial({color:'#F2F4F5',roughness:.7});[-1,1].forEach(sd=>{const l=A(new THREE.BoxGeometry(.05,.3,.012),lap,sd*.055,1.28,.162);l.rotation.z=sd*.32});
+ /* kart ve askı */
+ A(new THREE.BoxGeometry(.06,.08,.006),new THREE.MeshStandardMaterial({color:'#FFFFFF'}),-.09,1.12,.176);A(new THREE.BoxGeometry(.06,.02,.007),new THREE.MeshStandardMaterial({color:'#1F9A97'}),-.09,1.15,.178);
+ A(new THREE.BoxGeometry(.01,.24,.006),new THREE.MeshStandardMaterial({color:'#1F9A97'}),-.06,1.28,.172).rotation.z=-.3;
+ A(new THREE.BoxGeometry(.012,.09,.012),new THREE.MeshStandardMaterial({color:'#2F5E9E'}),.11,.79,.172);
+ /* kollar */
+ const arms=[];[-1,1].forEach(sd=>{const sh=new THREE.Group();sh.position.set(sd*.235*(o.male?1.08:1),1.40,0);g.add(sh);
+  A(new THREE.CylinderGeometry(.06,.055,.32,12),coat,0,-.16,0,sh);const el=new THREE.Group();el.position.y=-.32;sh.add(el);
+  A(new THREE.CylinderGeometry(.055,.05,.27,12),coat,0,-.13,0,el);A(new THREE.CylinderGeometry(.052,.052,.03,12),coat,0,-.27,0,el);
+  const hand=A(new THREE.SphereGeometry(.045,12,10),skin,0,-.31,0,el);hand.scale.set(.8,1.15,.55);sh.rotation.z=sd*.08;arms.push({sh,el})});
+ /* boyun, baş */
+ A(new THREE.CylinderGeometry(.045,.05,.09,12),skin,0,1.5,0);
+ const head=new THREE.Group();head.position.set(0,1.62,0);g.add(head);
+ const hm=A(new THREE.SphereGeometry(.1,24,18),skin,0,0,0,head);hm.scale.set(.93,1.17,1.0);
+ [-1,1].forEach(sd=>{A(new THREE.SphereGeometry(.022,10,8),skin,sd*.093,-.005,-.005,head).scale.set(.45,1,.7);
+  const e=A(new THREE.SphereGeometry(.0105,10,8),new THREE.MeshStandardMaterial({color:'#1B1412',roughness:.2}),sd*.034,.012,.088,head);
+  A(new THREE.SphereGeometry(.016,10,8),new THREE.MeshStandardMaterial({color:'#FFFFFF',roughness:.4}),sd*.034,.012,.082,head).scale.set(1,.65,.4);
+  A(new THREE.BoxGeometry(.04,.007,.01),hair,sd*.035,.042,.09,head).rotation.z=-sd*.12});
+ A(new THREE.SphereGeometry(.014,10,8),skin,0,-.016,.098,head).scale.set(1,1.3,1);
+ A(new THREE.BoxGeometry(.04,.007,.006),new THREE.MeshStandardMaterial({color:'#B5726A'}),0,-.058,.092,head);
+ if(o.gl){const gm=new THREE.MeshStandardMaterial({color:'#2A2A2A',metalness:.4,roughness:.3});[-1,1].forEach(sd=>{const t=A(new THREE.TorusGeometry(.024,.0035,6,20),gm,sd*.035,.012,.099,head)});A(new THREE.BoxGeometry(.02,.004,.004),gm,0,.016,.1,head)}
+ /* saç */
+ const cap=A(new THREE.SphereGeometry(.108,24,16,0,Math.PI*2,0,Math.PI*.55),hair,0,.022,-.008,head);cap.scale.set(.96,1.13,1.04);
+ if(o.male){cap.scale.set(.95,1.05,1.0);cap.position.y=.03;if(o.beard){const b=A(new THREE.SphereGeometry(.098,20,14,0,Math.PI*2,Math.PI*.55,Math.PI*.45),hair,0,-.004,.004,head);b.scale.set(.92,1.12,.99);b.material=new THREE.MeshStandardMaterial({color:o.hc,roughness:.95,transparent:true,opacity:.85})}}
+ else{const back=(len,w)=>{const m=A(new THREE.BoxGeometry(w,len,.06),hair,0,.06-len/2,-.075,head);return m};
+  if(o.hair==='long'){back(.36,.2);[-1,1].forEach(sd=>A(new THREE.BoxGeometry(.04,.3,.1),hair,sd*.095,-.06,-.02,head))}
+  if(o.hair==='long2'){back(.32,.19);[-1,1].forEach(sd=>A(new THREE.BoxGeometry(.035,.26,.09),hair,sd*.095,-.05,-.015,head))}
+  if(o.hair==='shoulder'){back(.22,.2);[-1,1].forEach(sd=>A(new THREE.BoxGeometry(.04,.2,.1),hair,sd*.097,-.03,-.015,head))}
+  if(o.hair==='bob'){const b=A(new THREE.CylinderGeometry(.115,.12,.13,24,1,true,Math.PI*.32,Math.PI*1.36),hair,0,-.02,-.005,head);b.material=hair;b.material.side=THREE.DoubleSide}
+  if(o.hair==='bun'){A(new THREE.SphereGeometry(.05,14,10),hair,0,.07,-.11,head)}
+  if(o.hair==='pony'){A(new THREE.SphereGeometry(.03,10,8),hair,0,.04,-.11,head);const p=A(new THREE.CylinderGeometry(.03,.015,.22,10),hair,0,-.07,-.13,head);p.rotation.x=.25}}
+ const hb=new THREE.Mesh(new THREE.BoxGeometry(.6,1.85,.5),new THREE.MeshBasicMaterial({visible:false}));hb.position.y=.92;root.add(hb);
+ /* isim etiketi */
+ const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:canvasTex(512,128,(c,w,h)=>{c.fillStyle='rgba(14,30,34,.88)';c.beginPath();c.roundRect(4,8,w-8,h-16,26);c.fill();c.fillStyle='#7CF2D8';let fs=46;do{c.font=`700 ${fs}px "Barlow Condensed","Source Sans 3",sans-serif`;fs-=2}while(c.measureText(o.s).width>470&&fs>20);c.textAlign='center';c.fillText(o.s,w/2,78)}),depthTest:true,transparent:true}));tag.scale.set(.6,.15,1);tag.position.y=o.h+.24;root.add(tag);tag.visible=false;
+ scene.add(root);return {root,g,legs,arms,head,hb,tag,ph:Math.random()*6}}
+const TP=TEAM.map((o,i)=>{const p=person(o);p.o=o;p.i=i;hot(p.hb,'team:'+i);return p});
+let teamMode='form',teamT=0,teamT0=0,greetIdx=-1;
+function teamForm(){teamMode='form';greetIdx=-1;TP.forEach(p=>{p.root.position.set(p.o.f[0],0,p.o.f[1]);p.root.rotation.y=0;p.tag.visible=false;p.dest=null})}
+teamForm();
+function teamDisperse(){if(teamMode==='go'||teamMode==='home')return;teamMode='go';$('#bub').hidden=true;TP.forEach((p,i)=>{p.dest=p.o.home;p.delay=i*.35});
+ say('Ekip şimdi kendi odalarına geçiyor. Sağ tarafta <b>1 Kromatografi</b>, <b>2 Örnek Hazırlama</b>, <b>3 İnorganik Analiz</b>, <b>4 Kimyasal Depo</b> ve en sonda <b>5 Gaz Tüp Odası</b>; sol tarafta, Örnek Hazırlama’nın tam karşısında <b>6 Yangın ve Patlayıcı Analiz Laboratuvarı</b> var. Ekipten birine <b>dokunursan</b> kim olduğunu görürsün; sol duvarda <b>poster sunumlarımız</b> var.')}
+function startGreet(){teamMode='greet';teamT=0;teamT0=performance.now();greetIdx=0;showBub()}
+function showBub(){const p=TP[greetIdx];if(!p)return;say(p.o.g)}
+const tv=new THREE.Vector3();
+function updTeam(dt,now){
+ if(teamMode==='greet'){teamT=(now-teamT0)/1000;if(greetIdx!==0){greetIdx=0;showBub()}if(teamT>6.5)teamDisperse()}
+ TP.forEach((p,i)=>{const t=now/1000+p.ph;let walking=false;
+  if(p.dest){if(p.delay>0){p.delay-=dt}else{const dx=p.dest.x-p.root.position.x,dz=p.dest.z-p.root.position.z,d=Math.hypot(dx,dz);
+   if(d>.04){walking=true;const sp=Math.min(d,1.25*dt);p.root.position.x+=dx/d*sp;p.root.position.z+=dz/d*sp;const ry=Math.atan2(dx,dz);let dr=ry-p.root.rotation.y;while(dr>Math.PI)dr-=Math.PI*2;while(dr<-Math.PI)dr+=Math.PI*2;p.root.rotation.y+=dr*Math.min(1,dt*8)}
+   else{let dr=p.dest.ry-p.root.rotation.y;while(dr>Math.PI)dr-=Math.PI*2;while(dr<-Math.PI)dr+=Math.PI*2;p.root.rotation.y+=dr*Math.min(1,dt*5);if(Math.abs(dr)<.02&&!p.arrived){p.arrived=true}}}}
+  const w=walking?Math.sin(t*7.5):0;p.legs[0].rotation.x=w*.45;p.legs[1].rotation.x=-w*.45;p.g.position.y=walking?Math.abs(Math.cos(t*7.5))*.018:Math.sin(t*1.6)*.003;
+  const waving=(teamMode==='greet'&&i===0);const R=p.arms[1],L=p.arms[0];
+  if(waving){R.sh.rotation.x+=(-.2-R.sh.rotation.x)*.2;R.sh.rotation.z+=(2.5-R.sh.rotation.z)*.2;R.el.rotation.z=.35+Math.sin(t*9)*.35}
+  else{R.sh.rotation.x=walking?w*.4:R.sh.rotation.x*.9;R.sh.rotation.z+=(.08-R.sh.rotation.z)*.15;R.el.rotation.z*=.85}
+  L.sh.rotation.x=walking?-w*.4:L.sh.rotation.x*.9;
+  p.head.rotation.y=(!walking&&inside)?Math.max(-.6,Math.min(.6,Math.atan2(cam.position.x-p.root.position.x,cam.position.z-p.root.position.z)-p.root.rotation.y))*.6:0;
+  const dc=Math.hypot(cam.position.x-p.root.position.x,cam.position.z-p.root.position.z);p.tag.visible=inside&&teamMode!=='greet'&&dc<9&&dc>2.2});
+ const b=$('#bub');if(teamMode==='greet'&&greetIdx>=0){const p=greetIdx<3?TP[greetIdx]:TP[0];tv.set(p.root.position.x,p.o.h+.32,p.root.position.z).project(cam);if(tv.z<1){b.hidden=false;b.style.left=(tv.x+1)/2*box.clientWidth+'px';b.style.top=(1-tv.y)/2*box.clientHeight+'px';b.textContent=greetIdx<3?'Hoş geldin! 👋':'Hoş geldin! 👋👋👋'}}else b.hidden=true}
+function openTeam(i){const p=TP[i],o=p.o;const el=$('#room');el.hidden=false;const ini=o.s.replace(/^(Prof\. Dr\.|Dr\. Öğr\. Üyesi|Dr\.|Uzm\. Bio\.|Laborant)\s*/,'').split(' ').map(x=>x[0]).slice(0,2).join('');
+ el.innerHTML=`<button class="x" id="rx">✕</button><div style="display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center">${o.male?`<img src="${AVATAR}" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #2BD9C0">`:`<div style="width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:${o.top};color:#fff;font:700 28px var(--f-display);border:3px solid #2BD9C0">${ini}</div>`}<div><div class="no" style="color:#7CF2D8">MY TOKSİLAB EKİBİ</div><h2 style="font-size:22px">${o.n}</h2></div></div><p><b style="color:#EAF2F3">Görevi:</b> ${o.r}</p><p><b style="color:#EAF2F3">Bulunduğu yer:</b> ${ROOMN[o.room]}</p>${o.room?`<button class="go" id="rgoT">Odasına git</button>`:''}`;
+ $('#rx').onclick=closeRoom;if($('#rgoT'))$('#rgoT').onclick=()=>openDoorCard(o.room);say(o.male?'Evet, bu benim 🙂 Turun her adımında yanında olacağım.':`Bu, <b>${o.n}</b>. ${o.r.split(' · ')[0]}.`)}
+
+/* asılı yön tabelaları */
+function hangSign(z,lines,back){const g=new THREE.Group();g.position.set(0,2.5,z);scene.add(g);[-1,1].forEach(s=>add(new THREE.CylinderGeometry(.01,.01,.5,6),M.steel,s*.9,.45,0,g));
+ const mk=(L,rot)=>{const t=canvasTex(1024,300,(c,w,h)=>{c.fillStyle='#0E6B68';c.fillRect(0,0,w,h);c.strokeStyle='#F4FBFB';c.lineWidth=6;c.strokeRect(10,10,w-20,h-20);c.fillStyle='#fff';c.textAlign='left';c.font='700 47px "Barlow Condensed","Source Sans 3",sans-serif';const n=L.length,lh=n>2?78:110,y0=n>2?84:118;L.forEach((l,i)=>{c.fillText(l[0],40,y0+i*lh);if(l[1])c.fillText(l[1],525,y0+i*lh)})});
+  const m=add(new THREE.PlaneGeometry(2.2,.64),new THREE.MeshBasicMaterial({map:t,toneMapped:false}),0,0,rot?-.012:.012,g);if(rot)m.rotation.y=Math.PI};
+ add(new THREE.BoxGeometry(2.26,.7,.02),M.dark,0,0,0,g);mk(lines,false);mk(back,true)}
+hangSign(-3.6,[['↑ 1 Kromatografi','↑ 2 Örnek Hazırlama'],['↑ 3 İnorganik Analiz','↑ 4 Kimyasal Depo'],['↑ 6 Yangın ve Patlayıcı Analiz (solda)','']],[['↓ ÇIKIŞ · Ana giriş','']]);
+hangSign(-14.2,[['↑ 3 İnorganik Analiz','↑ 4 Kimyasal Depo'],['↑ 5 Gaz Tüp Odası',''],['↓ 1 Kromatografi','↓ 2 Örnek Hazırlama']],[['↓ ÇIKIŞ · Ana giriş',''],['↑ 1 Kromatografi','↑ 2 Örnek Hazırlama'],['↑ 6 Yangın ve Patlayıcı Analiz','']]);
+/* acil çıkış */
+add(new THREE.PlaneGeometry(1.2,.4),new THREE.MeshBasicMaterial({map:canvasTex(600,200,(c,w,h)=>{c.fillStyle='#1B8E3A';c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='110px sans-serif';c.fillText('🏃',20,150);c.font='700 80px "Barlow Condensed",sans-serif';c.fillText('ACİL ÇIKIŞ',170,135)}),toneMapped:false}),0,2.55,-CL+.02);
+add(new THREE.BoxGeometry(1.4,2.2,.06),M.graph,0,1.1,-CL+.03);add(new THREE.BoxGeometry(1.2,.06,.1),M.steel,0,1.0,-CL+.08);
+/* ============ kamera / yürüme ============ */
+const STOPS={out:{x:0,z:9.5,yaw:0},door:{x:0,z:2.2,yaw:0},hall:{x:0,z:-.9,yaw:0},end:{x:0,z:-26,yaw:0}};ROOMS.forEach(r=>STOPS['d'+r.no]=r.side==='L'?{x:.2,z:r.z,yaw:Math.PI/2}:{x:-.2,z:r.z,yaw:-Math.PI/2});
+const P={x:0,z:14,yaw:0,pitch:-.04};const G={x:0,z:9.5,yaw:0,pitch:-.04};let inside=false,started=false,doorOpen=0,lookDrag=null,keys={};
+function goStop(id){const s=STOPS[id];G.x=s.x;G.z=s.z;G.yaw=s.yaw;G.pitch=-.03;at=id}
+let at='out';
+function fit(){const w=box.clientWidth,h=box.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.fov=w<h?72:62;cam.updateProjectionMatrix()}
+new ResizeObserver(fit).observe(box);fit();
+/* giriş animasyonu */
+$('#enter').onclick=enter;
+function enter(){if(started)return;started=true;$('#intro').classList.add('out');say('Ana girişin önündeyiz. Kapının üstündeki <b>sensör</b> yaklaştığımızı algılayınca kapılar kendiliğinden açılır…');goStop('door');
+ setTimeout(()=>{goStop('hall');inside=true},4600);
+ setTimeout(()=>{startGreet();drawMap()},5600)}
+/* etkileşim */
+const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
+const pick=e=>{const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,cam);const h=ray.intersectObjects(HOT,false)[0];return h?h.object.userData.hot:null};
+renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,yaw:G.yaw,pitch:G.pitch};renderer.domElement.setPointerCapture(e.pointerId)});
+renderer.domElement.addEventListener('pointermove',e=>{if(!down){const h=started&&pick(e);renderer.domElement.style.cursor=h?'pointer':'grab';return}if(!started)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.hypot(dx,dy)>6){down.moved=true;G.yaw=down.yaw+dx*.004;G.pitch=Math.max(-.6,Math.min(.5,down.pitch+dy*.003));at=null}});
+renderer.domElement.addEventListener('pointerup',e=>{const d=down;down=null;if(!d||d.moved||!started)return;const h=pick(e);if(h&&h.startsWith('dev:'))openDev(h.slice(4));else if(h&&h.startsWith('r2:'))openInfo(h.slice(3));else if(h&&h.startsWith('team:'))openTeam(+h.slice(5));else if(h&&h.startsWith('door:'))openDoorCard(+h.slice(5));else if(h&&h.startsWith('poster:'))openPoster(+h.slice(7))});
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key==='Escape')closeRoom()});addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+const step=(d)=>{if(!started||!inside)return;if(teamMode==='greet')teamDisperse();closeRoom();const dx=-Math.sin(G.yaw),dz=-Math.cos(G.yaw);const n=Math.max(1,Math.ceil(Math.abs(d)/.2));for(let i=0;i<n;i++){const nx=G.x+dx*d/n,nz=G.z+dz*d/n;if(!moveTo(nx,nz))break}at=null};
+function blocked(x,z){if(x<2.3||x>9.7||z<-13.72||z>-8.28)return true;return OBST.some(o=>x>o.x0-.25&&x<o.x1+.25&&z>o.z0-.25&&z<o.z1+.25)}
+function moveTo(x,z){if(inRoom){if(x<2.3&&Math.abs(z+11)<.45){if(x<1.55){inRoom=false;roomUI();say('Koridora döndün.')}G.x=x;G.z=z;return true}if(blocked(x,z))return false;G.x=x;G.z=z;return true}
+ if(x>1.55&&Math.abs(z+11)<.45&&openRoomDoor===2){G.x=x;G.z=z;if(x>2.3){inRoom=true;roomUI();roomWelcome()}return true}
+ G.x=Math.max(-1.55,Math.min(1.55,x));G.z=Math.max(-28.6,Math.min(-.8,z));return true}
+let inRoom=false;
+function roomUI(){$('#back').hidden=!inRoom}
+function openDev(k){const d=DEVI[k];const el=$('#room');el.hidden=false;el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:#1F9A97">ÖRNEK HAZIRLAMA · CİHAZ</div><h2>${d.ic} ${d.n}</h2><p>${d.d}</p><p style="font-size:13px;color:#9BB0B6;margin-bottom:-4px">Bu cihazdaki görevler:</p><ul>${d.t.map(x=>`<li>${x}</li>`).join('')}</ul><button class="go" id="dgo">Cihazı kullan ›</button><p style="font-size:12.5px;color:#9BB0B6">Cihaz yeni sekmede açılır; işin bitince bu sekmeye dönerek laboratuvarda kaldığın yerden devam edersin.</p>`;
+ $('#rx').onclick=closeRoom;$('#dgo').onclick=()=>{window.open(BASE+d.f,'_blank','noopener');say(`<b>${d.n}</b> yeni sekmede açıldı. Görevi bitirince bu sekmeye dön; laboratuvarda seni bekliyorum.`)};
+ const g=DEVS.find(x=>x.k===k);if(g){G.yaw=Math.atan2(-(g.x-P.x),-(g.z-P.z));G.pitch=-.35}say(`<b>${d.n}</b>. ${d.d}`)}
+let nearDev=null;const dv3=new THREE.Vector3();
+function updDev(now){const chip=$('#devchip');let best=null,bd=1.7;if(inRoom)DEVS.forEach(d=>{const dd=Math.hypot(d.x-P.x,d.z-P.z);if(dd<bd){bd=dd;best=d}});
+ DEVS.forEach(d=>{d.ring.material.opacity=(d===best?.55+.35*Math.sin(now/220):0)});
+ if(best!==nearDev){nearDev=best;if(best){chip.innerHTML=`${DEVI[best.k].ic} <b>${DEVI[best.k].n}</b> · bilgi ve kullanım ›`;chip.onclick=()=>openDev(best.k);if($('#room').hidden)say(`Yanındaki cihaz: <b>${DEVI[best.k].n}</b>. Üstüne ya da etiketine dokun.`)}}
+ if(!best||!$('#room').hidden){chip.hidden=true;return}dv3.set(best.x,best.y,best.z).project(cam);if(dv3.z>1){chip.hidden=true;return}chip.hidden=false;chip.style.left=(dv3.x+1)/2*box.clientWidth+'px';chip.style.top=(1-dv3.y)/2*box.clientHeight+'px'}
+function roomWelcome(){say('<b>Örnek Hazırlama Laboratuvarı</b>’na hoş geldin! Kapının hemen sağında <b>göz duşu</b> ve <b>tekerlekli çeker ocak</b>; solda biraz arayla <b>sarsıntısız tartım masası</b> var. İki yan duvarda dolaplı tezgahlar, ortada çalışma tezgahı, karşıda pencere. Nesnelere dokunarak ne olduklarını öğrenebilirsin. Tartım masasında <b>terazi</b>, sol tezgahta pencereye yakın <b>santrifüj</b> ve <b>vorteks</b>, orta tezgahta <b>pipet standı</b> var. Bir cihaza yaklaş ya da üstüne dokun: ne olduğunu anlatırım, istersen cihazı açıp kullanırsın.')}
+function enterRoom2(){closeRoom();openRoomDoor=2;goStop('d2');const t0=performance.now();const w=setInterval(()=>{if(Math.hypot(P.x-G.x,P.z-G.z)<.25||performance.now()-t0>6000){clearInterval(w);setTimeout(()=>{G.x=3.0;G.z=-11;G.yaw=-Math.PI/2;G.pitch=-.12;inRoom=true;roomUI();roomWelcome()},500)}},100)}
+function leaveRoom(){closeRoom();G.x=2.6;G.z=-11;G.yaw=Math.PI/2;setTimeout(()=>{G.x=.2;G.z=-11;G.yaw=Math.PI/2;inRoom=false;roomUI();say('Koridora döndün. Başka bir kapıya dokunabilir ya da ▲ ile ilerleyebilirsin.')},700)}
+function openInfo(id){const [t,d]=R2INFO[id];const el=$('#room');el.hidden=false;el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:#1F9A97">ÖRNEK HAZIRLAMA LABORATUVARI</div><h2>${t}</h2><p>${d}</p>`;$('#rx').onclick=closeRoom;say(`<b>${t}</b>: ${d}`)}
+const turn=a=>{if(!started)return;G.yaw+=a;at=null};
+function clampG(){if(inRoom)return;if(inside){G.x=Math.max(-1.55,Math.min(1.55,G.x));G.z=Math.max(-28.6,Math.min(-.8,G.z))}}
+$('#mvF').onclick=()=>step(3);$('#mvB').onclick=()=>step(-3);$('#mvL').onclick=()=>turn(Math.PI/4);$('#mvR').onclick=()=>turn(-Math.PI/4);
+/* oda kartı */
+function openDoorCard(no){const r=ROOMS[no-1];goStop('d'+no);const el=$('#room');el.hidden=false;
+ el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:${r.c}">ODA ${r.no}</div><h2>${r.n}</h2><p>${r.d}</p><ul>${r.l.map(x=>`<li>${x}</li>`).join('')}</ul>${r.st==='open'?`<p style="font-size:13px">Odaya girip cihazları yerinde görebilirsin. Cihazlara doğrudan da gidebilirsin:</p><div class="devs"><a href="${BASE}terazi_pilot.html" target="_blank" rel="noopener">⚖ Analitik terazi</a><a href="${BASE}pipet_pilot.html" target="_blank" rel="noopener">💧 Pipetler</a><a href="${BASE}vorteks_pilot.html" target="_blank" rel="noopener">🌀 Vorteks</a><a href="${BASE}santrifuj_pilot.html" target="_blank" rel="noopener">◎ Santrifüj</a></div><button class="go" id="rgo">Kapıyı aç ve içeri gir ›</button>`:(r.st==='info'?`<p style="font-size:13px">Tavandaki ince borular gazları odalara taşır: <b style="color:#9BB0B6">N₂</b> siyah, <b style="color:#C08A5A">He</b> kahverengi, <b style="color:#6FBF7F">Ar</b> yeşil bantla işaretli.</p>`:`<button class="go" disabled>Yakında açılacak</button>`)}`;
+ $('#rx').onclick=closeRoom;if($('#rgo'))$('#rgo').onclick=()=>{if(no===2)enterRoom2()};
+ say(`<b>${r.n}</b>. ${r.st==='open'?'Şu an kullandığın cihazlar bu odada.':r.st==='info'?'Gaz tüpleri burada; tavandaki borularla N₂, He ve Ar odalara dağıtılıyor.':'Bu oda yakında açılacak.'} Kapının yanındaki panoda odayla ilgili bilgiler var.`);drawMap()}
+let openRoomDoor=0;
+function openPoster(i){const p=POSTERS[i];const el=$('#room');el.hidden=false;el.classList.add('wide');el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:${p.c}">POSTER ${p.k}</div><h2 style="font-size:21px">${p.t}</h2><img src="${p.url}" alt="Poster" style="width:100%;border-radius:8px"><p style="font-size:12.5px">Örnek poster. Kendi poster sunumlarınla değiştirilecek.</p>`;$('#rx').onclick=closeRoom;say(`Bu bir <b>poster sunumu</b>: ${p.t.toLowerCase()}. Laboratuvarımızın kongrelerde sunduğu çalışmalar koridorda sergileniyor.`)}
+function closeRoom(){$('#room').classList.remove('wide');$('#room').hidden=true;openRoomDoor=0}
+/* harita */
+function drawMap(){const s=$('#mapS');const zx=z=>14+(-z)/30*190;let h=`<rect x="10" y="40" width="200" height="36" rx="4" fill="#26323A" stroke="#52636B"/><rect x="2" y="44" width="10" height="28" fill="#2BD9C0"/><text x="7" y="96" fill="#9BB0B6" font-size="9" text-anchor="middle" font-family="IBM Plex Mono">GİRİŞ</text>`;
+ ROOMS.forEach(r=>{const x=zx(r.z);const my=r.side==='L'?6:76;h+=`<g class="dr" data-no="${r.no}"><rect x="${x-17}" y="${my}" width="34" height="34" rx="3" fill="${r.c}" fill-opacity=".85" stroke="#16242A"/><text x="${x}" y="98" fill="#fff" font-size="13" font-weight="700" text-anchor="middle" font-family="Barlow Condensed">${r.no}</text></g>`.replace('y="98"',`y="${my+22}"`)});
+ h+=`<text x="160" y="28" fill="#9BB0B6" font-size="9.5" text-anchor="middle" font-family="IBM Plex Mono">KORİDOR</text>`;
+ TP.forEach(p=>{h+=`<circle cx="${zx(Math.min(0,p.root.position.z))}" cy="${58+p.root.position.x*7}" r="2.6" fill="#fff" stroke="#1F9A97"/>`});const px=zx(Math.min(0,P.z)),py=P.x>2?76+(P.x-2)/8*34:58+(P.x)*7;const a=-P.yaw;h+=`<g transform="translate(${px} ${py}) rotate(${(-90+a*180/Math.PI)})"><path d="M0 -9 L6 6 L0 3 L-6 6Z" fill="#F2B632" stroke="#16242A"/></g>`;
+ s.innerHTML=h;s.querySelectorAll('.dr').forEach(g=>g.onclick=()=>{if(!started){enter();return}openDoorCard(+g.dataset.no)})}
+let mapT=0;
+/* döngü */
+let last=performance.now(),bob=0;
+function loop(t){requestAnimationFrame(loop);const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;
+ if(started&&inside){const sp=2.6*dt;if(keys['arrowup']||keys['w'])step(sp);if(keys['arrowdown']||keys['s'])step(-sp);if(keys['arrowleft']||keys['a'])turn(1.6*dt);if(keys['arrowright']||keys['d'])turn(-1.6*dt)}
+ const k=Math.min(1,dt*(started?2.2:1.2));const mv=Math.hypot(G.x-P.x,G.z-P.z);P.x+=(G.x-P.x)*k;P.z+=(G.z-P.z)*k;let dy=G.yaw-P.yaw;P.yaw+=dy*Math.min(1,dt*4);P.pitch+=(G.pitch-P.pitch)*Math.min(1,dt*4);
+ if(!started){G.z=9.5+Math.sin(now/3000)*.6;G.yaw=Math.sin(now/4000)*.12}
+ bob+=mv>.05?dt*9:0;cam.position.set(P.x,1.62+(mv>.05?Math.sin(bob)*.025:0),P.z);cam.rotation.set(P.pitch,P.yaw,0);
+ /* sensör ve kapılar */
+ const near=P.z<5.2&&P.z>-3.2&&Math.abs(P.x)<2.5&&started;doorOpen+=((near?1:0)-doorOpen)*Math.min(1,dt*.85);leaves.forEach(L=>L.g.position.x=L.s*(.6+1.22*doorOpen));sLed.material.color.set(near?'#3CFF6E':'#E5484D');
+ ROOMS.forEach(r=>{const pv=doorG[r.no].userData.pivot;const tg=(openRoomDoor===r.no||(r.no===2&&inRoom))?(r.no===2?1.45:-1.1):0;pv.rotation.y+=(tg-pv.rotation.y)*Math.min(1,dt*3)});
+ sun.intensity+=((inside?.15:2.0)-sun.intensity)*Math.min(1,dt*1.5);
+ if(now-mapT>120&&started){mapT=now;drawMap()}
+ updTeam(dt,now);updDev(now);renderer.render(scene,cam)}
+requestAnimationFrame(loop);
+say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.');drawMap();
+$('#mHome').onclick=()=>window.open(BASE+'my_toksilab.html','_blank','noopener');
+$('#mMap').onclick=()=>{const m=$('#map');m.hidden=!m.hidden;$('#mMap').classList.toggle('on',!m.hidden)};
+$('#mIntro').onclick=()=>{teamForm();inRoom=false;roomUI();openRoomDoor=0;started=false;inside=false;closeRoom();P.z=14;P.x=0;G.x=0;G.z=9.5;$('#intro').classList.remove('out');say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.')};
+document.getElementById('back').onclick=leaveRoom;
+Object.assign(window,{openDev,enterRoom2,leaveRoom,openInfo,teamDisperse,openTeam,TP,GG:G,openPoster,enter,goStop,openDoorCard,closeRoom,step,turn,__lab:1,PP:P});
+</script>
+
+</body>
+</html>

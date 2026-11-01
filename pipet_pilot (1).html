@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pipet · Gerçekçi Pilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0E1518;--card:#1E2A30;--card2:#25333A;--line:#34454D;--ink:#EAF2F3;--muted:#9BB0B6;--blue:#2F7DE1;--ok:#2DBE5B;--bad:#E5484D;--warn:#F2B632;
+ --f-display:'Barlow Condensed',system-ui,sans-serif;--f-body:'Source Sans 3',system-ui,sans-serif;--f-mono:'IBM Plex Mono',ui-monospace,monospace}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0E1518}}
+:root[data-theme="light"]{--bg:#0E1518}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(ellipse at 30% 0%,#1A2A30,var(--bg) 60%);color:var(--ink);font-family:var(--f-body);min-height:100vh;padding:14px 16px 28px}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:12px}
+.hdr{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}.brand b{font:700 24px/1 var(--f-display)}.brand b i{font-style:normal;color:#2BD9C0}
+.pill{font:600 10.5px var(--f-mono);letter-spacing:.1em;border-radius:999px;padding:4px 9px;background:var(--warn);color:#2A2000}
+.hdr a{color:#7FDCD0;font-weight:600;font-size:14px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:12px;align-items:start}
+.stage{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);background:linear-gradient(180deg,#E9EEF0 0%,#DCE3E6 74%,#B9C3C8 74.2%,#C9D1D5 100%)}
+.stage svg{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.snav{position:absolute;left:8px;top:8px;z-index:4;display:grid;gap:6px;background:#16242A;border-radius:12px;padding:6px;width:74px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.snav button{border:0;border-radius:9px;background:#25333A;color:#fff;display:grid;place-items:center;gap:2px;font:600 11px var(--f-body);padding:8px 2px;line-height:1.1}
+.snav button span{font-size:20px;line-height:1}.snav button.on{background:var(--blue)}.snav button:hover{background:#2E3E46}.snav button.on:hover{background:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px}
+.card h2{font:700 21px/1 var(--f-display)}.card h3{font:700 16px var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.sub{font:500 11.5px var(--f-mono);color:var(--muted)}
+.seg{display:flex;flex-wrap:wrap;gap:5px}.seg button{background:var(--card2);border:1.5px solid var(--line);border-radius:9px;padding:7px 11px;font-weight:600;font-size:13.5px}.seg button.on{background:var(--blue);border-color:var(--blue);color:#fff}.seg button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:grid;grid-template-columns:1fr 160px;align-items:center;gap:8px;font-size:14.5px}
+.spin{display:grid;grid-template-columns:32px 1fr 32px;background:var(--card2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.spin button{background:none;border:0;font-weight:700;font-size:17px;color:#BFD6DB}.spin button:hover{background:#2E3E46}
+.spin input{width:100%;background:none;border:0;color:var(--ink);font:600 15px var(--f-mono);text-align:center;padding:6px 0;min-width:0}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bt{border:0;border-radius:10px;padding:10px;font-weight:700;font-size:14px;background:var(--card2);border:1px solid var(--line)}
+.bt.pri{background:var(--blue);border-color:var(--blue);color:#fff}.bt.full{grid-column:1/-1}.bt:disabled{opacity:.4;cursor:not-allowed}
+.tasks{display:grid;gap:6px}
+.tband{grid-template-columns:1fr auto;align-items:center;padding:10px 14px}.tband b{display:block;font:700 18px var(--f-display);margin-top:2px}
+dialog.tdlg{margin:auto;width:min(460px,92vw);border:0;border-radius:16px;background:var(--card);color:var(--ink);padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+dialog.tdlg::backdrop{background:rgba(5,10,12,.65)}dialog.tdlg h3{font:700 22px var(--f-display);margin-bottom:10px}
+.tdlg .close{width:100%;margin-top:12px;background:var(--blue);border:0;color:#fff}
+.card{gap:7px;padding:12px}.bt{padding:7px;font-size:13.5px}.acts{gap:5px}.steps li{font-size:13px}.steps{gap:3px}.row{font-size:14px}.spin input{padding:5px 0}.seg button{padding:6px 10px}
+@keyframes drip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(46px);opacity:0}}.drop{animation:drip .7s ease-in infinite}
+@keyframes warnP{0%,100%{stroke:#E5484D;stroke-width:3}50%{stroke:#FF1F1F;stroke-width:8}}
+.warn{animation:warnP 1s ease-in-out infinite;stroke:#E5484D!important;filter:drop-shadow(0 0 6px rgba(255,40,40,.75))}
+.ejp rect:first-child,.capw rect:first-child{animation:warnP .9s ease-in-out infinite;stroke:#E5484D;filter:drop-shadow(0 0 5px rgba(255,40,40,.9))}
+@keyframes warnB{0%,100%{box-shadow:0 0 0 2px #E5484D,0 0 8px rgba(255,40,40,.5)}50%{box-shadow:0 0 0 5px #FF1F1F,0 0 22px rgba(255,40,40,.9)}}
+.loupe.warnL{animation:warnB 1s ease-in-out infinite}.pwarn{animation:warnB 1s ease-in-out infinite;border-radius:10px}
+.hl.over{stroke:#2F7DE1!important;stroke-width:4}.grab{cursor:grab}.grab:active{cursor:grabbing}
+.task{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:center;text-align:left;background:var(--card2);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
+.task.on{border-color:var(--blue)}.task span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#3A4B53;font-size:12px;font-weight:700}.task.done span{background:var(--ok)}
+.task small{display:block;color:var(--muted);font-size:12.5px}
+.steps{list-style:none;display:grid;gap:4px}.steps li{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--muted)}
+.steps li i{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#33444C;font-size:11px;font-weight:700;font-style:normal}
+.steps li.done{color:var(--ink)}.steps li.done i{background:var(--ok)}.steps li.cur{color:#fff}.steps li.cur i{background:var(--blue)}
+.mentor{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;background:#F4F8F9;color:#132228;border-radius:14px;padding:12px 14px;border-left:6px solid #0E6B68}
+.mentor img{width:52px;height:52px;border-radius:50%;object-fit:cover}.mentor .nm{font:600 11px var(--f-mono);letter-spacing:.08em;color:#0E6B68}.mentor p{font-size:15.5px;line-height:1.4}
+.res{border-width:2px}.res.ok{border-color:var(--ok)}.res.bad{border-color:var(--bad)}.res b.big{font:700 22px var(--f-display)}
+.res ul{padding-left:18px;display:grid;gap:3px;font-size:14px;color:#C7D6DA}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px}.kv span{color:var(--muted)}.kv b{font:600 14px var(--f-mono);text-align:right}
+.hint{font-size:13px;color:var(--muted);line-height:1.4}
+.pl{cursor:pointer}.pl:hover rect.lb,.pl:focus-visible rect.lb{stroke:#2F7DE1;stroke-width:2}
+.hot{cursor:pointer}.hot:hover .hl{stroke:#F2B632}
+.capg{cursor:grab}.capg:active{cursor:grabbing}
+.loupe{position:absolute;right:10px;top:10px;width:100px;background:rgba(30,42,48,.93);border-radius:14px;padding:8px 6px;display:grid;gap:4px;justify-items:center;z-index:3;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.loupe.left{right:auto;left:94px;top:10px}.loupe[hidden]{display:none}.loupe svg{width:84px;height:150px;cursor:pointer;touch-action:none}.loupe small{font:600 10px var(--f-mono);letter-spacing:.06em;color:#BFD6DB;text-align:center;line-height:1.3}
+.lread{display:grid;justify-items:center;background:#0F1B1D;border-radius:8px;padding:4px 6px;width:100%}.lread span{font:600 9px var(--f-mono);color:#9BB0B6}.lread b{font:600 13px var(--f-mono);color:#7CF2D8}
+.sbub{position:absolute;left:10px;right:120px;bottom:10px;background:rgba(244,248,249,.96);color:#132228;border-radius:12px;padding:8px 10px;font-size:13.5px;line-height:1.35;z-index:3;display:none;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.sbub.parts{right:10px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.stage #sv{height:64vh;max-height:none}.snav{width:62px;padding:5px;gap:5px}.snav button{font-size:9.5px;padding:6px 1px}.snav button span{font-size:17px}.loupe.left{left:76px}}
+
+/* ===== tam sayfa düzen ===== */
+html,body{height:100%;overflow:hidden}body{padding:0;background:#0E1518}
+.wrap,.grid{display:block;max-width:none;margin:0}
+.stage{position:fixed;inset:0;border-radius:0;box-shadow:none;z-index:1}
+#cv3{aspect-ratio:auto!important;width:100vw;height:100vh;height:100dvh}
+.hdr{position:fixed;top:10px;left:96px;z-index:6;background:rgba(14,21,24,.82);backdrop-filter:blur(6px);border-radius:12px;padding:7px 12px;gap:12px}
+.hdr .brand b{font-size:20px}
+#tband{position:fixed;top:58px;left:96px;z-index:6;padding:7px 12px;background:rgba(30,42,48,.9);backdrop-filter:blur(6px);gap:12px;max-width:430px}
+#tband b{font-size:16px}#tband .bt{padding:5px 10px}
+.mentor{position:fixed;z-index:6;left:50%;bottom:14px;transform:translateX(-50%);width:min(680px,calc(100vw - 600px));min-width:380px;box-shadow:0 10px 30px rgba(0,0,0,.4);background:rgba(244,248,249,.96);transition:left .3s}
+.mentor p{font-size:15px}
+.mentor.pop{animation:mpop .6s ease}@keyframes mpop{0%{transform:translateX(-50%) scale(.97);box-shadow:0 0 0 4px #2BD9C0}100%{transform:translateX(-50%) scale(1)}}
+.stepc{position:fixed;z-index:6;left:12px;bottom:14px;width:270px;max-height:calc(100vh - 140px);overflow:auto;background:rgba(30,42,48,.92);backdrop-filter:blur(6px);gap:5px}
+.stepc h3{cursor:pointer;display:flex;justify-content:space-between}.stepc.col li:not(.cur){display:none}.stepc:not(.col) h3 span{transform:rotate(90deg)}.stepc h3 span{display:inline-block;transition:transform .2s}
+#side{position:fixed;z-index:9;top:0;right:0;bottom:0;width:370px;overflow:auto;padding:12px;background:rgba(14,21,24,.94);backdrop-filter:blur(8px);display:grid;gap:12px;align-content:start;transform:translateX(105%);transition:transform .3s;box-shadow:-10px 0 30px rgba(0,0,0,.4)}
+body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;width:calc(100vw - 676px);min-width:0;animation:none}body.panel .dsp{right:382px}
+.sideX{justify-self:end;border:0;border-radius:9px;background:#25333A;color:#fff;padding:6px 12px;font-weight:700}
+#mPanel.on{background:#2F7DE1}
+.held{left:50%;transform:translateX(-50%);bottom:auto;top:12px}
+#res{position:fixed;z-index:15;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 24px));max-height:80vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.6);border-radius:14px}
+#res:empty,#res[hidden]{display:none}#res .resX{position:sticky;top:0;float:right;margin:6px;z-index:2;border:0;border-radius:9px;background:#25333A;color:#fff;padding:5px 10px;font-weight:700}
+.rot{bottom:auto;top:12px;right:auto;left:calc(100vw - 520px)}
+@media (max-width:900px){
+ .hdr{display:none}
+ .snav{position:fixed!important;top:0;left:0;right:0;z-index:8}
+ #tband{top:60px;left:8px;right:8px;max-width:none;padding:6px 10px}#tband .sub{display:none}#tband b{font-size:14px;margin:0}
+ .stepc{top:108px;bottom:auto;left:8px;width:min(62vw,250px);max-height:45vh;padding:8px 10px}.stepc h3{font-size:13px}.stepc li{font-size:12px}
+ .dsp{top:108px!important;right:8px!important}
+ .mentor{left:8px;right:8px;width:auto;min-width:0;transform:none;bottom:8px;grid-template-columns:38px 1fr;gap:8px;padding:8px 10px;max-height:28vh;overflow:auto}.mentor img{width:38px;height:38px}.mentor p{font-size:13.5px}
+ .mentor.pop{animation:none}body.panel .mentor{left:8px}
+ #side{top:auto;left:0;width:auto;height:72vh;border-radius:16px 16px 0 0;transform:translateY(105%)}body.panel #side{transform:none}body.panel .dsp{right:8px}
+ .held{top:auto;bottom:calc(28vh + 20px)}
+}
+
+.stage #sv{width:100vw!important;height:100vh!important;height:100dvh!important;max-height:none!important}
+.stage{background:#DCE3E6}.sbub{display:none!important}
+.loupe.left{left:96px;top:112px}body.panel .loupe:not(.left){right:382px}
+@media (max-width:900px){.loupe,.loupe.left{top:108px;right:8px;left:auto}.snav{display:flex!important;width:auto!important;border-radius:0!important;padding:5px!important}.snav button{flex:1;font-size:10px!important}}
+
+#cv3{position:relative;width:100vw;height:100vh;height:100dvh;touch-action:none;user-select:none;-webkit-user-select:none}
+#cv3 canvas{display:block;width:100%!important;height:100%!important}
+.tip{position:absolute;z-index:7;max-width:270px;background:rgba(18,28,32,.95);color:#EAF2F3;border-radius:11px;padding:9px 12px;font-size:13.5px;line-height:1.4;pointer-events:none;box-shadow:0 8px 22px rgba(0,0,0,.35);border-left:4px solid #2BD9C0}.tip[hidden]{display:none}.tip b{display:block;font:700 16px var(--f-display);color:#7CF2D8;margin-bottom:2px}
+.held{position:absolute;left:50%;transform:translateX(-50%);top:64px;z-index:5;background:#E5484D;color:#fff;font-weight:700;font-size:14px;border-radius:999px;padding:6px 14px;pointer-events:none;animation:hwP 1s infinite}.held[hidden]{display:none}
+.rot{position:absolute;top:12px;left:calc(100vw - 540px);z-index:3;font:600 11px var(--f-mono);color:#3E4C52;background:rgba(255,255,255,.75);border-radius:999px;padding:4px 10px;pointer-events:none}
+.nogl{position:absolute;inset:0;display:grid;place-items:center;color:#132228}.nogl[hidden]{display:none}
+.kpop{position:absolute;z-index:6;transform:translate(-50%,-50%);background:#16242A;border-radius:12px;padding:7px;display:grid;gap:5px;box-shadow:0 8px 20px rgba(0,0,0,.4);text-align:center}.kpop[hidden]{display:none}.kpop b{font-size:12px;color:#fff}.kpop div{display:flex;gap:6px;align-items:center}.kpop button{width:44px;height:40px;border:0;border-radius:9px;background:#2F7DE1;color:#fff;font-size:24px;font-weight:700}.kpop span{font:700 20px var(--f-mono);color:#fff;min-width:54px}
+@keyframes hwP{0%,100%{box-shadow:0 0 0 2px #E5484D}50%{box-shadow:0 0 0 4px #FF1F1F,0 0 16px rgba(255,40,40,.85)}}.hw{animation:hwP 1s infinite}
+@media (max-width:900px){.rot{display:none}.held{top:auto;bottom:calc(28vh + 20px)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">PİPET · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html">‹ Laboratuvar</a></div>
+ <div class="grid">
+  <div style="display:grid;gap:12px">
+   <div class="stage"><nav class="snav" aria-label="Pipet menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav><div id="cv3"><div class="tip" id="tip" hidden></div><div class="held" id="held" hidden></div><div class="kpop" id="vpop" hidden><b>Hacim (µL)</b><div><button id="vpM">−</button><span id="vpV"></span><button id="vpP">+</button></div></div><div class="rot">Sürükle: döndür · pipeti tutup taşı</div><div class="nogl" id="nogl" hidden>3B görüntü için tarayıcının WebGL desteği gerekiyor.</div></div>
+    <div class="loupe" id="loupe" hidden><small>PİSTON</small><svg id="lsv" viewBox="0 0 84 150" role="button" aria-label="Piston: dokun bas, basılı tut 2. durak, tekrar dokun bırak"></svg><small>Dokun: bas / bırak<br>Basılı tut: 2. durak</small><button class="bt" id="lej" style="width:100%;padding:6px 4px;font-size:11.5px;background:#3A4B53;border-color:#56686F">EJEKTÖR</button><div class="lread"><span>TARTI · DARA</span><b id="lread"></b></div></div>
+    <div class="sbub" id="sbub"></div></div>
+   <div class="mentor"><img id="av" alt=""><div><div class="nm">UZM. MY</div><p id="say"></p></div></div>
+   <div id="res"></div>
+   <div class="card tband" id="tband"><div><span class="sub">AKTİF GÖREV</span><b id="tName"></b></div><button class="bt" id="tOpen">Görevler</button></div>
+   <div class="card stepc col" id="stepc"><h3 id="stepT">Adımlar <span>▸</span></h3><ol class="steps" id="steps"></ol></div>
+  </div>
+  <div id="side"><button class="sideX" id="sideX">✕ Kapat</button>
+   <div class="card" id="ctl">
+    <div><h2 id="pipT"></h2><div class="sub" id="pipS"></div></div>
+    <div class="seg" id="pips"><button data-p="P10">P10</button><button data-p="P200">P200</button><button data-p="P1000">P1000</button></div>
+    <div class="row"><span>Hacim (µL)</span><div class="spin"><button id="vM" aria-label="Azalt">−</button><input id="vI" inputmode="decimal"><button id="vP" aria-label="Artır">+</button></div></div>
+    <div class="sub">Piston</div>
+    <div class="acts"><button class="bt" id="p1">1. durağa bas</button><button class="bt" id="p2">2. durağa bas</button><button class="bt" id="rS">Yavaşça bırak</button><button class="bt" id="rF">Hızlı bırak</button></div>
+    <div class="sub">Konum</div>
+    <div class="acts"><button class="bt" id="lT">Uç kutusu</button><button class="bt" id="lS">Kaynak</button><button class="bt" id="lD">Hedef</button><button class="bt" id="lW">Atık</button></div>
+    <div class="acts"><button class="bt" id="iS">Daldır (2–3 mm)</button><button class="bt" id="iD">Derin daldır</button><button class="bt full" id="iO">Ucu sıvıdan çıkar</button><button class="bt full" id="ej">Ucu at (ejektör)</button></div>
+    <div class="sub">Tüpler</div>
+    <div class="acts"><button class="bt" id="refill">Kaynağı yenile</button><button class="bt" id="empty">Hedef tüpü boşalt</button></div>
+    
+   </div>
+  </div>
+ </div>
+</div>
+<dialog class="tdlg" id="tdlg"><h3>Görevler</h3><div class="tasks" id="tasks"></div><button class="bt close" id="tClose">Kapat</button></dialog>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+const AVATAR='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwQDAwQEBAQFBQQFBwsHBwYGBw4KCggLEA4RERAOEA8SFBoWEhMYEw8QFh8XGBsbHR0dERYgIh8cIhocHRz/2wBDAQUFBQcGBw0HBw0cEhASHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBz/wAARCADIAMgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3/NOFMxT1rrLFUUUtLikAlOoAp4XikxoctPAFMHFPTmoZQ/pXyn8UozJ4/wBZHYyL/wCgivqPU70adp1zdHpEu4naWxyBkgdhnP4V85/EDSJ9S+IOpi3KsjESeb/AECg7yR2xzxXRhJxjKTk7JIwxEXKKSXU5rwtrsmhabdwxxrIJpCcntg109x4hstc0K2g1DfAI5CMoM5rN0fwnO1ldvKnk2MTlhe3ZEUTg8ghicYPb681Pqtn/AGNptrbXWnyySzP5mIRuWFMfelkHyIO+AxJ9utQsXg42lzq789f69fmQ8JiJTkuR29NDb+HnibRPBmq39y9zJJHJFhMLycdq7iy+Lej6iZJnhljTIw5GRXkL+GpYLd9Qne1trKFEleWWdAqq3Q4BJ5zwMZPbJqt4Y8Z6Z4l8T61o1n/pGn2aRrDcFMNJtXD5AzxuBI9M1pUxWElNRjJO+7T0Xz2IjhsRGDfLa2ya3/U7z4raxp/iO80xrKbfsiIbHY1wfgXS3gmS53EkGTj8a6nX9MH2i0kgtpY4mi3b2jKg84zyOnvWJ4XuxYwp9oYRhnkVQ3BY7jwB3rs5qboNU5JpXMaaqe0TmrNnrXh74myeFLae0Fms4mYPnuDXsmhTnU9ES9ltjblh5hVq8C0jRbPVnHm3Ygn3KqAjg++a9o1C5vvC0NjbPPHc2sqbM9CDivmczpw9nGNNe899/wDhj0aNR88nJ6I43UPE1mfEsMtohVopNsgUferdvPEsviDU4dMs90MR++WGD+FM8L+B7PUp7zUb1riO7W4+RYmATb1596574l6xb/D3xHpclrbqUuond3uJDwwPFeYsLGrUjCirtLS/cUYVFBzk7Js37rQJ7XUILSSVjFI3DntXd21g2naXdxtcyTf6O2C/b5lrwS8+ON7cyo6f2esifdbriuz+GXjXVPGV1r0d5exTpBYB1SNAApMij+lerhsHWoUr1Y69dfMUYw57xZ1BPPNNNPbaGK7lLDggGmE4r0UyhCKKUCincDMxQBTsUoHNUIBS0AU4LmlcBBUopuABycY7k0PIsMcjOyqsYyzNwF471DYyO7d44GeNWdkZdyoMnbkZwPXFUJ/EVhHbvPDf2zLEN8hDjaqgZJZicIAOSTyMdM8V5P8AFnx/feFdK1K7Q29vclVS3M8BTzDnaWKjlsHgAkDhichfm+e9a8VfYNEu7nxBfvPrepmKRotOjjhPlphgrnGOpVjhRyqjLFTjzZ4tzuqS8v8AhjujhlFJ1H5nuPjT48i+sBpnhO5ttQ8Q3EvkCGMDYAxxlUOS3bqQQTnAArh/G3iG8tbefwl9v0ywN3+6vLmJjJe3srffEdujfLCuWVVbYoGW+nhfhrX5dD1eXVtHgNzqAzLFLdRiR7NScb9v3TIc8OeFBzjJ42tQ+K/iOCK4ijv7ia4uTmWRrdcg+iZUbR7gAn6cVzVMPVlO97+v9Wsv67m8K1KMdVb0/rdlyTToLCWIxarp8Nla/Oj6ncfaZmfuUihVkU4x0JI/vel/Rp9F8TXyXXijxjf3C20p2Q29g8aIMAKu5tyqgxxwCM5PrXmGp6leXW5r9Yo7lxv3MgSQH0YKB19+av6JdQEQJrN/dTWaHizgOAR/JfrjNayoNxvfXyt+GhnGulKyWnn+uv8Amdf4l1sXedM0PS47PTrDdNl0/eRtjhzIWbLEAAMeueOK4jSbV1MQjmuI7UthhGVXDHn5t3yk4HfjAra1zVIrzT7ays1lt7OJfkghDAZ9SDyzH1JP4CsaG0Rb/wApYkDKieaJJcLuxye5x34960pw5YWehNSfNO61/rodwfF2v/a1TSvFGs30/wDqCTKEFsoUf6uQMYxxkfKBjHvXpXgK506xtZ7nVtbt7q8OyJhNqCyXKEk87sujDg/KNrH3ri7G7sraGEXEfhC5t4lBMLWzNJtH3gHIBLH1J6+1cdqd5pV0pj+yfYXBO1objzIfphgSPrz9K5FGTfue7bqv6R1vlivf1v0f9M+ioPiN4aNyLaHV4LmWRtsaQBg59cqRhcdznH0r0XWZr6Tw5Z3M7vHIHzEnm7yE7EkHGT7EgccmvhuxvZn1SBRa2U1zGBsV5hum7ghvuk9hggn616/pnxX13U7SGz0/RVVYsq9uWlJPoyjO046Efe9z2744ucJRVb3kuun/AADzKuBhVUpUdJPpr/wT7L+DWoXd74ev5blmkdbjAJ9MCuF/aNjF1qGlRSKGXyehHT5hXQfAHWLefRL1JL0m8mkV1t5AIsAjqqEkk5GDnkYwQKxPj7NFNq1hskRmjTY4U5KtuBwfQ81nh3F5g5Q2d/yJnGUMPyT3R5hrHhCxtysxt1KMo5XjBxXY/BjUj4c1XWobHSb/AFGW+tFiCW43eVhwdzE9F96ZdJ9otTE33WXA9q6D4H2piv8AxOrk/wDHioP/AH9Fe5Xd6Lv5fmccElUTNfU/EPjGPUrmGw+HtzcFHwLg3sMccnuCxBx+Fc94s8W/FDR2tv7N+HdvevMpyV1BWEeOxwa9Uhg8jfufeSxIJGMD0ob5uDXHTulqb2T20PBP+Eq+P17/AKjwZoFkD/z3ugSP/HqK952e1Fa83kTy+Zm2souIIpgRtkQOMdMEZqcVg6n4s0nSryytpbuJftedjhhtGBxn0z2oTxpofnLF9uDFo5JNyIzLhCA3IHqarle9gujfpQa55fHGgSs6pqUblUEnyqxyDjGOOTyOBzzUc/jvQre4e3a8YTptBjMbZyxAA6deRn0zU8kuw+ZdzpJlieGUT7DAUPmb/u7cc59sV4p8QGg0ae3kbxhrdiJ5VhsNMjm824uJGJ2kEgui5wAM54JJHSux8YeJtRsLZRPDa6Tp4IMlxczLNJKd2FRIl9Tz8xGQrZGAQfkbWPGmo+LvEeo3ejQbdR1CQRwTctcIhB3OZDkr+7Uj5AAN5wM4ryMXUdWTpR2W7/Q9DDQVNKpLrsjnPin/AGlZ61eW0mq6pdmNtkkl3OT5j98KSTtz03YJHOB0rnJrSxe6jm1nV52uZSvmxWNr5qxKFGcyMyjOB0XPXrTbbQTdatcRXt9b2MUL7p7iSM+Wgz0CryW44XGTz0wTW3PB4OtWiFxea1dWu4u53wwNKCeSqbX25x1JNWvdSjH8EQ05tyenqzeX4gva6JLYaNNZ2umMqr5Mton2qYr0AzlcA+mPxNcRD44k029E1vCjXaNuDsgJRvXHr/nFaF3rHhJmP2LTWt1PCNNF57kdgSXOfqFH0qQ63ZyFJFEM8mOjRhNp6c8dcAf40U4RinaO5c5yk0+fbsZVxqV34jljmvYUuNowvmQrx/wLg1r6XpmiqT5pVbpsbYoZWC9ed3BOMZ6d6Dp2q6qGnttAtUgIyblvljP/AALOCfoCfaub1HUZrWQ2cDRNIG/efZVwi/7O7qx9TxWiStZaehk24vmnr6nY+LdY0jToUsrBMvxlsYDN+pwPcmsXQvD/ANu1AaheXstujE4McYLZxgdep9gK5ZrW8kud0pAmboG4x/hXQaboGqXUyFLsFl6L/d/AcijkUY2TGqjnO7j8jc1XQltoVWG/8uADCwspaUj1dsjn2AwO3rXIXul20c6mSWXafUdfpzmuv1K11mzhT7aEkijQ/N5hdUHp0yD+Fcw17ZRMXlDSP2VSwH6/4U4LTcVW19rC2jStZvbpvMSAP/qgjgZ7kD5lOcflWjo3iLUbK6j8rVLmO74WMhigcjopOeD6Hpnr1zVSDxA2FiEDSIpyqAbdv0rW0/UNNMoF3HJHIx2vC6bg/oDxwc9+CKznBWelzSnPVWlY6vRvGOpnUDfSarIbeb/XafNcNgSdV24OAGxxzxyMEYr3nXfGmheKdJ8PJZWsGkzxW+ZrIRGFVYtyQD6kHPJPuRg18p2to8d41neQq9pc5VXGBlT6HjkHBwe4969L8Has2jtDoWp68IFSMrAZvLkijO8MNj87AcYKHGPcgVzwksLUVSK9fT/gHS4fWYOEv6f/AAT6aW3jCRnG5SoIIPtW18KWRPEHiyOP+GxQkfWQVn6GLPVLezC3xeZ0+ZW2hwwHIIHH5cEEEcGux8G6Ja6Vq+v3ELFpbiwUPn2kGK9edaMqej3t+aPKdKUZWa2OgZs1yXj/AMTz+ENFttQt7ZLhpb+2syjsVAEsgQtx3Gc11ROTXHfE/wAP6p4n8Lx2WkC1N/DfW13GLpykZ8qQOQSATziqja6uTK9tDJ8XeL/Ekfi218J+FLbTW1M2b6hc3OpF/KiiD7FUKnJZmz7ACiqd/wCEvHF9rdr4stbjw9Y+IzayaddWrebLavAX3xurcNvU546HNFarlt0I9bl4fDS1Lbn1K8bAMYGE/wBUeNnT9etS/wDCubIrIn2y9VZC+RG4QYYqcAAYAyo+vOa7fZmjbU+1l3K5Eclb/D7R7WzjtohcqsTb0cSkMrYADA+vAqYeB9IkF49x5rJcANO0kvBx1Zj745rp9ma5X4iS6ZZ+FbyfU0hePBjiWYbgZGBAwv8AEQMkDnkConVcYuTY401JpJHzt8d/GWjzTwLHdy3VxYq08NpCcQozAxoZW6kqpGFXpl8nnFeTaL4gHh7w/frBbrZ3WtxqqXSna3lhvnRBklEOCBzltp7EVp+O0t9Ovdc1G8fy7xp1tbWwVV2wQhBtZ/8AgKjavvuPUCvNryY6g1hsRjFDGigZzn1/ma8ijBVI80uur/P8z06rdOXLHpovyMW5ma6leFNzL5wYRgcnt0/z1roLfwJqar9sv1lt4mj83eyk8ZwD378Yr1j4LfC63vZE1HUJEa5PMMMg3Er2brX0Lc+AdP8A7Nlt9ozKNjFF4OevHTpmuPE5qqdTkh0PRweS+1p+0qvfY+Kk0XSVQuNTtvMz827GMfqRUCazHpZP2ZrZiOnlDJ/MgCu/8f8AwsfQtduPIG60Kh0k3YJBz19Dx17+lcTH4fjIBgEVwnYmZQR7cV6FHEQqxUkzzq+Eq0ZuPLYqTeIfEGpkxbXMMnBxcDcR7n09hgVsadpD29puurKztH2/LJGwaQfUlcUW97caOxRNP+bp+5KyD884p9/Fc31ukzRSWy7ceZcyqcfQA4H4CttOhglbV6s57UZbWBpBNfTuT90lcAe+B1+tUdOvGtnEdm7MsjDOWOR9MVBc2kKTsiyiWTd800hOM+3rW1pUWn6U0cksnnSA7sfdyfX1x+VVYxTbl2Nc2cWd91buQ5O4oM89/wAe9Ymp2On/ADyQwSh8/wDPLj8eetTSeI21LUprt4WSxjGxRECAq/yOevOe1Wr3WNKkC+T5xmC8iSRV+nHWktDSXLJaHItqF5ajybctEM/eK/07VcW6u5EWS44nzw/lghh69Ktm4095S8qhZByBGcn/AAq2byxmhCCUhF52unJPrntTaRnG/cnsdcnNu9rdRoYZMYcqDtI6EDp/iKs6X/ZupiXTNRLWb7yIposeUZCOMA4CE8Z52nuARmueuNRtIz5bB1kTO0EYU98EH19q6TSYNN8VRbEV7S/jj+RXfejEcg84xyMH65ORkjGqla+3mdNKTbSvfyZ9Dfsx25udXmsRqU9lPGrQLY3J8xdwyVDMMEEgNjAwCrL0K19b2OjW2mzXzpO8tw9ltfJ+X768gV+cHg3xJPoPiGCexeeK8ICyu6hWhKkHKjJ3HAyMkfd+lff3gnWL3Uftn9ozRXVz/Z6t9pgjKxyqWQhtv8BIPK5ODnBIrOi53ab0Vvxf+Y8Qo2Ul1/T/AIBtkU00/epPBBqG5Ywxlvl9txxXpJ3PPutwoqgNXs0AE15ao3cGZeP1op2Y0y+UxTSMUy51axgwfOyPZTUMmsaevPn9f9k1CbKaJ8ZrzD42+ILPQNCtZNkL6u7lrUSLuZdvAIz9353U54ztxXoA1yzDcM7D2Q14Z+0L4kUPo4toI1SItKZZY8sz7o8NjphACcnPPQcZrPEpuk0aYe3tUfK2q6fNfTzrqEkhcyG4cEncwACAnPPOOO549a6H4d+F4Nd12Jj5axhuY36KM8ADvXFalLdTuvnSSs9w+5nYktIQcdT75OfU+1fQnwL8Jszx30sCMqAfOzgnr3A7/XmuDG1VRoOz1PSy+j7bEJNaHvOh6TFpNuIYQFRhuKhMfMep/H0raMXyAenI9jUEJy5JAHarQYqPWvjr3d2faWsrIwde8Mpqf75I4fN2lWjZcrKPQ/lwa+WfiN8LEttS/wBAtJF8xGfZjcBg8gEc9+47V9jg+YP4h6EVjeIPD1trEKyEAXETB1lAwwIyP5E114bEyoy5os5sRh4V48lRH5+yaVd6VK8ZieKSPkh9x465AA5FZl2k1/IXLSkj+ORzx9BzivrnxX8OWWUXxslnZDiRUU4kQ9xjuOoxXn/iD4ZpKn2nTo9r45iYeWzr7ds+hHBr3aWZxlbmPBr5LJX9mzxLS9MsY8i4eR/ZNxx+I6VeuDoVt5gs7R5G7ySZwfqzZ/SugufATozCedpLcMcSS7h5Z9GyOCPQ/WqNz4OudPnCsG6BldXzG6noRXYsTTk9zz3gasF8JhSifVlWJ1WOBeQoyoz681ZPhJYIllVx2I2jJI/Tj61oRxXsokgt4oknjOdqnJI/4FnH6VWkg1KNyz2s6zqcMWJbnt93mtfaxva5h9XdrtXIZVtrePZ9iYsvXzSEQ/nnFZ1xfQ7/ACltoIo8jMwXIz+nA9atRG8uXcqqz7eWCE4/GrMhsIo2/tDTncqM5QE/yA4981fNHqZ+zm1dIrw6BJqsJijeOWXrGFXkjuAvf8KowvLo7iYMgaGYqRwR1x1H1HI9DU0Gsmxk8ywtAlqDu2iQsc9SORgY9BVnW9dsNXt4p5tMIkncFpkm8vcwBHzqBzyBkjB+tK77aB7trp6l+31KxvdS8y2XyLySMFFckpJMmCAvHy5xtweORj0r7V8F+PIvDfwZh1nT5TdJFb/ZPIlUu8MgYYRskHGSDzyAe+K+G4bHyYdPvAilQhkKDoSuR/Rfyr62Gn3Gm/s3Wc0F3JcWdzO/nwzrukt51fLYcdVKbeGyQRkHkisUkqsVfR2/NGzk3Sba1/4DKo+PPjC5liZLHSkgMyI7LC527mx1Jrnf2qvGGsw6V4ftmud0MkshYRr5ZyFHcGuFn8ZRj7JE0uy2jeLescZG4KwOT6mt/wDaJ1WDxZomkXGmQzyxWLvJM7R7dqlRg89a9twsm7Jeh4kJTd+Y8a0vxXqVpCrQtGpIHLIGPHTk0Va0rwTr+qWdvLaaYzQyKGVzIo3D160VcXKwNH6L4BYZHeuxvvCcF7axy26iOXYOAODTNX8MbZRNaDgnJSuqt1KwRg8EKBXzlfE35ZU2evGHKmmeS6jbtpsc7TAosKs7YHYDJx+VfPv7TOnPDBoEs1zFJ9os5VdYgdsTMyHaGz85AJyQB0r6z+IdjE/hbVJwMSpF94e7Af1r4j+L8Uk3g7Q1nuGjt4b668vuzRshLY+jBgPdvaonj5TqQprS+524bAKWHqYi/wANl95wnwZ8CxfEvxvf393vOk6VGHWFjuBGcInoB619eadpttpsJitrdIYh0VFAArk/2XPBMWhfC+DUJIlW61qRronv5QO1Bn0wCfxrqvGvjWw8JSi0i0m6vJSd0sq7SiD065H4ivHx8pV67jF6LRHsZa4UKKutXqzVhjbrtPPrU5jIxz+BFcp4V+JNhrmFni+yuzbV8w7R9OeprvAqSIHBBQjINedKhKLsz1VXUtUUEVlOdoP0NTcScN196tLahh8px60jRsnHaqUGkJ1Eyn9mByo5X+6RWZd6CjZ2ZRTzgDIJ9a2sru4ODTHdvQEfWlYpNnBal4IW5Z5dituPzYOCR/X6V5/q3w4GjXUU9vBGbJt/nQuuUwccgjoM84wRya96fY3zEYPeoJI42RwQrhxgg9D7e1UqsobMbSluj5e8WeCpNEEWu2Frt/s/DzxAj5oM/NgjrgHIPpXT614F8uK3v7YKgDqpVlysiOQCMduoPpkcV6vqOiLNYSWgAZHj8vpyoIwaiitRHCLdkxGr7kAH3RnIHtj+grR4qTS8vyJWHgpNrZ/mfONx8PpdM8ZaVJb4jXUzJC6HlQ6oXDA+nH1+taviLwbbraSceVJtZfLUZKP2Iz2PtxXt76HbPdw3Drl4STF6KSMH9OKgvtMglWZ2UliuB7cVf1uUmr9CI4WnHmS2bufCl5BLpXiWe3eMPbnOV+noa1P7Igulht41BW2LfMeSXxux7dMfjWp8Swlj4qmZVHDYwe5yOPp7+lYOg309teXG5sGQsSxHUtwOPxr6qjJzpqXkfGV4xpVpQ6XNmwhlieGd0JTY8dvjsxzkkHrw2fyr6Ut0vNf/AGb9N+wQXVzdz6x501msTNLG+1hvwP4HQIwI461806beSrb2shUSfY2yA2cRggjdj8sfhX25pWrar4O8D+FtAayitry205UllwRIHDONwbIyMHIz604QlLER5VqRVnFULN6HzPL8PPFOotuTw3q7EKVA+ysBn15FekXXgTVNU0yDTb3w5qMySRKrReQecAe9XWvfHNzdSQjxFIQnRpC/I7d6DpHiq6mjmuteR5IwQrbWJGeveve9nJO90eMnHVpMXTfh7qmiWwjtPC9/CgAGNqr0+rUVI3h/WJf9drZP0jz/ADNFUov+ZfiPnXZ/gfaT8Yp/YYrG17XYNCsPtk6u8W4L8gyea5PQvi3Ya7rtro8NjcpNcMyq7YwMDJzXwXtoqXJ1Pe9lJx5lsdR4zjEvhLW0JAzaSEZ9QMj9QK+LP2kJjqKeGvCmk2486S5a3tlBwcnCsT9SW596+zfHkkkPhPUWVc8Rggenmpn9M18xad4bfWP2g9GN7Az2+nWsupRSMPlYeYQpA7/Mw57EU3NRqxk+ibPQwUb4WrfrZf5/get2qJ4U0Wx0uGMBbS1WBFHAAVQv9K8ovdMa+lnkknlSZ5CwbduC/QHt7V6v4nmE2oTjHygbB64rwL4mzXfhyS2vI9Pm1C3R8yIDJHhf95Tj8686hJuo4rdnsqmo0lUemhznjnRtc08vewW73sSDdmD5XQgdfl5PrVX4f/tAXemzrZ6qk08CLg7vvpjrXSaP8QfDUgjgvL7UtFuJI/MEWoRl49vruIPHvkVzvjfQvDmssbxRbXDHpfaZIC3/AAJR/wDXr04SVvZ14fM5JwbftMNU17H0n4c8V6f4i08XmnXAmXHzL3Wt5LtJBzXxV4TTWfCt3Fcabdm4tN+GaPhtp7Efr7V9K+HfF8d7bkynEiKC+fX6Vy16Hs3eDujsw9T2ytNWkdywUyHAzUxtQQMDmsu3vAYw54LHOCOgq0uoEOMnvXLZdTplCS2JHtWBO0HFVZbcrkkMDV9bsSDgjJ71E3JyD+NZzh2CM5Lcx5XKA5w1VnCzHkYP61uyWyOMsoPvis25tMD92fwNc9mjVTTM2WMRqcnrWD4hvotP0+SRwSMGtmVmL4btxXm3xa1abSdJaRIi1s3yuSOnuD2P14rooU+eaiZV6nJByPnL4kzJe6tKgGQjna+MEg8gEeoOa443BZlcAbthbA6HpxV7UbuXUr15N+4A4J9QOlVItNbLSjO1RgA+/P8AjX2tCnyU1E+ExFR1Kjkup1vwstbTVfFuiRa0+3TJ7yJLtzkgRZAY/kMfjX2f8QPGfhy51CxEGrJcCC1WNnCtnI9eOp6186fBvwzHBAdWdkaN1aHy8d/lbI+hAH4V6hrVliC0u4gSJQyvn2PFdtOioKOIe+y9DknNybo/eWP+Eu0bd8l3uPshqVfFVg33PNbPcJXMGPPDIhHuoo+ywNz5EefYYrSWJl0REaK6nUL4nsznEVyfpHRXIS6UjDMayLn+65FFR9Yn5FexifY+rwaZrPhKJZ5iLOExK7q2GDccfWuW0Hwx4a0jxDBqkdy63EDuEidsEbhjOO5rzTxLo+uXXi9PIvzHZ/aVYxvIQGPHOB3qz4r0DXRr08v22Is7KV/eYPQV59LL4ySbla67HTOu43SWzPZfFHifSLvTJdNjvY2mu5YoNqn5lzIuT+ABNcR4VEGqePfEOpxhhHY2VvYxRgfJEpZ5doPrgrn6+9ctbeE9ZvRFdW6xtdNIrxO79XVgRn2yMH2NdF8PJJ/sXi+/ntpLWSbVJo/JkILRrEqxBeOOqtjHFeNmdBUWuV3VvxPUy+SnCUWrO6+4sXoW4vZ5M7tzHoOKxdZsRdWbRtEJgOqdyPUe9X0kdZC3Pzc4qckyAfKQ2K8RQa1R9co2SXQ+dfHPwrsfFQD2uoeTdxIYdjp/DkkKVyGXHqMjnGK4/Q/g1c6RLc3F08ckhjEcQgmZMd9xJAyen619Z3Gl29+MXFjDMPV4wTWU3hSxt38xLOCIDnIWu+ljKsVZs4qmBoTlzNanz5ofhnXLRrlbi0lj2LvWRwNkozjhgcbv5/hXtXgbw1FcWC3Fwo88HDADqR3rSl06GRdhUlM52jgGt7RrRreJSvyqfSsamIc3Y6I0VTjcz9Yt5LG2d0yQhz1615J4i+IWr2oZbWPEuCBg456Z9v8A69eueLdWNtbtGBukf5V/xrwHxFpEkNreaiWnllTH7uOMyOzHsAO1Vh3Hm94Kzk4K25yt98S/iNE7MjTLEoyEjiDD6/X6VQX45eMLF1S6nnUkcn7OVJ/z61THikac8U2om+t7SSQxrMFV1yBk/KOeBXtvhLTtO1fTxd2t9YasNoJjR9sqgjPKnpx6gV6U5xpq8qasePGk6smoVnddzhvD/wAavEWrhmN5ArrjCyAp3/L8D+ldza/EPxBpl0j39mZrYk71gIfGOcg9ce3P6VZu7Hw953lT2ccErfLtnQLn6HofzqJvD0dnzZOyDHETMSh/Dt9RXLKVGo7qNjpjSrU1ZzudzaataeIbeO/sGJhlUMAy7SPUEduara7pMGraJfWlyoZJImB49qreEHhhtHiERjmL5kwcqTjqPr+PSnePdVj0HwdrGoO+zyoGC4ODubgfzriVO1RRidntP3bc+x8PMBBql7FEwMI3BWI9+P1q1oMV/e6hZ6fbIsl3euFjVuRknHPp2yfTNZVvDdSPsjRnubmQKgA5Yk/5/OvqH4X/AAz0TwWbfW/FyQnV7o+XFazOw2BsAFdh3A+jDpX1WKxVPCwXPrf7z5DB4Oti5v2XT+rG94e8P23h/SLWzt1Kqsalgf720Bj7ZIz9Sa6WQRS6VbQEA8OD+LVzpuHSaeDzWljhmkjSQnJdVcqCfU4A5rufCNvDcadvljVyrnBNe1i5pYeNRbaW+48ihF+2lB76/mcGunXM0pjS3kdgcfKpNdTo/wANta1LaTbrBGf4pTj9K7sFbZ1KKFU+gxzXQ2molVHzV4OIxlS3uI9Slh4X95ngd7CNM1CS1lIbyZCjFe+D2oqXXgJNZv365mY/rRXWqfMk2zBz5W0kdj4g8a6Na+LUtLq78u5juFJTbnrjFavizx54Zg1RY31EJLleGTmvPrv4cT6hqseoajrcdxfKys8qRbQxB44qfxD8M7PXdTiuhrJSYgFlMfAI9K4qmMx1OpGMKd4pPU9qlg8qnBOpVab39fuPR7PVCtjFdRSH7OMyhs4465pfh5fA+BrcqcvNE11KBj780jPyRwT83b61574n0nXdL8NX8dh4iga0gs5MxG2O84Q5AYHj611OjzT2Dafbf6yzXT40EigBQyqqke/fn/A1zZv8MLPV3ZllkE6k+ytY6OPGQSF564q5GqlQOmapRt8oypUY6EYqwkqhe/PrXiRaPqGrrQmchQOaz71yUwDnNPllJIC8msq+S4mcqHKRoMtj37UN3LpxtqJwH2g9e1bkcq29qpOAVFZtpaNkBwd/fHan6krCIpn6g0rWKklJpM57VB/aDksOFPHsKy5tI813liOMfeUdxWlFOnmMm4Y6DNaljAAQcdajVO6NLXVjyPxX8O9N1W0aO9jdVLbkvI+NjHj5uMHjjkc+orza0+BtxomqQXUV9IbWMlxJaGSKduDgA8gD6E19Ytp6qSUClSOVNZreF7F33RJLbsf+eDlV/LpXXDGVKasmcFfB0az5pLXufPotfiDayrbK8epWDZG7UIQ7gehIwTx+dd54c0PWLZEgurcID0COWjH+7nkD2r0dfDixPu8yV8dN7Zq2sP2cALy1YVcS5bJIqnh1HS7fqZFnpRtMscbiACa8j/aP1o2PhKz0qN/3moXAJHqicn9SPyr3CVznG3pXzf8AFbR7rx/8UrbSYGEdhpNtHJdTBv8AVozDcPZjnAH+FbYBqVZTntHUwxykqDpw3lovmUvgf4It9Tj/ALanED3YbNvG5z5KDgPt7knp6Ac9a9NvNIkl8R386EtJBwryEsWdUByT6Dlj9AO4o8EaELW/cQbYtNsVI3jhVQf/AFq9EstPQ+G9Q1G42LdX0byqmRuSNuQPqeCfwHauumpYzFc0vh/TsOvUjlOE5KfxNW+fV/15HmEKpHEiJnCqAM9a9D8GHGknHeQ1wEaKAMV3nhFtumYH/PRq+3zNL2Fl3Pz3B/xLnRud6YpouWTjNIDxzUEgyxzXzypp6HqubR5rqXzXtyx6lz/Oirl7Ev2mbj+I0V6cUrHI73MGT466KDkWV4R9BWhpfxZstQSS8h0u7MUXBJwK8kTwbbyABpHB9BXofgvwnHLpDWcSzSyTyeXHHGMvIxPCqO5NdM6cYK72OeEqk3ZbmnrnxITWdIv7G00e8kuLqB4o0QBiWKnGAMk/QCukn15LmDSfKLSJsgUKAFXdgdh/DyD9cV7r8K/g5pngawa7vYEuNbuoysjsd4t0YYMaH6Hlh1+lfNT2n9ly3WnJa+XNojzafuI+YMrHyzjjgoqn8R2r5vNbTcZQWiPfyidpShJ3f9bHrglLxhztL9Dt9fSokuEYsTcR7QMkKcn6Vz6vcr4TkuLaVRNHAdjE8Z9eO4H614Xqvi+PTNRhtri7bzxIMzt95m7gZOO4rwaVGVRs+lnXVNI+oF2quVP4+tcL481rV9IQy6ZFDKJCA4lLALjqOOefWuEi8e61awbfKYurg+ayknHYYx6Dp9a5PWvEura5MbaSSRUAV5OACFyc459ewrpo4eSeuwpYuMVs7nt/hzxmzafbmZzEZV3FHIPPTr7dM1r3fiS3uSEVfmIwWVTg+9fPFl4jlW0kk3OkMLiNdwyHJ9PU/Sqd3rlnqWrRwXW8yHG2YSsvlsenQ8D6V0PCJgsXB2elz3+50+OPThKrYcuMMD15rprBlMYUj516471594WtLy+itBJcia2TDAhi27HQlj1r0ILtYMOK86paLte53PVF4YwVB96rksG4AyOenWneYBj1prSgnnGPX3qG00QtCN5nUcrz39qrtOW46YNSTTAg4HXg1WLxxxu7kAKpY56cVPKmTKVkZ2v6zBoGlT31wRiJSwBOM+1ebfDzwxPq1ncavrMkrpq8hu0t4mKyHrs3H2GcDoNxqHx1qn/CV63pOgI8P2S8k8zlwpaJRlj+XGPf2r0X+27LQglrYCOW7UfuoEIKx9gzY+6o/XGAK6VSm1GlTXvS/I5Y1oxcq83aMV+P9fmcX441i807wxcaVpVgIkkAWURnJiQ8ku56uw4A7Ak+lcv4Tj1yXU7c3lndJbGNyZGlJUfKccV3HiVlj8LXFvGS2Blnb7zsTksT3JPJ+taGlzP/AGPGGPH2c8H/AHa+7y7BRwdDkWre78z4TM8wnjsR7R6Louy/z7nNqgUAZruPCBB0xvaU1waSxSkbZU/76Fd14TV0sDgjyxI2fXNdOZRfsde5y4N/vDoHbFQt8zVIxDc1SnuoIX2vMiMecMwFeGkemzkLoD7TLx/EaKbc5YXTphh8xBBzRXctjlb1PW9O/Zl8P6fAZ9Z16+n2As5hCQRgAZJyQxx75ruPhz8N9C8MNJqlhaTxmYYthdSGSSOM/wAfP3WcdcdFwPWtQpLrupx6b5ajTbcLNdsJN3mHPyREYxhiNx5PC4/irqvNRmZVYFh1ArglObfvP8Tab5Fyrd+S2+Xf+twnlEMMknUKK+OvjBp1xo/xBvL5JHS28SWrMFRcfvkXY4z3Yx7WHfg19aa5ceXaCMdXP6V4H8frKe78GG5tFzfadKLy2O4r8ygll/4Em5fxpvD+2pSX3GmEqexmp/1Y4bRJbttFitWCgf6rBODgE5/z3q5P4D0bUrZlvLSKYSKVbeoOQRgiuU8G69/wkFzFeRgAzoDCAS2QRk8D/CvTXVoQV5H1718jVUoT7M+2ozjOGmqPJpoPEPhVjZWbW+pW0RxHFdoDJtxwA/fj1/Ok0TxHouq3dzZ+ItHWylnQIzRgo6Dp07j/AHTXda6kIQSyt5bDgSHp+NZd6+ka1Yi21KzguCgwkiHa4OOORXbTmpRu0dUYQmuVb9jC1f4Z6VMIYbXU7QWO9ZP3kmWYc/8A1vyritV8C3+nanNfzQo0SAiOZQH8wAcH6d/rXQ3ngWH5prLXLiIAZ8ucB8n0Gc/zqnDJ4r0WPyra/tLu1OQYJEIDD6cj+VbQlJbSOevgI2u4mt4O8ZtoccNtc+Wxdckqxyg9Np9M5+ma9Is/HmkX6hfOVN5Crk9T7HuK8U1EatrwlMXhJVvCoX7QlyEjU+vIzWFpOla1p5ktb61SIFlACP5iMc5BHAwe1YzoQndt2fyOV1atJqNrr5n0/wDaQOM8UrXIdCcZA5OOtcz4Se6udFSe9QRyOzNjP8OeP8+tJq2trYnbCwkYRnIHBOSOh7EV50YtvlOyVRWubV9exW0DSl8YGcryc+mPevM/EXjCXVoikEnlWxTc8m/AXCk5/HFNvdRnvbWKZZNiKGEfQsxbgDHfoT7cVW8P/Dm/+LWrT6DoifY7HTIRLezlvl34ykO4fxyc5PO1ecc16GGw95W6nm4vE8sHJuyG+ArBdSgvddv4YnGoqqW0bICEgU/Lj0ycnpnpWxokCxapqixoqxgpwowOldE9mthCbYxNC9vmJomGDGy8FSOxGMVz+gyj+1dYGf4kx+VfcYaEYQShsfEYiUpzbluWvEmF0S6PsKo+IklvPAlzBbRySXElthEiBLE47Yq74pUnQbth2A/nXQ+Cifs2ElMUosJTuChiBs9DXdSrOjJVUr8rv9xySp+09zufJ1hpWrR3Vu/kXKpHKm9iDhee9fVfga4eXRnJbdiVuR+FZt7bNDbu0AVCoVs7R1HQ1w+reKPEkN/Puv5hukZvkCgH34FcfFnEjq+zh7Lu9H/wD3OGOGPbRnUVZKztqj23/WNtJxx0r4h8daN4ki1zVZZ4dWML3TGBpN5BjBONvtXvfh/x1q2oaFJHb6nJmCRhIQVLEgdScZHWsO88ca/P4jsZrnVizxyBI3k25UgfLjjrmvm8Bmbq4lYb2duZpXeyv8j1MwyL2OFniXVT5E3Zbu3+div8D01EeAtUa5Epczy7fMJLAAYxz0oq7qvi3xkl07TX9+ZMuzggDjPJIxRX3P8AYM1o60Pvf+R+fLP4vajP7l/mfddi0mg6QsDlG1GcmW5dOR5jdQPZQAo9lqTRbtjdbXJOfWqEm6TJJyaWzzBOj981826K5Hfc+ov+Jf1mXzLraOQoryL453DWnw/1icf8srWZv/IT16ndN5lxIx9cV5b8fE3fDDxFx920f8iCP61pSXJBAlrY+Pfg695oCaAl8pexvo2SMO21Y5lb5lJBz0Ab86+s9OeDUbUSK7OpJwzD7w/If59a+bdA0WTxF4PvNPttsd9bTmW1kIHyScEc9geQfY1v+DvHF8LVbYl47uzHlSwTNuKyg4OSTzjt7V8hiIvEXkt0z6rDv6vaD2a0/U9u1HQWvreSFCpVuBnt+NfP3izwbrGlapKdPEogV8sI5MqvuT6n+te2Wfim38iDfKsjDarM/G76Ae5/H2p1pqdrfGTAE2wbWBGA2Djp64FY0ZSpM7pwjVS5vkeUeGbTXRFGuoxGVCvLZwwPQgg13FpYBAp8oJ67sZrsls7W+VJHhwzcKT1+nHpVebR0AKo5Jz+VRVruT2saxTirczfqZ8cEACscbSMfWs7UYbaSdG8obVIGQKtX6xaeHNxcKoUd+n0+tcTqOvLJeLFFOpUxMVcnCtxnr09P8jFZ04OTIqVVHc0fEvil0t2sbUBZGVgVIBGOx46CsSO8ihd/t0m1lhGdzfebnn26n35HpXL6p4ysIboxxB73UZMLHFECWLcYG0dicHn86b4e8D694ou45PEV0+n6WvLwJJmRkHJ3sPujGTxz713xpRpwvPRHnTrOpP3NfyXqQnUNR8Ua+uk6AIJL6UhJrpUxFAP7xPPOAML3xX278LPC+l/D3wvY6dpsbFSPMup5OZLmVvvyOe7EivkH4BeJNI8U6rqbaTax2sMGruFiTj/R9mIT/wB8r+efWvtTSgVsIQ3p/Wvfjh40qKcVZs8GtV9tJ8zujjvjJ4Ia4U+ItKt3mmk2R3cMQGXzhUlA9Rwreowf4a8A0XS7qz1zWYrqCWCZChMcyFGHHcHmvszTHi1C0msrhFdCpRkYZDoeCK5290XTtXim0XxBB589iALe9BxP5LZ2OH65GCrdiVyRzXRSxM6Wj2OGVKM9HuvyPmLxMMaBeBvQfzrxHxN4u8VidLWK+vIrC1R1g8iPZ8pPPzAZYfUmvr6/+E2swanPFNYw67oLRkx+TMIpW9NyEjkf7JwfQdKZe6faCztNFv8ASWsrS2iMEME++LCkkkAt15PYmvfyrPqOBqOUqSnfvbT0v1/q55+Ky2pXjaM+X01++36nyt8GdS1XWviRotprbXuoaSyu8ttI7Ksu1CQCfTIH1r6UtdMsddaO+nhuree4kY+WUBVQDgA8dMYFbNjoelaRcQ3FtpyLNCMIWkY4GMdM+hq1CIrcMIoFAY55dj/M1nmmaQx1T2kafL039R4TCPDrl57/AC9Dh/CvhDw5p/huazsNJhtw892008ZIkmJYgbj6DsK53wf8PtIn+INk97Z/2lFHJ5/2e5AaMuIyVIA6YNeq2Gn2FhH5cdhFt3M3Mjnljk/xVJptlpmi6r/adjpNpDfYx5uXJ6Y7tjpXhyV00o7+Z3xlFddjNvtB0/WtRv5pUvEuQ2SxwFIJ+6PUUV0p1INkmztiW68N/jRUuL6RKU11Z2wWjGD9KKK7CQHzHPevOvjjHv8Ahh4rwMldNmk/75Un+lFFFr6DTtqfNXwyuwqiReUuFWQY+n+Bra8b/DmTXpW1PRpltdXO0OrHEVwB/eA7jPDUUV8LUqSpVeaB9vGnGrRSmjzOTxzqnhO5nstZtJbWXbgtOCVY8/dboQf1rc8J+PkgnluriQPHIxKuD1zjJHr0/QUUV7UaMKlLna1Z4qxNSlW9nF6I66P4mx+Ujo8SqinMe7JQEkfzI/DFXZfiikVv9plkVFVmZlVssBgfpnJH5UUVzywtPax0fXKurueca78Tb7xWsltpNpNc3RclWToq9OWPGMnpUGneCfEOtyIdV1EwRLgMlt94jByC5/oPxooqcRL6v7lNWFhYfWVz1Xf8j0rwp4E07RQw0+3EatjzJWO5m+pPJq58Q75dI8Hahbwkrc3yfZI8dQG++3/fII/EUUV5cZOdVczueo4RjBqKseO/swRNZ/FjxBpkXyxyRxTqoGMAOM/o5r9FbU4toh/siiivtIe9Rjc+OmrSaXd/mRQXL2t0JV6g81a8VQG70+LVrZpFuLDLusZ+Z4iP3i478AMB6qPWiiorqzRmtGpeZL4f1M3Efkl0lH3kZBg4Pcdjn8K2buSBrXZPGk8cnBRlDKfqDRRUVPdegpwXOcDrfgRLiCa68OqlveIpb+z5nIt5T/snkxn3Hy+o714Dq/xE8WaLem0vvAF7bTAkASS5DY64YDB/A0UUUqrjKMejNFTVTmv0MyX4ueJUOF8EzN9ZT/hUL/FvxbjcPA74/wCuzf8AxNFFeryR7Hn3fcb/AMLh8WAHHgf/AMjP/wDE0UUVapQ7GbnLuf/Z';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
+const fmt=(n,d=0)=>Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const PIP={P10:{min:.5,max:10,step:.1,dp:1,col:['#C9D0D4','#8E989D'],tipC:'#EEF4F6',tipL:95,tipW:9,n:'P10 · 0,5–10 µL',cap:'gri'},P200:{min:20,max:200,step:1,dp:0,col:['#FFD74A','#E0A800'],tipC:'#F7E79A',tipL:150,tipW:12,n:'P200 · 20–200 µL',cap:'sarı'},P1000:{min:100,max:1000,step:5,dp:0,col:['#5AA0F5','#1A55B8'],tipC:'#A9CCF4',tipL:205,tipW:17,n:'P1000 · 100–1000 µL',cap:'mavi'}};
+const LIQ={su:{n:'Tip I su',c:'#9FD3E6'},kan:{n:'Tam kan',c:'#7A0F18'},stok:{n:'Ara stok (EtOH+MeOH, 2 g/L)',c:'#CFE6F2'},dcm:{n:'Diklorometan (DCM)',c:'#7FA8E0'}};
+const TASKS=[{id:'parts',t:'Parçaları tanı',d:'Fareyi parçaların üzerine getir (8 parça).'},
+ {id:'su',t:'150 µL su aktar',d:'İleri pipetaj · uygun pipet',vol:150,liq:'su',pip:'P200',mode:'ileri'},
+ {id:'kan',t:'200 µL kan aktar',d:'Viskoz numune · doğru teknik',vol:200,liq:'kan',pip:'P200',mode:'ters'},
+ {id:'stok',t:'5 µL ara stok aktar',d:'Çok küçük hacim · uygun pipet',vol:5,liq:'stok',pip:'P10',mode:'ileri'},
+ {id:'dcm',t:'100 µL organik çözücü (DCM) aktar',d:'Uçucu çözücü · ön ıslatma · hız',vol:100,liq:'dcm',pip:'P200',mode:'ileri'}];
+const PARTS=[['cap','Kontrol düğmesi (piston)','Pipetlemeyi yapar. 1. durak ayarlanan hacmi ölçer, 2. durak (boşaltma) uçta kalanı üfler. Rengi pipetin hacim aralığını gösterir.',0,11],
+ ['ring','Hacim ayar halkası','Çevirerek hacmi ayarlarsın. Aralığın dışına zorlamak pipetin mekanizmasını bozar.',0,79],
+ ['ej','Uç atma (ejektör) düğmesi','Ucu elle dokunmadan atar; kanlı uç doğrudan tıbbi atığa gider.',28,70],
+ ['hook','Parmak dayanağı','İşaret parmağı buraya dayanır; pipet elde rahat durur, el yorulmaz.',-80,84],
+ ['disp','Hacim göstergesi','Ayarlanan hacmi µL olarak gösterir. Okurken pencereye karşıdan bak.',5,161],
+ ['cal','Kalibrasyon / ayar açıklığı','Yalnızca yetkili kişi kullanır; özel sıvılar için ayar yapılır. Pipetler düzenli olarak kalibre edilir.',16,285],
+ ['sleeve','Ejektör kovanı ve uç konisi','Uç, koniye sıkıca takılır. Ejektöre basınca kovan aşağı iner ve ucu iter.',0,540],
+ ['tip','Tek kullanımlık uç','Sıvı yalnızca uca girer, pipet gövdesine asla girmez. Her numune ve her çözelti için yeni uç.',0,700]];
+let S;
+const VOL={src:{su:1500,kan:1500,stok:1500,dcm:1500},tube:{}};
+function reset(task){const t=TASKS.find(x=>x.id===(task||'parts'));const keep=S&&S.done||{};
+ prevSayKey='';S={spills:[],task:t.id,mode:S?S.mode:'parts',pip:'P1000',vol:1000,depth:0,press:null,loc:'rest',imm:null,tip:null,src:t.liq?{liq:t.liq,get v(){return VOL.src[t.liq]},set v(x){VOL.src[t.liq]=Math.max(0,x)}}:null,dst:0,flags:[],done:keep,seen:S?S.seen:{},ev:{},res:null,ej:0,anim:null,usedTipWarn:false};
+ if(t.id!=='parts'&&S.mode==='parts')S.mode='use';$('#res').innerHTML='';
+ say(t.id==='parts'?'Merhaba! Bu bizim otomatik pipetimiz. Önce parçalarını tanıyalım: fareyi merak ettiğin parçanın üzerine getir, açıklaması çıksın (telefonda dokun). Arkadaki <b>döner pipet standında</b> diğer pipetler asılı duruyor.':`Görev: <b>${t.t}</b>. Önce bu hacim için <b>uygun pipeti</b> seç ve hacmi ayarla.${t.liq==='dcm'?' Bu iş <b>çeker ocakta</b> yapılır; DCM uçucudur.':''} ${LIQ[t.liq].n} kaynak tüpte, hedef tüp boş.`);render()}
+const say=t=>{$('#say').innerHTML=t;const b=$('#sbub');if(b)b.innerHTML=t};
+const P=()=>PIP[S.pip];const T=()=>TASKS.find(x=>x.id===S.task);
+function dispTxt(){const v=S.vol;return S.pip==='P10'?fmt(v,1):String(Math.round(v))}
+function drawLoupe(){const L=$('#loupe');L.hidden=S.mode!=='use';L.classList.toggle('left',narrow()&&(S.loc==='waste'||S.loc==='dst'));$('#sbub').classList.toggle('parts',S.mode!=='use');if(S.mode!=='use')return;const p=P(),d=S.depth,cy=12+d*45;
+ $('#lsv').innerHTML=`<defs><linearGradient id="lc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${p.col[1]}"/><stop offset=".45" stop-color="${p.col[0]}"/><stop offset="1" stop-color="${p.col[1]}"/></linearGradient><linearGradient id="lw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#B9C3C8"/><stop offset=".45" stop-color="#FFFFFF"/><stop offset="1" stop-color="#A9B4B9"/></linearGradient></defs>
+  ${[[0,'0'],[1,'1'],[1.2,'2']].map(([v,l])=>`<line x1="66" y1="${12+v*45}" x2="80" y2="${12+v*45}" stroke="${Math.abs(d-v)<.03?'#F2B632':'#5E6C73'}" stroke-width="2"/><text x="83" y="${v===1.2?22+v*45:10+v*45}" font-size="9" fill="${Math.abs(d-v)<.03?'#F2B632':'#9BB0B6'}" font-family="IBM Plex Mono,monospace" text-anchor="end">${l}</text>`).join('')}
+  <rect x="31" y="${cy+20}" width="14" height="${Math.max(0,90-(cy+20))}" fill="url(#lw)" stroke="#AEB8BD"/>
+  <rect x="16" y="90" width="44" height="18" rx="5" fill="#9AA4A9"/>${[0,1,2,3,4,5,6].map(i=>`<line x1="${20+i*6}" y1="92" x2="${20+i*6}" y2="106" stroke="#6E787D"/>`).join('')}
+  <rect x="12" y="108" width="52" height="42" rx="8" fill="url(#lw)" stroke="#AEB8BD"/><rect x="20" y="118" width="36" height="16" rx="3" fill="#2C3A40"/><text x="38" y="130" text-anchor="middle" font-size="10" font-weight="700" fill="#EAF6F8" font-family="IBM Plex Mono,monospace">${dispTxt()}</text>
+  <rect x="10" y="${cy}" width="56" height="22" rx="10" fill="url(#lc)" stroke="${p.col[1]}"/><ellipse cx="38" cy="${cy+5}" rx="18" ry="3.5" fill="#fff" opacity=".35"/>`;
+ $('#lread').textContent=`${fmt(S.dst,S.task==='stok'?2:1)} µL`}
+function hint(){if(S.mode!=='use'||S.task==='parts'||S.anim)return null;const e=S.ev,t=S.tip;
+ if(!e.pip)return 'pip';if(!e.vol)return 'vol';
+ if(!t)return S.res&&e.ejt?null:'tips';
+ if(S.res)return S.loc==='waste'?'ej':'waste';
+ if(t.liq<=0&&!(t.del>0)){if(S.loc==='src'&&S.imm)return 'cap';if(S.depth<.95)return 'cap';return 'src'}
+ if(t.liq>0&&!(t.del>0)){if(S.loc==='src'&&S.imm){if(T().liq==='dcm'&&!(t.pw>=2))return 'cap';return 'src'}if(S.loc!=='dst'||!S.imm)return 'dst';return 'cap'}
+ if(t.del>0){if(S.imm)return S.depth>=1.15||T().mode==='ters'?'dst':'cap';return 'cap'}return null}
+function render(){if(S.mode!=='parts')hideTip();const ro=$('.rot');if(ro)ro.style.visibility=S.mode==='parts'?'hidden':'visible';panel();drawLoupe();hints3d()}
+/* ---------- parçalar ---------- */
+function seePart(id){S.part=id;S.seen[id]=1;const p=PARTS.find(x=>x[0]===id);say(`<b>${p[1]}</b>: ${p[2]}`);if(PARTS.every(x=>S.seen[x[0]])&&!S.done.parts){S.done.parts=1;setTimeout(()=>say('Harika, pipetin bütün parçalarını tanıdın! Şimdi sağdan bir <b>görev</b> seç; üstteki <b>Kullanım</b> sekmesinde pipeti gerçekten kullanacaksın.'),1800)}render()}
+/* ---------- panel ---------- */
+function panel(){const p=P(),t=T(),use=S.mode==='use';
+ $('#mParts').classList.toggle('on',!use);$('#mUse').classList.toggle('on',use);
+ $('#tasks').innerHTML=TASKS.map((x,i)=>`<button class="task${S.task===x.id?' on':''}${S.done[x.id]?' done':''}" data-t="${x.id}"><span>${S.done[x.id]?'✓':i+1}</span><div>${x.t}<small>${x.d}</small></div></button>`).join('');
+ $('#tasks').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{$('#tdlg').close();reset(b.dataset.t);if(b.dataset.t!=='parts'){S.mode='use';render()}else{S.mode='parts';render()}});
+ $('#tName').textContent=T().t;
+ $('#pipT').textContent='MY-Pipet '+S.pip;$('#pipS').textContent=`${p.n} · düğme rengi: ${p.cap}`;
+ $('#pips').querySelectorAll('button').forEach(b=>{b.classList.toggle('on',b.dataset.p===S.pip);b.disabled=!!S.tip});
+ if(document.activeElement!==$('#vI'))$('#vI').value=fmt(S.vol,p.dp);
+ const busy=!use;['#p1','#p2','#rS','#rF','#lT','#lS','#lD','#lW','#iS','#iD','#iO','#ej'].forEach(i=>$(i).disabled=busy);
+ if(use){$('#iS').disabled=!(S.loc==='src'||S.loc==='dst')||!S.tip||!!S.imm;$('#iD').disabled=S.loc!=='src'||!S.tip||!!S.imm;$('#iO').disabled=!S.imm;$('#ej').disabled=!S.tip;$('#rS').disabled=$('#rF').disabled=S.depth<=0;$('#p1').disabled=S.depth>=1;$('#p2').disabled=S.depth>=1.2}
+ ['#lT','#lS','#lD','#lW'].forEach((i,k)=>$(i).classList.toggle('on',use&&S.loc===['tips','src','dst','waste'][k]));
+ const st=steps();$('#steps').innerHTML=st.map((s,i)=>`<li class="${s.st}"><i>${s.st==='done'?'✓':i+1}</i>${s.t}</li>`).join('')}
+function steps(){if(S.task==='parts')return PARTS.map(p=>({t:p[1],st:S.seen[p[0]]?'done':'todo'})).map((x,i,a)=>{if(x.st!=='done'&&!a.slice(0,i).some(y=>y.st==='cur'))x.st='cur';return x});
+ const t=T(),e=S.ev;if(t.liq==='dcm'){const L=[['Uygun pipeti seç',e.pip],['Hacmi 100 µL’ye ayarla',e.vol],['Uç tak',e.tip],['Havada 1. durağa bas',e.arm],['Daldır, yavaşça bırak',e.asp],['Ucu 2 kez ön ıslat (bas – bırak)',e.prewet],['Hızlıca hedefe: 1. sonra 2. durak',e.disp],['Ucu çıkar, pistonu bırak',e.fin],['Ucu atığa at (ejektör)',e.ejt]];let cur=false;return L.map(([t,d])=>{let st=d?'done':'todo';if(!d&&!cur){st='cur';cur=true}return {t,st}})}
+ const L=[[`Uygun pipeti seç`,e.pip],[`Hacmi ${fmt(t.vol,t.vol<10?1:0)} µL’ye ayarla`,e.vol],['Uç tak',e.tip],[t.mode==='ters'?'Havada 2. durağa bas (ters pipetaj)':'Havada 1. durağa bas',e.arm],['2–3 mm daldır, yavaşça bırak',e.asp],[t.mode==='ters'?'Hedefte duvara değdir, yalnız 1. durağa bas':'Hedefte duvara değdir, 1. sonra 2. durağa bas',e.disp],['Ucu çıkar, sonra pistonu bırak',e.fin],['Ucu atığa at',e.ejt]];
+ let cur=false;return L.map(([t,d])=>{let st=d?'done':'todo';if(!d&&!cur){st='cur';cur=true}return {t,st}})}
+/* ---------- hareketler ---------- */
+function tapLoc(loc){if(S.loc!==loc||loc==='rest'){go(loc);return}
+ if(loc==='tips'){go(loc);return}if(loc==='waste'){if(S.tip)say('Ucu atmak için pipetteki <b>ejektör düğmesine</b> bas: pistonun yanındaki gri düğme ya da piston panelindeki <b>EJEKTÖR</b>.');return}
+ if(loc==='src'||loc==='dst'){if(!S.tip){say('Önce uç tak: <b>uç kutusuna</b> dokun.');return}S.imm?withdraw():immerse('sh')}}
+function go(loc){if(S.mode!=='use')return;if(S.imm){say('Önce <b>ucu sıvıdan çıkar</b>, sonra pipeti hareket ettir.');return}if(loc==='rest'&&S.tip){say('Uç takılıyken pipeti standa asma; uçtaki sıvı pistona kaçabilir. Önce ucu <b>atığa</b> at.');return}S.loc=loc;S.part=null;
+ if(loc==='tips'){if(S.tip){say('Pipette zaten uç takılı. Önce eskisini <b>atığa</b> at.')}else{S.anim='attach';render();setTimeout(()=>{S.anim=null;S.tip={liq:0,kind:null,del:0,used:false};S.ev.tip=true;checkSetup();say(`Ucu koniye bastırarak taktın. ${S.pip} için ${P().cap === 'sarı'?'sarı':P().cap==='mavi'?'mavi':'şeffaf'} kutudaki uçları kullanırız. ${T().mode==='ters'?'Şimdi pistonu havada <b>basılı tut</b>: 2. durağa iner (ters pipetaj).':'Şimdi pistona havada <b>dokun</b>: 1. durağa iner.'}`);render()},600);return}}
+ else if(loc==='waste'&&S.tip)say('Atığın üstündesin. Ucu atmak için pipetin <b>ejektör düğmesine</b> bas.');
+ else if(loc==='src'&&S.tip&&S.tip.used&&!S.usedTipWarn){S.usedTipWarn=true;say('<b>Dikkat:</b> bu uç kullanılmış. Kullanılmış uçla kaynağa girersen numuneyi kontamine edersin. Ucu at, yeni uç tak.')}
+ render()}
+Object.defineProperty(window,'TUBE',{get(){return VOL.tube[S.task]||0},set(x){VOL.tube[S.task]=Math.max(0,x)}});
+function immerse(kind){if(!S.tip){say('Uç takmadan sıvıya girme!');return}if(S.loc!=='src'&&S.loc!=='dst')return;
+ if(S.loc==='src'&&S.tip.used){S.flags.push('Kullanılmış uçla kaynağa girildi (kontaminasyon).');S.tip.used=false}
+ if(S.loc==='src'&&!S.tip.liq&&S.src.v<S.vol*1.3){say(`<b>Kaynakta yeterli sıvı kalmadı</b> (${fmt(S.src.v)} µL). Uç sıvıya tam değmez ve hava çekersin. <b>Kaynağı yenile</b> düğmesiyle tüpü doldur.`);return}
+ if(S.loc==='dst'&&S.tip.liq>0&&TUBE+S.tip.liq>1500){say('<b>Hedef tüp dolmak üzere</b> (1,5 mL). Gerçekte taşar. Önce <b>hedef tüpü boşalt</b>.');return}
+ S.imm=kind;if(S.loc==='src'&&kind==='deep'){S.deepSrc=true;say('Ucu çok derine daldırdın. Ucun dışına sıvı yapışır ve hedefe fazladan gider. Doğrusu: yüzeyin <b>2–3 mm</b> altı.')}
+ else if(S.loc==='src')say(S.depth>0?'Uç sıvıda. Şimdi pistona <b>tekrar dokun</b>: piston yavaşça bırakılır ve sıvı uca çekilir.':'<b>Dikkat:</b> pistona basmadan daldırdın. Şimdi basarsan numuneye hava üflersin. Ucu çıkar, havada bas, sonra daldır.');
+ else say(S.tip.liq>0?`Ucu hedef tüpün iç duvarına değdirdin. Şimdi ${T().mode==='ters'?'<b>yalnız 1. durağa</b>':'<b>1. durağa</b>, ardından <b>2. durağa</b>'} bas.`:'Uçta sıvı yok.');
+ render()}
+function withdraw(){if(!S.imm)return;S.imm=null;if(S.loc==='dst'&&S.tip&&S.tip.del>0&&S.depth>0)say('Ucu pistonu bırakmadan çıkardın, çok iyi. Şimdi pistona dokunarak bırak.');render()}
+function eject(){if(!S.tip)return;S.ej=1;render();setTimeout(()=>{S.ej=0;const ok=S.loc==='waste';S.tip=null;if(ok){S.ev.ejt=true;say(S.res?'Ucu ejektörle doğrudan atığa attın. Görev tamamlandı! Başka bir görev seçebilirsin.':'Ucu atığa attın.');finishIfDone()}else{S.flags.push('Uç atık kabının dışına atıldı.');say(`<b>Uç ${S.loc==='src'?'kaynak tüpe':S.loc==='dst'?'hedef tüpe':'tezgaha'} düştü!</b> Ucu her zaman atık kabının üstünde at.`)}render()},350)}
+/* ---------- piston ---------- */
+function setDepth(d,fast){const prev=S.depth;d=Math.max(0,Math.min(1.2,d));if(Math.abs(d-prev)<.001)return;S.depth=d;
+ if(d>prev){if(!S.press){S.press={max:d,imm:S.imm,loc:S.loc};if(S.loc==='src'&&S.imm&&S.tip&&!S.tip.liq){S.flags.push('Uç numunedeyken pistona basıldı: numuneye hava üflendi.');say('<b>Hata:</b> uç numunedeyken pistona bastın; numuneye hava kabarcığı üfledin. Pistona daldırmadan <b>önce</b> basılır.')}}
+  else S.press.max=Math.max(S.press.max,d);
+  if(S.loc==='dst'&&S.tip&&S.tip.liq>0)dispense();
+  if(S.loc==='src'&&S.tip&&S.tip.liq>0&&((S.imm&&d>=.95&&prev<.95)||(d>=1.15&&prev<1.15))){S.src.v+=S.tip.liq;S.tip.liq=0;S.tip.del=0;S.tip.bub=false;S.tip.drip=false;S.tip.air=0;if(S.imm){S.tip.pw=(S.tip.pw||0)+1;if(S.tip.pw>=2)S.ev.prewet=true;say(S.tip.kind==='dcm'?`<b>Ön ıslatma ${Math.min(S.tip.pw,2)}/2:</b> sıvıyı kaynağa geri verdin. Pistonu yavaşça bırakıp tekrar çek. Ön ıslatma, uçtaki havayı çözücü buharıyla doyurur; böylece uç damlatmaz.`:'Sıvıyı kaynağa geri boşalttın (ön ıslatma). Pistonu yavaşça bırakıp yeniden çek.')}else say('Uçta kalan sıvıyı 2. durağa basarak <b>kaynağa geri boşalttın</b>. Ters pipetajda tekrarlı çalışırken fazlalık böyle atılır.')}
+  if(!S.imm&&S.tip&&!S.tip.liq&&d>=.95&&S.loc!=='dst'){S.ev.arm=(T().mode==='ters')?d>=1.15:d<1.15;
+   if(d>=1.15&&prev<1.15)say(T().mode==='ters'?'2. durağa kadar bastın: <b>ters pipetaj</b> için doğru. Şimdi <b>kaynak tüpe</b> dokun; tekrar dokununca uç sıvıya girer.':'2. durağa kadar bastın. Bu <b>ters pipetaj</b> olur; ileri pipetajda havada yalnız <b>1. durağa</b> basılır.');
+   else if(d<1.15&&prev<.95)say('1. durağa bastın (hafif bir direnç hissedilir). Piston basılı kalır. Şimdi <b>kaynak tüpe</b> dokun; tekrar dokununca uç 2–3 mm sıvıya girer.')}}
+ else if(d<=.001&&S.press){const ctx=S.press;S.press=null;release(ctx,fast)}
+ render()}
+function release(ctx,fast){const t=S.tip;if(!t)return;const Sv=S.vol;
+ if(S.loc==='src'&&S.imm){if(t.liq>0)return;const a=ctx.max;let A=a>=1.15?Sv*1.2:a>=.95?Sv:Sv*a;if(a<.95)S.flags.push('Pistona 1. durağa kadar basılmadı: eksik çekildi.');
+  if(fast){A*=.95;t.bub=true;S.flags.push('Piston hızlı bırakıldı: uçta hava kabarcığı, eksik hacim.')}
+  S.dst=0;S.res=null;$('#res').innerHTML='';t.del=0;t.film=false;t.air=0;t.drip=false;
+  t.liq=A;t.kind=S.src.liq;t.arm=a;t.out=!!S.deepSrc;S.src.v-=A;S.ev.asp=!fast&&a>=.95;
+  if(!fast&&S.src.liq==='dcm'){say((t.pw||0)>=2?'DCM çekildi; uç ön ıslatıldığı için damlatmaz. Yine de oyalanma: ucu çıkar ve <b>hedef tüpe</b> geç.':'DCM çekildi. <b>Dikkat:</b> organik çözücüler uçucudur; uç havada beklerse çözücü damlar. Ya hızlı ol ya da önce ucu <b>2 kez ön ıslat</b>: daldırılmışken pistona dokun (kaynağa ver), sonra tekrar dokun (çek).');return}
+  say(fast?'<b>Hızlı bıraktın!</b> Sıvı uca sıçradı, içeride hava kabarcığı var ve hacim eksik. Pistonu her zaman yavaş bırak.':`Sıvı uca çekildi${a>=1.15?' (ters pipetajda ayarlanandan biraz fazla çekilir, bu normal)':''}. Kaynak tüpe tekrar dokunarak <b>ucu çıkar</b>, sonra <b>hedef tüpe</b> dokun.`);return}
+ if(S.loc==='dst'&&S.imm&&t.del>0){const back=t.del*.3;t.del-=back;S.dst-=back;TUBE-=back;t.liq+=back;S.flags.push('Piston uç sıvıdayken bırakıldı: sıvının bir kısmı geri çekildi.');say('<b>Hata:</b> pistonu uç hâlâ sıvıdayken bıraktın; sıvının bir kısmı uca geri çekildi. Önce ucu çıkar, sonra bırak.');return}
+ if(S.loc==='dst'&&!S.imm&&t.del>0){S.ev.fin=true;evaluate();return}}
+function dispense(){const t=S.tip,m=S.press.max,Sv=S.vol,blood=t.kind==='kan',rev=t.arm>=1.15;const L0=t.liq+t.del;let tgt;
+ if(m<.95)tgt=Math.min(L0,Sv*m);else if(m<1.15)tgt=rev?Math.min(L0,Sv):L0*(blood?.92:.97);else tgt=L0*(blood?.96:1);
+ if(!S.imm)tgt*=.98;if(tgt>t.del){const add=tgt-t.del;t.del=tgt;t.liq=Math.max(0,L0-tgt);S.dst+=add+(t.out?Sv*.02:0);TUBE+=add+(t.out?Sv*.02:0);t.out=false;
+  if(blood&&!rev&&m>=.95)t.film=true;t.bub=false;S.ev.disp=true;
+  if(m>=1.15&&prevSayKey!=='bo'){prevSayKey='bo';say(rev?'<b>Dikkat:</b> ters pipetajda 2. durağa basmazsın; fazladan çekilen sıvı da hedefe gitti.':'2. durağa bastın; uçta kalan son damla da üflendi. Şimdi pistonu basılı tutarak hedef tüpe tekrar dokun ve <b>ucu çıkar</b>.')}
+  else if(m>=.95&&m<1.15&&prevSayKey!=='fs'){prevSayKey='fs';say(rev?'1. durağa bastın; ayarlanan hacim tam olarak verildi, fazlası uçta kaldı. Pistonu basılı tutarak hedef tüpe tekrar dokun ve <b>ucu çıkar</b>.':blood?'1. durağa bastın. Uç duvarında ince bir <b>kan filmi</b> kaldığını görüyor musun? Şimdi pistonu <b>basılı tut</b>: 2. durak.':'1. durağa bastın. Şimdi pistonu <b>basılı tut</b> (2. durak) ve son damlayı üfle.')}}}
+let prevSayKey='';
+function evaluate(){const t=T(),D=S.dst,err=(D-t.vol)/t.vol*100;const f=[...S.flags];
+ if(S.pip!==t.pip)f.push(`${t.vol} µL için en uygun pipet ${t.pip}; ${S.pip} ${PIP[S.pip].max<t.vol?'bu hacmi çekemez':'ile doğruluk düşer'}.`);
+ if(S.tip&&S.tip.film)f.push('Kan ileri pipetajla aktarıldı: uç duvarında kalan film hacmi azalttı. Viskoz sıvılarda ters pipetaj kullanılır.');
+ if(S.tip&&S.tip.arm>=1.15&&S.tip.liq<.01)f.push('Ters pipetajda 2. durağa basılıp fazlalık da verildi.');
+ if(S.tip&&S.tip.dripped)f.push('Organik çözücü uçta havada bekledi ve damladı: hacim kaybı. Ucu 2–3 kez ön ıslat ve hızlı çalış.');
+ if(S.deepSrc)f.push('Uç derin daldırıldı: dışına yapışan sıvı hedefe fazladan gitti.');
+ const ok=Math.abs(err)<=2&&!f.length;S.res={D,err,ok};S.flags=[];S.deepSrc=false;if(ok)S.done[t.id]=1;S.tip&&(S.tip.used=true);
+ $('#res').innerHTML=`<div class="card res ${ok?'ok':'bad'}"><b class="big">${ok?'Doğru aktarım ✓':'Aktarım hatalı'}</b><div class="kv"><span>Hedef</span><b>${fmt(t.vol,t.vol<10?1:0)} µL</b><span>Teslim edilen (gravimetrik)</span><b>${fmt(D,t.vol<10?2:1)} µL</b><span>Hata</span><b style="color:${Math.abs(err)<=2?'#2DBE5B':'#E5484D'}">${err>0?'+':''}${fmt(err,1)} %</b></div>${f.length?`<ul>${f.map(x=>`<li>${x}</li>`).join('')}</ul>`:'<p class="hint">Kabul sınırı ±2 %. Teknik doğru.</p>'}<div class="acts"><button class="bt" id="again">Aynı görevi tekrar dene</button></div></div>`;
+ $('#again').onclick=()=>{reset(t.id);S.mode='use';render()};
+ say(ok?'Mükemmel! Şimdi <b>uç atığına</b> dokun ve pipetin <b>ejektör düğmesine</b> basarak ucu at.':'Sonuç kabul sınırının dışında ya da teknikte hata var. Aşağıdaki notları oku; önce ucu atığa at, sonra tekrar dene.')}
+function finishIfDone(){}
+function checkSetup(){const t=T();if(!t.vol)return;S.ev.pip=S.pip===t.pip;S.ev.vol=Math.abs(S.vol-t.vol)<1e-6}
+/* sürükleme */
+function pressStart(e,ppu){if(S.mode!=='use')return;e.preventDefault();e.stopPropagation();const st={y0:e.clientY,d0:S.depth,moved:false,held:false,last:performance.now(),lastD:S.depth,v:0};
+ st.timer=setTimeout(()=>{if(st.moved)return;st.held=true;clearInterval(relT);if(S.depth<.95)setDepth(1);setTimeout(()=>setDepth(1.2),140);if(navigator.vibrate)navigator.vibrate(18)},550);
+ const mv=ev=>{const dy=ev.clientY-st.y0;if(!st.moved&&Math.abs(dy)>8){st.moved=true;clearTimeout(st.timer)}if(!st.moved)return;
+  const raw=st.d0+dy/ppu;let d;if(st.d0>=1.05)d=Math.min(1.2,raw);else if(raw<=1)d=raw;else if(raw<=1.4)d=1;else d=Math.min(1.2,1+(raw-1.4));
+  const now=performance.now(),dt=(now-st.last)/1000;if(dt>0){st.v=(d-st.lastD)/dt;st.last=now;st.lastD=d}setDepth(d,st.v<-3.5)};
+ const up=()=>{clearTimeout(st.timer);window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);
+  if(!st.moved&&!st.held){if(S.depth<.05){clearInterval(relT);setDepth(1)}else slowRelease()}};
+ window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up)}
+let drag=null;
+function svgY(e){const pt=sv.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(sv.getScreenCTM().inverse()).y}
+setInterval(()=>{const t=S&&S.tip;if(!t||t.kind!=='dcm'||!(t.liq>0)||S.imm||S.mode!=='use')return;t.air=(t.air||0)+.25;const onset=(t.pw||0)>=2?14:3;
+ if(t.air<onset)return;const loss=Math.min(t.liq,S.vol*.035*.25);t.liq-=loss;{const x=LOCX[S.loc]||0;const sp=S.spills.find(o=>Math.abs(o.x-x)<20);if(sp)sp.v+=loss;else S.spills.push({x,v:loss})}if(!t.drip){t.drip=true;t.dripped=true;say('<b>Uçtan damlıyor!</b> DCM uçucu ve yüzey gerilimi düşük; uçtaki hava ısınıp genleşir ve çözücüyü dışarı iter. Hızlı çalış ya da ucu ön ıslat.')}render()},250);
+let relT=null;function slowRelease(){clearInterval(relT);relT=setInterval(()=>{const d=S.depth-.06;if(d<=0){clearInterval(relT);setDepth(0,false)}else setDepth(d,false)},40)}
+/* ================= 3B SAHNE ================= */
+const box=$('#cv3');let R3=null;const K={models:{},hot:[]};const HOT=[];
+const stageEl=document.querySelector('.stage');const narrow=()=>stageEl.clientWidth<600;
+const LOCX={rest:-16,tips:-5,src:4,dst:12,waste:21};const LZ=2;const TL={P10:3.0,P200:4.6,P1000:6.6};
+const STAND={x:-16,z:-3,r:3.7};const SLOTS=['P10','P20','P100','P200','P1000','P5000'];
+const DECOR={P20:{col:['#E9ECEE','#9AA4A9'],n:'P20 · 2–20 µL'},P100:{col:['#FFE16B','#D9A800'],n:'P100 · 10–100 µL'},P5000:{col:['#A884E0','#6B3FB5'],n:'P5000 · 1–5 mL'}};
+const TIPC={P10:'#EEF4F6',P200:'#F7E79A',P1000:'#A9CCF4'};
+function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');draw(x,w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t}
+function noiseTex(base,amt,n=512,speck=0){return canvasTex(n,n,(c,w,h)=>{c.fillStyle=base;c.fillRect(0,0,w,h);const d=c.getImageData(0,0,w,h);for(let i=0;i<d.data.length;i+=4){const v=(Math.random()-.5)*amt;d.data[i]+=v;d.data[i+1]+=v;d.data[i+2]+=v}c.putImageData(d,0,0);for(let i=0;i<speck;i++){c.fillStyle=`rgba(${Math.random()<.5?'60,70,75':'255,255,255'},${.15+Math.random()*.25})`;c.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1+Math.random()*2)}})}
+function hot(o,id){o.userData.hot=id;HOT.push(o);return o}
+let M,add;
+const srcTop=()=>.2+6.0*Math.min(1,(S.src?S.src.v:0)/1500);
+function pipModel(name){const g=new THREE.Group();const fn=PIP[name]?'fn':'dec';const col=(PIP[name]||DECOR[name]).col;
+ const cm=new THREE.MeshPhysicalMaterial({color:col[0],roughness:.35,clearcoat:.7});const cmd=new THREE.MeshStandardMaterial({color:col[1],roughness:.4});
+ const P=(geo,mat,x,y,z,par=g,sh=true)=>add(geo,mat,x,y,z,par,sh);
+ P(new THREE.CylinderGeometry(.45,.2,4.2,24),M.white,0,2.1,0);
+ const sl=new THREE.Group();g.add(sl);P(new THREE.CylinderGeometry(.58,.52,1.6,24),M.grey,0,5.0,0,sl);g.userData.sleeve=sl;
+ P(new THREE.CylinderGeometry(.98,.62,1.4,28),M.white,0,6.5,0);
+ const body=P(new THREE.CylinderGeometry(1.0,.98,8.4,32),M.white,0,11.4,0);
+ P(new THREE.CylinderGeometry(1.01,1.01,.35,32),cmd,0,9.4,0,g,false);
+ const grip=P(new THREE.CylinderGeometry(1.03,1.03,6.4,24,1,true,Math.PI*.7,Math.PI*.6),M.grey,0,11.6,0,g,false);
+ const lab=canvasTex(512,128,(c,w,h)=>{c.clearRect(0,0,w,h);c.fillStyle='#2E5FA8';c.font='700 64px "Source Sans 3",sans-serif';c.fillText('MY-Pipet',10,86);c.font='italic 400 64px "Source Sans 3",sans-serif';c.fillText(name,290,86)});
+ const lp=P(new THREE.PlaneGeometry(4.8,1.2),new THREE.MeshBasicMaterial({map:lab,transparent:true}),.18,10.3,1.0,g,false);lp.rotation.z=Math.PI/2;lp.position.x=-.25;
+ const dc=document.createElement('canvas');dc.width=256;dc.height=128;const dt=new THREE.CanvasTexture(dc);dt.colorSpace=THREE.SRGBColorSpace;
+ add(new THREE.BoxGeometry(1.25,.72,.12),M.dark,.1,13.7,.98,g,false);const disp=P(new THREE.PlaneGeometry(1.1,.58),new THREE.MeshBasicMaterial({map:dt,toneMapped:false}),.1,13.7,1.05,g,false);g.userData.dc=dc;g.userData.dt=dt;g.userData.dtxt='';
+ const cal=P(new THREE.CircleGeometry(.24,20),new THREE.MeshStandardMaterial({color:'#D3D9DC'}),.45,8.4,1.01,g,false);
+ const hook=new THREE.Group();hook.position.set(-.8,14.8,0);g.add(hook);P(new THREE.BoxGeometry(2.4,.45,.7),M.grey,-1.1,0,0,hook);const hk2=P(new THREE.CylinderGeometry(.3,.3,.7,16),M.grey,-2.3,-.15,0,hook);hk2.rotation.x=Math.PI/2;hook.rotation.z=-.18;
+ const ring=new THREE.Group();ring.position.y=16.1;g.add(ring);P(new THREE.CylinderGeometry(.86,.86,1.0,32),M.grey,0,0,0,ring);for(let i=0;i<20;i++){const a=i/20*Math.PI*2;P(new THREE.BoxGeometry(.08,.95,.08),M.dgrey,Math.cos(a)*.87,0,Math.sin(a)*.87,ring,false)}
+ P(new THREE.CylinderGeometry(.7,.8,.4,24),M.white,0,16.8,0);
+ const ej=new THREE.Group();ej.position.set(.62,17.3,0);g.add(ej);P(new THREE.BoxGeometry(.55,.9,.6),M.grey,0,0,0,ej);g.userData.ej=ej;
+ const pl=new THREE.Group();g.add(pl);P(new THREE.CylinderGeometry(.26,.26,1.6,16),M.white,0,17.6,0,pl);P(new THREE.CylinderGeometry(.66,.62,.75,28),cm,0,18.55,0,pl);g.userData.pl=pl;
+ /* uç */
+ const tip=new THREE.Group();g.add(tip);g.userData.tip=tip;
+ if(PIP[name]){const L=TL[name];const tm=new THREE.MeshPhysicalMaterial({color:TIPC[name],roughness:.15,transparent:true,opacity:.45,clearcoat:.8,depthWrite:false,side:THREE.DoubleSide});
+  P(new THREE.CylinderGeometry(.46,.07,L,24,1,true),tm,0,-L/2+.25,0,tip,false);
+  const lm=new THREE.MeshPhysicalMaterial({color:'#9FD3E6',transparent:true,opacity:.9,roughness:.2,depthWrite:false});const liq=new THREE.Mesh(new THREE.BufferGeometry(),lm);tip.add(liq);g.userData.liq=liq;g.userData.lf=-1;
+  const film=new THREE.Mesh(new THREE.CylinderGeometry(.42,.065,L*.85,20,1,true),new THREE.MeshBasicMaterial({color:'#7A0F18',transparent:true,opacity:.35,side:THREE.DoubleSide,depthWrite:false}));film.position.y=-L*.85/2+.1;tip.add(film);g.userData.film=film;
+  const bub=new THREE.Mesh(new THREE.SphereGeometry(.12,10,8),new THREE.MeshBasicMaterial({color:'#FFFFFF'}));tip.add(bub);g.userData.bub=bub;
+  const drop=new THREE.Mesh(new THREE.SphereGeometry(.16,12,8),new THREE.MeshPhysicalMaterial({color:'#5E8FD6',roughness:.05,clearcoat:1,transparent:true}));drop.scale.y=1.4;g.add(drop);g.userData.drop=drop;
+  const out=new THREE.Mesh(new THREE.SphereGeometry(.1,10,8),lm);out.position.set(.12,-L+.5,.0);tip.add(out);g.userData.out=out;
+  hot(add(new THREE.BoxGeometry(1.2,L,1.2),new THREE.MeshBasicMaterial({visible:false}),0,-L/2,0,tip,false),'part:tip')}
+ /* tıklama alanları */
+ if(PIP[name]){hot(add(new THREE.CylinderGeometry(.95,.95,1.4,12),new THREE.MeshBasicMaterial({visible:false}),0,18.6,0,pl,false),'cap');
+  hot(add(new THREE.CylinderGeometry(1.1,1.1,1.2,12),new THREE.MeshBasicMaterial({visible:false}),0,0,0,ring,false),'ring');
+  hot(add(new THREE.BoxGeometry(1.1,1.4,1.1),new THREE.MeshBasicMaterial({visible:false}),0,0,0,ej,false),'ej');
+  hot(add(new THREE.BoxGeometry(3.2,1.1,1.2),new THREE.MeshBasicMaterial({visible:false}),-1.4,0,0,hook,false),'part:hook');
+  hot(add(new THREE.BoxGeometry(1.6,1.0,.4),new THREE.MeshBasicMaterial({visible:false}),.1,13.7,1.1,g,false),'part:disp');
+  hot(add(new THREE.CircleGeometry(.5,12),new THREE.MeshBasicMaterial({visible:false}),.45,8.4,1.05,g,false),'part:cal');
+  hot(add(new THREE.CylinderGeometry(.75,.75,5.8,12),new THREE.MeshBasicMaterial({visible:false}),0,2.9,0,g,false),'part:sleeve');
+  hot(add(new THREE.CylinderGeometry(1.15,1.15,9,12),new THREE.MeshBasicMaterial({visible:false}),0,11,0,g,false),'body:'+name)}
+ else hot(add(new THREE.CylinderGeometry(1.2,1.2,19,12),new THREE.MeshBasicMaterial({visible:false}),0,9.5,0,g,false),'body:'+name);
+ g.userData.name=name;R3.scene.add(g);return g}
+function build(){const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ box.prepend(renderer.domElement);
+ const scene=new THREE.Scene();scene.background=new THREE.Color('#9FB3BA');scene.fog=new THREE.Fog('#A9BBC1',110,280);const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;
+ const cam=new THREE.PerspectiveCamera(30,1,.5,600);const ctl=new OrbitControls(cam,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minPolarAngle=.35;ctl.maxPolarAngle=1.45;ctl.minAzimuthAngle=-1.0;ctl.maxAzimuthAngle=1.0;ctl.minDistance=8;ctl.maxDistance=140;
+ scene.add(new THREE.HemisphereLight('#EAF6FF','#6F7E84',.5));const sun=new THREE.DirectionalLight('#FFF2DF',2.0);sun.position.set(-20,55,40);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:10,far:150});sun.shadow.bias=-.0004;sun.shadow.radius=4;scene.add(sun);
+ const fill=new THREE.DirectionalLight('#EAF4FF',.55);fill.position.set(35,25,30);scene.add(fill);
+ R3={renderer,scene,cam,ctl,warn:[]};
+ M={white:new THREE.MeshPhysicalMaterial({color:'#F3F5F6',roughness:.35,clearcoat:.5}),grey:new THREE.MeshStandardMaterial({color:'#B9C1C5',roughness:.4,metalness:.2}),dgrey:new THREE.MeshStandardMaterial({color:'#6E787D',roughness:.5}),
+  dark:new THREE.MeshStandardMaterial({color:'#262D31',roughness:.45}),alu:new THREE.MeshStandardMaterial({color:'#E6EAEC',metalness:.55,roughness:.26}),steel:new THREE.MeshStandardMaterial({color:'#C9CFD2',metalness:.9,roughness:.22}),
+  graph:new THREE.MeshPhysicalMaterial({color:'#2E373C',roughness:.4,clearcoat:.5}),teal:new THREE.MeshPhysicalMaterial({color:'#2C9EA3',roughness:.32,clearcoat:.7}),
+  glass:new THREE.MeshPhysicalMaterial({color:'#EAF6F8',roughness:.03,transparent:true,opacity:.3,clearcoat:1,envMapIntensity:2.4,depthWrite:false,side:THREE.DoubleSide}),
+  pp:new THREE.MeshPhysicalMaterial({color:'#F4F6F2',roughness:.2,transparent:true,opacity:.45,clearcoat:.6,depthWrite:false,side:THREE.DoubleSide}),
+  bench:new THREE.MeshStandardMaterial({color:'#FFFFFF',roughness:.55,map:noiseTex('#7F8E95',12,512,2600)}),wall:new THREE.MeshStandardMaterial({color:'#B7CAD0',roughness:.9})};
+ M.bench.map.wrapS=M.bench.map.wrapT=THREE.RepeatWrapping;M.bench.map.repeat.set(5,3);
+ add=(geo,mat,x,y,z,par=scene,sh=true)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=sh;m.receiveShadow=true;par.add(m);return m};
+ const RB=(w,h,d,r)=>new RoundedBoxGeometry(w,h,d,4,r);
+ /* oda */
+ add(new THREE.BoxGeometry(220,4,95),M.bench,12,-2,12,scene,false);add(new THREE.BoxGeometry(220,2.4,1.2),M.graph,12,-1,59.6,scene,false);
+ add(new THREE.PlaneGeometry(320,160),M.wall,12,76,-30,scene,false);add(new THREE.BoxGeometry(220,1.2,1.2),M.graph,12,.6,-29.6,scene,false);
+ {const tile=canvasTex(512,256,(c,w,h)=>{c.fillStyle='#9DB3BB';c.fillRect(0,0,w,h);for(let y=0;y<4;y++)for(let x=0;x<8;x++){c.fillStyle=`hsl(192,${18+Math.random()*8}%,${70+Math.random()*5}%)`;c.fillRect(x*64+2,y*64+2,60,60)}});tile.wrapS=tile.wrapT=THREE.RepeatWrapping;tile.repeat.set(10,1.4);
+  add(new THREE.PlaneGeometry(260,26),new THREE.MeshStandardMaterial({map:tile,roughness:.35}),12,13,-29.9,scene,false);
+  const cab=new THREE.MeshStandardMaterial({color:'#5E8792',roughness:.55});for(let i=0;i<6;i++)add(new THREE.BoxGeometry(33,30,14),cab,-75+i*34,66,-23,scene,false);
+  add(new THREE.BoxGeometry(206,1.5,16),M.graph,12,50.4,-23,scene,false);
+  const win=canvasTex(256,256,(c,w,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#D7EEFA');g.addColorStop(1,'#9CCBE4');c.fillStyle=g;c.fillRect(0,0,w,h);c.fillStyle='#EAF4F7';c.fillRect(124,0,8,h);c.fillRect(0,124,w,8)});
+  add(new THREE.PlaneGeometry(36,22),new THREE.MeshBasicMaterial({map:win,toneMapped:false,fog:false}),-40,36,-29.8,scene,false);
+  add(new THREE.BoxGeometry(46,1,9),M.white,36,32,-25.5,scene,false);
+  ['#2F7DE1','#1F9A97','#E0A030','#C2312B','#2F7DE1','#6A4FB3','#1F9A97'].forEach((c,i)=>{const x=18+i*6;add(new THREE.CylinderGeometry(1.7,1.7,6+(i%3)*1.5,20),new THREE.MeshPhysicalMaterial({color:i%2?'#8A4A12':'#EAF2F2',transparent:true,opacity:.85,roughness:.1,clearcoat:1}),x,35.5+(i%3)*.75,-25,scene,false);add(new THREE.CylinderGeometry(1,1,1.4,16),new THREE.MeshStandardMaterial({color:c,roughness:.4}),x,39.2+(i%3)*1.5,-25,scene,false)})}
+ /* döner pipet standı */
+ {const g=new THREE.Group();g.position.set(STAND.x,0,STAND.z);scene.add(g);K.stand=g;
+  add(new THREE.CylinderGeometry(4.6,4.9,.9,48),M.graph,0,.45,0,g);add(new THREE.CylinderGeometry(.45,.45,25,20),M.steel,0,13,0,g);
+  const car=new THREE.Group();car.position.y=25;g.add(car);K.car=car;
+  const sh=new THREE.Shape();const N=6;for(let i=0;i<N;i++){const a0=i/N*Math.PI*2,a1=(i+1)/N*Math.PI*2;const pts=[[a0+.1,4.6],[a0+.32,4.6],[a0+.36,3.4],[a0+.68,3.4],[a0+.72,4.6],[a1-.1,4.6]];pts.forEach(([a,r],k)=>{const x=Math.cos(a)*r,y=Math.sin(a)*r;if(i===0&&k===0)sh.moveTo(x,y);else sh.lineTo(x,y)})}sh.closePath();
+  const disc=add(new THREE.ExtrudeGeometry(sh,{depth:.7,bevelEnabled:true,bevelThickness:.12,bevelSize:.12,bevelSegments:2}),M.teal,0,0,0,car);disc.rotation.x=-Math.PI/2;
+  add(new THREE.CylinderGeometry(.9,.9,1.2,20),M.graph,0,.4,0,car);
+  hot(add(new THREE.CylinderGeometry(5,5,1.4,16),new THREE.MeshBasicMaterial({visible:false}),0,.4,0,car,false),'stand')}
+ /* uç kutusu */
+ {const g=new THREE.Group();g.position.set(LOCX.tips,0,LZ);scene.add(g);K.tipsG=g;K.tipBoxM=new THREE.MeshPhysicalMaterial({color:'#E0A800',roughness:.35,transparent:true,opacity:.92,clearcoat:.5});
+  add(RB(6.4,3.0,4.4,.25),K.tipBoxM,0,1.5,0,g);add(new THREE.BoxGeometry(6.2,.2,4.2),M.dark,0,3.05,0,g,false);
+  K.tipRackM=new THREE.MeshPhysicalMaterial({color:'#F7E79A',roughness:.2,transparent:true,opacity:.75});K.rackTips=[];
+  for(let i=0;i<8;i++)for(let j=0;j<5;j++){const t=add(new THREE.CylinderGeometry(.3,.07,1.6,10),K.tipRackM,-2.6+i*.74,3.1+.5,-1.5+j*.75,g,false);K.rackTips.push(t)}
+  hot(add(new THREE.BoxGeometry(7,5,5),new THREE.MeshBasicMaterial({visible:false}),0,2.2,0,g,false),'loc:tips')}
+ /* kaynak tüp */
+ {const g=new THREE.Group();g.position.set(LOCX.src,0,LZ);scene.add(g);K.srcG=g;
+  add(new THREE.CylinderGeometry(1.35,1.35,6.6,32,1,true),M.glass,0,3.3,0,g,false);add(new THREE.CircleGeometry(1.35,32),M.glass,0,.05,0,g,false).rotation.x=-Math.PI/2;
+  add(new THREE.TorusGeometry(1.36,.08,8,32),M.glass,0,6.6,0,g,false).rotation.x=Math.PI/2;
+  K.srcLiq=add(new THREE.CylinderGeometry(1.25,1.25,1,32),new THREE.MeshPhysicalMaterial({color:'#9FD3E6',transparent:true,opacity:.85,roughness:.15,depthWrite:false}),0,.5,0,g,false);
+  add(new THREE.CylinderGeometry(1.5,1.5,1.0,32),new THREE.MeshStandardMaterial({color:'#4A92F0',roughness:.45}),2.6,.5,1.2,scene).position.set(LOCX.src+2.8,.5,LZ+1.4);
+  hot(add(new THREE.BoxGeometry(3.4,8,3.4),new THREE.MeshBasicMaterial({visible:false}),0,3.6,0,g,false),'loc:src')}
+ /* hedef: terazi üstünde mikrotüp */
+ {const g=new THREE.Group();g.position.set(LOCX.dst,0,LZ);scene.add(g);K.dstG=g;
+  add(RB(6.6,1.6,6.2,.3),M.white,0,.8,0,g);add(new THREE.CylinderGeometry(2.2,2.2,.2,32),M.steel,0,1.7,0,g);
+  const dc=document.createElement('canvas');dc.width=512;dc.height=128;K.balC=dc;K.balT=new THREE.CanvasTexture(dc);K.balT.colorSpace=THREE.SRGBColorSpace;
+  add(new THREE.PlaneGeometry(4.6,1.15),new THREE.MeshBasicMaterial({map:K.balT,toneMapped:false}),0,.85,3.12,g,false);
+  add(new THREE.CylinderGeometry(1.0,1.0,.6,24),M.dgrey,0,2.1,0,g);
+  add(new THREE.CylinderGeometry(.62,.62,2.4,24,1,true),M.pp,0,3.8,0,g,false);add(new THREE.CylinderGeometry(.62,.16,1.2,24,1,true),M.pp,0,2.0,0,g,false);
+  add(new THREE.TorusGeometry(.66,.08,8,24),M.pp,0,5.0,0,g,false).rotation.x=Math.PI/2;
+  const lidH=add(new THREE.CylinderGeometry(.7,.7,.25,24),M.pp,-1.3,5.0,0,g,false);lidH.rotation.z=1.3;
+  K.dstLiq=add(new THREE.CylinderGeometry(.56,.56,1,24),new THREE.MeshPhysicalMaterial({color:'#9FD3E6',transparent:true,opacity:.85,depthWrite:false}),0,2.6,0,g,false);
+  hot(add(new THREE.BoxGeometry(3,6.5,3),new THREE.MeshBasicMaterial({visible:false}),0,3.6,0,g,false),'loc:dst')}
+ /* atık */
+ {const g=new THREE.Group();g.position.set(LOCX.waste,0,LZ);scene.add(g);K.wasteG=g;
+  add(new THREE.CylinderGeometry(2.3,1.9,4.6,32,1,true),new THREE.MeshStandardMaterial({color:'#C2312B',roughness:.5,side:THREE.DoubleSide}),0,2.3,0,g);add(new THREE.CircleGeometry(1.9,32),M.dark,0,.1,0,g,false).rotation.x=-Math.PI/2;
+  add(new THREE.TorusGeometry(2.3,.14,8,40),new THREE.MeshStandardMaterial({color:'#8E1F19'}),0,4.6,0,g).rotation.x=Math.PI/2;
+  add(new THREE.PlaneGeometry(1.6,1.6),new THREE.MeshBasicMaterial({map:canvasTex(128,128,(c)=>{c.strokeStyle='#fff';c.lineWidth=8;c.beginPath();c.arc(64,64,40,0,7);c.stroke();c.font='700 40px sans-serif';c.fillStyle='#fff';c.textAlign='center';c.fillText('☣',64,78)}),transparent:true}),0,2.4,2.2,g,false).rotation.y=.0;
+  hot(add(new THREE.BoxGeometry(5,6,5),new THREE.MeshBasicMaterial({visible:false}),0,2.6,0,g,false),'loc:waste')}
+ /* zemin etiketleri */
+ const lab=(txt,x)=>{const t=canvasTex(512,96,(c,w,h)=>{c.fillStyle='rgba(255,255,255,.88)';c.beginPath();c.roundRect(4,8,w-8,h-16,30);c.fill();c.fillStyle='#24333B';c.font='700 48px "Source Sans 3",sans-serif';c.textAlign='center';c.fillText(txt,w/2,64)});const m=add(new THREE.PlaneGeometry(6,1.15),new THREE.MeshBasicMaterial({map:t,transparent:true,toneMapped:false}),x,.05,LZ+4.6,scene,false);m.rotation.x=-Math.PI/2;return m};
+ lab('Pipet standı',STAND.x);K.labTips=lab('Uçlar',LOCX.tips);K.labSrc=lab('Kaynak',LOCX.src);lab('Hedef · terazi',LOCX.dst);lab('Uç atığı',LOCX.waste);
+ /* dökülmeler */
+ K.spillM=[];for(let i=0;i<8;i++){const m=add(new THREE.CircleGeometry(1,20),new THREE.MeshPhysicalMaterial({color:'#7FA8E0',transparent:true,opacity:.7,roughness:.05,clearcoat:1}),0,.03,LZ,scene,false);m.rotation.x=-Math.PI/2;m.visible=false;K.spillM.push(m)}
+ /* pipetler */
+ SLOTS.forEach(n=>K.models[n]=pipModel(n));
+ new ResizeObserver(fit).observe(box);fit();
+ /* giriş */
+ const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
+ const setPtr=e=>{const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,cam)};
+ const pick=e=>{setPtr(e);const hit=ray.intersectObjects(HOT.filter(o=>visibleDeep(o)),false)[0];return hit?hit.object.userData.hot:null};
+ const plane=new THREE.Plane(new THREE.Vector3(0,0,1),-LZ),hitP=new THREE.Vector3();
+ renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};if(S.mode!=='use'||S.anim)return;const h=pick(e);
+  if(h==='cap'){ctl.enabled=false;pressStart(e,70);const re=()=>{ctl.enabled=true;removeEventListener('pointerup',re)};addEventListener('pointerup',re);down=null;return}
+  if(h&&h.startsWith('body:')&&h.slice(5)===S.pip&&S.loc!=='rest'){setPtr(e);if(!ray.ray.intersectPlane(plane,hitP))return;ctl.enabled=false;const q=pose();if(S.imm)S.imm=null;S.drag={x:q.x,y:q.y,ox:hitP.x-q.x,oy:hitP.y-q.y,moved:false,sx:e.clientX,sy:e.clientY};
+   const mv=ev=>{setPtr(ev);if(!ray.ray.intersectPlane(plane,hitP))return;if(Math.hypot(ev.clientX-S.drag.sx,ev.clientY-S.drag.sy)>6)S.drag.moved=true;S.drag.x=Math.max(-9,Math.min(25,hitP.x-S.drag.ox));S.drag.y=Math.max((S.tip?TL[S.pip]:0)+.2,Math.min(20,hitP.y-S.drag.oy))};
+   const upf=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',upf);ctl.enabled=true;const d=S.drag;S.drag=null;down=null;if(!d.moved){render();return}
+    const loc=nearLoc(d.x),tipY=d.y-(S.tip?TL[S.pip]:0);if(!loc){say('Pipeti bir kutunun, tüpün ya da atığın <b>üstüne</b> bırak.');render();return}
+    if(S.loc!==loc||loc==='tips')go(loc);else render();
+    if(S.tip&&loc==='src'&&tipY<srcTop()+.2)immerse(tipY<srcTop()-1.6?'deep':'sh');else if(S.tip&&loc==='dst'&&tipY<4.6)immerse('sh')};
+   addEventListener('pointermove',mv);addEventListener('pointerup',upf);return}});
+ renderer.domElement.addEventListener('pointerup',e=>{if(!down)return;const m=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;if(m<7){const h=pick(e);if(S.mode==='parts'){tipAt(h,e);return}hideVpop(h);if(h)onHot(h)}});
+ renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||down){if(down)hideTip();return}const h=pick(e);renderer.domElement.style.cursor=h?(h.startsWith('body:'+S.pip)?'grab':'pointer'):'default';if(S.mode==='parts')tipAt(h,e)});
+ renderer.domElement.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hideTip()});
+ ctl.addEventListener('start',()=>{camAnim=null});
+ animate()}
+const visibleDeep=o=>{while(o){if(o.visible===false)return false;o=o.parent}return true};
+function nearLoc(x){let best=null,bd=3.6;for(const k of ['tips','src','dst','waste']){const d=Math.abs(LOCX[k]-x);if(d<bd){bd=d;best=k}}return best}
+function onHot(h){const [a,b]=h.split(':');
+ if(a==='loc')tapLoc(b);else if(a==='ej')eject();else if(a==='ring')showVpop();else if(a==='stand'||(a==='body'&&(S.loc==='rest'||b!==S.pip)))standTap(b)}
+function standTap(n){if(!n||!PIP[n]){say(n&&DECOR[n]?`Bu <b>${DECOR[n].n}</b> pipeti; bu görevlerde kullanmıyoruz. Görevine uygun pipeti seç: P10, P200 ya da P1000.`:'Döner pipet standı: pipetler kullanılmadığında dik asılı durur; böylece uçta kalan sıvı pipetin içine akmaz.');return}choosePip(n)}
+/* poz */
+function pose(){if(S.mode==='parts')return {x:LOCX.src-1,y:3.4,z:LZ+3,rz:0,ry:0};if(S.drag)return {x:S.drag.x,y:S.drag.y,z:LZ,rz:0,ry:0};
+ const tl=S.tip?TL[S.pip]:0;let tb;const L=S.loc;
+ if(L==='rest')return null;
+ if(L==='tips'){const y=S.anim==='attach'?3.4:6.4;return {x:LOCX.tips,y,z:LZ,rz:0,ry:0}}
+ if(L==='src')tb=S.imm==='deep'?Math.max(.35,srcTop()-2.2):S.imm==='sh'?Math.max(.3,srcTop()-.35):7.6;
+ if(L==='dst')tb=S.imm?2.3:6.4;
+ if(L==='waste')tb=6.2;
+ return {x:LOCX[L]+(L==='dst'&&S.imm?.25:0),y:tb+tl,z:LZ,rz:L==='dst'&&S.imm?-.16:0,ry:0}}
+/* kamera */
+let camAnim=null;const camDir=new THREE.Vector3(.18,.42,1).normalize();
+function camGoal(){const nar=narrow();let c,rad,dir=camDir;
+ if(S.mode==='parts'){c=new THREE.Vector3(LOCX.src-1+(nar?0:3),11.5,LZ+3);rad=nar?10.5:13.5;dir=new THREE.Vector3(.1,.12,1).normalize()}
+ else if(nar){const x=S.loc==='rest'?STAND.x+2:LOCX[S.loc];c=new THREE.Vector3(x,10.5,LZ);rad=13}else{c=new THREE.Vector3(3+(document.body.classList.contains('panel')?7:0),12.5,0);rad=22}
+ const asp=box.clientWidth/Math.max(1,box.clientHeight),v=THREE.MathUtils.degToRad(30)/2,hf=Math.atan(Math.tan(v)*asp);const d=rad/Math.sin(Math.min(v,hf));return {t:c,p:c.clone().add(dir.clone().multiplyScalar(d))}}
+function fit(){if(!R3)return;const w=box.clientWidth,h=box.clientHeight;R3.renderer.setSize(w,h,false);R3.cam.aspect=w/h;R3.cam.updateProjectionMatrix();const g=camGoal();R3.cam.position.copy(g.p);R3.ctl.target.copy(g.t);R3.ctl.update()}
+let camKey='';function goCam(){const g=camGoal();camAnim={p0:R3.cam.position.clone(),t0:R3.ctl.target.clone(),p:g.p,t:g.t,s:performance.now()}}
+/* uyarı kutuları (nesneye bağlı) */
+function warnBox(obj,size){obj.updateWorldMatrix(true,true);const b=new THREE.Box3();if(size){b.setFromCenterAndSize(new THREE.Vector3(),size)}else{const inv=obj.matrixWorld.clone().invert();obj.traverse(o=>{if(o.isMesh&&o.geometry){o.geometry.computeBoundingBox();const bb=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld).applyMatrix4(inv);b.union(bb)}});b.expandByScalar(.25)}
+ const s=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());const ls=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(s.x,s.y,s.z)),new THREE.LineBasicMaterial({color:'#FF2A2A',transparent:true,depthTest:false,toneMapped:false}));ls.position.copy(c);ls.renderOrder=10;
+ ls.add(new THREE.Mesh(new THREE.BoxGeometry(s.x,s.y,s.z),new THREE.MeshBasicMaterial({color:'#FF2A2A',transparent:true,opacity:.12,depthWrite:false,toneMapped:false})));obj.add(ls);return ls}
+let curWarn=[],lastHint='';
+function hints3d(){const h=hint();$('#loupe').classList.toggle('warnL',h==='cap');$('#lej').classList.toggle('pwarn',h==='ej');$('#vI').classList.toggle('hw',h==='vol');
+ if(!R3)return;const key=(h||'')+S.pip+S.loc+(S.tip?1:0);if(key===lastHint)return;lastHint=key;curWarn.forEach(o=>o.parent&&o.parent.remove(o));curWarn=[];if(!h)return;const m=K.models[S.pip];
+ const t=T();if(h==='pip'){curWarn=[warnBox(K.models[t.pip])];return}
+ if(h==='vol'){curWarn=[warnBox(m.children.find(c=>c.position.y===16.1)||m,new THREE.Vector3(2.4,1.6,2.4))];return}
+ if(h==='cap'){curWarn=[warnBox(m.userData.pl,null)];return}if(h==='ej'){curWarn=[warnBox(m.userData.ej)];return}
+ const g={tips:K.tipsG,src:K.srcG,dst:K.dstG,waste:K.wasteG}[h];if(g)curWarn=[warnBox(g)]}
+/* her kare */
+let carA=Math.PI/2,lastF=performance.now();const tmpV=new THREE.Vector3();
+function slotPos(i,A){const th=A-i*Math.PI/3;return {x:STAND.x+Math.cos(th)*STAND.r,z:STAND.z+Math.sin(th)*STAND.r,th}}
+function sync(t){const now=performance.now(),dt=Math.min(.1,(now-lastF)/1000);lastF=now;
+ const idx=SLOTS.indexOf(S.mode==='parts'?'P200':S.pip);let tgtA=Math.PI/2+idx*Math.PI/3;while(tgtA-carA>Math.PI)tgtA-=Math.PI*2;while(tgtA-carA<-Math.PI)tgtA+=Math.PI*2;carA+=(tgtA-carA)*Math.min(1,dt*4);K.car.rotation.y=-carA-Math.PI/6;
+ SLOTS.forEach((n,i)=>{const g=K.models[n];const active=n===S.pip;const sp=slotPos(i,carA);const ph=S.mode==='parts'&&n===S.pip?null:(!active||S.loc==='rest'||S.mode!=='use')?{x:sp.x,y:10.0,z:sp.z,ry:-sp.th,rz:0}:null;
+  let tgt=ph;if(!tgt){const q=pose();tgt=q?{...q}:{x:sp.x,y:10,z:sp.z,ry:-sp.th,rz:0}}
+  if(S.mode==='parts'&&n===S.pip){const q=pose();tgt={...q}}
+  const fast=S.drag&&active;const k=fast?1:Math.min(1,dt*7);g.position.x+=(tgt.x-g.position.x)*k;g.position.y+=(tgt.y-g.position.y)*k;g.position.z+=(tgt.z-g.position.z)*k;
+  const ry=tgt.ry||0;let dr=ry-g.rotation.y;while(dr>Math.PI)dr-=Math.PI*2;while(dr<-Math.PI)dr+=Math.PI*2;g.rotation.y+=dr*k;g.rotation.z+=((tgt.rz||0)-g.rotation.z)*k;
+  if(!PIP[n])return;
+  const dep=active?S.depth:0;g.userData.pl.position.y=-dep*.85;g.userData.ej.position.y=17.3-(active?S.ej:0)*.35;g.userData.sleeve.position.y=-(active?S.ej:0)*.6;
+  const tipOn=(active&&S.mode==='use'&&!!S.tip)||(S.mode==='parts'&&active);g.userData.tip.visible=tipOn;
+  const txt=active?dispTxt():String(PIP[n].max);if(g.userData.dtxt!==txt){g.userData.dtxt=txt;const c=g.userData.dc.getContext('2d');c.fillStyle='#22303A';c.fillRect(0,0,256,128);c.fillStyle='#EAF6F8';c.font='700 78px "IBM Plex Mono",monospace';c.textAlign='center';c.fillText(txt,128,92);g.userData.dt.needsUpdate=true}
+  if(tipOn){const tp=active&&S.tip?S.tip:{liq:0};const L=TL[n];const f=tp.liq>0?Math.min(.92,tp.liq/PIP[n].max*.72):0;
+   if(Math.abs(f-g.userData.lf)>.005){g.userData.lf=f;const lq=g.userData.liq;lq.geometry.dispose();if(f>0){const h=L*f,rt=.07+(.4-.07)*f;lq.geometry=new THREE.CylinderGeometry(rt,.06,h,20);lq.position.y=-L+.25+h/2}else lq.geometry=new THREE.BufferGeometry()}
+   if(tp.kind)g.userData.liq.material.color.set(LIQ[tp.kind].c);g.userData.film.visible=!!tp.film;g.userData.bub.visible=!!tp.bub&&f>0;g.userData.bub.position.y=-L+.25+L*f*.45;g.userData.out.visible=!!tp.out;
+   const dr=g.userData.drop;dr.visible=!!(tp.drip&&tp.liq>0);if(dr.visible){const ph=(now/700)%1;dr.position.set(0,-L+.1-ph*3,0);dr.material.opacity=1-ph}}else g.userData.drop.visible=false});
+ /* kaynak, hedef, uç kutusu */
+ if(S.src){const h=Math.max(.02,srcTop()-.15);K.srcLiq.scale.y=h;K.srcLiq.position.y=.1+h/2;K.srcLiq.material.color.set(LIQ[S.src.liq].c);K.srcLiq.visible=S.mode==='use'}else K.srcLiq.visible=false;
+ const tv=S.mode==='use'?TUBE:0;K.dstLiq.visible=tv>0;if(tv>0){const h=Math.min(2.6,.15+tv/1500*2.6);K.dstLiq.scale.y=h;K.dstLiq.position.y=1.9+h/2;K.dstLiq.material.color.set(LIQ[T().liq||'su'].c)}
+ K.tipBoxM.color.set(PIP[S.pip].col[1]);K.tipRackM.color.set(TIPC[S.pip]);
+ {const txt=fmt(S.dst,S.task==='stok'?2:1)+' µL';if(K.balTxt!==txt){K.balTxt=txt;const c=K.balC.getContext('2d');c.fillStyle='#1B2428';c.fillRect(0,0,512,128);c.fillStyle='#7CF2D8';c.font='700 72px "IBM Plex Mono",monospace';c.textAlign='right';c.fillText(txt,490,92);c.font='600 26px "IBM Plex Mono",monospace';c.textAlign='left';c.fillStyle='#9BB0B6';c.fillText('TARTI',16,40);K.balT.needsUpdate=true}}
+ K.spillM.forEach((m,i)=>{const s=S.spills[i];m.visible=S.mode==='use'&&!!s;if(s){m.position.x=s.x;const r=Math.min(1.6,.4+s.v*.06);m.scale.set(r,r*.7,1)}});
+ curWarn.forEach(o=>{const k=.55+.45*Math.sin(t/160);o.material.opacity=k;o.children[0].material.opacity=.06+.12*k});
+ /* el chip */
+ const hd=$('#held');const dr=S.tip&&S.tip.drip&&S.tip.liq>0;hd.hidden=!(S.mode==='use'&&dr);if(dr){hd.textContent='⚠ UÇTAN DAMLIYOR!';hd.style.background='#E5484D'}}
+function animate(t){requestAnimationFrame(animate);if(!R3)return;const ck=S.mode+(narrow()?S.loc:'')+document.body.classList.contains('panel');if(ck!==camKey){if(camKey)goCam();camKey=ck}
+ if(camAnim){const k=Math.min(1,(performance.now()-camAnim.s)/700),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;R3.cam.position.lerpVectors(camAnim.p0,camAnim.p,e);R3.ctl.target.lerpVectors(camAnim.t0,camAnim.t,e);if(k>=1)camAnim=null}
+ R3.ctl.update();sync(t||0);R3.renderer.render(R3.scene,R3.cam);placeVpop()}
+/* açıklama balonu */
+const INFO=Object.fromEntries(PARTS.map(p=>[p[0],[p[1],p[2]]]));INFO.stand=['Döner pipet standı','Pipetler kullanılmadığında dik asılır; uçta kalan sıvı pipetin içine akmaz. Çevirerek istediğin pipete kolayca ulaşırsın.'];
+function partOf(h){if(!h)return null;const [a,b]=h.split(':');if(a==='part')return b;if(a==='cap')return 'cap';if(a==='ring')return 'ring';if(a==='ej')return 'ej';if(a==='stand')return 'stand';if(a==='body')return b===S.pip?'body':'stand';if(a==='loc')return null;return null}
+INFO.body=['Pipet gövdesi','Elinle tuttuğun kısım. Isı iletimini azaltmak için uzun süre avuçta tutma; pipeti dik tut.'];
+let tipId=null;function hideTip(){tipId=null;$('#tip').hidden=true}
+function tipAt(h,e){const id=partOf(h),inf=id&&INFO[id];if(!inf){hideTip();return}const tp=$('#tip'),rc=box.getBoundingClientRect(),x=e.clientX-rc.left,y=e.clientY-rc.top;
+ if(tipId!==id){tipId=id;tp.innerHTML=`<b>${inf[0]}</b><span>${inf[1]}</span>`;tp.hidden=false;if(PARTS.some(p=>p[0]===id)&&!S.seen[id]){S.seen[id]=1;panel();if(PARTS.every(p=>S.seen[p[0]])&&!S.done.parts){S.done.parts=1;panel();say('Harika, pipetin bütün parçalarını tanıdın! Şimdi <b>Görevler</b>’den bir görev seç.')}}}
+ const W=box.clientWidth,H=box.clientHeight,tw=tp.offsetWidth,th=tp.offsetHeight;let lx=x+18,ly=y+18;if(lx+tw>W-8)lx=x-tw-18;if(ly+th>H-8)ly=y-th-18;tp.style.left=Math.max(8,lx)+'px';tp.style.top=Math.max(8,ly)+'px'}
+/* hacim popup */
+let vOpen=false;function showVpop(){if(S.mode!=='use')return;vOpen=true;$('#vpop').hidden=false;$('#vpV').textContent=dispTxt()}
+function hideVpop(h){if(vOpen&&h!=='ring'){vOpen=false;$('#vpop').hidden=true}}
+function placeVpop(){const el=$('#vpop');if(!vOpen||S.mode!=='use'){el.hidden=true;return}el.hidden=false;$('#vpV').textContent=dispTxt();const g=K.models[S.pip];tmpV.set(0,16.1,0);g.localToWorld(tmpV);const v=tmpV.project(R3.cam);el.style.left=Math.max(80,Math.min(box.clientWidth-80,(v.x+1)/2*box.clientWidth+90))+'px';el.style.top=Math.max(120,(1-v.y)/2*box.clientHeight+40)+'px'}
+const vStep=()=>P().step*(S.pip==='P10'?5:S.pip==='P200'?5:10);
+$('#vpM').onclick=()=>setVol(S.vol-vStep());$('#vpP').onclick=()=>setVol(S.vol+vStep());
+
+function choosePip(n){if(S.mode!=='use')return;if(S.tip){say('Pipet değiştirmeden önce ucu at.');return}if(n!==S.pip)S.loc='rest';S.pip=n;const p=P();S.vol=Math.min(p.max,Math.max(p.min,S.vol));checkSetup();
+ const t=T();if(t.vol){say(t.vol>p.max?`${S.pip} en fazla ${fmt(p.max)} µL çeker; ${t.vol} µL için daha büyük bir pipet gerek.`:t.vol<p.min?`${S.pip}’nin alt sınırı ${fmt(p.min,p.dp)} µL; ${t.vol} µL bu pipetle ölçülemez.`:S.pip===t.pip?`Doğru seçim: ${t.vol} µL, ${S.pip}’nin aralığında ve üst sınırına yakın; doğruluk en iyi bu bölgede. Şimdi hacmi ayarla.`:`${S.pip} bu hacmi çekebilir ama ${t.vol} µL aralığın alt kısmında kalır; doğruluk düşer. Daha küçük pipet var mı?`)}render()}
+/* girişler */
+$('#mTasks').onclick=$('#tOpen').onclick=()=>$('#tdlg').showModal();$('#tClose').onclick=()=>$('#tdlg').close();
+$('#mHome').onclick=()=>{const u=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html';try{window.close()}catch(e){}setTimeout(()=>{location.href=u},250)};$('#mReset').onclick=()=>{VOL.src={su:1500,kan:1500,stok:1500,dcm:1500};VOL.tube={};S.done={};S.seen={};reset('parts');S.mode='parts';render()};
+$('#mParts').onclick=()=>{if(S.task!=='parts')reset('parts');S.mode='parts';render()};$('#mUse').onclick=()=>{if(S.task==='parts'){reset('su')}S.mode='use';render()};
+function setVol(v){const p=P();if(v>p.max+1e-9||v<p.min-1e-9){say(`<b>Dur!</b> ${S.pip}’nin aralığı ${fmt(p.min,p.dp)}–${fmt(p.max)} µL. Halkayı aralığın dışına zorlamak pipetin mekanizmasını bozar ve kalibrasyonu kaydırır.`);v=Math.min(p.max,Math.max(p.min,v))}S.vol=Math.round(v/p.step)*p.step;checkSetup();if(S.ev.vol)say(`Hacim ${fmt(S.vol,p.dp)} µL. Göstergeyi karşıdan okuyarak kontrol ettin. Şimdi <b>uç kutusuna</b> git ve uç tak.`);render()}
+$('#vM').onclick=()=>setVol(S.vol-P().step*(S.pip==='P10'?5:S.pip==='P200'?5:10));$('#vP').onclick=()=>setVol(S.vol+P().step*(S.pip==='P10'?5:S.pip==='P200'?5:10));
+$('#vI').onchange=e=>{const v=parseFloat(String(e.target.value).replace(',','.'));if(!isNaN(v))setVol(v);else render()};
+$('#p1').onclick=()=>setDepth(1);$('#p2').onclick=()=>setDepth(1.2);$('#rS').onclick=slowRelease;$('#rF').onclick=()=>{clearInterval(relT);setDepth(0,true)};
+$('#lT').onclick=()=>go('tips');$('#lS').onclick=()=>go('src');$('#lD').onclick=()=>go('dst');$('#lW').onclick=()=>go('waste');
+$('#refill').onclick=()=>{if(!S.src)return;if(S.loc==='src'&&S.imm){say('Önce ucu sıvıdan çıkar.');return}S.src.v=1500;say(`Kaynak tüpü taze ${LIQ[S.src.liq].n.toLowerCase()} ile doldurdun (1,5 mL).`);render()};
+$('#empty').onclick=()=>{if(S.loc==='dst'&&S.imm){say('Önce ucu sıvıdan çıkar.');return}const was=TUBE;TUBE=0;S.dst=0;say(was>0?`Hedef tüpteki ${fmt(was)} µL sıvıyı ${T().liq==='kan'?'<b>tıbbi atığa</b>':'atık kabına'} döktün. Tüp boş, terazi sıfırlandı.`:'Hedef tüp zaten boş.');render()};
+$('#lej').onclick=eject;
+$('#iS').onclick=()=>immerse('sh');$('#iD').onclick=()=>immerse('deep');$('#iO').onclick=withdraw;$('#ej').onclick=eject;
+reset('parts');$('#lsv').addEventListener('pointerdown',e=>pressStart(e,45*$('#lsv').getBoundingClientRect().height/150));
+$('#pips').querySelectorAll('button').forEach(b=>b.onclick=()=>choosePip(b.dataset.p));
+try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
+
+/* tam sayfa yardımcıları */
+$('#mPanel').onclick=()=>{document.body.classList.toggle('panel');$('#mPanel').classList.toggle('on',document.body.classList.contains('panel'))};
+$('#sideX').onclick=()=>{document.body.classList.remove('panel');$('#mPanel').classList.remove('on')};
+$('#stepT').onclick=()=>$('#stepc').classList.toggle('col');
+if(innerWidth>900)$('#stepc').classList.remove('col');
+new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')}).observe($('#say'),{childList:true,characterData:true,subtree:true});
+{const rs=$('#res');new MutationObserver(()=>{if(rs.innerHTML&&!rs.querySelector('.resX')){const b=document.createElement('button');b.className='resX';b.textContent='✕';b.onclick=()=>{rs.hidden=true};rs.prepend(b);rs.hidden=false}}).observe(rs,{childList:true})}
+
+Object.assign(window,{reset,render,tapLoc,go,immerse,withdraw,eject,setDepth,slowRelease,setVol,choosePip,standTap,onHot,pose});Object.defineProperty(window,'S',{get:()=>S});window.scrOf=n=>{const o=K.models[n]||K[n];const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};window.__pip=1;
+</script>
+
+</body>
+</html>
