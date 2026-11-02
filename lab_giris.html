@@ -144,12 +144,22 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
 @media (max-width:900px){.hdr2{display:none}.snav2{position:fixed;top:0;left:0;right:0;width:auto;display:flex;border-radius:0;padding:5px}.snav2 button{flex:1;font-size:10px;padding:6px 1px}
  .map{top:60px;right:8px;width:150px;padding:6px 8px}.mentor{left:8px;right:8px;width:auto;min-width:0;transform:none;bottom:8px;grid-template-columns:38px 1fr;gap:8px;padding:8px 10px;max-height:24vh;overflow:auto}.mentor img{width:38px;height:38px}.mentor p{font-size:13.5px}
  .moves{right:auto;left:50%;transform:translateX(-50%);bottom:calc(24vh + 18px);grid-template-columns:repeat(3,56px)}.keys{display:none}.room{top:auto;bottom:8px;transform:none;max-height:70vh;overflow:auto}.ilogo{width:130px;height:130px}}
+
+#xh{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:8;display:none}body.fps #xh{display:block}
+#xh i{display:block;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(0,0,0,.45);transition:all .12s}
+#xh.on i{width:16px;height:16px;background:#2BD9C0;box-shadow:0 0 0 3px rgba(43,217,192,.35)}
+#xh span{position:absolute;top:22px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(14,30,34,.88);color:#7CF2D8;padding:4px 10px;border-radius:8px;font:600 13px var(--f-body)}#xh span b{color:#fff}#xh:not(.on) span{display:none}
+#gmode{position:fixed;z-index:6;right:14px;bottom:156px;border:0;border-radius:999px;padding:8px 14px;font:700 13px var(--f-body);color:#062126;background:linear-gradient(90deg,#2BD9C0,#7CF2D8);box-shadow:0 6px 16px rgba(0,0,0,.3)}
+body.fps #gmode{background:rgba(14,21,24,.8);color:#EAF2F3}body.fps .moves,body.fps .devchip{display:none!important}
+#joy{position:fixed;z-index:6;left:14px;bottom:calc(24vh + 18px);width:116px;height:116px;border-radius:50%;background:rgba(14,21,24,.45);border:2px solid rgba(124,242,216,.5);touch-action:none;display:none}
+#joy i{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:rgba(43,217,192,.85);box-shadow:0 4px 12px rgba(0,0,0,.35)}
+@media (pointer:coarse){#gmode{display:none}#joy{display:block}.moves{display:none!important}}
 </style>
 <nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mMap" class="on"><span>▦</span>Harita</button><button id="mIntro"><span>↺</span>Baştan</button></nav>
 <div class="hdr2"><b>MY_<i>ToksiLab</i></b><span class="pill">LABORATUVAR GİRİŞİ · 3B</span></div>
 <div id="cv3"></div>
 <div class="map" id="map"><small>KAT PLANI · BULUNDUĞUN YER</small><svg id="mapS" viewBox="0 0 220 120"></svg></div>
-<div class="keys">Sürükle: etrafa bak · ↑↓ / W S: yürü · ← → : dön</div>
+<div class="keys">Sürükle: bak · W A S D: yürü · ← →: dön · Shift: hızlı · E: kullan</div><button id="gmode">◎ Fareyle bak (oyun modu)</button><div id="xh"><i></i><span></span></div><div id="joy"><i></i></div>
 <div class="moves" id="moves"><span class="sp"></span><button id="mvF" aria-label="İleri">▲</button><span class="sp"></span><button id="mvL" aria-label="Sola dön">⟲</button><button id="mvB" aria-label="Geri">▼</button><button id="mvR" aria-label="Sağa dön">⟳</button></div>
 <div class="mentor"><img id="av" alt=""><div><div class="nm">UZM. MY</div><p id="say"></p></div></div>
 <div class="room" id="room" hidden></div>
@@ -618,9 +628,10 @@ function enter(){if(started)return;started=true;$('#intro').classList.add('out')
 const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
 const pick=e=>{const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,cam);const hs=ray.intersectObjects(HOT,false);if(!hs.length)return null;let h=hs[0];if(!h.object.userData.hot.startsWith('dev:')){const d=hs.find(x=>x.object.userData.hot.startsWith('dev:')&&x.distance<h.distance+2.5);if(d)h=d}return h.object.userData.hot};
 renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,yaw:G.yaw,pitch:G.pitch};renderer.domElement.setPointerCapture(e.pointerId)});
-renderer.domElement.addEventListener('pointermove',e=>{if(!down){const h=started&&pick(e);renderer.domElement.style.cursor=h?'pointer':'grab';return}if(!started)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.hypot(dx,dy)>6){down.moved=true;G.yaw=down.yaw+dx*.004;G.pitch=Math.max(-.6,Math.min(.5,down.pitch+dy*.003));at=null}});
-renderer.domElement.addEventListener('pointerup',e=>{const d=down;down=null;if(!d||d.moved||!started)return;const h=pick(e);if(h&&h.startsWith('dev:'))openDev(h.slice(4));else if(h&&h.startsWith('r2:'))openInfo(h.slice(3));else if(h&&h.startsWith('team:'))openTeam(+h.slice(5));else if(h&&h.startsWith('door:'))openDoorCard(+h.slice(5));else if(h&&h.startsWith('poster:'))openPoster(+h.slice(7))});
-addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key==='Escape')closeRoom()});addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+renderer.domElement.addEventListener('pointermove',e=>{if(locked)return;if(!down){const h=started&&pick(e);renderer.domElement.style.cursor=h?'pointer':'grab';return}if(!started)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.hypot(dx,dy)>6){down.moved=true;G.yaw=down.yaw+dx*.004;G.pitch=Math.max(-.6,Math.min(.5,down.pitch+dy*.003));at=null}});
+renderer.domElement.addEventListener('pointerup',e=>{const d=down;down=null;if(!d||d.moved||!started)return;act(locked?centerPick():pick(e))});
+function act(h){if(h&&h.startsWith('dev:'))openDev(h.slice(4));else if(h&&h.startsWith('r2:'))openInfo(h.slice(3));else if(h&&h.startsWith('team:'))openTeam(+h.slice(5));else if(h&&h.startsWith('door:'))openDoorCard(+h.slice(5));else if(h&&h.startsWith('poster:'))openPoster(+h.slice(7))}
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if(k.startsWith('arrow')&&started)e.preventDefault();if(e.key==='Escape')closeRoom();if(k==='e'&&started&&!e.repeat){if(locked){const h=centerPick();if(h)act(h)}else if(nearDev)openDev(nearDev.k)}});addEventListener('blur',()=>{for(const k in keys)keys[k]=false});addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
 const step=(d)=>{if(!started||!inside)return;if(teamMode==='greet')teamDisperse();closeRoom();const dx=-Math.sin(G.yaw),dz=-Math.cos(G.yaw);const n=Math.max(1,Math.ceil(Math.abs(d)/.2));for(let i=0;i<n;i++){const nx=G.x+dx*d/n,nz=G.z+dz*d/n;if(!moveTo(nx,nz))break}at=null};
 function blocked(x,z){if(x<2.3||x>9.7||z<-13.72||z>-8.28)return true;return OBST.some(o=>x>o.x0-.25&&x<o.x1+.25&&z>o.z0-.25&&z<o.z1+.25)}
 function moveTo(x,z){if(inRoom){if(x<2.3&&Math.abs(z+11)<.45){if(x<1.55){inRoom=false;roomUI();say('Koridora döndün.')}G.x=x;G.z=z;return true}if(blocked(x,z))return false;G.x=x;G.z=z;return true}
@@ -641,6 +652,23 @@ function enterRoom2(){closeRoom();openRoomDoor=2;goStop('d2');const t0=performan
 function leaveRoom(){closeRoom();G.x=2.6;G.z=-11;G.yaw=Math.PI/2;setTimeout(()=>{G.x=.2;G.z=-11;G.yaw=Math.PI/2;inRoom=false;roomUI();say('Koridora döndün. Başka bir kapıya dokunabilir ya da ▲ ile ilerleyebilirsin.')},700)}
 function openInfo(id){const [t,d]=R2INFO[id];const el=$('#room');el.hidden=false;el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:#1F9A97">ÖRNEK HAZIRLAMA LABORATUVARI</div><h2>${t}</h2><p>${d}</p>`;$('#rx').onclick=closeRoom;say(`<b>${t}</b>: ${d}`)}
 const turn=a=>{if(!started)return;G.yaw+=a;at=null};
+/* ===== oyun tarzı gezinme: W A S D + fareyle bakış + nişangah ===== */
+const walk=(f,sd)=>{if(!started||!inside)return;if(teamMode==='greet')teamDisperse();if(!$('#room').hidden)closeRoom();
+ const dx=-Math.sin(G.yaw)*f+Math.cos(G.yaw)*sd,dz=-Math.cos(G.yaw)*f-Math.sin(G.yaw)*sd;const n=Math.max(1,Math.ceil(Math.hypot(dx,dz)/.15));
+ for(let i=0;i<n;i++){const ox=G.x,oz=G.z;if(!moveTo(G.x+dx/n,G.z+dz/n)){if(!moveTo(ox+dx/n,oz))moveTo(ox,oz+dz/n)}}at=null};
+let locked=false,xhT=0;const cvEl=renderer.domElement;
+const centerPick=()=>{ptr.set(0,0);ray.setFromCamera(ptr,cam);const hs=ray.intersectObjects(HOT,false).filter(x=>x.distance<6);if(!hs.length)return null;let h=hs[0];if(!h.object.userData.hot.startsWith('dev:')){const d=hs.find(x=>x.object.userData.hot.startsWith('dev:')&&x.distance<h.distance+2.5);if(d)h=d}return h.object.userData.hot};
+function hotName(h){if(!h)return null;const [a,b]=h.split(':');if(a==='dev')return DEVI[b]&&DEVI[b].ic+' '+DEVI[b].n;if(a==='r2')return R2INFO[b]&&R2INFO[b][0];if(a==='door'){const R=ROOMS[+b-1];return R&&('Oda '+R.no+' · '+R.n)}if(a==='poster')return 'Poster';if(a==='team')return 'Ekip';return null}
+window.__xh=()=>xhUpd();function xhUpd(){const h=centerPick(),n=hotName(h),el=$('#xh');el.classList.toggle('on',!!n);if(n)el.querySelector('span').innerHTML=`${n} · <b>tıkla / E</b>`}
+$('#gmode').onclick=()=>{if(!started){say('Önce <b>Laboratuvara gir</b> düğmesine bas.');return}try{const p=cvEl.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(_){}};
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===cvEl;document.body.classList.toggle('fps',locked);$('#gmode').textContent=locked?'Esc: fareyi serbest bırak':'◎ Fareyle bak (oyun modu)';$('#xh').classList.remove('on');
+ if(locked)say('<b>Oyun modu</b> açık: fareyi oynatarak etrafa bak, <b>W A S D</b> ile yürü, <b>Shift</b> ile hızlan. Ortadaki nokta bir cihazın, kapının ya da posterin üstüne gelince <b>tıkla</b> ya da <b>E</b>’ye bas. Çıkmak için <b>Esc</b>.')});
+document.addEventListener('mousemove',e=>{if(!locked)return;G.yaw-=e.movementX*.0022;G.pitch=Math.max(-.95,Math.min(.75,G.pitch-e.movementY*.0022));P.yaw=G.yaw;P.pitch=G.pitch;at=null});
+new MutationObserver(()=>{if(!$('#room').hidden&&locked)document.exitPointerLock()}).observe($('#room'),{attributes:true,attributeFilter:['hidden']});
+/* dokunmatik joystick */
+const joy={on:false,x:0,y:0,id:null};{const J=$('#joy'),K=J.querySelector('i');const upd=e=>{const r=J.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let x=(e.clientX-cx)/(r.width/2),y=(e.clientY-cy)/(r.height/2);const m=Math.hypot(x,y);if(m>1){x/=m;y/=m}joy.x=Math.abs(x)<.15?0:x;joy.y=Math.abs(y)<.15?0:y;K.style.transform=`translate(${x*33}px,${y*33}px)`};
+ J.addEventListener('pointerdown',e=>{e.preventDefault();joy.on=true;joy.id=e.pointerId;try{J.setPointerCapture(e.pointerId)}catch(_){}upd(e)});J.addEventListener('pointermove',e=>{if(joy.on&&e.pointerId===joy.id)upd(e)});
+ const end=e=>{if(e.pointerId!==joy.id)return;joy.on=false;joy.x=joy.y=0;K.style.transform=''};J.addEventListener('pointerup',end);J.addEventListener('pointercancel',end)}
 function clampG(){if(inRoom)return;if(inside){G.x=Math.max(-1.55,Math.min(1.55,G.x));G.z=Math.max(-28.6,Math.min(-.8,G.z))}}
 $('#mvF').onclick=()=>step(3);$('#mvB').onclick=()=>step(-3);$('#mvL').onclick=()=>turn(Math.PI/4);$('#mvR').onclick=()=>turn(-Math.PI/4);
 /* oda kartı */
@@ -661,8 +689,9 @@ let mapT=0;
 /* döngü */
 let last=performance.now(),bob=0;
 function loop(t){requestAnimationFrame(loop);const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;
- if(started&&inside){const sp=2.6*dt;if(keys['arrowup']||keys['w'])step(sp);if(keys['arrowdown']||keys['s'])step(-sp);if(keys['arrowleft']||keys['a'])turn(1.6*dt);if(keys['arrowright']||keys['d'])turn(-1.6*dt)}
- const k=Math.min(1,dt*(started?2.2:1.2));const mv=Math.hypot(G.x-P.x,G.z-P.z);P.x+=(G.x-P.x)*k;P.z+=(G.z-P.z)*k;let dy=G.yaw-P.yaw;P.yaw+=dy*Math.min(1,dt*4);P.pitch+=(G.pitch-P.pitch)*Math.min(1,dt*4);
+ let kw=false;if(started&&inside){const sp=2.1*(keys['shift']?1.9:1)*dt;let f=0,sd=0;if(keys['arrowup']||keys['w'])f+=1;if(keys['arrowdown']||keys['s'])f-=1;if(keys['a'])sd-=1;if(keys['d'])sd+=1;if(joy.on){f-=joy.y;sd+=joy.x}
+  if(keys['arrowleft'])turn(1.7*dt);if(keys['arrowright'])turn(-1.7*dt);if(f||sd){const m=Math.max(1,Math.hypot(f,sd));walk(f/m*sp,sd/m*sp);kw=true}}
+ const k=Math.min(1,dt*(kw?12:started?2.2:1.2));const mv=Math.hypot(G.x-P.x,G.z-P.z);P.x+=(G.x-P.x)*k;P.z+=(G.z-P.z)*k;let dy=G.yaw-P.yaw;P.yaw+=dy*Math.min(1,dt*4);P.pitch+=(G.pitch-P.pitch)*Math.min(1,dt*4);
  if(!started){G.z=9.5+Math.sin(now/3000)*.6;G.yaw=Math.sin(now/4000)*.12}
  bob+=mv>.05?dt*9:0;cam.position.set(P.x,1.62+(mv>.05?Math.sin(bob)*.025:0),P.z);cam.rotation.set(P.pitch,P.yaw,0);
  /* sensör ve kapılar */
@@ -670,6 +699,7 @@ function loop(t){requestAnimationFrame(loop);const now=performance.now(),dt=Math
  ROOMS.forEach(r=>{const pv=doorG[r.no].userData.pivot;const tg=(openRoomDoor===r.no||(r.no===2&&inRoom))?(r.no===2?1.45:-1.1):0;pv.rotation.y+=(tg-pv.rotation.y)*Math.min(1,dt*3)});
  sun.intensity+=((inside?.15:2.0)-sun.intensity)*Math.min(1,dt*1.5);
  if(now-mapT>120&&started){mapT=now;drawMap()}
+ if(locked&&now-xhT>90){xhT=now;xhUpd()}
  updTeam(dt,now);updDev(now);renderer.render(scene,cam)}
 requestAnimationFrame(loop);
 say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.');drawMap();
