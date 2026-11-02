@@ -564,7 +564,8 @@ function person(o){const root=new THREE.Group();const g=new THREE.Group();root.a
  /* isim etiketi */
  const tag=new THREE.Sprite(new THREE.SpriteMaterial({map:canvasTex(512,128,(c,w,h)=>{c.fillStyle='rgba(14,30,34,.88)';c.beginPath();c.roundRect(4,8,w-8,h-16,26);c.fill();c.fillStyle='#7CF2D8';let fs=46;do{c.font=`700 ${fs}px "Barlow Condensed","Source Sans 3",sans-serif`;fs-=2}while(c.measureText(o.s).width>470&&fs>20);c.textAlign='center';c.fillText(o.s,w/2,78)}),depthTest:true,transparent:true}));tag.scale.set(.6,.15,1);tag.position.y=o.h+.24;root.add(tag);tag.visible=false;
  scene.add(root);return {root,g,legs,arms,head,hb,tag,ph:Math.random()*6}}
-const TP=TEAM.map((o,i)=>{const p=person(o);p.o=o;p.i=i;hot(p.hb,'team:'+i);return p});
+const TEAM_ON=false;/* ekip figürleri şimdilik kapalı */
+const TP=TEAM_ON?TEAM.map((o,i)=>{const p=person(o);p.o=o;p.i=i;hot(p.hb,'team:'+i);return p}):[];
 let teamMode='form',teamT=0,teamT0=0,greetIdx=-1;
 function teamForm(){teamMode='form';greetIdx=-1;TP.forEach(p=>{p.root.position.set(p.o.f[0],0,p.o.f[1]);p.root.rotation.y=0;p.tag.visible=false;p.dest=null})}
 teamForm();
@@ -612,10 +613,10 @@ new ResizeObserver(fit).observe(box);fit();
 $('#enter').onclick=enter;
 function enter(){if(started)return;started=true;$('#intro').classList.add('out');say('Ana girişin önündeyiz. Kapının üstündeki <b>sensör</b> yaklaştığımızı algılayınca kapılar kendiliğinden açılır…');goStop('door');
  setTimeout(()=>{goStop('hall');inside=true},4600);
- setTimeout(()=>{startGreet();drawMap()},5600)}
+ setTimeout(()=>{if(TEAM_ON)startGreet();else{teamMode='home';say('Koridordayız. Sağ tarafta <b>1 Kromatografi</b>, <b>2 Örnek Hazırlama</b>, <b>3 İnorganik Analiz</b>, <b>4 Kimyasal Depo</b> ve en sonda <b>5 Gaz Tüp Odası</b>; sol tarafta, Örnek Hazırlama’nın tam karşısında <b>6 Yangın ve Patlayıcı Analiz Laboratuvarı</b> var. Sol duvarda <b>poster sunumlarımız</b> var. Bir kapıya yaklaşıp dokunursan odanın tanıtımını görürsün.')}drawMap()},5600)}
 /* etkileşim */
 const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
-const pick=e=>{const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,cam);const h=ray.intersectObjects(HOT,false)[0];return h?h.object.userData.hot:null};
+const pick=e=>{const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,cam);const hs=ray.intersectObjects(HOT,false);if(!hs.length)return null;let h=hs[0];if(!h.object.userData.hot.startsWith('dev:')){const d=hs.find(x=>x.object.userData.hot.startsWith('dev:')&&x.distance<h.distance+2.5);if(d)h=d}return h.object.userData.hot};
 renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,yaw:G.yaw,pitch:G.pitch};renderer.domElement.setPointerCapture(e.pointerId)});
 renderer.domElement.addEventListener('pointermove',e=>{if(!down){const h=started&&pick(e);renderer.domElement.style.cursor=h?'pointer':'grab';return}if(!started)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.hypot(dx,dy)>6){down.moved=true;G.yaw=down.yaw+dx*.004;G.pitch=Math.max(-.6,Math.min(.5,down.pitch+dy*.003));at=null}});
 renderer.domElement.addEventListener('pointerup',e=>{const d=down;down=null;if(!d||d.moved||!started)return;const h=pick(e);if(h&&h.startsWith('dev:'))openDev(h.slice(4));else if(h&&h.startsWith('r2:'))openInfo(h.slice(3));else if(h&&h.startsWith('team:'))openTeam(+h.slice(5));else if(h&&h.startsWith('door:'))openDoorCard(+h.slice(5));else if(h&&h.startsWith('poster:'))openPoster(+h.slice(7))});
@@ -683,7 +684,7 @@ $('#mHome').onclick=()=>window.open(BASE+'my_toksilab.html','_blank','noopener')
 $('#mMap').onclick=()=>{const m=$('#map');m.hidden=!m.hidden;$('#mMap').classList.toggle('on',!m.hidden)};
 $('#mIntro').onclick=()=>{teamForm();inRoom=false;roomUI();openRoomDoor=0;started=false;inside=false;closeRoom();P.z=14;P.x=0;G.x=0;G.z=9.5;$('#intro').classList.remove('out');say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.')};
 document.getElementById('back').onclick=leaveRoom;
-Object.assign(window,{openDev,enterRoom2,leaveRoom,openInfo,teamDisperse,openTeam,TP,GG:G,openPoster,enter,goStop,openDoorCard,closeRoom,step,turn,__lab:1,PP:P});
+window.__proj=(x,y,z)=>{const v=new THREE.Vector3(x,y,z).project(cam);const r=renderer.domElement.getBoundingClientRect();return [r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height]};Object.assign(window,{openDev,enterRoom2,leaveRoom,openInfo,teamDisperse,openTeam,TP,GG:G,openPoster,enter,goStop,openDoorCard,closeRoom,step,turn,__lab:1,PP:P});
 </script>
 
 </body>

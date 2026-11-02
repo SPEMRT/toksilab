@@ -224,6 +224,7 @@ function tapLoc(loc){if(S.loc!==loc||loc==='rest'){go(loc);return}
  if(loc==='tips'){go(loc);return}if(loc==='waste'){if(S.tip)say('Ucu atmak için pipetteki <b>ejektör düğmesine</b> bas: pistonun yanındaki gri düğme ya da piston panelindeki <b>EJEKTÖR</b>.');return}
  if(loc==='src'||loc==='dst'){if(!S.tip){say('Önce uç tak: <b>uç kutusuna</b> dokun.');return}S.imm?withdraw():immerse('sh')}}
 function go(loc){if(S.mode!=='use')return;if(S.imm){say('Önce <b>ucu sıvıdan çıkar</b>, sonra pipeti hareket ettir.');return}if(loc==='rest'&&S.tip){say('Uç takılıyken pipeti standa asma; uçtaki sıvı pistona kaçabilir. Önce ucu <b>atığa</b> at.');return}S.loc=loc;S.part=null;
+ if(loc==='rest'){say(`<b>${S.pip}</b> pipetini standa dik astın ✓. Kullanılmayan pipet böyle durur; uçta kalan sıvı pistona akmaz.`);render();return}
  if(loc==='tips'){if(S.tip){say('Pipette zaten uç takılı. Önce eskisini <b>atığa</b> at.')}else{S.anim='attach';render();setTimeout(()=>{S.anim=null;S.tip={liq:0,kind:null,del:0,used:false};S.ev.tip=true;checkSetup();say(`Ucu koniye bastırarak taktın. ${S.pip} için ${P().cap === 'sarı'?'sarı':P().cap==='mavi'?'mavi':'şeffaf'} kutudaki uçları kullanırız. ${T().mode==='ters'?'Şimdi pistonu havada <b>basılı tut</b>: 2. durağa iner (ters pipetaj).':'Şimdi pistona havada <b>dokun</b>: 1. durağa iner.'}`);render()},600);return}}
  else if(loc==='waste'&&S.tip)say('Atığın üstündesin. Ucu atmak için pipetin <b>ejektör düğmesine</b> bas.');
  else if(loc==='src'&&S.tip&&S.tip.used&&!S.usedTipWarn){S.usedTipWarn=true;say('<b>Dikkat:</b> bu uç kullanılmış. Kullanılmış uçla kaynağa girersen numuneyi kontamine edersin. Ucu at, yeni uç tak.')}
@@ -425,9 +426,9 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};if(S.mode!=='use'||S.anim)return;const h=pick(e);
   if(h==='cap'){ctl.enabled=false;pressStart(e,70);const re=()=>{ctl.enabled=true;removeEventListener('pointerup',re)};addEventListener('pointerup',re);down=null;return}
   if(h&&h.startsWith('body:')&&h.slice(5)===S.pip&&S.loc!=='rest'){setPtr(e);if(!ray.ray.intersectPlane(plane,hitP))return;ctl.enabled=false;const q=pose();if(S.imm)S.imm=null;S.drag={x:q.x,y:q.y,ox:hitP.x-q.x,oy:hitP.y-q.y,moved:false,sx:e.clientX,sy:e.clientY};
-   const mv=ev=>{setPtr(ev);if(!ray.ray.intersectPlane(plane,hitP))return;if(Math.hypot(ev.clientX-S.drag.sx,ev.clientY-S.drag.sy)>6)S.drag.moved=true;S.drag.x=Math.max(-9,Math.min(25,hitP.x-S.drag.ox));S.drag.y=Math.max((S.tip?TL[S.pip]:0)+.2,Math.min(20,hitP.y-S.drag.oy))};
+   const mv=ev=>{setPtr(ev);if(!ray.ray.intersectPlane(plane,hitP))return;if(Math.hypot(ev.clientX-S.drag.sx,ev.clientY-S.drag.sy)>6)S.drag.moved=true;S.drag.x=Math.max(-20,Math.min(25,hitP.x-S.drag.ox));S.drag.y=Math.max((S.tip?TL[S.pip]:0)+.2,Math.min(20,hitP.y-S.drag.oy))};
    const upf=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',upf);ctl.enabled=true;const d=S.drag;S.drag=null;down=null;if(!d.moved){render();return}
-    const loc=nearLoc(d.x),tipY=d.y-(S.tip?TL[S.pip]:0);if(!loc){say('Pipeti bir kutunun, tüpün ya da atığın <b>üstüne</b> bırak.');render();return}
+    const loc=nearLoc(d.x),tipY=d.y-(S.tip?TL[S.pip]:0);if(!loc){say('Pipeti bir kutunun, tüpün, atığın üstüne ya da <b>standa</b> bırak.');render();return}
     if(S.loc!==loc||loc==='tips')go(loc);else render();
     if(S.tip&&loc==='src'&&tipY<srcTop()+.2)immerse(tipY<srcTop()-1.6?'deep':'sh');else if(S.tip&&loc==='dst'&&tipY<4.6)immerse('sh')};
    addEventListener('pointermove',mv);addEventListener('pointerup',upf);return}});
@@ -437,10 +438,10 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  ctl.addEventListener('start',()=>{camAnim=null});
  animate()}
 const visibleDeep=o=>{while(o){if(o.visible===false)return false;o=o.parent}return true};
-function nearLoc(x){let best=null,bd=3.6;for(const k of ['tips','src','dst','waste']){const d=Math.abs(LOCX[k]-x);if(d<bd){bd=d;best=k}}return best}
+function nearLoc(x){let best=null,bd=3.6;if(Math.abs(x-LOCX.rest)<5.5)return 'rest';for(const k of ['tips','src','dst','waste']){const d=Math.abs(LOCX[k]-x);if(d<bd){bd=d;best=k}}return best}
 function onHot(h){const [a,b]=h.split(':');
  if(a==='loc')tapLoc(b);else if(a==='ej')eject();else if(a==='ring')showVpop();else if(a==='stand'||(a==='body'&&(S.loc==='rest'||b!==S.pip)))standTap(b)}
-function standTap(n){if(!n||!PIP[n]){say(n&&DECOR[n]?`Bu <b>${DECOR[n].n}</b> pipeti; bu görevlerde kullanmıyoruz. Görevine uygun pipeti seç: P10, P200 ya da P1000.`:'Döner pipet standı: pipetler kullanılmadığında dik asılı durur; böylece uçta kalan sıvı pipetin içine akmaz.');return}choosePip(n)}
+function standTap(n){if(!n&&S.mode==='use'&&S.loc!=='rest'){go('rest');return}if(!n||!PIP[n]){say(n&&DECOR[n]?`Bu <b>${DECOR[n].n}</b> pipeti; bu görevlerde kullanmıyoruz. Görevine uygun pipeti seç: P10, P200 ya da P1000.`:'Döner pipet standı: pipetler kullanılmadığında dik asılı durur; böylece uçta kalan sıvı pipetin içine akmaz.');return}choosePip(n)}
 /* poz */
 function pose(){if(S.mode==='parts')return {x:LOCX.src-1,y:3.4,z:LZ+3,rz:0,ry:0};if(S.drag)return {x:S.drag.x,y:S.drag.y,z:LZ,rz:0,ry:0};
  const tl=S.tip?TL[S.pip]:0;let tb;const L=S.loc;
@@ -542,7 +543,7 @@ if(innerWidth>900)$('#stepc').classList.remove('col');
 new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')}).observe($('#say'),{childList:true,characterData:true,subtree:true});
 {const rs=$('#res');new MutationObserver(()=>{if(rs.innerHTML&&!rs.querySelector('.resX')){const b=document.createElement('button');b.className='resX';b.textContent='✕';b.onclick=()=>{rs.hidden=true};rs.prepend(b);rs.hidden=false}}).observe(rs,{childList:true})}
 
-Object.assign(window,{reset,render,tapLoc,go,immerse,withdraw,eject,setDepth,slowRelease,setVol,choosePip,standTap,onHot,pose});Object.defineProperty(window,'S',{get:()=>S});window.scrOf=n=>{const o=K.models[n]||K[n];const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};window.__pip=1;
+Object.assign(window,{reset,render,tapLoc,go,immerse,withdraw,eject,setDepth,slowRelease,setVol,choosePip,standTap,onHot,pose});Object.defineProperty(window,'S',{get:()=>S});window.scrOf=n=>{const o=K.models[n]||K[n];const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};window.__pip=1;window.__pk=(x,y)=>{const r=R3.renderer.domElement.getBoundingClientRect();const ptr=new THREE.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);const rc=new THREE.Raycaster();rc.setFromCamera(ptr,R3.cam);const h=rc.intersectObjects(HOT.filter(o=>visibleDeep(o)),false)[0];return h?h.object.userData.hot:null};
 </script>
 
 </body>
