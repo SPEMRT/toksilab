@@ -104,7 +104,7 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
 </head>
 <body>
 <div class="wrap">
- <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">ANALİTİK TERAZİ · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html">‹ Laboratuvar</a></div>
+ <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">ANALİTİK TERAZİ · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
  <div class="grid">
   <div style="display:grid;gap:12px">
    <div class="stage" id="stg"><nav class="snav" aria-label="Terazi menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav>
@@ -481,7 +481,8 @@ function evaluate(){const t=T(),v=S.disp,err=v-t.target;const f=[...S.flags];
  $('#res').innerHTML=`<div class="card res ${ok?'ok':'bad'}"><b class="big">${ok?'Tartım kaydedildi ✓':'Tartım kabul edilmedi'}</b><div class="kv"><span>Hedef</span><b>${fmt(t.target,2)} ± ${fmt(t.tol,2)} mg</b><span>Kaydedilen</span><b>${d.n} ${d.u}${d.u==='g'?` = ${fmt(v,3)} mg`:''}</b><span>Sapma</span><b style="color:${Math.abs(err)<=t.tol?'#2DBE5B':'#E5484D'}">${err>0?'+':''}${fmt(err,3)} mg</b></div>${f.length?`<ul>${f.map(x=>`<li>${x}</li>`).join('')}</ul>`:'<p class="sub" style="font-size:13px">Kayıt LIMS’e aktarıldı: tarih, saat, terazi no, kullanıcı. Şimdi kapıyı aç, kayığı al ve <b>balon jojeye</b> boşalt.</p>'}<div class="acts"><button class="bt" id="again">Aynı görevi tekrar dene</button></div></div>`;
  $('#again').onclick=()=>{reset(t.id);S.mode='use';render()};say(ok?'Mükemmel! Kararlı değeri kapılar kapalıyken kaydettin. Son adım: kapıyı aç, kayığı kefeden al ve <b>balon jojeye</b> boşalt.':'Kayıt kabul edilmedi. Aşağıdaki notları oku ve tekrar dene.');render()}
 /* ---------- girişler ---------- */
-$('#mHome').onclick=()=>{const u=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html';try{window.close()}catch(e){}setTimeout(()=>{location.href=u},250)};
+function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
+$('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}
 $('#mTasks').onclick=$('#tOpen').onclick=()=>$('#tdlg').showModal();$('#tClose').onclick=()=>$('#tdlg').close();
 $('#mParts').onclick=()=>{reset('parts');S.mode='parts';render()};$('#mUse').onclick=()=>{if(S.task==='parts')reset('level');S.mode='use';render()};
 $('#mReset').onclick=()=>{S.done={};S.seen={};S.lev={x:3,y:-1};S.cal=false;reset('parts');S.mode='parts';render()};

@@ -111,7 +111,7 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
 .dsp{width:250px}.dsp .mg{font-size:11.5px}.dsp .st{font-size:11px}@media (max-width:900px){.dsp{width:170px}.dsp .mg,.dsp .st{font-size:9.5px}}
 </style>
 <div class="wrap">
- <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">VORTEKS · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html">‹ Laboratuvar</a></div>
+ <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">VORTEKS · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
  <div class="grid">
   <div style="display:grid;gap:12px">
    <div class="stage" id="stg"><nav class="snav" aria-label="Vorteks menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav>
@@ -405,7 +405,8 @@ function evaluate(){const t=T();const f=[...S.flags];
  $('#res').innerHTML=`<div class="card res ${ok?'ok':'bad'}"><b class="big">${ok?(t.id==='hs'?'Vial homojen ✓':'Ekstraksiyon tamam ✓'):'Görev kabul edilmedi'}</b><div class="kv"><span>Karıştırma süresi</span><b>${fmt(S.tRun,1)} s</b>${t.id==='lle'?`<span>Yüksek hızda (≥ 2000 rpm)</span><b>${fmt(S.tHigh,1)} s</b>`:''}<span>Kalan hacim</span><b>%${Math.round(S.vol[t.id==='hs'?'hs':'fal']*100)}</b></div>${f.length?`<ul>${f.map(x=>`<li>${x}</li>`).join('')}</ul>`:`<p class="sub" style="font-size:13px">${t.id==='hs'?'Kan, su ve İS tamamen karıştı. Vial artık HS-GC-MS otomatik örnekleyicisine konabilir.':'İki faz karıştı ve bulanık bir <b>emülsiyon</b> oluştu: analit organik faza geçti. Fazları ayırmak için tüpü <b>santrifüjle</b> (4000 rpm, 5 dk), sonra üstteki organik fazı al.'}</p>`}<div class="acts">${t.id==='lle'?'<a class="bt" style="text-align:center;text-decoration:none" href="https://spemrt.github.io/toksilab/santrifuj_pilot.html" target="_blank" rel="noopener">Santrifüje git ↗</a>':''}<button class="bt" id="again">Aynı görevi tekrar dene</button></div></div>`;
  $('#again').onclick=()=>{reset(t.id);S.mode='use';render()};say(ok?(t.id==='hs'?'Mükemmel! Vial homojen; kısa bir TOUCH vorteksi yeterli oldu.':'Mükemmel! Kapalı tüp, düşük hızla başlangıç ve 30 s yüksek hız: doğru ekstraksiyon.'):'Görev kabul edilmedi. Aşağıdaki notları oku ve tekrar dene.');render()}
 /* ---------- girişler ---------- */
-$('#mHome').onclick=()=>{const u=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html';try{window.close()}catch(e){}setTimeout(()=>{location.href=u},250)};
+function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
+$('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}
 $('#mTasks').onclick=$('#tOpen').onclick=()=>$('#tdlg').showModal();$('#tClose').onclick=()=>$('#tdlg').close();
 $('#mParts').onclick=()=>{reset('parts');S.mode='parts';kOpen=false;render()};$('#mUse').onclick=()=>{if(S.task==='parts')reset('hs');S.mode='use';render()};
 $('#mReset').onclick=()=>{S.done={};S.seen={};kOpen=false;reset('parts');S.mode='parts';render()};

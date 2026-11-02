@@ -123,7 +123,7 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
 </head>
 <body>
 <div class="wrap">
- <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">PİPET · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html">‹ Laboratuvar</a></div>
+ <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">PİPET · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
  <div class="grid">
   <div style="display:grid;gap:12px">
    <div class="stage"><nav class="snav" aria-label="Pipet menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav><div id="cv3"><div class="tip" id="tip" hidden></div><div class="held" id="held" hidden></div><div class="kpop" id="vpop" hidden><b>Hacim (µL)</b><div><button id="vpM">−</button><span id="vpV"></span><button id="vpP">+</button></div></div><div class="rot">Sürükle: döndür · pipeti tutup taşı</div><div class="nogl" id="nogl" hidden>3B görüntü için tarayıcının WebGL desteği gerekiyor.</div></div>
@@ -518,7 +518,8 @@ function choosePip(n){if(S.mode!=='use')return;if(S.tip){say('Pipet değiştirme
  const t=T();if(t.vol){say(t.vol>p.max?`${S.pip} en fazla ${fmt(p.max)} µL çeker; ${t.vol} µL için daha büyük bir pipet gerek.`:t.vol<p.min?`${S.pip}’nin alt sınırı ${fmt(p.min,p.dp)} µL; ${t.vol} µL bu pipetle ölçülemez.`:S.pip===t.pip?`Doğru seçim: ${t.vol} µL, ${S.pip}’nin aralığında ve üst sınırına yakın; doğruluk en iyi bu bölgede. Şimdi hacmi ayarla.`:`${S.pip} bu hacmi çekebilir ama ${t.vol} µL aralığın alt kısmında kalır; doğruluk düşer. Daha küçük pipet var mı?`)}render()}
 /* girişler */
 $('#mTasks').onclick=$('#tOpen').onclick=()=>$('#tdlg').showModal();$('#tClose').onclick=()=>$('#tdlg').close();
-$('#mHome').onclick=()=>{const u=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html';try{window.close()}catch(e){}setTimeout(()=>{location.href=u},250)};$('#mReset').onclick=()=>{VOL.src={su:1500,kan:1500,stok:1500,dcm:1500};VOL.tube={};S.done={};S.seen={};reset('parts');S.mode='parts';render()};
+function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
+$('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}$('#mReset').onclick=()=>{VOL.src={su:1500,kan:1500,stok:1500,dcm:1500};VOL.tube={};S.done={};S.seen={};reset('parts');S.mode='parts';render()};
 $('#mParts').onclick=()=>{if(S.task!=='parts')reset('parts');S.mode='parts';render()};$('#mUse').onclick=()=>{if(S.task==='parts'){reset('su')}S.mode='use';render()};
 function setVol(v){const p=P();if(v>p.max+1e-9||v<p.min-1e-9){say(`<b>Dur!</b> ${S.pip}’nin aralığı ${fmt(p.min,p.dp)}–${fmt(p.max)} µL. Halkayı aralığın dışına zorlamak pipetin mekanizmasını bozar ve kalibrasyonu kaydırır.`);v=Math.min(p.max,Math.max(p.min,v))}S.vol=Math.round(v/p.step)*p.step;checkSetup();if(S.ev.vol)say(`Hacim ${fmt(S.vol,p.dp)} µL. Göstergeyi karşıdan okuyarak kontrol ettin. Şimdi <b>uç kutusuna</b> git ve uç tak.`);render()}
 $('#vM').onclick=()=>setVol(S.vol-P().step*(S.pip==='P10'?5:S.pip==='P200'?5:10));$('#vP').onclick=()=>setVol(S.vol+P().step*(S.pip==='P10'?5:S.pip==='P200'?5:10));

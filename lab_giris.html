@@ -609,8 +609,8 @@ function moveTo(x,z){if(inRoom){if(x<2.3&&Math.abs(z+11)<.45){if(x<1.55){inRoom=
  G.x=Math.max(-1.55,Math.min(1.55,x));G.z=Math.max(-28.6,Math.min(-.8,z));return true}
 let inRoom=false;
 function roomUI(){$('#back').hidden=!inRoom}
-function openDev(k){const d=DEVI[k];const el=$('#room');el.hidden=false;el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:#1F9A97">ÖRNEK HAZIRLAMA · CİHAZ</div><h2>${d.ic} ${d.n}</h2><p>${d.d}</p><p style="font-size:13px;color:#9BB0B6;margin-bottom:-4px">Bu cihazdaki görevler:</p><ul>${d.t.map(x=>`<li>${x}</li>`).join('')}</ul><button class="go" id="dgo">Cihazı kullan ›</button><p style="font-size:12.5px;color:#9BB0B6">Cihaz yeni sekmede açılır; işin bitince bu sekmeye dönerek laboratuvarda kaldığın yerden devam edersin.</p>`;
- $('#rx').onclick=closeRoom;$('#dgo').onclick=()=>{window.open(BASE+d.f,'_blank','noopener');say(`<b>${d.n}</b> yeni sekmede açıldı. Görevi bitirince bu sekmeye dön; laboratuvarda seni bekliyorum.`)};
+function openDev(k){const d=DEVI[k];const el=$('#room');el.hidden=false;el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:#1F9A97">ÖRNEK HAZIRLAMA · CİHAZ</div><h2>${d.ic} ${d.n}</h2><p>${d.d}</p><p style="font-size:13px;color:#9BB0B6;margin-bottom:-4px">Bu cihazdaki görevler:</p><ul>${d.t.map(x=>`<li>${x}</li>`).join('')}</ul><button class="go" id="dgo">Cihazı kullan ›</button><p style="font-size:12.5px;color:#9BB0B6">İşin bitince cihaz sayfasındaki <b>⌂ Laboratuvar</b> düğmesi seni tekrar bu odaya, bu cihazın önüne getirir.</p>`;
+ $('#rx').onclick=closeRoom;$('#dgo').onclick=()=>{location.href=BASE+d.f+'?ret=r2-'+k};
  const g=DEVS.find(x=>x.k===k);if(g){G.yaw=Math.atan2(-(g.x-P.x),-(g.z-P.z));G.pitch=-.35}say(`<b>${d.n}</b>. ${d.d}`)}
 let nearDev=null;const dv3=new THREE.Vector3();
 function updDev(now){const chip=$('#devchip');let best=null,bd=1.7;if(inRoom)DEVS.forEach(d=>{const dd=Math.hypot(d.x-P.x,d.z-P.z);if(dd<bd){bd=dd;best=d}});
@@ -654,6 +654,13 @@ function loop(t){requestAnimationFrame(loop);const now=performance.now(),dt=Math
  updTeam(dt,now);updDev(now);renderer.render(scene,cam)}
 requestAnimationFrame(loop);
 say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.');drawMap();
+/* cihazdan dönüş: lab_giris.html#r2-bal */
+{const m=location.hash.match(/^#r2-(\w+)/);if(m){const k=m[1];history.replaceState(null,'',location.pathname+location.search);
+ $('#intro').classList.add('out');started=true;inside=true;teamMode='home';TP.forEach(p=>{p.root.position.set(p.o.home.x,0,p.o.home.z);p.root.rotation.y=p.o.home.ry;p.dest=null;p.arrived=true});
+ openRoomDoor=2;inRoom=true;roomUI();const d=DEVS.find(x=>x.k===k)||DEVS[0];
+ const sp={bal:[3.6,-12.25],cen:[8.9,-12.55],vor:[7.9,-12.55],pip:[5.5,-9.75]}[d.k]||[3,-11];
+ G.x=P.x=sp[0];G.z=P.z=sp[1];G.yaw=P.yaw=Math.atan2(-(d.x-sp[0]),-(d.z-sp[1]));G.pitch=P.pitch=-.3;doorOpen=1;drawMap();nearDev=d;{const c=$('#devchip');c.innerHTML=`${DEVI[d.k].ic} <b>${DEVI[d.k].n}</b> · bilgi ve kullanım ›`;c.onclick=()=>openDev(d.k)}
+ say(`Tekrar hoş geldin! <b>Örnek Hazırlama Laboratuvarı</b>’ndasın, <b>${DEVI[d.k].n}</b> önünde kaldığın yerdesin. Başka bir cihaza geçebilir ya da <b>‹ Koridora dön</b> ile koridora çıkabilirsin.`)}}
 $('#mHome').onclick=()=>window.open(BASE+'my_toksilab.html','_blank','noopener');
 $('#mMap').onclick=()=>{const m=$('#map');m.hidden=!m.hidden;$('#mMap').classList.toggle('on',!m.hidden)};
 $('#mIntro').onclick=()=>{teamForm();inRoom=false;roomUI();openRoomDoor=0;started=false;inside=false;closeRoom();P.z=14;P.x=0;G.x=0;G.z=9.5;$('#intro').classList.remove('out');say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.')};

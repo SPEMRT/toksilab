@@ -116,7 +116,7 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
 @media (max-width:900px){.dsp{width:175px}.dsp .mg{font-size:9.5px}.imbrow svg{width:44px;height:44px}.imbrow span{font-size:9.5px}.resg{grid-template-columns:1fr}}
 </style>
 <div class="wrap">
- <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">SANTRİFÜJ · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html">‹ Laboratuvar</a></div>
+ <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">SANTRİFÜJ · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
  <div class="grid">
   <div style="display:grid;gap:12px">
    <div class="stage" id="stg"><nav class="snav" aria-label="Santrifüj menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav>
@@ -444,7 +444,8 @@ function loop(){const now=performance.now(),dt=Math.min(.1,(now-last)/1000);last
  if(S.cur>0)S.rot+=Math.min(S.cur,900)/60*2*Math.PI*dt*.35;
  if(ch)live()}
 /* ---------- girişler ---------- */
-$('#mHome').onclick=()=>{const u=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html';try{window.close()}catch(e){}setTimeout(()=>{location.href=u},250)};
+function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
+$('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}
 $('#mTasks').onclick=$('#tOpen').onclick=()=>$('#tdlg').showModal();$('#tClose').onclick=()=>$('#tdlg').close();
 $('#mParts').onclick=()=>{if(S.phase!=='idle')return;S.slots.fill(null);reset('parts');S.mode='parts';render()};$('#mUse').onclick=()=>{if(S.task==='parts')reset('kan');S.mode='use';render()};
 $('#mReset').onclick=()=>{if(S.phase!=='idle')return;S.done={};S.seen={};S.rotor='ang';reset('parts');S.mode='parts';render()};
