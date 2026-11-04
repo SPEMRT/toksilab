@@ -186,8 +186,8 @@ const ROOMS=[
  {no:2,z:-11,n:'Örnek Hazırlama Laboratuvarı',k:'ÖRNEK HAZIRLAMA',c:'#1F9A97',ic:'🧪',haz:'bio',sub:'KKD zorunlu · biyolojik risk',d:'Numuneler analize burada hazırlanır: tartım, pipetleme, karıştırma, ekstraksiyon ve santrifüj. Biyolojik numunelerle çalışıldığı için KKD zorunludur.',l:['Analitik terazi','Otomatik pipetler · döner stand','Vorteks · santrifüj','Çeker ocak · SPE · buzdolabı'],st:'open'},
  {no:3,z:-17,n:'İnorganik Analiz Laboratuvarı',k:'İNORGANİK ANALİZ',c:'#E0862A',ic:'⚛',haz:'cor',sub:'Asit ve aşındırıcı madde',d:'Metal ve eser element analizleri yapılır. Numuneler asitle mikrodalgada yakılır ve ICP-MS ile ölçülür.',l:['ICP-MS · eser elementler (Pb, As, Hg, Cd…)','Mikrodalga yakma ünitesi','Asit çeker ocağı','Ultra saf su sistemi'],st:'soon'},
  {no:4,z:-23,n:'Kimyasal Depo',k:'KİMYASAL DEPO',c:'#C2312B',ic:'☢',haz:'fla',sub:'Yetkisiz giriş yasaktır',d:'Çözücüler, asitler, bazlar ve referans standartlar burada saklanır. Uyumsuz kimyasallar ayrı dolaplarda tutulur; giriş-çıkış kayda geçer.',l:['Yanıcı madde dolabı (havalandırmalı)','Asit / baz dolapları','Referans standart buzdolabı (+4 °C / −20 °C)','Kimyasal envanter ve SDS dosyaları'],st:'soon'},
- {no:5,z:-28.9,n:'Gaz Tüp Odası',k:'GAZ TÜP ODASI',c:'#E8B923',ic:'⬣',haz:'gas',sub:'Basınçlı gaz · sigara içilmez',d:'Basınçlı gaz tüpleri tek bir odada toplanır; tüpler duvara zincirle sabitlenir, manifold ve regülatörlerden ince paslanmaz borularla odalara dağıtılır.',l:['Azot (N₂) → Örnek Hazırlama, Kromatografi','Helyum (He) → Kromatografi, İnorganik Analiz, Yangın ve Patlayıcı','Argon (Ar) → Kromatografi, İnorganik Analiz','Gaz kaçak dedektörü · havalandırma'],st:'info',small:true},
- {no:6,z:-11,side:'L',n:'Yangın ve Patlayıcı Analiz Laboratuvarı',k:'YANGIN VE PATLAYICI',c:'#6A4FB3',ic:'💥',haz:'exp',sub:'Yangın ve patlayıcı analiz laboratuvarı',d:'Yangın yerinden alınan enkazda hızlandırıcı (benzin, tiner, gazyağı vb.) kalıntıları ile patlama sonrası örneklerde patlayıcı madde kalıntıları analiz edilir.',l:['GC-MS · yangın hızlandırıcı kalıntısı (ILR) analizi','Headspace ve aktif karbon şeritle örnekleme','Patlayıcı kalıntı analizi (TNT, RDX, PETN…)','Delil saklama ve delil zinciri kaydı'],st:'soon'}];
+ {no:5,z:-28.9,n:'Gaz Tüp Odası',k:'GAZ TÜP ODASI',c:'#E8B923',ic:'⬣',haz:'gas',sub:'Basınçlı gaz · sigara içilmez',d:'Basınçlı gaz tüpleri tek bir odada toplanır; tüpler duvara zincirle sabitlenir, manifold ve regülatörlerden ince paslanmaz borularla odalara dağıtılır.',l:['Azot-1 (N₂, tek tüp) → Kromatografi · LC-MS/MS ve GC','Argon-1 (Ar, tek tüp) → Kromatografi · LC-MS/MS','Argon-2 (Ar, çift tüp) → İnorganik Analiz · ICP-MS','Helyum (He, çift tüp) → Kromatografi ve Yangın-Patlayıcı · GC-MS','Azot-2 (N₂, çift tüp) → Örnek Hazırlama · evaporatör, SPE','Çift tüplü regülatörler kesintisiz gaz sağlar · gaz kaçak dedektörü · havalandırma'],st:'info',small:true},
+ {no:6,z:-11,side:'L',dx:-6,n:'Yangın ve Patlayıcı Analiz Laboratuvarı',k:'YANGIN VE PATLAYICI',c:'#6A4FB3',ic:'💥',haz:'exp',sub:'Yangın ve patlayıcı analiz laboratuvarı',d:'Yangın yerinden alınan enkazda hızlandırıcı (benzin, tiner, gazyağı vb.) kalıntıları ile patlama sonrası örneklerde patlayıcı madde kalıntıları analiz edilir.',l:['GC-MS · yangın hızlandırıcı kalıntısı (ILR) analizi','Headspace ve aktif karbon şeritle örnekleme','Patlayıcı kalıntı analizi (TNT, RDX, PETN…)','Delil saklama ve delil zinciri kaydı'],st:'soon'}];
 /* ============ sahne ============ */
 const box=$('#cv3');const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;box.appendChild(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color('#BFD9E6');scene.fog=new THREE.Fog('#BFD9E6',30,90);
@@ -236,17 +236,26 @@ const sensor=add(new THREE.BoxGeometry(.5,.12,.14),M.dark,0,2.86,.2);const sLed=
 const CL=30;
 add(new THREE.PlaneGeometry(4,CL),new THREE.MeshStandardMaterial({map:floorT,roughness:.35,metalness:.05}),0,.001,-CL/2).rotation.x=-Math.PI/2;
 add(new THREE.PlaneGeometry(4,CL),M.ceil,0,3,-CL/2).rotation.x=Math.PI/2;
-const lw=add(new THREE.PlaneGeometry(CL,3),M.wall,-2,1.5,-CL/2);lw.rotation.y=Math.PI/2;
+/* sol duvar: 6 numaralı odaya giden küçük yan koridor için açıklık (z −9,6 … −12,4) */
+const SZ0=-9.6,SZ1=-12.4,SX=-6;
+[[0,SZ0],[SZ1,-CL]].forEach(([a,b])=>{const m=add(new THREE.PlaneGeometry(Math.abs(b-a),3),M.wall,-2,1.5,(a+b)/2);m.rotation.y=Math.PI/2});{const m=add(new THREE.PlaneGeometry(SZ0-SZ1,.4),M.wall,-2,2.8,(SZ0+SZ1)/2);m.rotation.y=Math.PI/2}
+/* yan koridor */
+add(new THREE.PlaneGeometry(4,SZ0-SZ1),new THREE.MeshStandardMaterial({map:floorT,roughness:.35,metalness:.05}),(SX-2)/2,.001,(SZ0+SZ1)/2).rotation.x=-Math.PI/2;
+add(new THREE.PlaneGeometry(4,SZ0-SZ1),M.ceil,(SX-2)/2,3,(SZ0+SZ1)/2).rotation.x=Math.PI/2;
+{const a=add(new THREE.PlaneGeometry(4,3),M.wall,(SX-2)/2,1.5,SZ0);a.rotation.y=Math.PI;add(new THREE.PlaneGeometry(4,3),M.wall,(SX-2)/2,1.5,SZ1);const e=add(new THREE.PlaneGeometry(SZ0-SZ1,3),M.wall2,SX,1.5,(SZ0+SZ1)/2);e.rotation.y=Math.PI/2;
+ add(new THREE.BoxGeometry(4,.18,.05),M.rail,(SX-2)/2,.95,SZ0-.03);add(new THREE.BoxGeometry(4,.18,.05),M.rail,(SX-2)/2,.95,SZ1+.03);
+ add(new THREE.BoxGeometry(.6,.03,1.2),M.light,(SX-2)/2,2.985,(SZ0+SZ1)/2);const pl=new THREE.PointLight('#FFF6EA',4,7,1.4);pl.position.set((SX-2)/2,2.7,(SZ0+SZ1)/2);scene.add(pl);
+ const st=add(new THREE.PlaneGeometry(2.4,.3),new THREE.MeshBasicMaterial({map:canvasTex(1024,128,(c,w,h)=>{c.fillStyle='#2E373C';c.fillRect(0,0,w,h);c.fillStyle='#6A4FB3';c.fillRect(0,0,128,h);c.fillStyle='#fff';c.font='700 96px "Barlow Condensed",sans-serif';c.textAlign='center';c.fillText('6',64,100);c.textAlign='left';c.font='700 60px "Barlow Condensed","Source Sans 3",sans-serif';c.fillText('◀ YANGIN VE PATLAYICI ANALİZ',156,86)}),toneMapped:false}),-1.98,2.8,(SZ0+SZ1)/2);st.rotation.y=Math.PI/2}
 [[0,-10.44],[-11.56,-CL]].forEach(([a,b])=>{const m=add(new THREE.PlaneGeometry(Math.abs(b-a),3),M.wall,2,1.5,(a+b)/2);m.rotation.y=-Math.PI/2});{const m=add(new THREE.PlaneGeometry(1.12,.8),M.wall,2,2.6,-11);m.rotation.y=-Math.PI/2}
 add(new THREE.PlaneGeometry(4,3),M.wall2,0,1.5,-CL);
-[-1,1].forEach(s=>{add(new THREE.BoxGeometry(.05,.18,CL),M.rail,s*1.97,.95,-CL/2);add(new THREE.BoxGeometry(.03,.12,CL),M.band,s*1.985,.08,-CL/2)});
+add(new THREE.BoxGeometry(.05,.18,CL),M.rail,1.97,.95,-CL/2);add(new THREE.BoxGeometry(.03,.12,CL),M.band,1.985,.08,-CL/2);[[0,SZ0],[SZ1,-CL]].forEach(([a,b])=>{add(new THREE.BoxGeometry(.05,.18,Math.abs(b-a)),M.rail,-1.97,.95,(a+b)/2);add(new THREE.BoxGeometry(.03,.12,Math.abs(b-a)),M.band,-1.985,.08,(a+b)/2)});
 /* tavan ışıkları */
 {let k=0;for(let z=-2.5;z>-CL;z-=3.2,k++){add(new THREE.BoxGeometry(1.2,.03,.6),M.light,0,2.985,z);if(k%2===0){const p=new THREE.PointLight('#FFF6EA',6,10,1.4);p.position.set(0,2.7,z-1.6);scene.add(p)}}}
 /* kapılar */
 const HAZ={gas:'⬣',bio:'☣',cor:'⚠',fla:'🔥',exp:'💥'};
 function hazardTex(k){return canvasTex(256,256,(c,w,h)=>{c.translate(128,128);c.rotate(Math.PI/4);c.fillStyle='#fff';c.fillRect(-82,-82,164,164);c.strokeStyle='#C2312B';c.lineWidth=14;c.strokeRect(-82,-82,164,164);c.rotate(-Math.PI/4);c.fillStyle='#111';c.font='700 92px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(HAZ[k],0,6)})}
 const doorG={};
-ROOMS.forEach(r=>{const g=new THREE.Group();const L=r.side==='L';g.position.set(L?-1.995:1.995,0,r.z);g.rotation.y=L?Math.PI/2:-Math.PI/2;scene.add(g);doorG[r.no]=g;
+ROOMS.forEach(r=>{const g=new THREE.Group();const L=r.side==='L';g.position.set(r.dx!=null?r.dx+.005:(L?-1.995:1.995),0,r.z);g.rotation.y=L?Math.PI/2:-Math.PI/2;scene.add(g);doorG[r.no]=g;
  if(r.no===2){add(new THREE.BoxGeometry(.12,2.32,.16),M.graph,-.62,1.16,0,g);add(new THREE.BoxGeometry(.12,2.32,.16),M.graph,.62,1.16,0,g);add(new THREE.BoxGeometry(1.36,.12,.16),M.graph,0,2.26,0,g)}else add(new THREE.BoxGeometry(1.36,2.32,.08),M.graph,0,1.16,.02,g);
  const pivot=new THREE.Group();pivot.position.set(-.56,0,.07);g.add(pivot);
  const lm=new THREE.MeshPhysicalMaterial({color:r.c,roughness:.45,clearcoat:.3});const leaf=add(new THREE.BoxGeometry(1.12,2.18,.05),lm,.56,1.1,0,pivot);
@@ -500,14 +509,14 @@ const PZ=[-3.4,-7.4,-14.6,-18.8,-23,-27];POSTERS.forEach((p,i)=>{const z=PZ[i];c
 add(new THREE.CylinderGeometry(.09,.09,.55,16),new THREE.MeshStandardMaterial({color:'#C62828',roughness:.4}),-1.85,.6,-9.2);add(new THREE.CylinderGeometry(.03,.03,.1,8),M.dark,-1.85,.92,-9.2);
 {const m=add(new THREE.PlaneGeometry(.32,.32),new THREE.MeshStandardMaterial({map:canvasTex(128,128,(c)=>{c.fillStyle='#C62828';c.fillRect(0,0,128,128);c.fillStyle='#fff';c.font='700 70px sans-serif';c.textAlign='center';c.fillText('🧯',64,92)})}),-1.98,1.45,-9.2);m.rotation.y=Math.PI/2}
 /* gaz hatları (tavanda) */
-const GAS=[{k:'N₂',n:'Azot',c:'#1E1E1E',x:1.5,to:[2,1]},{k:'He',n:'Helyum',c:'#7B4A24',x:1.63,to:[3,6,1]},{k:'Ar',n:'Argon',c:'#2F6B3A',x:1.76,to:[3,1]}];
+const GAS=[{k:'N₂-1',n:'Azot',c:'#2F8F4E',x:1.42,to:[1]},{k:'Ar-1',n:'Argon',c:'#2F70B8',x:1.53,to:[1]},{k:'Ar-2',n:'Argon',c:'#3F8FD0',x:1.64,to:[3]},{k:'He',n:'Helyum',c:'#7B4A24',x:1.75,to:[1,6]},{k:'N₂-2',n:'Azot',c:'#3AA35C',x:1.86,to:[2]}];
 const pipeM=new THREE.MeshStandardMaterial({color:'#C9CFD2',metalness:.9,roughness:.25});const GY=2.86;
 function seg(a,b,mat,rad){const v=new THREE.Vector3().subVectors(b,a);const L=v.length();const m=add(new THREE.CylinderGeometry(rad,rad,L,10),mat,(a.x+b.x)/2,(a.y+b.y)/2,(a.z+b.z)/2);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize());return m}
 const V=(x,y,z)=>new THREE.Vector3(x,y,z);
 GAS.forEach((g,gi)=>{const cm=new THREE.MeshStandardMaterial({color:g.c,roughness:.5});const z0=-29.25-gi*.0;const yy=GY-gi*.0;
  const endZ=Math.max(...g.to.map(n=>ROOMS[n-1].z-.8-gi*.12));
  seg(V(2,yy,z0-gi*.12),V(g.x,yy,z0-gi*.12),pipeM,.018);seg(V(g.x,yy,z0-gi*.12),V(g.x,yy,endZ),pipeM,.018);
- g.to.forEach(n=>{const RR=ROOMS[n-1],wx=RR.side==='L'?-2:2,vx=RR.side==='L'?-1.9:1.9;const zd=RR.z-.8-gi*.12;seg(V(g.x,yy,zd),V(wx,yy,zd),pipeM,.018);add(new THREE.CylinderGeometry(.034,.034,.05,12),new THREE.MeshStandardMaterial({color:'#D9A800',roughness:.4}),vx,yy-.05,zd).rotation.z=0;add(new THREE.BoxGeometry(.06,.05,.05),new THREE.MeshStandardMaterial({color:'#C62828'}),vx,yy-.09,zd)});
+ g.to.forEach(n=>{const RR=ROOMS[n-1],wx=RR.dx!=null?RR.dx:RR.side==='L'?-2:2,vx=RR.dx!=null?RR.dx+.1:RR.side==='L'?-1.9:1.9;const zd=RR.z-.8-gi*.12;seg(V(g.x,yy,zd),V(wx,yy,zd),pipeM,.018);add(new THREE.CylinderGeometry(.034,.034,.05,12),new THREE.MeshStandardMaterial({color:'#D9A800',roughness:.4}),vx,yy-.05,zd).rotation.z=0;add(new THREE.BoxGeometry(.06,.05,.05),new THREE.MeshStandardMaterial({color:'#C62828'}),vx,yy-.09,zd)});
  for(let z=z0;z<endZ-.2;z+=1.5){const b=add(new THREE.CylinderGeometry(.024,.024,.09,10),cm,g.x,yy,z);b.rotation.x=Math.PI/2}
  for(let z=z0+1.2;z<endZ-.5;z+=3.6){const t=canvasTex(256,64,(c,w,h)=>{c.fillStyle=g.c;c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='700 40px "Barlow Condensed","Source Sans 3",sans-serif';c.fillText(g.k+'  '+g.n+'  ⟶',12,46)});const m=add(new THREE.PlaneGeometry(.36,.09),new THREE.MeshBasicMaterial({map:t,side:THREE.DoubleSide}),g.x-.0,yy-.075,z+gi*.4);m.rotation.y=-Math.PI/2;m.rotation.x=0}});
 for(let z=-29;z<-4.5;z+=1.8){add(new THREE.BoxGeometry(.42,.02,.03),M.dark,1.63,GY+.035,z);add(new THREE.BoxGeometry(.02,.12,.03),M.dark,1.42,GY+.08,z)}
@@ -580,7 +589,7 @@ let teamMode='form',teamT=0,teamT0=0,greetIdx=-1;
 function teamForm(){teamMode='form';greetIdx=-1;TP.forEach(p=>{p.root.position.set(p.o.f[0],0,p.o.f[1]);p.root.rotation.y=0;p.tag.visible=false;p.dest=null})}
 teamForm();
 function teamDisperse(){if(teamMode==='go'||teamMode==='home')return;teamMode='go';$('#bub').hidden=true;TP.forEach((p,i)=>{p.dest=p.o.home;p.delay=i*.35});
- say('Ekip şimdi kendi odalarına geçiyor. Sağ tarafta <b>1 Kromatografi</b>, <b>2 Örnek Hazırlama</b>, <b>3 İnorganik Analiz</b>, <b>4 Kimyasal Depo</b> ve en sonda <b>5 Gaz Tüp Odası</b>; sol tarafta, Örnek Hazırlama’nın tam karşısında <b>6 Yangın ve Patlayıcı Analiz Laboratuvarı</b> var. Ekipten birine <b>dokunursan</b> kim olduğunu görürsün; sol duvarda <b>poster sunumlarımız</b> var.')}
+ say('Ekip şimdi kendi odalarına geçiyor. Sağ tarafta <b>1 Kromatografi</b>, <b>2 Örnek Hazırlama</b>, <b>3 İnorganik Analiz</b>, <b>4 Kimyasal Depo</b> ve en sonda <b>5 Gaz Tüp Odası</b>; sol tarafta, Örnek Hazırlama’nın karşısındaki küçük koridorun sonunda <b>6 Yangın ve Patlayıcı Analiz Laboratuvarı</b> var. Ekipten birine <b>dokunursan</b> kim olduğunu görürsün; sol duvarda <b>poster sunumlarımız</b> var.')}
 function startGreet(){teamMode='greet';teamT=0;teamT0=performance.now();greetIdx=0;showBub()}
 function showBub(){const p=TP[greetIdx];if(!p)return;say(p.o.g)}
 const tv=new THREE.Vector3();
@@ -613,7 +622,7 @@ hangSign(-14.2,[['↑ 3 İnorganik Analiz','↑ 4 Kimyasal Depo'],['↑ 5 Gaz T�
 add(new THREE.PlaneGeometry(1.2,.4),new THREE.MeshBasicMaterial({map:canvasTex(600,200,(c,w,h)=>{c.fillStyle='#1B8E3A';c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='110px sans-serif';c.fillText('🏃',20,150);c.font='700 80px "Barlow Condensed",sans-serif';c.fillText('ACİL ÇIKIŞ',170,135)}),toneMapped:false}),0,2.55,-CL+.02);
 add(new THREE.BoxGeometry(1.4,2.2,.06),M.graph,0,1.1,-CL+.03);add(new THREE.BoxGeometry(1.2,.06,.1),M.steel,0,1.0,-CL+.08);
 /* ============ kamera / yürüme ============ */
-const STOPS={out:{x:0,z:9.5,yaw:0},door:{x:0,z:2.2,yaw:0},hall:{x:0,z:-.9,yaw:0},end:{x:0,z:-26,yaw:0}};ROOMS.forEach(r=>STOPS['d'+r.no]=r.side==='L'?{x:.2,z:r.z,yaw:Math.PI/2}:{x:-.2,z:r.z,yaw:-Math.PI/2});
+const STOPS={out:{x:0,z:9.5,yaw:0},door:{x:0,z:2.2,yaw:0},hall:{x:0,z:-.9,yaw:0},end:{x:0,z:-26,yaw:0}};ROOMS.forEach(r=>STOPS['d'+r.no]=r.dx!=null?{x:r.dx+1.1,z:r.z,yaw:Math.PI/2}:r.side==='L'?{x:.2,z:r.z,yaw:Math.PI/2}:{x:-.2,z:r.z,yaw:-Math.PI/2});
 const P={x:0,z:14,yaw:0,pitch:-.04};const G={x:0,z:9.5,yaw:0,pitch:-.04};let inside=false,started=false,doorOpen=0,lookDrag=null,keys={};
 function goStop(id){const s=STOPS[id];G.x=s.x;G.z=s.z;G.yaw=s.yaw;G.pitch=-.03;at=id}
 let at='out';
@@ -623,7 +632,7 @@ new ResizeObserver(fit).observe(box);fit();
 $('#enter').onclick=enter;
 function enter(){if(started)return;started=true;$('#intro').classList.add('out');say('Ana girişin önündeyiz. Kapının üstündeki <b>sensör</b> yaklaştığımızı algılayınca kapılar kendiliğinden açılır…');goStop('door');
  setTimeout(()=>{goStop('hall');inside=true},4600);
- setTimeout(()=>{if(TEAM_ON)startGreet();else{teamMode='home';say('Koridordayız. Sağ tarafta <b>1 Kromatografi</b>, <b>2 Örnek Hazırlama</b>, <b>3 İnorganik Analiz</b>, <b>4 Kimyasal Depo</b> ve en sonda <b>5 Gaz Tüp Odası</b>; sol tarafta, Örnek Hazırlama’nın tam karşısında <b>6 Yangın ve Patlayıcı Analiz Laboratuvarı</b> var. Sol duvarda <b>poster sunumlarımız</b> var. Bir kapıya yaklaşıp dokunursan odanın tanıtımını görürsün.')}drawMap()},5600)}
+ setTimeout(()=>{if(TEAM_ON)startGreet();else{teamMode='home';say('Koridordayız. Sağ tarafta <b>1 Kromatografi</b>, <b>2 Örnek Hazırlama</b>, <b>3 İnorganik Analiz</b>, <b>4 Kimyasal Depo</b> ve en sonda <b>5 Gaz Tüp Odası</b>; sol tarafta, Örnek Hazırlama’nın karşısındaki küçük koridorun sonunda <b>6 Yangın ve Patlayıcı Analiz Laboratuvarı</b> var. Sol duvarda <b>poster sunumlarımız</b> var. Bir kapıya yaklaşıp dokunursan odanın tanıtımını görürsün.')}drawMap()},5600)}
 /* etkileşim */
 const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
 const pick=e=>{const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,cam);const hs=ray.intersectObjects(HOT,false);if(!hs.length)return null;let h=hs[0];if(!h.object.userData.hot.startsWith('dev:')){const d=hs.find(x=>x.object.userData.hot.startsWith('dev:')&&x.distance<h.distance+2.5);if(d)h=d}return h.object.userData.hot};
@@ -636,6 +645,7 @@ const step=(d)=>{if(!started||!inside)return;if(teamMode==='greet')teamDisperse(
 function blocked(x,z){if(x<2.3||x>9.7||z<-13.72||z>-8.28)return true;return OBST.some(o=>x>o.x0-.25&&x<o.x1+.25&&z>o.z0-.25&&z<o.z1+.25)}
 function moveTo(x,z){if(inRoom){if(x<2.3&&Math.abs(z+11)<.45){if(x<1.55){inRoom=false;roomUI();say('Koridora döndün.')}G.x=x;G.z=z;return true}if(blocked(x,z))return false;G.x=x;G.z=z;return true}
  if(x>1.55&&Math.abs(z+11)<.45&&openRoomDoor===2){G.x=x;G.z=z;if(x>2.3){inRoom=true;roomUI();roomWelcome()}return true}
+ if((G.x<-1.5&&x<-1.5)||(x<-1.55&&z<SZ0-.3&&z>SZ1+.3)){G.x=Math.max(SX+.45,x);G.z=Math.max(SZ1+.3,Math.min(SZ0-.3,z));return true}
  G.x=Math.max(-1.55,Math.min(1.55,x));G.z=Math.max(-28.6,Math.min(-.8,z));return true}
 let inRoom=false;
 function roomUI(){$('#back').hidden=!inRoom}
@@ -673,9 +683,9 @@ function clampG(){if(inRoom)return;if(inside){G.x=Math.max(-1.55,Math.min(1.55,G
 $('#mvF').onclick=()=>step(3);$('#mvB').onclick=()=>step(-3);$('#mvL').onclick=()=>turn(Math.PI/4);$('#mvR').onclick=()=>turn(-Math.PI/4);
 /* oda kartı */
 function openDoorCard(no){const r=ROOMS[no-1];goStop('d'+no);const el=$('#room');el.hidden=false;
- el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:${r.c}">ODA ${r.no}</div><h2>${r.n}</h2><p>${r.d}</p><ul>${r.l.map(x=>`<li>${x}</li>`).join('')}</ul>${r.st==='open'?`<p style="font-size:13px">Odaya girip cihazları yerinde görebilirsin. Cihazlara doğrudan da gidebilirsin:</p><div class="devs"><a href="${BASE}terazi_pilot.html" target="_blank" rel="noopener">⚖ Analitik terazi</a><a href="${BASE}pipet_pilot.html" target="_blank" rel="noopener">💧 Pipetler</a><a href="${BASE}vorteks_pilot.html" target="_blank" rel="noopener">🌀 Vorteks</a><a href="${BASE}santrifuj_pilot.html" target="_blank" rel="noopener">◎ Santrifüj</a></div><button class="go" id="rgo">Kapıyı aç ve içeri gir ›</button>`:(r.st==='info'?`<p style="font-size:13px">Tavandaki ince borular gazları odalara taşır: <b style="color:#9BB0B6">N₂</b> siyah, <b style="color:#C08A5A">He</b> kahverengi, <b style="color:#6FBF7F">Ar</b> yeşil bantla işaretli.</p>`:`<button class="go" disabled>Yakında açılacak</button>`)}`;
- $('#rx').onclick=closeRoom;if($('#rgo'))$('#rgo').onclick=()=>{if(no===2)enterRoom2()};
- say(`<b>${r.n}</b>. ${r.st==='open'?'Şu an kullandığın cihazlar bu odada.':r.st==='info'?'Gaz tüpleri burada; tavandaki borularla N₂, He ve Ar odalara dağıtılıyor.':'Bu oda yakında açılacak.'} Kapının yanındaki panoda odayla ilgili bilgiler var.`);drawMap()}
+ el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:${r.c}">ODA ${r.no}</div><h2>${r.n}</h2><p>${r.d}</p><ul>${r.l.map(x=>`<li>${x}</li>`).join('')}</ul>${r.st==='open'?`<p style="font-size:13px">Odaya girip cihazları yerinde görebilirsin. Cihazlara doğrudan da gidebilirsin:</p><div class="devs"><a href="${BASE}terazi_pilot.html" target="_blank" rel="noopener">⚖ Analitik terazi</a><a href="${BASE}pipet_pilot.html" target="_blank" rel="noopener">💧 Pipetler</a><a href="${BASE}vorteks_pilot.html" target="_blank" rel="noopener">🌀 Vorteks</a><a href="${BASE}santrifuj_pilot.html" target="_blank" rel="noopener">◎ Santrifüj</a></div><button class="go" id="rgo">Kapıyı aç ve içeri gir ›</button>`:(r.st==='info'?`<p style="font-size:13px">Tavandaki ince borular gazları odalara taşır: <b style="color:#6FD08F">N₂</b> yeşil, <b style="color:#7FB8F0">Ar-1 / Ar-2</b> mavi, <b style="color:#C08A5A">He</b> kahverengi bantla işaretli.</p>${no===5?'<button class="go" id="rgo">Odaya gir ve panelleri incele ›</button>':''}`:`<button class="go" disabled>Yakında açılacak</button>`)}`;
+ $('#rx').onclick=closeRoom;if($('#rgo'))$('#rgo').onclick=()=>{if(no===2)enterRoom2();else if(no===5)location.href=BASE+'gaz_pilot.html?ret=r5'};
+ say(`<b>${r.n}</b>. ${r.st==='open'?'Şu an kullandığın cihazlar bu odada.':r.st==='info'?'Gaz tüpleri burada; tavandaki borularla N₂-1, Ar-1, Ar-2, He ve N₂-2 odalara dağıtılıyor. İçeri girip regülatörleri ve manometreleri inceleyebilirsin.':'Bu oda yakında açılacak.'} Kapının yanındaki panoda odayla ilgili bilgiler var.`);drawMap()}
 let openRoomDoor=0;
 function openPoster(i){const p=POSTERS[i];const el=$('#room');el.hidden=false;el.classList.add('wide');el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:${p.c}">POSTER ${p.k}</div><h2 style="font-size:21px">${p.t}</h2><img src="${p.url}" alt="Poster" style="width:100%;border-radius:8px"><p style="font-size:12.5px">Örnek poster. Kendi poster sunumlarınla değiştirilecek.</p>`;$('#rx').onclick=closeRoom;say(`Bu bir <b>poster sunumu</b>: ${p.t.toLowerCase()}. Laboratuvarımızın kongrelerde sunduğu çalışmalar koridorda sergileniyor.`)}
 function closeRoom(){$('#room').classList.remove('wide');$('#room').hidden=true;openRoomDoor=0}
@@ -703,6 +713,10 @@ function loop(t){requestAnimationFrame(loop);const now=performance.now(),dt=Math
  updTeam(dt,now);updDev(now);renderer.render(scene,cam)}
 requestAnimationFrame(loop);
 say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.');drawMap();
+/* gaz odasından dönüş: lab_giris.html#r5 */
+{if(/^#r5\b/.test(location.hash)){history.replaceState(null,'',location.pathname+location.search);$('#intro').classList.add('out');started=true;inside=true;teamMode='home';
+ const s=STOPS.d5;G.x=P.x=s.x;G.z=P.z=s.z;G.yaw=P.yaw=s.yaw;G.pitch=P.pitch=-.03;openRoomDoor=5;drawMap();
+ say('Gaz tüp odasından çıktın; koridorun sonundasın. Tavandaki borular <b>N₂-1</b>, <b>Ar-1</b> ve <b>He</b>’yi Kromatografi’ye, <b>Ar-2</b>’yi İnorganik Analiz’e, <b>N₂-2</b>’yi Örnek Hazırlama’ya taşıyor.')}}
 /* cihazdan dönüş: lab_giris.html#r2-bal */
 {const m=location.hash.match(/^#r2-(\w+)/);if(m){const k=m[1];history.replaceState(null,'',location.pathname+location.search);
  $('#intro').classList.add('out');started=true;inside=true;teamMode='home';TP.forEach(p=>{p.root.position.set(p.o.home.x,0,p.o.home.z);p.root.rotation.y=p.o.home.ry;p.dest=null;p.arrived=true});
