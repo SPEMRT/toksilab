@@ -136,10 +136,10 @@ function say(t,cls){$('#sayT').innerHTML=t;$('#say').className='say'+(cls?' '+cl
 function beep(f=1100,d=.05){try{const a=beep.a=beep.a||new (window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.type='sine';g.gain.value=.05;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+d)}catch(e){}}
 const isLiquidSrc=id=>['meohN','etohN','nprN','su','tuz','anaM','anaE','anaP','araME','araP','bosKan','numKan'].includes(id)||id.startsWith('v_');
 function act(id){
- if(PIP[id]){if(held){say('Pipette sıvı var; önce bir kaba boşalt.','bad');return}if(pip&&pip!==id&&tip){say('Önce taktığın ucu <b>atığa</b> at, sonra pipet değiştir.','bad');return}pip=pip===id?null:id;tool=null;sel=pip;draw();panel();
+ if(PIP[id]){if(held){say('Pipette sıvı var; önce bir kaba boşalt.','bad');return}if(pip&&pip!==id&&tip){say('Önce taktığın ucu <b>atığa</b> at, sonra pipet değiştir.','bad');return}pip=pip===id?null:id;tool=null;draw();panel();
   if(pip)say(`<b>${PIP[pip].n}</b> elinde (${PIP[pip].lo}–${PIP[pip].hi} µL). Sağdan hacmi ayarla, <b>uç kutusuna</b> dokunup uç tak, sonra çekeceğin kaba dokun.`);return}
  if(id==='tips'){if(!pip){say('Önce bir pipet al.');return}if(tip){say('Pipette zaten uç var. Değiştirmek için önce atığa at.');return}snap();tip={from:null,used:false};beep(1400,.03);say('Temiz uç takıldı. Şimdi çekeceğin kaba dokun.');draw();panel();return}
- if(id==='waste'){if(!tip){say('Atılacak uç yok.');return}if(held){say('Uçta sıvı var. Önce bir kaba boşalt; sıvıyı atığa dökme.','bad');return}snap();tip=null;beep(600,.04);say('Uç atıldı. Her farklı çözelti için yeni uç: taşınmayı (carryover) önler.');draw();panel();return}
+ if(id==='waste'){if(!tip){say('Atılacak uç yok.');return}if(held){say('Uçta sıvı var. Önce bir kaba boşalt; sıvıyı atığa dökme.','bad');return}snap();tip=null;const pn=PIP[pip].n;pip=null;beep(600,.04);say(`Uç atıldı, ${pn} standa kondu. Her farklı çözelti için yeni uç: taşınmayı (carryover) önler. Şimdi bir kaba dokunup işlemlerini görebilir ya da yeniden pipet alabilirsin.`);draw();panel();return}
  if(id==='caps'||id==='crimp'){if(pip){say('Pipeti bırak (pipete tekrar dokun), sonra kapak/crimper al.');return}tool=tool===id?null:id;sel=tool;draw();panel();say(tool==='caps'?'Kapak elinde. Hazır viale dokun: kapağı üstüne koy.':tool==='crimp'?'Crimper elinde. Kapaklı viale dokun: kapağı sık.':'Bıraktın.');return}
  if(id==='nacl'||id==='bal'){sel='bal';tool=null;draw();panel();return}
  if(pip&&isLiquidSrc(id)){return pipAct(id)}
@@ -149,11 +149,11 @@ function act(id){
   draw();panel();tasks();return}
  sel=id;draw();panel()}
 function pipAct(id){const P=PIP[pip],c=C[id];
- if(!tip){say('Uçsuz pipetle sıvı çekilmez: <b>uç kutusuna</b> dokun.','bad');return}
+ if(!tip){sel=id;draw();panel();say(`<b>${c.n}</b> seçildi; işlemleri sağda. Bu kaptan sıvı çekmek için önce <b>uç kutusuna</b> dokunup uç tak.`);return}
  if(!held){ // çek
   if(id.startsWith('v_')){say('Vialden geri çekmiyoruz; vial yalnız hedef.','bad');return}
-  if(c.kind==='flask'&&!c.done){say(`<b>${c.n}</b> henüz hazır değil (çizgiye tamamlanıp karıştırılmadı).`,'bad');return}
-  if(id==='tuz'&&!c.done){say('Tuzlu su henüz hazır değil.','bad');return}
+  if(c.kind==='flask'&&!c.done){sel=id;draw();panel();say(`<b>${c.n}</b> henüz hazır değil. ${c.vol?'Sağdan <b>tuzlu suyla çizgiye tamamla</b>, sonra <b>kapat · karıştır</b>.':'İçine önce planındaki hacmi ekle.'} Bitmeden bu kaptan çekilmez.`);return}
+  if(id==='tuz'&&!c.done){sel=id;draw();panel();say('Tuzlu su henüz hazır değil: önce NaCl tart, sonra sağdan su ile 250 mL’ye tamamla.');return}
   const v=P.v;if(v<P.lo||v>P.hi){say(`${P.n} ${P.lo}–${P.hi} µL arasında çalışır.`,'bad');return}
   if(!c.inf&&c.vol<v){say('Kapta yeterli sıvı yok.','bad');return}
   snap();let warn='';if(tip.used&&tip.from!==id){const pv=C[tip.from],an=pv.m.meoh+pv.m.etoh+pv.m.npr>0;if(an){c.trace=(c.trace||0)+.002;log.push(`Uç değiştirilmeden ${pv.n} → ${c.n}`);warn=`⚠ Aynı uçla farklı çözeltiye girdin: <b>${pv.n}</b> kalıntısı <b>${c.n}</b>’e karıştı (taşınma). Her çözelti için yeni uç! `}else warn=`Not: ${pv.n} ucuyla ${c.n} çektin; iyi uygulama her çözelti için yeni uç. `}
@@ -174,11 +174,11 @@ function pipAct(id){const P=PIP[pip],c=C[id];
   beep(1000,.03);say(`${fmt(held.v,held.v<100?1:0)} µL → <b>${c.n}</b>. ${c.kind==='vial'?`Vialde ${fmt(c.vol,0)} µL.`:''}`);held=null}
  draw();panel();tasks()}
 /* ---------- seçili nesne paneli ---------- */
-function panel(){const E=$('#sel');let h='';
+function panel(){const E=$('#sel');let h='';let ph='';
  if(pip){const P=PIP[pip];h=`<h2>${P.n} · ${P.lo}–${P.hi} µL</h2><div class="row"><label for="pv">Hacim (µL)</label><input type="number" id="pv" min="${P.lo}" max="${P.hi}" step="${P.hi<=100?.5:1}" value="${P.v}" ${held?'disabled':''}><button id="pvOK" ${held?'disabled':''}>Ayarla</button></div>
   <div class="hold">${tip?(held?`Uçta: ${fmt(held.v,held.v<100?1:0)} µL ${C[held.from].n}`:tip.used?`Uç kullanılmış (${C[tip.from].n})`:'Temiz uç takılı'):'Uç yok'}</div>
-  <p>Hacmi ayarla → uç tak → kaynağa dokun (çek) → hedefe dokun (boşalt) → ucu atığa at. Pipeti bırakmak için pipete tekrar dokun.</p>`}
- else if(sel==='bal'){const t=C.tuz;h=`<h2>Terazi · NaCl tartımı</h2><p>%20 (a/h) tuzlu su, 250 mL. ${UP?`Planın: <b>${UP.nacl??'?'} g</b> NaCl.`:'Önce <b>hesap planını</b> yap.'} Tartılan NaCl 250 mL şişeye alınır. Yanlış tartarsan <b>↶ Geri al</b>.</p>
+  <p>Hacmi ayarla → uç tak → kaynağa dokun (çek) → hedefe dokun (boşalt) → ucu atığa at. Pipeti bırakmak için pipete tekrar dokun.</p>`;ph=h;h=''}
+ if(sel==='bal'){const t=C.tuz;h=`<h2>Terazi · NaCl tartımı</h2><p>%20 (a/h) tuzlu su, 250 mL. ${UP?`Planın: <b>${UP.nacl??'?'} g</b> NaCl.`:'Önce <b>hesap planını</b> yap.'} Tartılan NaCl 250 mL şişeye alınır. Yanlış tartarsan <b>↶ Geri al</b>.</p>
   <div class="row"><label for="ng">NaCl (g)</label><input type="number" id="ng" step=".01" min="0" max="80" value="${C._w!=null?C._w:''}"><button id="ngOK" ${t.salt?'disabled':''}>Tart ve şişeye al</button></div>${t.salt?`<p>Şişede ${fmt(t.salt/1e6,2)} g NaCl var.</p>`:''}`}
  else if(sel&&C[sel]){const c=C[sel];
   const comp=c.kind==='vial'||c.kind==='flask'||c.kind==='salt'?`<table><tr><th>Hacim</th><td>${fmt(c.vol/1000,c.kind==='vial'?3:2)} mL</td></tr>${['meoh','etoh','npr'].map(k=>c.m[k]>0?`<tr><th>${{meoh:'Metanol',etoh:'Etanol',npr:'n-Propanol'}[k]}</th><td>${fmt(gL(c,k),3)} g/L</td></tr>`:'').join('')}${c.salt?`<tr><th>NaCl</th><td>%${fmt(c.salt/c.vol/10,1)}</td></tr>`:''}${c.blood?`<tr><th>Kan</th><td>${fmt(c.blood,0)} µL</td></tr>`:''}</table>`:'';
@@ -188,7 +188,8 @@ function panel(){const E=$('#sel');let h='';
   if(c.id==='tuz')h+=`<div class="row"><button id="tFill" ${!c.salt||c.vol?'disabled':''}>Su ile 250 mL’ye tamamla · çözündür</button></div>`;
   if(c.kind==='vial'){const p=c.p,u=UP&&UP.lv&&UP.lv[p.id];h+=`<p>${p.t==='cal'||p.t==='qc'?`Hedef: vialde <b>${fmt(p.c,2)} g/L</b>. `:''}${UP?`Planın: %20 NaCl <b>${u?u.salt:'?'} µL</b> · ${p.t==='num'?'vaka kanı':'boş kan'} <b>250 µL</b>${p.std?` · ara stok <b>${u?u.std:'?'} µL</b>`:''} · iç std. <b>${UP.is_v??'?'} µL</b>`:'Önce <b>hesap planını</b> yap.'} → kapak → crimp. Toplam 2000 µL.</p><p>${c.capped?(c.crimped?'Kapak: sıkıldı ✓':'Kapak: <b>sıkılmadı</b>'):'Kapak yok'}</p>`}
   if(c.kind==='bottle')h+=`<p>Saf çözücü (yoğunluk ${c.sub.replace('ρ ','')}). Ana stok 10 g/L, 25 mL için gereken hacmi hesap planında bul.</p>`;
- }else h='<h2>Bir nesneye dokun</h2><p>Şişeler, balon jojeler, pipetler ve vial rafı tezgâhta. Bir pipet alıp sıvı aktarabilir, terazide NaCl tartabilir, kapak ve crimper ile vialleri kapatabilirsin.</p>';
+ }else if(!ph)h='<h2>Bir nesneye dokun</h2><p>Şişeler, balon jojeler, pipetler ve vial rafı tezgâhta. Bir pipet alıp sıvı aktarabilir, terazide NaCl tartabilir, kapak ve crimper ile vialleri kapatabilirsin.</p>';
+ if(ph)h=ph+(h?'<hr style="border:0;border-top:1px solid var(--line);margin:4px 0">'+h:'');
  E.innerHTML=h;
  const pv=$('#pvOK');if(pv)pv.onclick=()=>{const P=PIP[pip],v=+$('#pv').value;if(!(v>=P.lo&&v<=P.hi)){say(`${P.n} yalnız ${P.lo}–${P.hi} µL arasında ayarlanır. Daha büyük hacim için büyük pipet, küçük hacim için küçük pipet al.`,'bad');return}P.v=v;draw();say(`${P.n} → <b>${fmt(v,v<100?1:0)} µL</b>.`)};
  const ng=$('#ngOK');if(ng)ng.onclick=()=>{const g=+$('#ng').value;if(!(g>0)){say('Tartılacak miktarı yaz.');return}snap();C._w=g;C.tuz.salt=g*1e6;draw();panel();tasks();say(`${fmt(g,2)} g NaCl tartıldı ve 250 mL şişeye alındı. Şimdi şişeye dokun: <b>su ile 250 mL’ye tamamla</b>.`)};
