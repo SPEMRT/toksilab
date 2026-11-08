@@ -1,0 +1,236 @@
+<meta charset="utf-8">
+<title>Örnek Hazırlama · Kanda Alkol</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Üstte adımlar; solda tezgâh (her şey önünde), sağda görev + seçili nesne paneli. Tek tema: koyu uygulama, açık tezgâh. */
+:root{--bg:#0E1518;--card:#16242A;--card2:#1E2E35;--line:#2C3D44;--fg:#EAF2F3;--mute:#9BB0B6;--blue:#2F7DE1;--ok:#2DBE5B;--warn:#F2B632;--bad:#E5484D;--bench:#E9EDEC;--benchTop:#2A3135;
+ --disp:'Barlow Condensed','Arial Narrow',sans-serif;--body:'Source Sans 3',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);margin:0;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+h1{font:700 24px/1 var(--disp);margin:0;letter-spacing:.02em}h1 small{display:block;font:600 11px var(--mono);color:var(--warn);letter-spacing:.08em;margin-top:3px}
+.steps{display:flex;gap:6px;flex-wrap:wrap}.steps span{font:600 12px var(--mono);padding:5px 9px;border-radius:999px;background:var(--card2);color:var(--mute)}.steps span.on{background:var(--blue);color:#fff}.steps span.ok{background:#173D27;color:#7BE39A}
+button{font:600 14px var(--body);color:var(--fg);background:#25333A;border:1px solid #33464E;border-radius:8px;padding:7px 11px;cursor:pointer}
+button:hover{background:#2E3F47}button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}button.p{background:var(--blue);border-color:var(--blue)}button:disabled{opacity:.45;cursor:not-allowed}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:start}
+@media (max-width:980px){.wrap{grid-template-columns:1fr}}
+.benchBox{background:var(--card);border-radius:14px;padding:10px;min-width:0}
+.bench{width:100%;height:auto;display:block;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.bench .it{cursor:pointer}.bench .it:hover .hl{opacity:.35}.bench .hl{opacity:0;transition:opacity .12s}.bench .it.sel .hl{opacity:.7}
+.side{display:grid;gap:10px;min-width:0}
+.pn{background:var(--card);border-radius:14px;padding:12px 14px;display:grid;gap:8px;min-width:0}
+.pn h2{font:700 18px var(--disp);margin:0;letter-spacing:.02em}
+.pn p{margin:0;font-size:14px;line-height:1.5;color:#D3E0E4}
+.task li{font-size:13.5px;line-height:1.45;margin:2px 0}.task li.ok{color:#7BE39A}.task li.ok::marker{content:'✓  '}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=number]{font:600 16px var(--mono);width:110px;padding:6px 8px;border-radius:8px;border:1px solid #33464E;background:#0E1518;color:var(--fg)}
+.say{display:flex;gap:10px;align-items:flex-start;background:#F4F8F9;color:#14232A;border-radius:12px;padding:10px 12px;font-size:14.5px;line-height:1.45}
+.say b.n{display:block;font:700 11px var(--mono);color:#1F9A97;letter-spacing:.08em;margin-bottom:2px}
+.say.bad{background:#FDECEC}.say.good{background:#E8F7EC}
+table{border-collapse:collapse;width:100%;font-size:12.5px}th,td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}th:first-child,td:first-child{text-align:left}th{color:var(--mute);font-weight:600}
+.tw{overflow-x:auto}
+.hold{font:600 13px var(--mono);color:var(--warn)}
+details summary{cursor:pointer;font-weight:600;color:var(--mute)}
+dialog{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:14px;max-width:min(720px,92vw)}
+dialog::backdrop{background:rgba(5,10,12,.7)}
+.res td.ok{color:#7BE39A}.res td.bad{color:#FF8A8D}.res td.w{color:var(--warn)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<header>
+ <h1>Örnek Hazırlama · Kanda Alkol<small>HS-GC-MS · SOP ÇÖZELTİLERİ</small></h1>
+ <div class="steps" id="steps"></div>
+ <span style="flex:1"></span>
+ <button id="bMode">Mod değiştir</button><button id="bFin" class="p">Bitir · vialleri gönder</button>
+</header>
+<div class="wrap">
+ <div class="benchBox"><svg class="bench" id="bench" viewBox="0 0 1200 580" role="img" aria-label="Çalışma tezgâhı"></svg></div>
+ <div class="side">
+  <div class="say" id="say"><div><b class="n">UZM. MY</b><span id="sayT"></span></div></div>
+  <div class="pn" id="sel"></div>
+  <div class="pn"><h2>Görev</h2><ol class="task" id="task" style="margin:0;padding-left:18px"></ol></div>
+  <div class="pn"><details><summary>SOP · çözeltiler ve kalibrasyon tablosu</summary><div class="tw" id="sop" style="margin-top:8px"></div></details></div>
+ </div>
+</div>
+<dialog id="dlg"><div id="dlgB"></div><div class="row" style="justify-content:flex-end;margin-top:12px"><button id="dlgX">Kapat</button></div></dialog>
+<script>
+/* ======================= SOP verisi (laboratuvar tablosu) ======================= */
+const DENS={meoh:792,etoh:790,npr:803};            // g/L
+const ANA=10,ARA=2,FL=25000;                        // g/L, g/L, balon joje µL
+const NEAT={meoh:+(ANA*25/DENS.meoh*1000).toFixed(1),etoh:+(ANA*25/DENS.etoh*1000).toFixed(1),npr:+(ANA*25/DENS.npr*1000).toFixed(1)}; // µL
+const ARA_V=ARA*25/ANA*1000;                        // 5000 µL
+const VT=2000,VB=250,VIS=70;                        // vial toplam, kan, iç std (µL)
+const LEV=[.01,.05,.1,.2,.25,.3,.4,.45,.5,.55,.6];
+const PLAN=[{id:'BLANK',t:'blank',c:0},...[.01,.05,.1,.2,.25,.3,.4,.45,.5].map(c=>({id:'KAL-'+String(c).replace('.',','),t:'cal',c})),{id:'QC-0,25',t:'qc',c:.25},{id:'NUMUNE-01',t:'num',c:0}];
+PLAN.forEach(p=>{p.std=p.c*VT/ARA;p.salt=VT-VB-VIS-p.std});
+const fmt=(v,d=1)=>(+v).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* ======================= durum ======================= */
+const C={};          // kaplar
+let mode='full',sel=null,tool=null,held=null,log=[];
+const PIP={p100:{n:'P100',lo:10,hi:100,v:70},p1000:{n:'P1000',lo:100,hi:1000,v:250},p5000:{n:'P5000',lo:500,hi:5000,v:1670}};
+let pip=null,tip=null; // tip: {from:id|null, used:boolean}
+function mk(id,o){C[id]=Object.assign({id,vol:0,m:{meoh:0,etoh:0,npr:0},salt:0,blood:0,trace:0},o)}
+function reset(m){mode=m;for(const k in C)delete C[k];sel=null;tool=null;held=null;pip=null;tip=null;log=[];
+ mk('meohN',{n:'Metanol',sub:'ρ 792 g/L',kind:'bottle',inf:1,vol:1e6,m:{meoh:792e6,etoh:0,npr:0},col:'#9A5A22'});
+ mk('etohN',{n:'Etanol',sub:'ρ 790 g/L',kind:'bottle',inf:1,vol:1e6,m:{meoh:0,etoh:790e6,npr:0},col:'#9A5A22'});
+ mk('nprN',{n:'n-Propanol',sub:'ρ 803 g/L',kind:'bottle',inf:1,vol:1e6,m:{meoh:0,etoh:0,npr:803e6},col:'#9A5A22'});
+ mk('nacl',{n:'NaCl',sub:'katı',kind:'jar'});mk('su',{n:'Ultra saf su',sub:'18,2 MΩ·cm',kind:'tap',inf:1,vol:1e9});
+ mk('tuz',{n:'%20 NaCl',sub:'250 mL şişe',kind:'salt',cap:260000,mark:250000});
+ [['anaM','Ana stok MeOH','10 g/L'],['anaE','Ana stok EtOH','10 g/L'],['anaP','Ana stok n-PrOH','10 g/L'],['araME','Ara stok MeOH+EtOH','2 g/L'],['araP','İç std. n-PrOH','2 g/L']].forEach(([id,n,s])=>mk(id,{n,sub:s+' · 25 mL',kind:'flask',cap:FL+600,mark:FL}));
+ mk('bosKan',{n:'Boş kan',sub:'alkolsüz · NaF',kind:'tube',inf:1,vol:1e7,blood:1e7});mk('numKan',{n:'NUMUNE-01',sub:'vaka kanı',kind:'tube',inf:1,vol:1e7,blood:1e7,m:{meoh:0,etoh:0,npr:0},caseC:.342});
+ PLAN.forEach(p=>mk('v_'+p.id,{n:p.id,kind:'vial',cap:20000,p,capped:false,crimped:false}));
+ if(m==='quick'){const fill=(id,v,mm,s)=>{C[id].vol=v;Object.assign(C[id].m,mm);C[id].salt=s};
+  fill('tuz',250000,{},50e6);C.tuz.done=true;['anaM','anaE','anaP','araME','araP'].forEach(id=>{C[id].done=true;C[id].closed=true});['anaM','anaE','anaP'].forEach((id,i)=>fill(id,FL,{meoh:i===0?250e3:0,etoh:i===1?250e3:0,npr:i===2?250e3:0},FL*200));
+  fill('araME',FL,{meoh:50e3,etoh:50e3},FL*200);fill('araP',FL,{npr:50e3},FL*200);
+  say('<b>Hızlı mod</b>: %20 tuzlu su, ana ve ara stoklar hazır. Sen yalnız <b>12 viali</b> SOP tablosuna göre hazırla: tuzlu su → kan → ara stok → iç standart → kapak → crimp.')}
+ else say('<b>Tam mod</b>: önce <b>%20 NaCl</b> çözeltisini hazırla (terazi + su), sonra ana stokları, ara stokları ve en son 12 viali. Bütün çözeltiler %20 tuzlu suyla tamamlanır. Bir nesneye dokun: ne olduğu ve yapabileceklerin sağda çıkar.');
+ draw();panel();tasks()}
+/* m: mg (·1000 = µg) — iç birim: µg ve µL; g/L = µg/µL */
+const gL=(c,k)=>c.vol?c.m[k]/c.vol:0;
+
+/* ======================= tezgâh çizimi (SVG) ======================= */
+const SV=document.getElementById('bench');
+const POS={meohN:[30,140],etohN:[105,140],nprN:[180,140],nacl:[270,165],bal:[340,140],su:[480,30],tuz:[600,140],
+ anaM:[690,130],anaE:[765,130],anaP:[840,130],araME:[925,130],araP:[1000,130],bosKan:[1075,160],numKan:[1135,160],
+ p100:[30,324],p1000:[100,324],p5000:[170,324],tips:[250,436],waste:[340,436],caps:[1000,436],crimp:[1100,420]};
+function liquidColor(c){if(c.blood>0)return c.blood/c.vol>.05?'#8E1B22':'#B4535A';if(c.salt>0)return '#BFE3F2';return c.vol?'#E4F2F7':'none'}
+function draw(){let h=`<defs><linearGradient id="gl" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".5" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity=".35"/></linearGradient></defs>`;
+ h+=`<rect x="0" y="0" width="1200" height="580" fill="#DCE2E1"/><rect x="0" y="298" width="1200" height="22" fill="var(--benchTop)"/><rect x="0" y="320" width="1200" height="222" fill="#E9EDEC"/><rect x="0" y="542" width="1200" height="38" fill="var(--benchTop)"/>`;
+ h+=`<text x="16" y="24" font-family="IBM Plex Mono" font-size="12" fill="#5A6A70">RAF · STANDARTLAR · ÇÖZELTİLER</text><text x="16" y="338" font-family="IBM Plex Mono" font-size="12" fill="#5A6A70">ÇALIŞMA ALANI · PİPETLER · VİAL RAFI</text>`;
+ const it=(id,inner,w,hh,x,y)=>`<g class="it${sel===id||tool===id?' sel':''}" data-id="${id}" transform="translate(${x},${y})"><rect class="hl" x="-6" y="-6" width="${w+12}" height="${hh+12}" rx="8" fill="#2F7DE1"/>${inner}</g>`;
+ const lab=(t,s,w,y)=>`<text x="${w/2}" y="${y}" text-anchor="middle" font-family="Source Sans 3" font-weight="700" font-size="12.5" fill="#1D2A30">${t}</text>${s?`<text x="${w/2}" y="${y+13}" text-anchor="middle" font-family="Source Sans 3" font-size="10.5" fill="#55656B">${s}</text>`:''}`;
+ // şişeler
+ ['meohN','etohN','nprN'].forEach(id=>{const c=C[id],[x,y]=POS[id];h+=it(id,`<rect x="18" y="0" width="24" height="16" rx="3" fill="#2B2F31"/><path d="M14 16h32v14c10 4 12 10 12 18v62a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V48c0-8 2-14 12-18z" fill="${c.col}" opacity=".85"/><rect x="6" y="58" width="48" height="36" rx="3" fill="#FAFAF6"/><text x="30" y="74" text-anchor="middle" font-family="Source Sans 3" font-weight="700" font-size="10" fill="#222">${c.n.toUpperCase()}</text><text x="30" y="87" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#B00">⚠ yanıcı</text><path d="M14 30h32" stroke="url(#gl)" stroke-width="6"/>`+lab('',c.sub,60,132),60,140,x,y)});
+ // NaCl kavanoz + terazi
+ h+=it('nacl',`<rect x="4" y="0" width="44" height="12" rx="3" fill="#2F7DE1"/><rect x="0" y="12" width="52" height="70" rx="8" fill="#F7F7F4" stroke="#C9CECE"/><text x="26" y="52" text-anchor="middle" font-family="Source Sans 3" font-weight="700" font-size="13" fill="#2A3236">NaCl</text>`+lab('','katı',52,100),52,104,...POS.nacl);
+ {const [x,y]=POS.bal;const w=C.tuz;h+=it('bal',`<rect x="0" y="40" width="120" height="70" rx="8" fill="#C9CFCF"/><rect x="18" y="26" width="84" height="14" rx="4" fill="#9AA2A3"/><rect x="10" y="62" width="100" height="26" rx="4" fill="#0E1A16"/><text x="60" y="81" text-anchor="middle" font-family="IBM Plex Mono" font-size="15" fill="#5BE37A">${C._w!=null?fmt(C._w,2)+' g':'0,00 g'}</text>`+lab('Terazi','0,01 g',120,128),120,132,x,y)}
+ // su cihazı
+ {const [x,y]=POS.su;h+=it('su',`<rect x="0" y="0" width="70" height="200" rx="8" fill="#F4F6F6" stroke="#C9CECE"/><rect x="10" y="16" width="50" height="34" rx="4" fill="#0E1518"/><text x="35" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="#3CFF6E">18,2</text><rect x="62" y="92" width="44" height="12" rx="4" fill="#9AA2A3"/><rect x="96" y="100" width="10" height="28" fill="#9AA2A3"/>`+lab('Ultra saf su','tabanca',80,222),106,236,x,y)}
+ // tuzlu su şişesi
+ {const c=C.tuz,[x,y]=POS.tuz,f=Math.min(1,c.vol/c.mark);h+=it('tuz',`<rect x="22" y="0" width="26" height="14" rx="3" fill="#1F9A97"/><rect x="0" y="14" width="70" height="100" rx="10" fill="#F2F7F8" stroke="#9FB2B8"/><rect x="2" y="${14+98*(1-f)}" width="66" height="${98*f}" rx="8" fill="${c.salt?'#BFE3F2':'#E4F2F7'}"/><line x1="4" x2="66" y1="${14+98*(1-250000/c.mark)+2}" y2="${14+98*(1-250000/c.mark)+2}" stroke="#335" stroke-dasharray="3 2"/><rect x="8" y="50" width="54" height="30" rx="3" fill="#FAFAF6" opacity=".9"/><text x="35" y="64" text-anchor="middle" font-family="Source Sans 3" font-weight="700" font-size="10" fill="#222">%20 NaCl</text><text x="35" y="75" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5" fill="#444">${c.vol?fmt(c.vol/1000,0)+' mL':'boş'}</text>`+lab('Tuzlu su',c.salt&&c.vol?'%'+fmt(c.salt/c.vol/10,1)+' (a/h)':'250 mL',70,132),70,140,x,y)}
+ // balon jojeler
+ ['anaM','anaE','anaP','araME','araP'].forEach(id=>{const c=C[id],[x,y]=POS[id],f=c.vol/c.mark;const by=50,bh=64;const lvl=f<=.8?by+bh-bh*f/.8:by-(f-.8)/.2*40;
+  h+=it(id,`<rect x="22" y="0" width="16" height="8" rx="2" fill="${c.closed?'#2F7DE1':'#B9C3C6'}"/><path d="M24 8h12v40c14 6 22 18 22 34a28 28 0 0 1-56 0c0-16 8-28 22-34z" fill="#F3F8FA" stroke="#8FA4AB"/>${c.vol?`<clipPath id="cp${id}"><path d="M24 8h12v40c14 6 22 18 22 34a28 28 0 0 1-56 0c0-16 8-28 22-34z"/></clipPath><rect clip-path="url(#cp${id})" x="0" y="${Math.max(10,lvl)}" width="60" height="120" fill="${liquidColor(c)}" opacity=".9"/>`:''}<line x1="21" x2="39" y1="22" y2="22" stroke="#223" stroke-width="1.5"/><text x="30" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#334">${c.vol?fmt(c.vol/1000,2):'0'} mL</text>`+lab({anaM:'Ana MeOH',anaE:'Ana EtOH',anaP:'Ana n-PrOH',araME:'Ara Me+Et',araP:'İç std.'}[id],c.sub.split(' · ')[0],60,128),60,140,x,y)});
+ // kan tüpleri
+ ['bosKan','numKan'].forEach(id=>{const c=C[id],[x,y]=POS[id];h+=it(id,`<rect x="6" y="0" width="22" height="14" rx="3" fill="${id==='bosKan'?'#7A7F86':'#7A4FA0'}"/><rect x="8" y="14" width="18" height="70" rx="9" fill="#F3F7F8" stroke="#9FB2B8"/><rect x="10" y="34" width="14" height="48" rx="7" fill="#8E1B22"/><rect x="9" y="40" width="16" height="18" fill="#FAFAF6"/><text x="17" y="52" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#222">${id==='bosKan'?'BLANK':'N-01'}</text>`+lab(id==='bosKan'?'Boş kan':'Numune','',34,100),34,104,x,y)});
+ // pipetler
+ Object.entries(PIP).forEach(([k,P])=>{const [x,y]=POS[k];const isH=pip===k;const lq=isH&&held;h+=it(k,`<rect x="10" y="0" width="22" height="22" rx="5" fill="${k==='p100'?'#E5C04A':k==='p1000'?'#2F7DE1':'#7A4FA0'}"/><rect x="8" y="22" width="26" height="86" rx="8" fill="#E7E9E6" stroke="#9AA2A3"/><rect x="11" y="44" width="20" height="16" rx="2" fill="#0E1518"/><text x="21" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="7.5" fill="#5BE37A">${P.v}</text><path d="M14 108h14l-3 26h-8z" fill="#B9C0C2"/>${isH&&tip?`<path d="M16 134h10l-3 40h-4z" fill="${tip.used?'#F2E6C9':'#F6FAFB'}" stroke="#9AA2A3"/>${lq?`<path d="M18 160h6l-1 14h-4z" fill="${liquidColor({vol:held.v,blood:held.blood,salt:held.salt})}"/>`:''}`:''}`+lab(P.n,P.lo+'–'+P.hi+' µL',42,196),42,200,x,y)});
+ // uç kutusu, atık
+ h+=it('tips',`<rect x="0" y="20" width="70" height="44" rx="5" fill="#2F7DE1" opacity=".85"/><rect x="4" y="10" width="62" height="12" rx="3" fill="#E9EEF0"/>${Array.from({length:12},(_,i)=>`<circle cx="${10+(i%6)*10}" cy="${16}" r="2.6" fill="#C9D3D6"/>`).join('')}`+lab('Uç kutusu','',70,82),70,86,...POS.tips);
+ h+=it('waste',`<path d="M6 10h56l-6 56H12z" fill="#E7C04A" stroke="#9A7A10"/><text x="34" y="44" text-anchor="middle" font-family="Source Sans 3" font-weight="700" font-size="11" fill="#5A4300">ATIK</text>`+lab('Uç atık','',68,82),68,86,...POS.waste);
+ // vial rafı
+ h+=`<rect x="424" y="452" width="560" height="44" rx="6" fill="#2F7DE1" opacity=".18"/>`;
+ PLAN.forEach((p,i)=>{const c=C['v_'+p.id],x=430+i*46,y=350,f=Math.min(1,c.vol/6000);const col={blank:'#9BB0B6',cal:'#2DBE5B',qc:'#E0862A',num:'#E5484D'}[p.t];
+  h+=it('v_'+p.id,`${c.capped?`<rect x="4" y="0" width="32" height="12" rx="2" fill="#C9CDD0" stroke="#7E868A"/>${c.crimped?'<path d="M4 9h32M4 6h32" stroke="#7E868A"/>':''}`:''}<rect x="7" y="12" width="26" height="92" rx="4" fill="#F4FAFB" stroke="#8FA4AB" opacity=".95"/>${c.vol?`<rect x="9" y="${102-88*f}" width="22" height="${88*f}" rx="3" fill="${liquidColor(c)}"/>`:''}<rect x="7" y="40" width="26" height="24" fill="#FFF" opacity=".92"/><rect x="7" y="40" width="26" height="4" fill="${col}"/><text x="20" y="54" text-anchor="middle" font-family="IBM Plex Mono" font-size="6.6" font-weight="600" fill="#222">${p.id.replace('KAL-','K ').replace('NUMUNE-','N-').replace('QC-','QC ')}</text><text x="20" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#555">${c.vol?Math.round(c.vol):''}</text>`+`<text x="20" y="122" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#33454B">${i+1}</text>`,40,126,x,y)});
+ h+=it('caps',`<rect x="0" y="16" width="70" height="44" rx="5" fill="#8E9599"/>${Array.from({length:10},(_,i)=>`<circle cx="${10+(i%5)*12.5}" cy="${30+Math.floor(i/5)*16}" r="5.5" fill="#C9CDD0" stroke="#6E777B"/>`).join('')}`+lab('Kapaklar','septumlu',70,78),70,86,...POS.caps);
+ h+=it('crimp',`<path d="M10 70L30 6h8L28 70z" fill="#3A4448"/><path d="M60 70L40 6h-8L42 70z" fill="#566166"/><circle cx="35" cy="10" r="7" fill="#9AA2A3"/><rect x="24" y="66" width="22" height="16" rx="3" fill="#9AA2A3"/>`+lab('Crimper','kapak sıkma',70,100),70,104,...POS.crimp);
+ SV.innerHTML=h;SV.querySelectorAll('.it').forEach(g=>g.onclick=()=>act(g.dataset.id))}
+
+/* ======================= etkileşim ======================= */
+const $=s=>document.querySelector(s);
+function say(t,cls){$('#sayT').innerHTML=t;$('#say').className='say'+(cls?' '+cls:'')}
+function beep(f=1100,d=.05){try{const a=beep.a=beep.a||new (window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.type='sine';g.gain.value=.05;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+d)}catch(e){}}
+const isLiquidSrc=id=>['meohN','etohN','nprN','su','tuz','anaM','anaE','anaP','araME','araP','bosKan','numKan'].includes(id)||id.startsWith('v_');
+function act(id){
+ if(PIP[id]){if(held){say('Pipette sıvı var; önce bir kaba boşalt.','bad');return}if(pip&&pip!==id&&tip){say('Önce taktığın ucu <b>atığa</b> at, sonra pipet değiştir.','bad');return}pip=pip===id?null:id;tool=null;sel=pip;draw();panel();
+  if(pip)say(`<b>${PIP[pip].n}</b> elinde (${PIP[pip].lo}–${PIP[pip].hi} µL). Sağdan hacmi ayarla, <b>uç kutusuna</b> dokunup uç tak, sonra çekeceğin kaba dokun.`);return}
+ if(id==='tips'){if(!pip){say('Önce bir pipet al.');return}if(tip){say('Pipette zaten uç var. Değiştirmek için önce atığa at.');return}tip={from:null,used:false};beep(1400,.03);say('Temiz uç takıldı. Şimdi çekeceğin kaba dokun.');draw();panel();return}
+ if(id==='waste'){if(!tip){say('Atılacak uç yok.');return}if(held){say('Uçta sıvı var. Önce bir kaba boşalt; sıvıyı atığa dökme.','bad');return}tip=null;beep(600,.04);say('Uç atıldı. Her farklı çözelti için yeni uç: taşınmayı (carryover) önler.');draw();panel();return}
+ if(id==='caps'||id==='crimp'){if(pip){say('Pipeti bırak (pipete tekrar dokun), sonra kapak/crimper al.');return}tool=tool===id?null:id;sel=tool;draw();panel();say(tool==='caps'?'Kapak elinde. Hazır viale dokun: kapağı üstüne koy.':tool==='crimp'?'Crimper elinde. Kapaklı viale dokun: kapağı sık.':'Bıraktın.');return}
+ if(id==='nacl'||id==='bal'){sel='bal';tool=null;draw();panel();return}
+ if(pip&&isLiquidSrc(id)){return pipAct(id)}
+ if(tool&&id.startsWith('v_')){const c=C[id];
+  if(tool==='caps'){if(c.capped){say('Bu vial zaten kapaklı.');return}if(!c.vol){say('Boş viali kapatma; önce içini hazırla.','bad');return}c.capped=true;beep(900,.04);say(`<b>${c.n}</b> kapağı kondu. Şimdi <b>crimper</b> ile sık; sıkılmamış kapaktan alkol buharlaşır.`)}
+  else{if(!c.capped){say('Önce kapak koy.','bad');return}if(c.crimped){say('Zaten sıkıldı. Kapağı çevir: dönmüyorsa tamam.');return}c.crimped=true;beep(500,.08);say(`<b>${c.n}</b> crimp edildi ✓`)}
+  draw();panel();tasks();return}
+ sel=id;draw();panel()}
+function pipAct(id){const P=PIP[pip],c=C[id];
+ if(!tip){say('Uçsuz pipetle sıvı çekilmez: <b>uç kutusuna</b> dokun.','bad');return}
+ if(!held){ // çek
+  if(id.startsWith('v_')){say('Vialden geri çekmiyoruz; vial yalnız hedef.','bad');return}
+  if(c.kind==='flask'&&!c.done){say(`<b>${c.n}</b> henüz hazır değil (çizgiye tamamlanıp karıştırılmadı).`,'bad');return}
+  if(id==='tuz'&&!c.done){say('Tuzlu su henüz hazır değil.','bad');return}
+  const v=P.v;if(v<P.lo||v>P.hi){say(`${P.n} ${P.lo}–${P.hi} µL arasında çalışır.`,'bad');return}
+  if(!c.inf&&c.vol<v){say('Kapta yeterli sıvı yok.','bad');return}
+  let warn='';if(tip.used&&tip.from!==id){const pv=C[tip.from],an=pv.m.meoh+pv.m.etoh+pv.m.npr>0;if(an){c.trace=(c.trace||0)+.002;log.push(`Uç değiştirilmeden ${pv.n} → ${c.n}`);warn=`⚠ Aynı uçla farklı çözeltiye girdin: <b>${pv.n}</b> kalıntısı <b>${c.n}</b>’e karıştı (taşınma). Her çözelti için yeni uç! `}else warn=`Not: ${pv.n} ucuyla ${c.n} çektin; iyi uygulama her çözelti için yeni uç. `}
+  const fr=c.inf?v/c.vol:v/c.vol;held={v,from:id,m:{meoh:c.m.meoh*fr,etoh:c.m.etoh*fr,npr:c.m.npr*fr},salt:c.salt*fr,blood:c.blood*fr,trace:c.trace||0};
+  if(c.inf&&id==='su'){held.salt=0;held.m={meoh:0,etoh:0,npr:0}}
+  if(!c.inf){c.vol-=v;for(const k in c.m)c.m[k]-=held.m[k];c.salt-=held.salt;c.blood-=held.blood}
+  tip.from=id;tip.used=true;beep(1300,.03);
+  say(warn+`${fmt(v,v<100?1:0)} µL <b>${c.n}</b> çekildi.${id==='bosKan'||id==='numKan'?' Kan viskozdur: <b>ters pipetleme</b> daha doğru sonuç verir.':''} Şimdi hedef kaba dokun.`,warn.startsWith('⚠')?'bad':undefined)}
+ else{ // boşalt
+  if(id===held.from){say('Aynı kaba geri boşaltma; hedef başka bir kap olmalı.');return}
+  if(['meohN','etohN','nprN','bosKan','numKan','su'].includes(id)){say('Stok şişesine/numune tüpüne geri boşaltılmaz: kontaminasyon!','bad');return}
+  if(c.capped){say('Kapaklı viale ekleme yapılmaz.','bad');return}
+  if(c.kind==='flask'&&c.done){say('Bu balon joje tamamlandı; içine artık bir şey eklenmez.','bad');return}
+  if(c.vol+held.v>(c.cap||1e9)){say('Kap taşar!','bad');return}
+  c.vol+=held.v;for(const k in c.m)c.m[k]+=held.m[k];c.salt+=held.salt;c.blood+=held.blood;c.trace=Math.max(c.trace||0,held.trace||0);
+  if(c.kind==='vial'){(c.adds=c.adds||[]).push([held.from,held.v])}
+  beep(1000,.03);say(`${fmt(held.v,held.v<100?1:0)} µL → <b>${c.n}</b>. ${c.kind==='vial'?`Vialde ${fmt(c.vol,0)} µL.`:''}`);held=null}
+ draw();panel();tasks()}
+/* ---------- seçili nesne paneli ---------- */
+function panel(){const E=$('#sel');let h='';
+ if(pip){const P=PIP[pip];h=`<h2>${P.n} · ${P.lo}–${P.hi} µL</h2><div class="row"><label for="pv">Hacim (µL)</label><input type="number" id="pv" min="${P.lo}" max="${P.hi}" step="${P.hi<=100?.5:1}" value="${P.v}" ${held?'disabled':''}><button id="pvOK" ${held?'disabled':''}>Ayarla</button></div>
+  <div class="hold">${tip?(held?`Uçta: ${fmt(held.v,held.v<100?1:0)} µL ${C[held.from].n}`:tip.used?`Uç kullanılmış (${C[tip.from].n})`:'Temiz uç takılı'):'Uç yok'}</div>
+  <p>Hacmi ayarla → uç tak → kaynağa dokun (çek) → hedefe dokun (boşalt) → ucu atığa at. Pipeti bırakmak için pipete tekrar dokun.</p>`}
+ else if(sel==='bal'){const t=C.tuz;h=`<h2>Terazi · NaCl tartımı</h2><p>%20 (a/h) tuzlu su: <b>250 mL için 50 g NaCl</b> (1000 mL → 200 g). Tartılan NaCl doğrudan 250 mL şişeye alınır.</p>
+  <div class="row"><label for="ng">NaCl (g)</label><input type="number" id="ng" step=".01" min="0" max="80" value="${C._w!=null?C._w:''}"><button id="ngOK" ${t.salt?'disabled':''}>Tart ve şişeye al</button></div>${t.salt?`<p>Şişede ${fmt(t.salt/1e6,2)} g NaCl var.</p>`:''}`}
+ else if(sel&&C[sel]){const c=C[sel];
+  const comp=c.kind==='vial'||c.kind==='flask'||c.kind==='salt'?`<table><tr><th>Hacim</th><td>${fmt(c.vol/1000,c.kind==='vial'?3:2)} mL</td></tr>${['meoh','etoh','npr'].map(k=>c.m[k]>0?`<tr><th>${{meoh:'Metanol',etoh:'Etanol',npr:'n-Propanol'}[k]}</th><td>${fmt(gL(c,k),3)} g/L</td></tr>`:'').join('')}${c.salt?`<tr><th>NaCl</th><td>%${fmt(c.salt/c.vol/10,1)}</td></tr>`:''}${c.blood?`<tr><th>Kan</th><td>${fmt(c.blood,0)} µL</td></tr>`:''}</table>`:'';
+  h=`<h2>${c.n}</h2><p>${c.sub||''}</p>${comp}`;
+  if(c.kind==='flask'){const tgt=c.id.startsWith('ana')?`${{anaM:'Metanol',anaE:'Etanol',anaP:'n-Propanol'}[c.id]} (saf): <b>${fmt(NEAT[{anaM:'meoh',anaE:'etoh',anaP:'npr'}[c.id]],1)} µL</b> → 25 mL`:c.id==='araME'?`Ana stok MeOH <b>5000 µL</b> + Ana stok EtOH <b>5000 µL</b> → 25 mL`:`Ana stok n-PrOH <b>5000 µL</b> → 25 mL`;
+   h+=`<p>SOP: ${tgt}, <b>%20 tuzlu suyla</b> çizgiye tamamla, kapağı kapat, ters çevirerek karıştır.</p><div class="row"><button id="fFill" ${c.done?'disabled':''}>Tuzlu suyla çizgiye tamamla</button><button id="fMix" ${c.done||c.vol<c.mark*.999?'disabled':''}>Kapat · karıştır</button></div>`}
+  if(c.id==='tuz')h+=`<div class="row"><button id="tFill" ${!c.salt||c.vol?'disabled':''}>Su ile 250 mL’ye tamamla · çözündür</button></div>`;
+  if(c.kind==='vial'){const p=c.p;h+=`<p>SOP: %20 NaCl <b>${fmt(p.salt,0)} µL</b> · ${p.t==='num'?'vaka kanı':'boş kan'} <b>250 µL</b>${p.std?` · ara stok <b>${fmt(p.std,0)} µL</b>`:''} · iç std. <b>70 µL</b> → kapak → crimp. Toplam 2000 µL.</p><p>${c.capped?(c.crimped?'Kapak: sıkıldı ✓':'Kapak: <b>sıkılmadı</b>'):'Kapak yok'}</p>`}
+  if(c.kind==='bottle')h+=`<p>Saf çözücü. Ana stok için P1000 ile çekilir: ${fmt(NEAT[{meohN:'meoh',etohN:'etoh',nprN:'npr'}[c.id]],1)} µL → 25 mL = 10 g/L.</p>`;
+ }else h='<h2>Bir nesneye dokun</h2><p>Şişeler, balon jojeler, pipetler ve vial rafı tezgâhta. Bir pipet alıp sıvı aktarabilir, terazide NaCl tartabilir, kapak ve crimper ile vialleri kapatabilirsin.</p>';
+ E.innerHTML=h;
+ const pv=$('#pvOK');if(pv)pv.onclick=()=>{const P=PIP[pip],v=+$('#pv').value;if(!(v>=P.lo&&v<=P.hi)){say(`${P.n} yalnız ${P.lo}–${P.hi} µL arasında ayarlanır. Daha büyük hacim için büyük pipet, küçük hacim için küçük pipet al.`,'bad');return}P.v=v;draw();say(`${P.n} → <b>${fmt(v,v<100?1:0)} µL</b>.`)};
+ const ng=$('#ngOK');if(ng)ng.onclick=()=>{const g=+$('#ng').value;if(!(g>0)){say('Tartılacak miktarı yaz.');return}C._w=g;C.tuz.salt=g*1e6;draw();panel();tasks();say(`${fmt(g,2)} g NaCl tartıldı ve 250 mL şişeye alındı. Şimdi şişeye dokun: <b>su ile 250 mL’ye tamamla</b>.`)};
+ const tf=$('#tFill');if(tf)tf.onclick=()=>{C.tuz.vol=250000;C.tuz.done=true;draw();panel();tasks();const pc=C.tuz.salt/C.tuz.vol/10;say(`Tuzlu su hazır: <b>%${fmt(pc,1)}</b> NaCl.${Math.abs(pc-20)>.4?' ⚠ SOP %20 diyor!':' ✓'} Bütün stoklar bu çözeltiyle tamamlanacak.`,Math.abs(pc-20)>.4?'bad':'good')};
+ const ff=$('#fFill');if(ff)ff.onclick=()=>{const c=C[sel],t=C.tuz;if(!t.done){say('Önce %20 tuzlu su hazırla.','bad');return}if(c.vol>=c.mark){say('Zaten çizgide/üstünde.');return}if(!c.vol){say('Balon joje boş: önce SOP’taki hacmi pipetle ekle.','bad');return}
+  const add=c.mark-c.vol,fr=add/t.vol;c.salt+=t.salt*fr;t.salt-=t.salt*fr;t.vol-=add;c.vol=c.mark;draw();panel();say(`<b>${c.n}</b> tuzlu suyla 25 mL çizgisine tamamlandı. Menisküs çizgiye teğet olmalı. Şimdi kapat ve karıştır.`)};
+ const fm=$('#fMix');if(fm)fm.onclick=()=>{const c=C[sel];c.done=true;c.closed=true;draw();panel();tasks();const chk=flaskCheck(c);say(`<b>${c.n}</b> hazır: ${chk.txt}`,chk.ok?'good':'bad')}}
+function flaskCheck(c){const want={anaM:{meoh:10},anaE:{etoh:10},anaP:{npr:10},araME:{meoh:2,etoh:2},araP:{npr:2}}[c.id];let ok=true,t=[];
+ for(const k in want){const v=gL(c,k);t.push(`${{meoh:'MeOH',etoh:'EtOH',npr:'n-PrOH'}[k]} ${fmt(v,3)} g/L`);if(Math.abs(v-want[k])/want[k]>.03)ok=false}
+ ['meoh','etoh','npr'].forEach(k=>{if(!want[k]&&gL(c,k)>.01){ok=false;t.push(`istenmeyen ${k} ${fmt(gL(c,k),3)} g/L`)}});
+ return {ok,txt:t.join(', ')+(ok?' ✓':' ⚠ SOP’tan farklı')}}
+function vialEval(c){const p=c.p,V=c.vol||1,r={id:p.id,notes:[]};
+ const cE=gL(c,'etoh'),cM=gL(c,'meoh'),cI=gL(c,'npr'),isN=VIS*ARA/VT;
+ r.isf=+(cI/isN).toFixed(3);
+ if(p.t==='cal'||p.t==='qc'){r.cf=+(p.c?cE/p.c:1).toFixed(3);r.mf=+(p.c?cM/p.c:1).toFixed(3)}
+ else if(p.t==='num'){r.cf=+((c.blood/VB)*(VT/V)).toFixed(3);r.mf=r.cf}
+ else{r.cf=1;r.cx=+cE.toFixed(4)}
+ if(Math.abs(V-VT)/VT>.02)r.notes.push(`toplam ${fmt(V,0)} µL (SOP 2000)`);
+ if(Math.abs(c.blood-VB)/VB>.03)r.notes.push(`kan ${fmt(c.blood,0)} µL`);
+ if(r.isf<.97||r.isf>1.03)r.notes.push(r.isf<.05?'iç standart YOK':`iç std. ×${fmt(r.isf,2)}`);
+ if((p.t==='cal'||p.t==='qc')&&Math.abs(r.cf-1)>.03)r.notes.push(`derişim ×${fmt(r.cf,2)}`);
+ if(p.t==='blank'&&cE>.002)r.notes.push(`blankta etanol ${fmt(cE,3)} g/L (kontaminasyon)`);
+ if(c.trace)r.notes.push('taşınma şüphesi');
+ if(!c.capped)r.notes.push('kapak YOK');else if(!c.crimped)r.notes.push('kapak sıkılmadı');
+ const loss=!c.capped?.7:!c.crimped?.88:1;r.cf=+(r.cf*loss).toFixed(3);r.mf=+((r.mf||1)*loss).toFixed(3);r.isf=+(r.isf*(loss===1?1:loss+.04)).toFixed(3);
+ r.ok=!r.notes.length;r.ready=c.vol>0;return r}
+function tasks(){const L=[];const T=C.tuz;
+ if(mode==='full'){L.push([T.done&&Math.abs(T.salt/T.vol/10-20)<.4,'%20 NaCl: 50 g NaCl + su → 250 mL']);
+  ['anaM','anaE','anaP'].forEach(id=>L.push([C[id].done&&flaskCheck(C[id]).ok,`${C[id].n}: ${fmt(NEAT[{anaM:'meoh',anaE:'etoh',anaP:'npr'}[id]],1)} µL saf → 25 mL (10 g/L)`]));
+  L.push([C.araME.done&&flaskCheck(C.araME).ok,'Ara stok MeOH+EtOH: her ana stoktan 5 mL → 25 mL (2 g/L)']);L.push([C.araP.done&&flaskCheck(C.araP).ok,'İç standart: n-PrOH ana stoktan 5 mL → 25 mL (2 g/L)'])}
+ const nv=PLAN.filter(p=>{const c=C['v_'+p.id];return c.crimped&&vialEval(c).ok}).length;L.push([nv===12,`12 vial (tuzlu su · kan · ara stok · iç std. · kapak · crimp): ${nv}/12 doğru`]);
+ $('#task').innerHTML=L.map(([ok,t])=>`<li class="${ok?'ok':''}">${t}</li>`).join('');
+ const st=mode==='full'?[['1 Tuzlu su',L[0][0]],['2 Ana stok',L[1][0]&&L[2][0]&&L[3][0]],['3 Ara stok',L[4][0]&&L[5][0]],['4 Vialler',L[6][0]]]:[['Vialler',L[0][0]]];
+ let on=false;$('#steps').innerHTML=st.map(([t,ok])=>{const c=ok?'ok':(!on?(on=true,'on'):'');return `<span class="${c}">${ok?'✓ ':''}${t}</span>`}).join('')}
+function sop(){$('#sop').innerHTML=`<table><tr><th>Çözelti</th><th>Hazırlama</th><th>Son</th></tr>
+ <tr><td>%20 NaCl</td><td>50 g NaCl → 250 mL su</td><td>%20 a/h</td></tr>
+ ${['meoh','etoh','npr'].map(k=>`<tr><td>Ana stok ${{meoh:'MeOH',etoh:'EtOH',npr:'n-PrOH'}[k]}</td><td>${fmt(NEAT[k],1)} µL saf (ρ ${DENS[k]}) → 25 mL</td><td>10 g/L</td></tr>`).join('')}
+ <tr><td>Ara stok MeOH+EtOH</td><td>5 mL + 5 mL ana stok → 25 mL</td><td>2 g/L</td></tr><tr><td>İç std. n-PrOH</td><td>5 mL ana stok → 25 mL</td><td>2 g/L</td></tr></table>
+ <p style="font-size:12px;color:var(--mute);margin:6px 0 8px">Bütün çözeltiler %20 tuzlu suyla tamamlanır. Vialde iç standart 70 µL × 2 g/L / 2 mL = 0,07 g/L.</p>
+ <table><tr><th>Kal. (g/L)</th><th>Ara stok</th><th>İç std.</th><th>Kan</th><th>%20 NaCl</th></tr>${LEV.map(c=>`<tr><td>${fmt(c,2)}</td><td>${fmt(c*VT/ARA,0)}</td><td>70</td><td>250</td><td>${fmt(VT-VB-VIS-c*VT/ARA,0)}</td></tr>`).join('')}</table>
+ <p style="font-size:12px;color:var(--mute);margin:6px 0 0">µL · nihai hacim 2000 µL. Bu seferki 12 yuvalık karusel için 9 seviye + blank + QC + numune hazırlanır.</p>`}
+function finish(){const R=PLAN.map(p=>vialEval(C['v_'+p.id]));const out={t:Date.now(),mode,vials:{}};R.forEach(r=>out.vials[r.id]=r);let saved=false;try{localStorage.setItem('toksilab_prep_v1',JSON.stringify(out));saved=true}catch(e){}
+ $('#dlgB').innerHTML=`<h2 style="font:700 22px var(--disp);margin:0 0 8px">Hazırlanan vialler</h2><div class="tw"><table class="res"><tr><th>Vial</th><th>Hacim</th><th>Derişim</th><th>İç std.</th><th>Not</th></tr>${PLAN.map((p,i)=>{const c=C['v_'+p.id],r=R[i];return `<tr><td>${p.id}</td><td>${fmt(c.vol,0)} µL</td><td class="${Math.abs(r.cf-1)>.03?'bad':'ok'}">×${fmt(r.cf,2)}</td><td class="${Math.abs(r.isf-1)>.03?'bad':'ok'}">×${fmt(r.isf,2)}</td><td class="${r.ok?'ok':'w'}">${r.ok?'✓':r.notes.join('; ')}</td></tr>`}).join('')}</table></div>
+ <p style="font-size:14px;line-height:1.5">${saved?'Vialler kaydedildi. <b>HS-GC-MS pilotuna</b> dön; “Vial hazırlama” sekmesinde <b>Vialleri al</b> de. Yaptığın hatalar (hacim, iç standart, kapak, taşınma) analiz sonucuna aynen yansır.':'Tarayıcı bu sayfada kayıt tutamıyor; sonuçları buradan incele.'}</p><div class="row"><a href="hsgcms_pilot.html#prep" style="color:#7CC4FF;font-weight:600">HS-GC-MS pilotuna dön ›</a></div>`;
+ $('#dlg').showModal()}
+$('#dlgX').onclick=()=>$('#dlg').close();$('#bFin').onclick=finish;
+$('#bMode').onclick=()=>{$('#dlgB').innerHTML=`<h2 style="font:700 22px var(--disp);margin:0 0 8px">Mod seç</h2><p>Tezgâh sıfırlanır.</p><div class="row"><button class="p" id="mF">Tam: tuzlu su + stoklar + vialler</button><button id="mQ">Hızlı: stoklar hazır, yalnız vialler</button></div>`;$('#dlg').showModal();$('#mF').onclick=()=>{$('#dlg').close();reset('full')};$('#mQ').onclick=()=>{$('#dlg').close();reset('quick')}};
+sop();reset(/quick/.test(location.hash)?'quick':'full');
+</script>

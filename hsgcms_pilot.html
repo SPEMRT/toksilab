@@ -148,7 +148,7 @@ let AC=null;const beep=(f=2400,d=.05,v=.05)=>{try{AC=AC||new (window.AudioContex
 /* ---------- SOP: vial planı (ALKOL2.M kalibrasyon seviyeleri, g/L) ---------- */
 const CALS=[[9,.01],[2,.05],[1,.1],[3,.2],[4,.25],[5,.3],[6,.4],[7,.45],[8,.5]];
 const PLAN=[{id:'BLANK',lab:'BLANK (boş kan)',type:'blank',lvl:12,c:0},...CALS.map(([l,c])=>({id:'KAL-'+String(c).replace('.',','),lab:`KAL ${String(c).replace('.',',')} g/L`,type:'cal',lvl:l,c})),{id:'QC-0,25',lab:'QC 0,25 g/L',type:'qc',c:.25},{id:'NUMUNE-01',lab:'NUMUNE-01 (kan)',type:'num',c:.342,acet:.006,meoh:.006}];
-PLAN.forEach(p=>{p.steps={};p.ready=false;p.where=null});
+PLAN.forEach(p=>{p.steps={};p.ready=false;p.where=null;p.std=p.type==='cal'||p.type==='qc'?Math.round(p.c*1000):0;p.salt=2000-250-70-p.std;if(!p.std)p.steps.std='na'});
 const VBY=id=>PLAN.find(p=>p.id===id);
 /* ---------- durum ---------- */
 const S={seen:{},view:'main',lid:false,slots:{},hand:null,tasks:{},
@@ -248,21 +248,28 @@ function renderLoad(){const free=PLAN.filter(p=>p.ready&&!p.where);
  g+='<text y="-2" text-anchor="middle" font-size="10" fill="#9BB0B6" font-family="Source Sans 3">KARUSEL</text><text y="11" text-anchor="middle" font-size="9" fill="#6E8086" font-family="Source Sans 3">(üstten görünüm)</text>';
  $('#car').innerHTML=g;$$('#car g').forEach(e=>e.onclick=()=>slotAct(+e.dataset.n))}
 /* ---------- vial hazırlama ---------- */
-const STEPS=[['lab','🏷 Etiket'],['smp','💧 Örnek\n100 µL'],['is','🧪 İç std.\n1 mL'],['cap','🔒 Kapak']];
-function renderPrep(){const W=$('#prepW');const nReady=PLAN.filter(p=>p.ready).length;
- W.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between"><b style="font:700 20px 'Barlow Condensed',sans-serif">VİAL HAZIRLAMA · ${nReady}/12 hazır</b><div class="row" style="display:flex;gap:8px">${PLAN.filter(p=>p.ready).length>=2?'<button class="bt" id="pAll">Kalanları SOP’a göre hazırla</button>':''}<button class="bt p" id="pGo">HS’e yükle ›</button></div></div>
- <div class="sop"><b>SOP (taslak):</b> 20 mL HS vialine sırasıyla <b>etiket</b> → <b>100 µL kalibratör / kontrol / kan</b> → <b>1 mL iç standart çözeltisi (n-propanol)</b> → <b>alüminyum kapak, crimp</b>. İç standart her viale <b>aynı hacimde</b> eklenir. Kapak kapandıktan sonra hiçbir şey eklenemez. <span style="color:#F2B632">Hacimleri laboratuvar SOP’undaki değerlerle güncelleyeceğiz.</span></div>
- <div class="vgrid">${PLAN.map((p,i)=>`<div class="vc ${p.type}${p.ready?' ready':''}"><div style="display:flex;justify-content:space-between"><b>${p.id}</b><small>${p.lvl?'Level '+p.lvl:''}</small></div><small>${p.lab}</small><div class="steps">${STEPS.map(([k,t])=>`<button data-i="${i}" data-k="${k}" class="${p.steps[k]?'ok':''}">${t.replace('\n','<br>')}</button>`).join('')}</div></div>`).join('')}</div>`;
+const STEPS=[['lab','🏷 Etiket'],['salt','🧂 %20 NaCl'],['blood','🩸 Kan'],['std','🧪 Ara stok'],['is','🧪 İç std.'],['cap','🔒 Kapak']];
+const stepTxt=(p,k)=>({lab:'🏷 Etiket',salt:`🧂 %20 NaCl<br>${p.salt} µL`,blood:`🩸 ${p.type==='num'?'Vaka kanı':'Boş kan'}<br>250 µL`,std:p.std?`🧪 Ara stok<br>${p.std} µL`:'Ara stok<br>—',is:'🧪 İç std.<br>70 µL',cap:'🔒 Kapak<br>crimp'}[k]);
+function prepImport(){let d=null;try{d=JSON.parse(localStorage.getItem('toksilab_prep_v1')||'null')}catch(e){}return d&&d.vials&&Date.now()-d.t<864e5?d:null}
+function prepApply(d){let n=0;PLAN.forEach(p=>{const r=d.vials[p.id];if(!r||!r.ready||p.where)return;STEPS.forEach(([k])=>p.steps[k]=1);p.ready=true;p.cf=r.cf;p.isf=r.isf;p.cx=r.cx||0;p.notes=r.notes||[];p.self=true;n++});
+ const bad=PLAN.filter(p=>p.self&&p.notes.length);try{localStorage.removeItem('toksilab_prep_v1')}catch(e){}
+ if(PLAN.every(p=>p.ready))done('prep');renderPrep();say(`Örnek hazırlama laboratuvarında hazırladığın <b>${n} vial</b> geldi.${bad.length?` ${bad.length} vialde SOP’tan sapma var (${bad.map(p=>p.id).join(', ')}); analiz sonucunda göreceksin.`:' Hepsi SOP’a uygun ✓'} Şimdi <b>HS’e yükle</b>.`)}
+function renderPrep(){const W=$('#prepW');const nReady=PLAN.filter(p=>p.ready).length;const imp=prepImport();
+ W.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between"><b style="font:700 20px 'Barlow Condensed',sans-serif">VİAL HAZIRLAMA · ${nReady}/12 hazır</b><div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><a class="bt" href="ornek_hazirlama.html" style="text-decoration:none;background:#1F9A97;color:#fff">🧪 Kendin hazırla (örnek hazırlama lab.) ›</a>${PLAN.filter(p=>p.ready).length>=2?'<button class="bt" id="pAll">Kalanları SOP’a göre hazırla</button>':''}<button class="bt p" id="pGo">HS’e yükle ›</button></div></div>
+ ${imp?`<div class="sop" style="border:2px solid #2DBE5B"><b>Örnek hazırlama laboratuvarından ${Object.keys(imp.vials).length} vial hazır.</b> Kendi hazırladığın viallerle çalışmak için al: hacim, iç standart, kapak ve taşınma hataları analize aynen yansır. <button class="bt p" id="pImp" style="margin-left:8px">Vialleri al</button></div>`:''}
+ <div class="sop"><b>SOP:</b> 20 mL HS vialine <b>%20 NaCl</b> + <b>250 µL kan</b> (kalibratör/QC/blank için boş kan) + <b>ara stok</b> (MeOH+EtOH 2 g/L; kalibratör g/L × 1000 µL) + <b>70 µL iç standart</b> (n-propanol 2 g/L → vialde 0,07 g/L) → <b>kapak, crimp</b>. Toplam <b>2000 µL</b>; tuzlu su hacmi = 2000 − 250 − 70 − ara stok. Bütün stoklar %20 tuzlu suyla hazırlanır: ana stok 10 g/L (25 mL), ara stok 2 g/L (5 mL ana stok → 25 mL). İç standart her viale <b>aynı hacimde</b>; kapak kapandıktan sonra hiçbir şey eklenemez.</div>
+ <div class="vgrid">${PLAN.map((p,i)=>`<div class="vc ${p.type}${p.ready?' ready':''}"><div style="display:flex;justify-content:space-between"><b>${p.id}</b><small>${p.lvl?'Level '+p.lvl:''}</small></div><small>${p.lab}${p.self?' · <span style="color:'+(p.notes.length?'#F2B632':'#2DBE5B')+'">'+(p.notes.length?'⚠ '+p.notes.join('; '):'kendin hazırladın ✓')+'</span>':''}</small><div class="steps" style="grid-template-columns:repeat(3,1fr)">${STEPS.map(([k])=>`<button data-i="${i}" data-k="${k}" class="${p.steps[k]?'ok':''}" ${p.steps[k]==='na'?'disabled':''}>${stepTxt(p,k)}</button>`).join('')}</div></div>`).join('')}</div>`;
  $$('#prepW .steps button').forEach(b=>b.onclick=()=>prepStep(+b.dataset.i,b.dataset.k));
- if($('#pAll'))$('#pAll').onclick=()=>{PLAN.forEach(p=>{STEPS.forEach(([k])=>p.steps[k]=1);p.ready=true});done('prep');say('Kalan vialler SOP’a göre hazırlandı. Şimdi <b>HS’e yükle</b>.');renderPrep()};
+ if($('#pImp'))$('#pImp').onclick=()=>prepApply(imp);
+ if($('#pAll'))$('#pAll').onclick=()=>{PLAN.forEach(p=>{STEPS.forEach(([k])=>p.steps[k]=p.steps[k]||1);p.ready=true});done('prep');say('Kalan vialler SOP’a göre hazırlandı. Şimdi <b>HS’e yükle</b>.');renderPrep()};
  $('#pGo').onclick=()=>{if(!PLAN.some(p=>p.ready)){say('Önce en az bir vial hazırla.');return}show('hslid')}}
 function prepStep(i,k){const p=PLAN[i],order=STEPS.map(s=>s[0]),j=order.indexOf(k);
- if(p.steps[k]){say('Bu adım zaten yapıldı.');return}
+ if(p.steps[k]){say(p.steps[k]==='na'?'Bu viale ara stok eklenmez.':'Bu adım zaten yapıldı.');return}
  if(p.steps.cap){danger('Kapak kapalı!','Kapatılmış viale bir şey eklenemez. Septumu delip ekleme yapmak buharlaşma kaybına ve sızıntıya yol açar; viali baştan hazırla.');return}
- if(k==='cap'&&!p.steps.is){danger('İç standart eklenmedi!','Kapağı kapatmadan önce iç standardı (n-propanol) eklemelisin. İç standardı olmayan vial hesaplanamaz: pik alan oranı (analit/ISTD) kurulamaz.');return}
- for(let q=0;q<j;q++)if(!p.steps[order[q]]){say(`Sıra önemli: önce <b>${STEPS[q][1].replace('\n',' ')}</b>.`);beep(500,.15,.05);return}
+ if(k==='cap'&&!p.steps.is){danger('İç standart eklenmedi!','Kapağı kapatmadan önce iç standardı (n-propanol, 70 µL) eklemelisin. İç standardı olmayan vial hesaplanamaz: pik alan oranı (analit/ISTD) kurulamaz.');return}
+ for(let q=0;q<j;q++)if(!p.steps[order[q]]){say(`Sıra önemli: önce <b>${stepTxt(p,order[q]).replace('<br>',' ')}</b>.`);beep(500,.15,.05);return}
  p.steps[k]=1;beep(1100,.04);if(k==='cap'){p.ready=true;say(`<b>${p.id}</b> hazır ✓ Kapak sıkıca crimp edildi; kapağı çevirerek dönmediğini kontrol et.`)}
- else say({lab:`Etiket yazıldı: <b>${p.id}</b>. Etiket vial gövdesine; kapağa değil.`,smp:`${p.type==='num'?'Kan numunesi':'Kalibratör'} 100 µL eklendi. Pipeti viale dik tut, ucu tabana yakın bırak.`,is:'1 mL iç standart (n-propanol) eklendi. Her viale aynı pipetle, aynı hacim.'}[k]);
+ else say({lab:`Etiket yazıldı: <b>${p.id}</b>. Etiket vial gövdesine; kapağa değil.`,salt:`${p.salt} µL %20 NaCl eklendi. Tuz, alkollerin sıvıdan tepe boşluğuna geçişini artırır (salting-out).`,blood:`250 µL ${p.type==='num'?'vaka kanı':'boş kan'} eklendi. Kan viskozdur: ters pipetleme kullan.`,std:`${p.std} µL ara stok (MeOH+EtOH 2 g/L) eklendi → vialde ${String(p.c).replace('.',',')} g/L.`,is:'70 µL iç standart (n-propanol 2 g/L) eklendi. Her viale aynı pipetle, aynı hacim.'}[k]);
  if(PLAN.every(p=>p.ready))done('prep');renderPrep()}
 function danger(t,d){beep(380,.3,.07);say(`<b style="color:#C62828">⚠ DİKKAT: ${t}</b> ${d}`)}
 /* ---------- 6890N ---------- */
@@ -367,8 +374,8 @@ const RTC={};function methRT(m){const key=JSON.stringify([m.oven,m.col]);if(RTC[
 function applyMeth(name){const m=METH[name];if(!m)return;IC.method=name;const g=S.gc,o=m.oven;[o.init,o.hold,o.r1,o.f1,o.h1,o.r2].forEach((v,i)=>g.p.oven[i][1]=v);g.ovenSet=o.init;g.p.finlet[1][1]=m.inlet.temp;g.p.finlet[3][1]=m.inlet.ratio;g.p.finlet[4][1]=+(m.inlet.ratio*m.col).toFixed(1);g.p.aux[0][1]=m.aux2;
  if($('#icTitle'))$('#icTitle').textContent=`GCMS/Enhanced MassHunter - ${name} / ATUNE.U / default.sequence.xml`}
 const RK=.3;
-function makeFile(name,folder,vial,content,sample,type,mname){seedN=Math.floor(hashS(name+folder)*2e9)+1;const c=content.c||0,isA=87000*(1+gs()*.025);
- const A={npr:isA,etoh:c>0?RK*1.142*(c/.07)*isA*(1+gs()*.018)+700:(content.type==='blank'?0:700*(1+gs()*.2)),meoh:(content.type==='num'?(content.meoh||0):c)>0?RK*.6789*((content.type==='num'?(content.meoh||0):c)/.07)*isA*(1+gs()*.018)+900:(content.type==='blank'?0:900*(1+gs()*.2)),acet:3800*(1+gs()*.2)+(content.acet||0)*900000};
+function makeFile(name,folder,vial,content,sample,type,mname){seedN=Math.floor(hashS(name+folder)*2e9)+1;const c=((content.c||0)*(content.cf!=null?content.cf:1))||(content.cx||0),isA0=87000*(1+gs()*.025),isA=isA0*(content.isf!=null?content.isf:1);
+ const A={npr:isA,etoh:c>0&&!(content.type==='blank'&&!content.cx)?RK*1.142*(c/.07)*isA0*(1+gs()*.018)+700:(content.type==='blank'?0:700*(1+gs()*.2)),meoh:(content.type==='num'?(content.meoh||0):c)>0?RK*.6789*((content.type==='num'?(content.meoh||0):c)/.07)*isA0*(1+gs()*.018)+900:(content.type==='blank'?0:900*(1+gs()*.2)),acet:3800*(1+gs()*.2)+(content.acet||0)*900000};
  const rt={},sg={},lost=[];const m=mname&&METH[mname];
  if(m){const R=methRT(m),fac=(30/Math.max(1,m.inlet.ratio))*(m.aux2<150?.4:1)*(m.inlet.temp<120?.6:1);for(const k in RT){const r=R[k];if(!r||r.rt<(m.ms?m.ms.sd:SIMSTART)){A[k]=0;rt[k]=r?r.rt:99;sg[k]=.0065;lost.push(k);continue}rt[k]=r.rt+gs()*.0015;sg[k]=r.sg*(m.inlet.temp<120?1.5:1);A[k]*=fac}}
  else for(const k in RT){rt[k]=RT[k]+gs()*.0015;sg[k]=.0065}
@@ -1348,6 +1355,7 @@ $('#hLab').onclick=e=>{e.preventDefault();const ret=new URLSearchParams(location
 renderTasks();show('main');
 say('Kanda <b>metanol ve etanol</b> analizi, doğrulanmış yöntem <b>ALKOL2.M</b> ile. Sağdaki SOP adımlarını sırayla izle: önce cihazı tanı (fırın kapağı, tuş takımları), sonra vialleri hazırla, HS’e yükle, ChemStation’da sekansı kur ve başlat; en sonda veriyi değerlendir.');
 window.__hs={S,PLAN,IC,DA,DATA,gcKey,hsKey,show,slotAct,hsAct,prepStep,pcApp,daLoad,calGlobals,qsIon,calUpdate,quantCalc,quantReport,quantCalcUI,fit:calFit,allFiles,daLib,daOverlay,seqTable,startSeqDlg,seqCheck,gcEditDlg,METH,applyMeth,methRT,runLen,loadMethDlg,saveAsDlg,libDlg,calEdit,setDAMethod,CAL,inletAnim,qsOpen,DA2:()=>DA};
+if(location.hash==='#prep')setTimeout(()=>show('prep'),400);
 
 </script>
 
