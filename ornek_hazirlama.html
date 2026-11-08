@@ -214,6 +214,9 @@ function vialEval(c){const p=c.p,V=c.vol||1,r={id:p.id,notes:[]};
  if(c.trace)r.notes.push('taşınma şüphesi');
  if(!c.capped)r.notes.push('kapak YOK');else if(!c.crimped)r.notes.push('kapak sıkılmadı');
  const loss=!c.capped?.7:!c.crimped?.88:1;r.cf=+(r.cf*loss).toFixed(3);r.mf=+((r.mf||1)*loss).toFixed(3);r.isf=+(r.isf*(loss===1?1:loss+.04)).toFixed(3);
+ const V2={salt:0,blood:0,std:0,is:0},oth=[];(c.adds||[]).forEach(([f,v])=>{const k={tuz:'salt',bosKan:'blood',numKan:'blood',araME:'std',araP:'is'}[f];if(k)V2[k]+=v;else oth.push(`${C[f]?C[f].n:f} ${Math.round(v)} µL`)});
+ r.vols=Object.fromEntries(Object.entries(V2).map(([k,v])=>[k,Math.round(v*10)/10]));r.capped=!!c.capped;r.crimped=!!c.crimped;if(oth.length)r.notes.push('fazladan: '+oth.join(', '));r.total=Math.round(V);
+ if(p.t==='num'&&(c.adds||[]).some(([f])=>f==='bosKan'))r.notes.push('numuneye boş kan eklendi');if(p.t!=='num'&&(c.adds||[]).some(([f])=>f==='numKan'))r.notes.push('vaka kanı yanlış viale');
  r.ok=!r.notes.length;r.ready=c.vol>0;return r}
 function tasks(){const L=[];const T=C.tuz;
  if(mode==='full'){L.push([T.done&&Math.abs(T.salt/T.vol/10-20)<.4,'%20 NaCl çözeltisi · 250 mL']);
@@ -241,7 +244,7 @@ function planDlg(){const q=PQ(),U=UP||{lv:{}};const lvP=PLAN.filter(p=>p.t==='ca
  <div class="tw"><table class="pl">${q.map(([k,t,u])=>`<tr><td style="text-align:left;white-space:normal">${t}</td><td><input type="number" step="any" data-k="${k}" value="${U[k]??''}"> ${u}</td><td class="h" data-h="${k}"></td></tr>`).join('')}</table></div>
  <h3 style="font:700 17px var(--disp);margin:12px 0 4px">Vial tablosu (µL · toplam 2000 · kan 250 · iç std. senin değerin)</h3>
  <div class="tw"><table class="pl"><tr><th>Vial</th><th>Hedef (g/L)</th><th>Ara stok (2 g/L)</th><th>%20 NaCl</th><th></th></tr>${PLAN.map(p=>{const v=U.lv[p.id]||{};const hasStd=p.t==='cal'||p.t==='qc';return `<tr><td>${p.id}</td><td>${hasStd?fmt(p.c,2):'—'}</td><td>${hasStd?`<input type="number" step="any" data-l="${p.id}" data-f="std" value="${v.std??''}">`:'—'}</td><td><input type="number" step="any" data-l="${p.id}" data-f="salt" value="${v.salt??''}"></td><td class="h" data-hl="${p.id}"></td></tr>`}).join('')}</table></div>
- <div class="row" style="margin-top:10px"><button id="pChk">Kontrol et</button><button class="p" id="pSave">Planı kaydet</button><span id="pRes" style="font:600 14px var(--mono)"></span></div>`;
+ <div class="row" style="margin-top:10px"><button id="pShow">Hesaplamayı göster</button><button id="pChk">Kontrol et</button><button class="p" id="pSave">Planı kaydet</button><span id="pRes" style="font:600 14px var(--mono)"></span></div>`;
  const read=()=>{const o={lv:{}};$$('#dlgB [data-k]').forEach(i=>{if(i.value!=='')o[i.dataset.k]=+i.value});$$('#dlgB [data-l]').forEach(i=>{const id=i.dataset.l;o.lv[id]=o.lv[id]||{};if(i.value!=='')o.lv[id][i.dataset.f]=+i.value});return o};
  const near=(v,a)=>v!=null&&Math.abs(v-a)<=Math.max(.5,Math.abs(a)*.005);
  $('#pChk').onclick=()=>{const o=read();let ok=0,n=0;q.forEach(([k,,,a,h])=>{n++;const i=$(`#dlgB [data-k="${k}"]`),g=near(o[k],a);ok+=g;i.className=g?'ok':'bad';const e=$(`#dlgB [data-h="${k}"]`);e.className='h'+(g?' ok':'');e.textContent=g?'✓':h});
@@ -250,6 +253,9 @@ function planDlg(){const q=PQ(),U=UP||{lv:{}};const lvP=PLAN.filter(p=>p.t==='ca
    n++;const i2=$(`#dlgB [data-l="${p.id}"][data-f="salt"]`),g2=near(v.salt,VT-VB-VIS-sa);ok+=g2;i2.className=g2?'ok':'bad';if(!g2)msg.push(`NaCl: 2000 − 250 − 70 − ${fmt(sa,0)} = ${fmt(VT-VB-VIS-sa,0)}`);
    e.className='h'+(msg.length?'':' ok');e.textContent=msg.length?msg.join(' · '):'✓'});
   $('#pRes').textContent=`${ok}/${n} doğru`;say(ok===n?'Hesap planın tamamen doğru ✓ Kaydet ve tezgâhta uygula.':`${n-ok} hesap hatalı. Kırmızıların yanında formül var; düzeltip tekrar kontrol et.`,ok===n?'good':'bad')};
+ $('#pShow').onclick=()=>{q.forEach(([k,,,a,h])=>{const i=$(`#dlgB [data-k="${k}"]`);i.value=+(+a).toFixed(1);i.className='ok';const e=$(`#dlgB [data-h="${k}"]`);e.className='h ok';e.textContent=h});
+  PLAN.forEach(p=>{const hasStd=p.t==='cal'||p.t==='qc',sa=hasStd?p.c*VT/ARA:0,sl=VT-VB-VIS-sa;if(hasStd){const i=$(`#dlgB [data-l="${p.id}"][data-f="std"]`);i.value=sa;i.className='ok'}const i2=$(`#dlgB [data-l="${p.id}"][data-f="salt"]`);i2.value=sl;i2.className='ok';const e=$(`#dlgB [data-hl="${p.id}"]`);e.className='h ok';e.textContent=(hasStd?`ara = ${fmt(p.c,2)} × 2000 / 2 = ${fmt(sa,0)} · `:'')+`NaCl = 2000 − 250 − 70${hasStd?' − '+fmt(sa,0):''} = ${fmt(sl,0)}`});
+  $('#pRes').textContent='Hesaplama gösterildi';say('Doğru hesaplar ve formüller tabloya yazıldı. İnceleyip <b>Planı kaydet</b> de.')};
  $('#pSave').onclick=()=>{UP=read();$('#dlg').close();$('#dlg').classList.remove('big');panel();tasks();say('Plan kaydedildi. Nesnelere dokunduğunda <b>senin hesapladığın</b> hacimler görünecek. Pipeti bu hacimlere ayarla.')};
  $('#dlg').showModal()}
 const $$=s=>[...document.querySelectorAll(s)];
