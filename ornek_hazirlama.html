@@ -35,7 +35,13 @@ details summary{cursor:pointer;font-weight:600;color:var(--mute)}
 dialog{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:14px;max-width:min(720px,92vw)}
 dialog::backdrop{background:rgba(5,10,12,.7)}
 .pl td{padding:5px 6px}.pl input{width:96px;font-size:14px;padding:4px 6px}.pl input.ok{border-color:#2DBE5B;background:#0F2A1A}.pl input.bad{border-color:#E5484D;background:#2A1214}.pl .h{white-space:normal;text-align:left;color:#FFB4B6;font-size:12px;max-width:280px}.pl .h.ok{color:#7BE39A}
-dialog.big{max-width:min(980px,96vw);width:96vw}.res td.ok{color:#7BE39A}.res td.bad{color:#FF8A8D}.res td.w{color:var(--warn)}
+dialog.big{max-width:min(1180px,97vw);width:97vw}
+.pgrid{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:16px;align-items:start}@media (max-width:900px){.pgrid{grid-template-columns:1fr}}
+.calc{position:sticky;top:0;background:#0E1518;border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:8px}
+.calc .scr{background:#0A1A14;border-radius:8px;padding:8px 10px;text-align:right;font:600 13px var(--mono);color:#7BA78A;min-height:20px;overflow-x:auto;white-space:nowrap}
+.calc .res{font:700 24px var(--mono);color:#5BE37A;text-align:right;min-height:30px}
+.calc .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.calc .keys button{padding:9px 0;font:600 16px var(--mono)}.calc .keys .op{background:#2E3F47}.calc .keys .eq{background:var(--blue);border-color:var(--blue)}
+.calc small{color:var(--mute);font-size:12px}.res td.ok{color:#7BE39A}.res td.bad{color:#FF8A8D}.res td.w{color:var(--warn)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <header>
@@ -242,10 +248,14 @@ const PQ=()=>{const q=[];if(mode==='full'){q.push(['nacl','%20 NaCl, 250 mL içi
 function planDlg(){const q=PQ(),U=UP||{lv:{}};const lvP=PLAN.filter(p=>p.t==='cal'||p.t==='qc');
  $('#dlg').classList.add('big');
  $('#dlgB').innerHTML=`<h2 style="font:700 22px var(--disp);margin:0 0 4px">Hesap planı</h2><p style="margin:0 0 10px;color:var(--mute);font-size:14px">SOP hedeflerinden hacimleri <b>kendin</b> hesapla. “Kontrol et” doğruları yeşil, yanlışları kırmızı gösterir. Yanlış planla da devam edebilirsin; sonucu analizde görürsün.</p>
- <div class="tw"><table class="pl">${q.map(([k,t,u])=>`<tr><td style="text-align:left;white-space:normal">${t}</td><td><input type="number" step="any" data-k="${k}" value="${U[k]??''}"> ${u}</td><td class="h" data-h="${k}"></td></tr>`).join('')}</table></div>
+ <div class="pgrid"><div><div class="tw"><table class="pl">${q.map(([k,t,u])=>`<tr><td style="text-align:left;white-space:normal">${t}</td><td><input type="number" step="any" data-k="${k}" value="${U[k]??''}"> ${u}</td><td class="h" data-h="${k}"></td></tr>`).join('')}</table></div>
  <h3 style="font:700 17px var(--disp);margin:12px 0 4px">Vial tablosu (µL · toplam 2000 · kan 250 · iç std. senin değerin)</h3>
  <div class="tw"><table class="pl"><tr><th>Vial</th><th>Hedef (g/L)</th><th>Ara stok (2 g/L)</th><th>%20 NaCl</th><th></th></tr>${PLAN.map(p=>{const v=U.lv[p.id]||{};const hasStd=p.t==='cal'||p.t==='qc';return `<tr><td>${p.id}</td><td>${hasStd?fmt(p.c,2):'—'}</td><td>${hasStd?`<input type="number" step="any" data-l="${p.id}" data-f="std" value="${v.std??''}">`:'—'}</td><td><input type="number" step="any" data-l="${p.id}" data-f="salt" value="${v.salt??''}"></td><td class="h" data-hl="${p.id}"></td></tr>`}).join('')}</table></div>
- <div class="row" style="margin-top:10px"><button id="pShow">Hesaplamayı göster</button><button id="pChk">Kontrol et</button><button class="p" id="pSave">Planı kaydet</button><span id="pRes" style="font:600 14px var(--mono)"></span></div>`;
+ <div class="row" style="margin-top:10px"><button id="pShow">Hesaplamayı göster</button><button id="pChk">Kontrol et</button><button class="p" id="pSave">Planı kaydet</button><span id="pRes" style="font:600 14px var(--mono)"></span></div></div>
+ <div class="calc" aria-label="Hesap makinesi"><b style="font:700 16px var(--disp)">Hesap makinesi</b><div class="scr" id="cE">&nbsp;</div><div class="res" id="cR">0</div>
+  <div class="keys">${['C','(',')','÷','7','8','9','×','4','5','6','−','1','2','3','+','0',',','⌫','='].map(k=>`<button type="button" data-c="${k}" class="${'÷×−+()'.includes(k)?'op':k==='='?'eq':''}">${k}</button>`).join('')}</div>
+  <button type="button" id="cPut">Sonucu seçili kutuya yaz ↙</button><small id="cTo">Önce tablodan bir kutuya tıkla.</small><small>Klavye de çalışır: rakamlar, + − * / ( ) , Enter.</small></div></div>`;
+ calcInit();
  const read=()=>{const o={lv:{}};$$('#dlgB [data-k]').forEach(i=>{if(i.value!=='')o[i.dataset.k]=+i.value});$$('#dlgB [data-l]').forEach(i=>{const id=i.dataset.l;o.lv[id]=o.lv[id]||{};if(i.value!=='')o.lv[id][i.dataset.f]=+i.value});return o};
  const near=(v,a)=>v!=null&&Math.abs(v-a)<=Math.max(.5,Math.abs(a)*.005);
  $('#pChk').onclick=()=>{const o=read();let ok=0,n=0;q.forEach(([k,,,a,h])=>{n++;const i=$(`#dlgB [data-k="${k}"]`),g=near(o[k],a);ok+=g;i.className=g?'ok':'bad';const e=$(`#dlgB [data-h="${k}"]`);e.className='h'+(g?' ok':'');e.textContent=g?'✓':h});
@@ -260,6 +270,14 @@ function planDlg(){const q=PQ(),U=UP||{lv:{}};const lvP=PLAN.filter(p=>p.t==='ca
  $('#pSave').onclick=()=>{UP=read();$('#dlg').close();$('#dlg').classList.remove('big');panel();tasks();say('Plan kaydedildi. Nesnelere dokunduğunda <b>senin hesapladığın</b> hacimler görünecek. Pipeti bu hacimlere ayarla.')};
  $('#dlg').showModal()}
 const $$=s=>[...document.querySelectorAll(s)];
+let calcExpr='',calcTarget=null,calcLast=null;
+function calcEval(e){const x=e.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/,/g,'.');if(!/^[0-9+\-*/(). ]*$/.test(x)||!x.trim())return null;try{const v=Function('"use strict";return ('+x+')')();return Number.isFinite(v)?v:null}catch(e){return null}}
+function calcShow(){$('#cE').textContent=calcExpr||'\u00a0';const v=calcEval(calcExpr);$('#cR').textContent=v==null?(calcExpr?'…':'0'):(+v.toFixed(6)).toLocaleString('tr-TR',{maximumFractionDigits:6})}
+let calcEq=false;function calcKey(k){if(calcEq&&/^[0-9(,]$/.test(k))calcExpr='';calcEq=false;if(k==='C'){calcExpr='';calcLast=null}else if(k==='⌫')calcExpr=calcExpr.slice(0,-1);else if(k==='='){const v=calcEval(calcExpr);if(v!=null){calcLast=v;calcExpr=String(+v.toFixed(6)).replace('.',',');calcEq=true}}else calcExpr+=k;calcShow()}
+function calcInit(){calcExpr='';calcShow();$$('#dlgB .calc [data-c]').forEach(b=>b.onclick=()=>calcKey(b.dataset.c));
+ $$('#dlgB .pl input').forEach(i=>i.addEventListener('focus',()=>{calcTarget=i;const tr=i.closest('tr');$('#cTo').textContent='Hedef: '+(tr?tr.cells[0].textContent.trim().slice(0,48):'kutu')}));
+ $('#cPut').onclick=()=>{const v=calcEval(calcExpr);if(v==null){say('Hesap makinesinde geçerli bir sonuç yok.');return}if(!calcTarget){say('Önce tablodan sonucu yazacağın kutuya tıkla.');return}calcTarget.value=+v.toFixed(2);calcTarget.className='';calcTarget.focus();say('Sonuç kutuya yazıldı. Tümünü doldurunca <b>Kontrol et</b>.')}}
+addEventListener('keydown',e=>{if(!$('#dlg').open||!$('#cE'))return;const a=document.activeElement;if(a&&a.tagName==='INPUT')return;const m={'*':'×','/':'÷','-':'−','.':',',Enter:'=',Backspace:'⌫',Escape:'C'};const k=m[e.key]||e.key;if(/^[0-9+()×÷−,=⌫C]$/.test(k)){e.preventDefault();calcKey(k)}});
 function finish(){const R=PLAN.map(p=>vialEval(C['v_'+p.id]));const out={t:Date.now(),mode,vials:{}};R.forEach(r=>out.vials[r.id]=r);let saved=false;try{localStorage.setItem('toksilab_prep_v1',JSON.stringify(out));saved=true}catch(e){}
  $('#dlgB').innerHTML=`<h2 style="font:700 22px var(--disp);margin:0 0 8px">Hazırlanan vialler</h2><div class="tw"><table class="res"><tr><th>Vial</th><th>Hacim</th><th>Derişim</th><th>İç std.</th><th>Not</th></tr>${PLAN.map((p,i)=>{const c=C['v_'+p.id],r=R[i];return `<tr><td>${p.id}</td><td>${fmt(c.vol,0)} µL</td><td class="${Math.abs(r.cf-1)>.03?'bad':'ok'}">×${fmt(r.cf,2)}</td><td class="${Math.abs(r.isf-1)>.03?'bad':'ok'}">×${fmt(r.isf,2)}</td><td class="${r.ok?'ok':'w'}">${r.ok?'✓':r.notes.join('; ')}</td></tr>`}).join('')}</table></div>
  <p style="font-size:14px;line-height:1.5">${saved?'Vialler kaydedildi. <b>HS-GC-MS pilotuna</b> dön; “Vial hazırlama” sekmesinde <b>Vialleri al</b> de. Yaptığın hatalar (hacim, iç standart, kapak, taşınma) analiz sonucuna aynen yansır.':'Tarayıcı bu sayfada kayıt tutamıyor; sonuçları buradan incele.'}</p><div class="row"><a href="hsgcms_pilot.html#prep" style="color:#7CC4FF;font-weight:600">HS-GC-MS pilotuna dön ›</a></div>`;
