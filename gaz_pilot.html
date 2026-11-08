@@ -156,7 +156,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
-const MEDIA=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'media/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
+const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
 const fmt=(n,d=0)=>Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
 /* ---------- hatlar (soldan sağa) ---------- */
 const COL={N:{body:'#2F8F4E',sh:'#24713C'},A:{body:'#3F8FD0',sh:'#2F6FA8'},H:{body:'#7C5434',sh:'#5E3D22'}};

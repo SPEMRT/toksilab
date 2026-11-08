@@ -150,7 +150,7 @@ body.fps #gmode{background:rgba(14,21,24,.8);color:#EAF2F3}body.fps .moves,body.
 @media (pointer:coarse){#gmode{display:none}#joy{display:block}.moves{display:none!important}}
 </style>
 <nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mMap" class="on"><span>▦</span>Harita</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button></nav>
-<div id="wv" hidden><div class="wvb"><video id="wvV" playsinline preload="auto" poster="media/karsilama.jpg" src="media/karsilama.mp4"></video><div class="wvc"><button id="wvS" aria-label="Sesi aç/kapat">🔊</button><span style="flex:1"></span><button id="wvX">Geç ›</button></div></div></div>
+<div id="wv" hidden><div class="wvb"><video id="wvV" playsinline preload="auto" poster="karsilama.jpg" src="karsilama.mp4"></video><div class="wvc"><button id="wvS" aria-label="Sesi aç/kapat">🔊</button><span style="flex:1"></span><button id="wvX">Geç ›</button></div></div></div>
 <div class="hdr2"><b>MY_<i>ToksiLab</i></b><span class="pill">LABORATUVAR GİRİŞİ · 3B</span></div>
 <div id="cv3"></div>
 <div class="map" id="map"><small>KAT PLANI · BULUNDUĞUN YER</small><svg id="mapS" viewBox="0 0 220 120"></svg></div>
@@ -173,9 +173,9 @@ body.fps #gmode{background:rgba(14,21,24,.8);color:#EAF2F3}body.fps .moves,body.
 import * as THREE from 'three';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
-const MEDIA=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'media/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
+const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
 const say=t=>{$('#say').innerHTML=t;const m=$('.mentor');m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')};
-const BASE=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';if(BASE){const V=document.getElementById('wvV');V.poster=BASE+'media/karsilama.jpg';V.src=BASE+'media/karsilama.mp4'}
+const BASE=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';if(BASE){const V=document.getElementById('wvV');V.poster=BASE+'karsilama.jpg';V.src=BASE+'karsilama.mp4'}
 const ROOMS=[
  {no:1,z:-5,n:'Kromatografi Laboratuvarı',k:'KROMATOGRAFİ',c:'#2F7DE1',ic:'⚗',haz:null,sub:'Cihaz alanı · yetkili personel',d:'Ayrıştırma ve tanımlama burada yapılır: hazırlanan ekstraktlar cihazlara verilir, analitler ayrılır ve kütle spektrumlarıyla tanımlanır.',l:['LC-MS/MS · ilaç ve uyuşturucu taraması','GC-MS · doğrulama analizleri','HS-GC-MS / GC-FID · kanda alkol','Veri işleme ve raporlama'],st:'open'},
  {no:2,z:-11,n:'Örnek Hazırlama Laboratuvarı',k:'ÖRNEK HAZIRLAMA',c:'#1F9A97',ic:'🧪',haz:'bio',sub:'KKD zorunlu · biyolojik risk',d:'Numuneler analize burada hazırlanır: tartım, pipetleme, karıştırma, ekstraksiyon ve santrifüj. Biyolojik numunelerle çalışıldığı için KKD zorunludur.',l:['Analitik terazi','Otomatik pipetler · döner stand','Vorteks · santrifüj','Çeker ocak · SPE · buzdolabı'],st:'open'},

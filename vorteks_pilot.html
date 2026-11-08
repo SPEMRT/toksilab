@@ -146,7 +146,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
-const MEDIA=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'media/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
+const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
 const fmt=(n,d=0)=>Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const TASKS=[{id:'parts',t:'Parçaları tanı',d:'Fareyi parçaların üzerine getir (6 parça).'},
  {id:'hs',t:'HS vialini karıştır (TOUCH modu)',d:'Krimpli vial · dokunmatik çalıştırma · homojenlik'},

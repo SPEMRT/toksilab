@@ -148,7 +148,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
-const MEDIA=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'media/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
+const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
 const fmt=(n,d=0)=>Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const SPD=60;/* 1 sn = 1 dk */
 const LMIN=1.9,LMAX=2.5,LOVER=3.0;/* banyo seviyesi (L, numuneyle birlikte): 2/3 çizgisi ≈ 2,2 L */

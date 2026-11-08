@@ -158,7 +158,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
-const MEDIA=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'media/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
+const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
 const fmt=(n,d=0)=>Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const PIP={P10:{min:.5,max:10,step:.1,dp:1,col:['#C9D0D4','#8E989D'],tipC:'#EEF4F6',tipL:95,tipW:9,n:'P10 · 0,5–10 µL',cap:'gri'},P200:{min:20,max:200,step:1,dp:0,col:['#FFD74A','#E0A800'],tipC:'#F7E79A',tipL:150,tipW:12,n:'P200 · 20–200 µL',cap:'sarı'},P1000:{min:100,max:1000,step:5,dp:0,col:['#5AA0F5','#1A55B8'],tipC:'#A9CCF4',tipL:205,tipW:17,n:'P1000 · 100–1000 µL',cap:'mavi'}};
 const LIQ={su:{n:'Tip I su',c:'#9FD3E6'},kan:{n:'Tam kan',c:'#7A0F18'},stok:{n:'Ara stok (EtOH+MeOH, 2 g/L)',c:'#CFE6F2'},dcm:{n:'Diklorometan (DCM)',c:'#7FA8E0'}};

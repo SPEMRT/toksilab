@@ -117,7 +117,7 @@ td.ok input,td.ok select{border-color:var(--ok);background:rgba(45,190,91,.12)}t
  </section>
 </div>
 <script>
-const MEDIA=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'media/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];$('#av').src=AVATAR;
+const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];$('#av').src=AVATAR;
 const fmt=(n,d)=>{if(d==null){d=Math.abs(n)>=100?0:Math.abs(n)>=10?1:Math.abs(n)>=1?2:3}return Number(n).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0})};
 const num=v=>{if(v==null)return NaN;v=String(v).trim().replace(/\s/g,'').replace(',','.');return v===''?NaN:Number(v)};
 const near=(a,b,t=.01)=>isFinite(a)&&Math.abs(a-b)<=Math.max(Math.abs(b)*t,1e-9);
