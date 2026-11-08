@@ -1,0 +1,1583 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SPE · CEREX 48 · Gerçekçi Pilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0E1518;--card:#1E2A30;--card2:#25333A;--line:#34454D;--ink:#EAF2F3;--muted:#9BB0B6;--blue:#2F7DE1;--ok:#2DBE5B;--bad:#E5484D;--warn:#F2B632;
+ --f-display:'Barlow Condensed',system-ui,sans-serif;--f-body:'Source Sans 3',system-ui,sans-serif;--f-mono:'IBM Plex Mono',ui-monospace,monospace}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0E1518}}
+:root[data-theme="light"]{--bg:#0E1518}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(ellipse at 30% 0%,#1A2A30,var(--bg) 60%);color:var(--ink);font-family:var(--f-body);min-height:100vh;padding:14px 16px 28px}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:12px}
+.hdr{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}.brand b{font:700 24px/1 var(--f-display)}.brand b i{font-style:normal;color:#2BD9C0}
+.pill{font:600 10.5px var(--f-mono);letter-spacing:.1em;border-radius:999px;padding:4px 9px;background:var(--warn);color:#2A2000}
+.hdr a{color:#7FDCD0;font-weight:600;font-size:14px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:12px;align-items:start}
+.stage{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);background:#DDE3E6}
+#cv3{position:relative;width:100%;aspect-ratio:9/7;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+#cv3 canvas{display:block;width:100%!important;height:100%!important}
+#ov{position:absolute;left:0;top:0;pointer-events:none}
+#ov .pl{pointer-events:auto;cursor:pointer}#ov .pl:hover rect.lb{stroke:#2F7DE1;stroke-width:2}
+.snav{position:absolute;left:8px;top:8px;z-index:4;display:grid;gap:6px;background:#16242A;border-radius:12px;padding:6px;width:74px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.snav button{border:0;border-radius:9px;background:#25333A;color:#fff;display:grid;place-items:center;gap:2px;font:600 11px var(--f-body);padding:8px 2px;line-height:1.1}
+.snav button span{font-size:20px;line-height:1}.snav button.on{background:var(--blue)}
+.dsp{position:absolute;right:10px;top:10px;z-index:3;width:210px;background:rgba(20,30,34,.92);border-radius:14px;padding:10px 12px;display:grid;gap:4px;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none}
+.dsp[hidden]{display:none}.dsp small{font:600 10px var(--f-mono);letter-spacing:.08em;color:#9BB0B6}
+.dsp .val{font:600 25px var(--f-mono);color:#EAF6F8;text-align:right;letter-spacing:-.5px}.dsp .mg{font:500 12.5px var(--f-mono);color:#7CF2D8;text-align:right}
+.dsp .st{display:flex;justify-content:space-between;font:600 11px var(--f-mono)}.stb{color:#2DBE5B}.ust{color:#F2B632}
+.lvrow{display:flex;align-items:center;gap:10px;margin-top:4px;padding-top:6px;border-top:1px solid #34454D}.lvrow svg{width:64px;height:64px;flex:none}.lvrow span{font:600 11.5px var(--f-mono);line-height:1.35}
+.fpop{position:absolute;z-index:5;transform:translate(-50%,calc(-100% - 18px));background:#16242A;border-radius:12px;padding:7px;display:grid;gap:5px;box-shadow:0 8px 20px rgba(0,0,0,.4);text-align:center}.fpop[hidden]{display:none}.fpop b{font-size:12px;color:#fff}.fpop div{display:flex;gap:6px}.fpop button{width:48px;height:42px;border:0;border-radius:9px;background:#2F7DE1;color:#fff;font-size:24px;font-weight:700}
+.smenu{position:absolute;z-index:6;transform:translate(-50%,calc(-100% - 16px));width:200px;background:#16242A;border-radius:12px;padding:10px;display:grid;gap:6px;box-shadow:0 10px 24px rgba(0,0,0,.45)}.smenu[hidden]{display:none}.smenu b{color:#fff;font:700 17px var(--f-display)}.smenu .sub{color:#9BB0B6}.smenu button{border:0;border-radius:9px;background:#25333A;color:#fff;padding:9px;font-weight:700;font-size:14px}.smenu button.on{background:#2F7DE1}.smenu .u2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.smenu .x{background:#3A4B53}
+@keyframes hwP{0%,100%{box-shadow:0 0 0 2px #E5484D}50%{box-shadow:0 0 0 4px #FF1F1F,0 0 16px rgba(255,40,40,.85)}}.hw{animation:hwP 1s infinite}
+.tip{position:absolute;z-index:7;max-width:270px;background:rgba(18,28,32,.95);color:#EAF2F3;border-radius:11px;padding:9px 12px;font-size:13.5px;line-height:1.4;pointer-events:none;box-shadow:0 8px 22px rgba(0,0,0,.35);border-left:4px solid #2BD9C0}.tip[hidden]{display:none}.tip b{display:block;font:700 16px var(--f-display);color:#7CF2D8;margin-bottom:2px}
+.held{position:absolute;left:96px;bottom:10px;z-index:3;background:rgba(47,125,225,.95);color:#fff;font-weight:700;font-size:13.5px;border-radius:999px;padding:6px 12px;pointer-events:none}
+.held[hidden]{display:none}
+.rot{position:absolute;right:10px;bottom:10px;z-index:3;font:600 11px var(--f-mono);color:#3E4C52;background:rgba(255,255,255,.75);border-radius:999px;padding:4px 10px;pointer-events:none}
+.nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:#132228;font-size:16px}
+.nogl[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:7px}
+.card h2{font:700 21px/1 var(--f-display)}.card h3{font:700 15px var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.sub{font:500 11px var(--f-mono);color:var(--muted)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:5px}.acts3{grid-template-columns:1fr 1fr 1fr}
+.bt{border-radius:10px;padding:7px;font-weight:700;font-size:13.5px;background:var(--card2);border:1px solid var(--line)}
+.bt.on{background:var(--blue);border-color:var(--blue);color:#fff}.bt.full{grid-column:1/-1}.bt:disabled{opacity:.4;cursor:not-allowed}
+.tband{grid-template-columns:1fr auto;align-items:center;padding:10px 14px}.tband b{display:block;font:700 18px var(--f-display);margin-top:2px}
+.steps{list-style:none;display:grid;gap:3px}.steps li{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.steps li i{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#33444C;font-size:11px;font-weight:700;font-style:normal}
+.steps li.done{color:var(--ink)}.steps li.done i{background:var(--ok)}.steps li.cur{color:#fff}.steps li.cur i{background:var(--blue)}
+.mentor{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;background:#F4F8F9;color:#132228;border-radius:14px;padding:12px 14px;border-left:6px solid #0E6B68}
+.mentor img{width:52px;height:52px;border-radius:50%;object-fit:cover}.mentor .nm{font:600 11px var(--f-mono);letter-spacing:.08em;color:#0E6B68}.mentor p{font-size:15.5px;line-height:1.4}
+.res{border-width:2px}.res.ok{border-color:var(--ok)}.res.bad{border-color:var(--bad)}.res b.big{font:700 22px var(--f-display)}
+.res ul{padding-left:18px;display:grid;gap:3px;font-size:14px;color:#C7D6DA}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px}.kv span{color:var(--muted)}.kv b{font:600 14px var(--f-mono);text-align:right}
+.tasks{display:grid;gap:6px}
+.task{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:center;text-align:left;background:var(--card2);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
+.task.on{border-color:var(--blue)}.task span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#3A4B53;font-size:12px;font-weight:700}.task.done span{background:var(--ok)}
+.task small{display:block;color:var(--muted);font-size:12.5px}
+dialog.tdlg{margin:auto;width:min(460px,92vw);border:0;border-radius:16px;background:var(--card);color:var(--ink);padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+dialog.tdlg::backdrop{background:rgba(5,10,12,.65)}dialog.tdlg h3{font:700 22px var(--f-display);margin-bottom:10px}
+.tdlg .close{width:100%;margin-top:12px;background:var(--blue);border:0;color:#fff}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.snav{position:static;display:flex;width:auto;border-radius:0;padding:5px;gap:5px}.snav button{flex:1;font-size:10px;padding:6px 1px}.snav button span{font-size:17px}
+ #cv3{aspect-ratio:1/1.02}.dsp{width:150px;padding:8px}.dsp .val{font-size:17px}.lvrow svg{width:46px;height:46px}.lvrow span{font-size:10px}.held{left:10px;font-size:12px}.rot{display:none}}
+
+/* ===== tam sayfa düzen ===== */
+html,body{height:100%;overflow:hidden}body{padding:0;background:#0E1518}
+.wrap,.grid{display:block;max-width:none;margin:0}
+.stage{position:fixed;inset:0;border-radius:0;box-shadow:none;z-index:1}
+#cv3{aspect-ratio:auto!important;width:100vw;height:100vh;height:100dvh}
+.hdr{position:fixed;top:10px;left:96px;z-index:6;background:rgba(14,21,24,.82);backdrop-filter:blur(6px);border-radius:12px;padding:7px 12px;gap:12px}
+.hdr .brand b{font-size:20px}
+#tband{position:fixed;top:58px;left:96px;z-index:6;padding:7px 12px;background:rgba(30,42,48,.9);backdrop-filter:blur(6px);gap:12px;max-width:430px}
+#tband b{font-size:16px}#tband .bt{padding:5px 10px}
+.mentor{position:fixed;z-index:6;left:50%;bottom:14px;transform:translateX(-50%);width:min(680px,calc(100vw - 600px));min-width:380px;box-shadow:0 10px 30px rgba(0,0,0,.4);background:rgba(244,248,249,.96);transition:left .3s}
+.mentor p{font-size:15px}
+.mentor.pop{animation:mpop .6s ease}@keyframes mpop{0%{transform:translateX(-50%) scale(.97);box-shadow:0 0 0 4px #2BD9C0}100%{transform:translateX(-50%) scale(1)}}
+.stepc{position:fixed;z-index:6;left:12px;bottom:14px;width:270px;max-height:calc(100vh - 140px);overflow:auto;background:rgba(30,42,48,.92);backdrop-filter:blur(6px);gap:5px}
+.stepc h3{cursor:pointer;display:flex;justify-content:space-between}.stepc.col li:not(.cur){display:none}.stepc:not(.col) h3 span{transform:rotate(90deg)}.stepc h3 span{display:inline-block;transition:transform .2s}
+#side{position:fixed;z-index:9;top:0;right:0;bottom:0;width:370px;overflow:auto;padding:12px;background:rgba(14,21,24,.94);backdrop-filter:blur(8px);display:grid;gap:12px;align-content:start;transform:translateX(105%);transition:transform .3s;box-shadow:-10px 0 30px rgba(0,0,0,.4)}
+body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;width:calc(100vw - 676px);min-width:0;animation:none}body.panel .rot{display:none}body.panel .dsp{right:382px}
+.sideX{justify-self:end;border:0;border-radius:9px;background:#25333A;color:#fff;padding:6px 12px;font-weight:700}
+#mPanel.on{background:#2F7DE1}
+.held{left:50%;transform:translateX(-50%);bottom:auto;top:64px}
+#res{position:fixed;z-index:15;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 24px));max-height:80vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.6);border-radius:14px}
+#res:empty,#res[hidden]{display:none}#res .resX{position:sticky;top:0;float:right;margin:6px;z-index:2;border:0;border-radius:9px;background:#25333A;color:#fff;padding:5px 10px;font-weight:700}
+.rot{bottom:auto;top:12px;right:auto;left:calc(100vw - 520px)}
+@media (max-width:900px){
+ .hdr{display:none}
+ .snav{position:fixed!important;top:0;left:0;right:0;z-index:8}
+ #tband{top:60px;left:8px;right:8px;max-width:none;padding:6px 10px}#tband .sub{display:none}#tband b{font-size:14px;margin:0}
+ .stepc{top:108px;bottom:auto;left:8px;width:calc(100vw - 200px);max-height:45vh;padding:8px 10px}.stepc h3{font-size:13px}.stepc li{font-size:12px}
+ .dsp{top:108px!important;right:8px!important}
+ .mentor{left:8px;right:8px;width:auto;min-width:0;transform:none;bottom:8px;grid-template-columns:38px 1fr;gap:8px;padding:8px 10px;max-height:28vh;overflow:auto}.mentor img{width:38px;height:38px}.mentor p{font-size:13.5px}
+ .mentor.pop{animation:none}body.panel .mentor{left:8px}
+ #side{top:auto;left:0;width:auto;height:auto;max-height:72vh;border-radius:16px 16px 0 0;transform:translateY(105%)}body.panel #side{transform:none}body.panel .dsp{right:8px}
+ .held{top:auto;bottom:calc(28vh + 20px);left:50%}.dsp{width:175px}
+}
+</style>
+</head>
+<body>
+<style>
+[hidden]{display:none!important}
+/* SPE pilotu: vorteks kabuğu + kartuş kartı, regülatör balonu ve sapma listesi */
+.dsp{width:240px}.dsp .row2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dsp .val{font-size:22px}.dsp .val small{font-size:12px;color:#9BB0B6;margin-left:2px}
+.dsp .stl{display:flex;gap:7px;align-items:flex-start;margin-top:4px;padding-top:6px;border-top:1px solid #34454D;font:600 12px/1.35 var(--f-body);color:#EAF2F3}
+.dsp .dot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:3px;background:#9BB0B6}.dsp .dot.ok{background:#2DBE5B}.dsp .dot.warn{background:#F2B632}.dsp .dot.bad{background:#E5484D}.dsp .dot.run{background:#2BD9C0}
+.dsp .stl.warn{color:#FFD77A}.dsp .stl.bad{color:#FF9EA1}
+.carts{position:absolute;right:10px;top:190px;z-index:3;width:240px;display:grid;gap:5px}
+.carts[hidden]{display:none}
+body.panel .carts{right:382px}
+.lane{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:2px 8px;align-items:center;background:rgba(20,30,34,.92);border:1px solid #34454D;border-radius:10px;padding:6px 9px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.lane:hover{border-color:#2F7DE1}.lane.off{opacity:.6}.lane.alert{border-color:#E5484D;box-shadow:0 0 0 1px #E5484D}.lane.soon{border-color:#F2B632;box-shadow:0 0 0 1px #F2B632}
+.lane .id{font:700 18px var(--f-display);grid-row:span 2}
+.lane .fl{font:600 13px var(--f-mono);color:#EAF6F8;white-space:nowrap}.lane .fl small{font-size:10px;color:#9BB0B6}
+.lane .stp{font-size:11.5px;color:#9BB0B6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;grid-column:2/4}
+.lane .bar{grid-column:1/-1;height:4px;border-radius:3px;background:#33444C;overflow:hidden}.lane .bar i{display:block;height:100%;width:0}
+.lane .od{grid-column:1/3;font:500 10.5px var(--f-mono);color:#9BB0B6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lane .od.hot{color:#FF8A8D}
+.lane .acts{display:flex;gap:4px;justify-content:flex-end}
+.lane .mini{border:1px solid #34454D;border-radius:7px;background:#25333A;color:#fff;padding:3px 7px;font:600 11px var(--f-body);white-space:nowrap}.lane .mini.danger{color:#FF9EA1}
+.pill{justify-self:start;font:600 10.5px var(--f-body);padding:2px 7px;border-radius:999px;background:#33444C;color:#C7D6DA;white-space:nowrap}
+.pill.s-ok{background:#173D27;color:#7BE39A}.pill.s-slow,.pill.s-soon{background:#3D3010;color:#FFD77A}.pill.s-stop,.pill.s-bad{background:#43161A;color:#FF9EA1}.pill.s-dry{background:#2B2450;color:#C3B6FF}
+.regpop{position:absolute;z-index:5;transform:translate(-50%,calc(-100% - 18px));display:flex;align-items:center;gap:6px;background:#16242A;border-radius:12px;padding:7px 9px;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.regpop[hidden]{display:none}.regpop span{font:600 11px var(--f-mono);color:#9BB0B6;letter-spacing:.06em;text-transform:uppercase}
+.regpop output{font:700 16px var(--f-mono);min-width:62px;text-align:center;color:#fff}
+.regpop button{width:44px;height:40px;border:0;border-radius:9px;background:#2F7DE1;color:#fff;font-size:20px;font-weight:700;touch-action:none}
+.regpop #regClose{width:28px;height:28px;background:#25333A;font-size:14px}
+#hand{pointer-events:auto;display:flex;gap:10px;align-items:center}#hand[hidden]{display:none}#hand button{border:0;border-radius:999px;background:rgba(255,255,255,.2);color:#fff;padding:3px 10px;font-weight:700}
+@media (min-width:901px){.stepc{max-height:calc(100vh - 380px)}}
+.stepc .stx{font-size:13px;line-height:1.45;color:#EAF2F3;background:#16242A;border-radius:10px;padding:8px 10px}
+.stepc.col .stx,.stepc.col .devh,.stepc.col #log,.stepc.col #logEmpty{display:none}
+.devh{font:700 13px var(--f-display);letter-spacing:.05em;text-transform:uppercase;color:#9BB0B6;margin-top:4px}
+ul.log{list-style:none;display:grid;gap:5px;font-size:12.5px;line-height:1.35}ul.log li{display:grid;grid-template-columns:44px 1fr;gap:6px}
+ul.log time{font:600 10.5px var(--f-mono);color:#9BB0B6;padding-top:1px}ul.log li.err span{color:#FF9EA1}ul.log li.fixed span{color:#7C8E94;text-decoration:line-through}ul.log li.info span{color:#7BE39A}
+#logEmpty{font-size:12.5px;color:#9BB0B6}
+#side .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}#side .seg .bt[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.lblr{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#C7D6DA}.lblr output{font:700 13px var(--f-mono);color:#fff}
+#side input[type=range]{width:100%;accent-color:#2BD9C0}
+.samples{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.samples .bt{display:grid;gap:1px;padding:6px 2px;font-size:13px}.samples .bt small{font:500 10px var(--f-mono);color:#9BB0B6}
+.bt.armed{background:var(--blue);border-color:var(--blue);color:#fff}
+@media (max-width:900px){.carts{top:auto;bottom:calc(28vh + 70px);right:8px;width:190px}.lane{padding:4px 7px}.lane .od,.lane .bar{display:none}.dsp{width:175px}.dsp .val{font-size:16px}}
+</style>
+<div class="wrap">
+ <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">SPE · CEREX 48 · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
+ <div class="grid">
+  <div style="display:grid;gap:12px">
+   <div class="stage" id="stg"><nav class="snav" aria-label="SPE menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav>
+    <div id="cv3">
+     <div class="dsp" id="dsp" hidden><small>CEREX 48 · MANİFOLD</small>
+      <div class="row2"><div class="val" id="roP">0.0<small>psi</small></div><div class="mg" id="roF">0.0<small> L/dk</small></div></div>
+      <div class="st"><span>Saat <b id="roT" style="color:#EAF2F3">00:00</b></span><span><span id="roDk">Atık</span> <b id="roD" style="color:#EAF2F3">0</b></span></div>
+      <div class="stl" id="statusBox"><span class="dot" id="dot"></span><span id="statusTxt"></span></div>
+     </div>
+     <div class="carts" id="lanes" hidden></div>
+     <div class="regpop" id="regpop" hidden><span id="regName"></span><button type="button" id="regMinus" aria-label="Basıncı azalt">−</button><output id="regVal">0 psi</output><button type="button" id="regPlus" aria-label="Basıncı artır">+</button><button type="button" id="regClose" aria-label="Kapat">✕</button></div>
+     <div class="tip" id="tip" hidden></div>
+     <div class="held" id="hand" hidden><span id="handTxt"></span><button type="button" id="btnDrop">Bırak</button></div>
+     <div class="rot">Sürükle: döndür · Tekerlek: yakınlaş</div>
+     <div class="nogl" id="nogl" hidden>3B görüntü için tarayıcının WebGL desteği gerekiyor. Lütfen güncel Chrome, Edge ya da Safari ile aç.</div></div></div>
+   <div class="mentor"><img id="av" alt=""><div><div class="nm">UZM. MY</div><p id="say"></p></div></div>
+   <div id="res"></div>
+   <div class="card tband" id="tband"><div><span class="sub">AKTİF GÖREV</span><b id="tName"></b></div><button class="bt" id="tOpen">Görevler</button></div>
+   <div class="card stepc col" id="stepc"><h3 id="stepT">Adımlar <span>▸</span></h3><ol class="steps" id="steps"></ol><ol class="steps" id="pSteps" hidden></ol><p class="stx" id="stageTxt"></p><div class="devh">Protokol sapmaları</div><ul class="log" id="log"></ul><p id="logEmpty">Henüz sapma yok.</p></div>
+  </div>
+  <div id="side"><button class="sideX" id="sideX">✕ Kapat</button>
+   <div class="card">
+    <div><h2>CEREX 48 · SPE</h2><div class="sub">Pozitif basınçlı manifold · Oasis HLB 3 cc</div></div>
+    <div class="sub">Numune tüpleri (N) ve yedekler (Y) · pipetle 3 mL</div>
+    <div class="samples" id="samples"></div>
+    <div class="sub">Çözeltiler için 3B sahnede erlenlere tıkla. Dökülen sıvıyı peçeteyle kurula.</div>
+   </div>
+   <div class="card">
+    <h3>Kartuş ve raf</h3>
+    <div class="acts"><button class="bt" id="btnTake" type="button">Kutudan al</button><button class="bt" id="btnPlace" type="button">Rafa yerleştir</button><button class="bt full" id="btnPull" type="button">Rafı öne çek</button><button class="bt full" id="btnRack" type="button">Toplama rafına geç</button></div>
+   </div>
+   <div class="card">
+    <h3>Basınç kafası</h3>
+    <div class="sub">İki anahtara aynı anda bas (klavye: A + L)</div>
+    <div class="acts"><button class="bt" id="btnL" type="button">Sol anahtar (A)</button><button class="bt" id="btnR" type="button">Sağ anahtar (L)</button></div>
+   </div>
+   <div class="card">
+    <h3>Gaz</h3>
+    <div class="sub">Mod seçici</div>
+    <div class="seg" role="group" aria-label="Mod seçici" id="modeSeg"><button class="bt" type="button" data-mode="adj" aria-pressed="false">ADJ</button><button class="bt" type="button" data-mode="off" aria-pressed="true">OFF</button><button class="bt" type="button" data-mode="max" aria-pressed="false">MAX</button></div>
+    <label class="lblr" for="adj">Ayarlanabilir akış <output id="adjOut">10 psi</output></label><input type="range" id="adj" min="0" max="60" step="1" value="10">
+    <label class="lblr" for="max">Maksimum akış <output id="maxOut">20 psi</output></label><input type="range" id="max" min="0" max="60" step="1" value="20">
+   </div>
+   <div class="card">
+    <h3>Simülasyon</h3>
+    <div class="sub">Hız</div>
+    <div class="seg" role="group" aria-label="Simülasyon hızı" id="speedSeg"><button class="bt" type="button" data-speed="1" aria-pressed="false">1×</button><button class="bt" type="button" data-speed="10" aria-pressed="true">10×</button><button class="bt" type="button" data-speed="60" aria-pressed="false">60×</button></div>
+    <div class="sub">Kamera</div>
+    <div class="acts"><button class="bt" id="vIso" type="button">Tezgâh</button><button class="bt" id="vFront" type="button">Ön panel</button><button class="bt" id="vRack" type="button">Kartuşlar</button><button class="bt" id="vBack" type="button">Arka</button></div>
+    <button class="bt full" id="btnReset" type="button">Yeni deneme</button>
+   </div>
+  </div>
+ </div>
+</div>
+<dialog class="tdlg" id="tdlg"><h3>Görevler</h3><div class="tasks" id="tasks"></div><button class="bt close" id="tClose">Kapat</button></dialog>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const AVATAR='data:image/jpeg;base64,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';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
+
+const say = t => { $('#say').innerHTML = t; };
+const stage = $('#cv3');
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const UI = { mode: 'parts', task: 'parts', done: {}, seen: {}, res: false };
+
+/* ---------- renderer / sahne ---------- */
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ antialias: true }); } catch (err) { $('#nogl').hidden = false; throw err; }
+renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.domElement.tabIndex = 0; renderer.domElement.style.outline = 'none';
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#9FB3BA'); scene.fog = new THREE.Fog('#A9BBC1', 40, 90);
+{ const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), .04).texture; }
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 160);
+const VIEW_ISO = [[7.4, 7.6, 12.6], [0, 1.5, 0.9]];
+camera.position.set(...VIEW_ISO[0]);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(...VIEW_ISO[1]);
+controls.enableDamping = true;
+controls.minDistance = 2; controls.maxDistance = 22;
+controls.maxPolarAngle = Math.PI * 0.495;
+scene.add(new THREE.HemisphereLight('#EAF6FF', '#6F7E84', .45));
+const key = new THREE.DirectionalLight('#FFF2DF', 2.2);
+key.position.set(5, 12, 8); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+Object.assign(key.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 40 });
+key.shadow.bias = -0.0005; key.shadow.radius = 4;
+scene.add(key);
+const fill = new THREE.DirectionalLight('#EAF4FF', .5); fill.position.set(-7, 4, 5); scene.add(fill);
+/* tezgâh ve duvar */
+{
+  const nt = (base, amt, n = 512, speck = 0) => { const c = document.createElement('canvas'); c.width = c.height = n; const g = c.getContext('2d'); g.fillStyle = base; g.fillRect(0, 0, n, n); const d = g.getImageData(0, 0, n, n); for (let i = 0; i < d.data.length; i += 4) { const v = (Math.random() - .5) * amt; d.data[i] += v; d.data[i + 1] += v; d.data[i + 2] += v; } g.putImageData(d, 0, 0); for (let i = 0; i < speck; i++) { g.fillStyle = `rgba(${Math.random() < .5 ? '60,70,75' : '255,255,255'},${.15 + Math.random() * .25})`; g.fillRect(Math.random() * n, Math.random() * n, 1 + Math.random() * 2, 1 + Math.random() * 2); } const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; };
+  const bt = nt('#7F8E95', 12, 512, 2600); bt.repeat.set(6, 3);
+  const top = new THREE.Mesh(new THREE.BoxGeometry(30, .4, 13), new THREE.MeshStandardMaterial({ map: bt, roughness: .55 }));
+  top.position.set(0, -.2, .9); top.receiveShadow = true; scene.add(top);
+  const edge = new THREE.Mesh(new THREE.BoxGeometry(30, .3, .15), new THREE.MeshPhysicalMaterial({ color: '#2E373C', roughness: .4, clearcoat: .5 }));
+  edge.position.set(0, -.15, 7.45); scene.add(edge);
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(40, 18), new THREE.MeshStandardMaterial({ color: '#B7CAD0', roughness: .9 }));
+  wall.position.set(0, 8, -5.6); scene.add(wall);
+  const tile = (() => { const c = document.createElement('canvas'); c.width = 512; c.height = 256; const g = c.getContext('2d'); g.fillStyle = '#9DB3BB'; g.fillRect(0, 0, 512, 256); for (let y = 0; y < 4; y++) for (let x = 0; x < 8; x++) { g.fillStyle = `hsl(192,${18 + Math.random() * 8}%,${70 + Math.random() * 5}%)`; g.fillRect(x * 64 + 2, y * 64 + 2, 60, 60); } const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(12, 1.2); return t; })();
+  const tw = new THREE.Mesh(new THREE.PlaneGeometry(40, 2.6), new THREE.MeshStandardMaterial({ map: tile, roughness: .35 }));
+  tw.position.set(0, 1.3, -5.58); scene.add(tw);
+}
+
+/* ---------- materials & helpers ---------- */
+const M = {
+  steel:  new THREE.MeshStandardMaterial({ color: 0xb9bec4, metalness: 0.45, roughness: 0.42 }),
+  steelL: new THREE.MeshStandardMaterial({ color: 0xd0d4d8, metalness: 0.5, roughness: 0.3 }),
+  alu:    new THREE.MeshStandardMaterial({ color: 0xc4c8cd, metalness: 0.4, roughness: 0.35 }),
+  chrome: new THREE.MeshStandardMaterial({ color: 0xe9ecef, metalness: 0.7, roughness: 0.18 }),
+  black:  new THREE.MeshStandardMaterial({ color: 0x1b1c1f, metalness: 0.1, roughness: 0.55 }),
+  anod:   new THREE.MeshStandardMaterial({ color: 0x202226, metalness: 0.3, roughness: 0.45 }),
+  platen: new THREE.MeshStandardMaterial({ color: 0x1f2023, metalness: 0.15, roughness: 0.6 }),
+  seal:   new THREE.MeshStandardMaterial({ color: 0x45484d, metalness: 0.1, roughness: 0.8 }),
+  rubber: new THREE.MeshStandardMaterial({ color: 0x0f0f10, roughness: 0.95 }),
+  white:  new THREE.MeshStandardMaterial({ color: 0xf2f2f2, roughness: 0.4 }),
+  orange: new THREE.MeshStandardMaterial({ color: 0xe8642c, roughness: 0.45 }),
+  hose:   new THREE.MeshStandardMaterial({ color: 0x1f5fd6, roughness: 0.35 }),
+  glass:  new THREE.MeshStandardMaterial({ color: 0xe6f2ff, roughness: 0.05, transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide }),
+  tubGlass: new THREE.MeshStandardMaterial({ color: 0xf4f8fb, roughness: 0.15, transparent: true, opacity: 0.32, depthWrite: false }),
+  tub:    new THREE.MeshStandardMaterial({ color: 0xf3f4f2, roughness: 0.65, transparent: true, opacity: 0.72, depthWrite: false }),
+  pp:     new THREE.MeshStandardMaterial({ color: 0xf7f8f6, roughness: 0.4, transparent: true, opacity: 0.42, depthWrite: false }),
+  ppSolid:new THREE.MeshStandardMaterial({ color: 0xf2f3f0, roughness: 0.45 }),
+  card:   new THREE.MeshStandardMaterial({ color: 0xf1f2ee, roughness: 0.85 }),
+  cardG:  new THREE.MeshStandardMaterial({ color: 0x2f8a5b, roughness: 0.8 }),
+};
+function mesh(geo, mat, x, y, z, label, action) {
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true;
+  if (label) m.userData.label = label;
+  if (action) m.userData.action = action;
+  return m;
+}
+const cyl = (r1, r2, h, s = 20) => new THREE.CylinderGeometry(r1, r2, h, s);
+const box = (x, y, z) => new THREE.BoxGeometry(x, y, z);
+const canvasTex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), c); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+function labelSprite(label, action, w = 1.0) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 168;
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false }));
+  sp.scale.set(w, w * 168 / 512, 1);
+  sp.userData = { label, action, draw(t1, t2, sw) {
+    const g = c.getContext('2d'); g.clearRect(0, 0, 512, 168);
+    rrect(g, 6, 6, 500, 156, 26); g.fillStyle = 'rgba(255,255,255,0.94)'; g.fill(); g.lineWidth = 4; g.strokeStyle = '#2b3440'; g.stroke();
+    if (sw) { g.fillStyle = sw; rrect(g, 30, 40, 36, 36, 6); g.fill(); g.strokeStyle = '#5a6470'; g.lineWidth = 2; g.stroke(); }
+    g.fillStyle = '#15191e'; g.font = 'bold 56px Arial'; g.textBaseline = 'middle'; g.fillText(t1, sw ? 84 : 32, 60);
+    g.fillStyle = '#4a5562'; g.font = '34px Arial'; g.fillText(t2 || '', 32, 124);
+    t.needsUpdate = true;
+  } };
+  return sp;
+}
+const hex = n => '#' + n.toString(16).padStart(6, '0');
+
+const dev = new THREE.Group(); scene.add(dev);
+
+/* ---------- housing ---------- */
+const W = 3.4, H = 1.9, D = 2.6, Y0 = 0.15, FZ = D / 2, DECK = Y0 + H, BASE = DECK + 0.04, RZ = 0.15;
+dev.add(mesh(box(W, H, D), M.steel, 0, Y0 + H / 2, 0, 'Paslanmaz çelik gövde'));
+[[-1.45, -1.05], [1.45, -1.05], [-1.45, 1.05], [1.45, 1.05]].forEach(([x, z]) =>
+  dev.add(mesh(cyl(0.13, 0.15, Y0), M.rubber, x, Y0 / 2, z, 'Kaymaz lastik ayak')));
+for (const sx of [-1, 1]) for (const [y, z] of [[0.35, -1.15], [1.9, -1.15], [0.35, 1.15], [1.9, 1.15]]) {
+  const s = mesh(cyl(0.035, 0.035, 0.02, 12), M.chrome, sx * (W / 2 + 0.005), y, z); s.rotation.z = Math.PI / 2; dev.add(s);
+}
+dev.add(mesh(box(W + 0.02, 0.04, D + 0.02), M.steelL, 0, DECK + 0.02, 0, 'Üst tabla'));
+[-1, 1].forEach(sx => {
+  const bar = mesh(cyl(0.025, 0.025, 1.25, 12), M.chrome, sx * 1.42, DECK + 0.08, 0.75, 'Raf yönlendirme çubuğu');
+  bar.rotation.x = Math.PI / 2; bar.rotation.z = sx * 0.18; dev.add(bar);
+  dev.add(mesh(box(0.1, 0.06, 0.1), M.chrome, sx * 1.47, DECK + 0.07, 1.22, 'Raf yönlendirme çubuğu'));
+});
+const rearZ = -D / 2;
+[[-0.7, 'Arka gaz bağlantısı (hortum)'], [0.7, 'Arka gaz girişi (azot hattı)']].forEach(([x, l]) => {
+  const f = mesh(cyl(0.06, 0.06, 0.1, 16), M.orange, x, 0.75, rearZ - 0.05, l); f.rotation.x = Math.PI / 2; dev.add(f);
+  const n = mesh(cyl(0.035, 0.035, 0.08, 12), M.chrome, x, 0.75, rearZ - 0.13, l); n.rotation.x = Math.PI / 2; dev.add(n);
+});
+
+/* ---------- front panel ---------- */
+const PW = 3.32, PH = 1.8, PCY = Y0 + H / 2;
+const PX = px => -PW / 2 + (px / 1200) * PW;
+const PY = py => PCY + PH / 2 - (py / 650) * PH;
+const BLUE = '#1d58b8';
+const panelTex = canvasTex(2400, 1300, g => {
+  g.scale(2, 2);
+  const grd = g.createLinearGradient(0, 0, 0, 650); grd.addColorStop(0, '#f7f8f7'); grd.addColorStop(1, '#ebeceb');
+  g.fillStyle = grd; g.fillRect(0, 0, 1200, 650);
+  g.fillStyle = BLUE; g.fillRect(40, 118, 1120, 6); g.fillRect(40, 620, 1120, 6);
+  g.fillStyle = '#121418'; g.font = 'italic 900 50px Arial, Helvetica, sans-serif';
+  g.fillText('CEREX', 470, 98);
+  const w = g.measureText('CEREX').width;
+  g.font = 'bold 16px Arial'; g.fillText('®', 474 + w, 72);
+  g.font = 'italic 900 40px Arial, Helvetica, sans-serif'; g.fillText('48', 496 + w, 98);
+  g.fillStyle = BLUE; g.beginPath(); g.moveTo(885, 55); g.quadraticCurveTo(905, 80, 897, 96); g.quadraticCurveTo(885, 108, 873, 96); g.quadraticCurveTo(865, 80, 885, 55); g.fill();
+  g.font = 'bold 40px Arial'; g.fillText('SPE', 910, 100);
+  g.fillStyle = '#d6dce3'; g.fillRect(212, 140, 90, 390); g.strokeStyle = '#9aa3ad'; g.lineWidth = 2; g.strokeRect(212, 140, 90, 390);
+  g.fillStyle = '#2a63c4'; g.fillRect(272, 160, 22, 350);
+  g.fillStyle = '#fff'; g.font = 'bold 12px Arial'; g.textAlign = 'center';
+  for (let v = 0; v <= 30; v += 5) { const y = 505 - v / 30 * 340; g.fillRect(272, y - 1, 9, 2); g.fillText(v, 287, y + 4); }
+  g.fillStyle = '#121418'; g.font = 'bold 12px Arial'; g.fillText('L/MIN AIR', 256, 607);
+  g.fillStyle = BLUE; g.fillRect(560, 365, 190, 22);
+  g.fillStyle = '#fff'; g.font = 'bold 15px Arial'; g.fillText('FLOW CONTROL', 655, 381);
+  g.fillStyle = '#121418'; g.font = 'bold 13px Arial';
+  g.fillText('ADJUSTABLE', 480, 412); g.fillText('FLOW', 480, 428);
+  g.fillText('MAXIMUM', 830, 412); g.fillText('FLOW', 830, 428);
+  g.fillText('OFF', 655, 528); g.font = 'bold 11px Arial'; g.fillText('ADJ', 604, 560); g.fillText('MAX', 706, 560);
+  g.font = 'bold 12px Arial'; g.fillText('▼ PRESS', 70, 410); g.fillText('▼ PRESS', 1130, 410);
+});
+const panel = mesh(new THREE.PlaneGeometry(PW, PH), new THREE.MeshStandardMaterial({ map: panelTex, roughness: 0.55 }), 0, PCY, FZ + 0.004, 'Ön kontrol paneli');
+panel.castShadow = false; dev.add(panel);
+
+function dialTexture(title) {
+  return canvasTex(512, 512, g => {
+    g.fillStyle = '#151619'; g.fillRect(0, 0, 512, 512);
+    g.strokeStyle = '#3d424a'; g.lineWidth = 6; g.strokeRect(20, 20, 472, 472);
+    g.beginPath(); g.arc(256, 256, 218, 0, 7); g.fillStyle = '#1f4fae'; g.fill();
+    g.lineWidth = 4; g.strokeStyle = '#dbe6ff'; g.beginPath(); g.arc(256, 256, 202, 0, 7); g.stroke();
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (let v = 0; v <= 60; v += 2) {
+      const a = (-135 + v / 60 * 270) * Math.PI / 180, major = v % 10 === 0, r2 = major ? 160 : 178;
+      g.lineWidth = major ? 6 : 3; g.strokeStyle = '#fff';
+      g.beginPath(); g.moveTo(256 + Math.sin(a) * 196, 256 - Math.cos(a) * 196); g.lineTo(256 + Math.sin(a) * r2, 256 - Math.cos(a) * r2); g.stroke();
+      if (major) { g.fillStyle = '#fff'; g.font = 'bold 34px Arial'; g.fillText(v, 256 + Math.sin(a) * 128, 256 - Math.cos(a) * 128); }
+    }
+    g.fillStyle = '#fff'; g.font = 'bold 28px Arial'; g.fillText('psi', 256, 340);
+    g.font = '18px Arial'; g.fillText(title, 256, 378);
+  });
+}
+function makeGauge(px, py, title, label) {
+  const grp = new THREE.Group(); grp.position.set(PX(px), PY(py), FZ);
+  grp.add(mesh(box(0.44, 0.44, 0.07), M.black, 0, 0, 0.035, label));
+  const face = mesh(new THREE.PlaneGeometry(0.42, 0.42), new THREE.MeshStandardMaterial({ map: dialTexture(title), roughness: 0.35 }), 0, 0, 0.072, label);
+  face.castShadow = false; grp.add(face);
+  const ng = box(0.012, 0.15, 0.006); ng.translate(0, 0.055, 0);
+  const needle = new THREE.Mesh(ng, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 }));
+  needle.position.z = 0.08; grp.add(needle);
+  const cap = mesh(cyl(0.018, 0.018, 0.012, 16), M.black, 0, 0, 0.085); cap.rotation.x = Math.PI / 2; grp.add(cap);
+  const gl = mesh(new THREE.PlaneGeometry(0.42, 0.42), M.glass, 0, 0, 0.092, label); gl.castShadow = false; grp.add(gl);
+  dev.add(grp); return needle;
+}
+const needleL = makeGauge(480, 250, 'ADJ', 'Ayarlanabilir akış manometresi (0–60 psi)');
+const needleR = makeGauge(830, 250, 'MAX', 'Maksimum akış manometresi (0–60 psi)');
+const setNeedle = (n, v) => { n.rotation.z = -((-135 + Math.min(Math.max(v, 0), 60) / 60 * 270) * Math.PI / 180); };
+
+function makeKnob(px, py, label, act) {
+  const grp = new THREE.Group(); grp.position.set(PX(px), PY(py), FZ);
+  const skirt = mesh(cyl(0.17, 0.17, 0.03, 32), M.black, 0, 0, 0.015, label, act); skirt.rotation.x = Math.PI / 2; grp.add(skirt);
+  const body = mesh(cyl(0.14, 0.155, 0.16, 18), new THREE.MeshStandardMaterial({ color: 0x18191b, roughness: 0.5, flatShading: true }), 0, 0, 0.11, label, act);
+  body.rotation.x = Math.PI / 2; grp.add(body);
+  const top = mesh(cyl(0.115, 0.14, 0.02, 32), M.black, 0, 0, 0.2, label, act); top.rotation.x = Math.PI / 2; grp.add(top);
+  grp.add(mesh(box(0.018, 0.085, 0.01), M.white, 0, 0.06, 0.212, label, act));
+  dev.add(grp); return grp;
+}
+const knobL = makeKnob(480, 510, 'Ayarlanabilir akış regülatörü: tıkla ve + / − ile ayarla', 'knobL');
+const knobR = makeKnob(830, 510, 'Maksimum akış regülatörü: tıkla ve + / − ile ayarla', 'knobR');
+const setKnob = (k, v) => { k.rotation.z = 2.3 - v / 60 * 4.6; };
+
+const SEL_L = 'Mod seçici: ADJ / OFF / MAX (tıkla)';
+const sel = new THREE.Group(); sel.position.set(PX(655), PY(575), FZ);
+const selBase = mesh(cyl(0.11, 0.12, 0.05, 32), M.chrome, 0, 0, 0.025, SEL_L, 'mode'); selBase.rotation.x = Math.PI / 2; sel.add(selBase);
+const lever = new THREE.Group(); sel.add(lever);
+lever.add(mesh(box(0.065, 0.2, 0.08), M.black, 0, 0, 0.09, SEL_L, 'mode'));
+lever.add(mesh(box(0.012, 0.07, 0.005), M.white, 0, 0.06, 0.132));
+dev.add(sel);
+
+function makeRocker(px, label, action) {
+  const grp = new THREE.Group(); grp.position.set(PX(px), PY(300), FZ);
+  grp.add(mesh(box(0.2, 0.36, 0.05), M.black, 0, 0, 0.025, label, action));
+  const r = new THREE.Group(); r.position.z = 0.05; grp.add(r);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x26282c, roughness: 0.45, emissive: 0x000000 });
+  r.add(mesh(box(0.14, 0.28, 0.05), mat, 0, 0, 0, label, action));
+  r.add(mesh(box(0.02, 0.06, 0.005), M.white, 0, 0.08, 0.027));
+  r.userData.mat = mat;
+  dev.add(grp); return r;
+}
+const rockerL = makeRocker(70, 'Sol baskı anahtarı: sağ anahtarla birlikte bas', 'twoL');
+const rockerR = makeRocker(1130, 'Sağ baskı anahtarı: sol anahtarla birlikte bas', 'twoR');
+
+const RM = 'Akış ölçer (rotametre)';
+const fmX = PX(244);
+const rmTube = mesh(cyl(0.05, 0.05, 0.98, 24), M.glass, fmX, PY(335), FZ + 0.07, RM); rmTube.castShadow = false; dev.add(rmTube);
+dev.add(mesh(box(0.22, 1.08, 0.03), M.glass, PX(257), PY(335), FZ + 0.14, RM));
+[PY(140), PY(530)].forEach(y => dev.add(mesh(box(0.22, 0.05, 0.12), M.chrome, PX(257), y, FZ + 0.06, RM)));
+const ball = mesh(new THREE.SphereGeometry(0.036, 20, 14), new THREE.MeshStandardMaterial({ color: 0x2b2d31, metalness: 0.6, roughness: 0.25 }), fmX, PY(505), FZ + 0.07);
+dev.add(ball);
+const vKnob = mesh(cyl(0.065, 0.075, 0.16, 18), M.black, PX(257), PY(575), FZ + 0.08, 'Rotametre iğneli vanası'); vKnob.rotation.x = Math.PI / 2; dev.add(vKnob);
+
+/* ---------- geometry of the stack ---------- */
+const RACK_H = 0.8, COL_TOP = 0.84;
+const HEAD_DOWN = BASE + RACK_H + COL_TOP, HEAD_UP = HEAD_DOWN + 0.75, POST_TOP = HEAD_UP + 0.75;
+
+/* posts & platen */
+const POST_X = 1.55, POST_Z = -0.55;
+[-POST_X, POST_X].forEach(x => {
+  dev.add(mesh(cyl(0.06, 0.06, POST_TOP - DECK, 20), M.chrome, x, (POST_TOP + DECK) / 2, POST_Z, 'Kılavuz kolon'));
+  dev.add(mesh(cyl(0.08, 0.08, 0.05, 20), M.chrome, x, POST_TOP, POST_Z, 'Kılavuz kolon'));
+  dev.add(mesh(cyl(0.1, 0.1, 0.05, 20), M.chrome, x, DECK + 0.065, POST_Z, 'Kılavuz kolon'));
+});
+const platen = new THREE.Group();
+const PL = 'Basınç kafası: indirmek için iki anahtara aynı anda bas';
+platen.add(mesh(box(2.3, 0.05, 0.92), M.seal, 0, 0.025, RZ, 'Silikon conta (kartuş üstlerine oturur)', 'platen'));
+platen.add(mesh(box(3.0, 0.12, 1.5), M.platen, 0, 0.11, 0, PL, 'platen'));
+platen.add(mesh(box(3.25, 0.2, 1.62), M.platen, 0, 0.27, 0, PL, 'platen'));
+[-POST_X, POST_X].forEach(x => platen.add(mesh(cyl(0.1, 0.1, 0.36, 20), M.chrome, x, 0.2, POST_Z, 'Kılavuz burcu')));
+platen.add(mesh(box(0.55, 0.22, 0.36), M.black, 0, 0.49, -0.15, 'Sıkıştırma bloğu'));
+platen.add(mesh(cyl(0.03, 0.03, 0.22, 12), M.chrome, 0, 0.7, -0.15, 'Kelebek civata'));
+platen.add(mesh(box(0.32, 0.04, 0.05), M.chrome, 0, 0.8, -0.15, 'Kelebek civata'));
+platen.add(mesh(cyl(0.045, 0.045, 0.12, 14), M.chrome, 0.32, 0.44, -0.6, 'Gaz hortumu bağlantısı'));
+dev.add(platen);
+
+let hose = null, hoseY = -1;
+function buildHose(py) {
+  if (Math.abs(py - hoseY) < 0.002) return; hoseY = py;
+  const pts = [
+    V3(0.32, py + 0.5, -0.6), V3(0.4, py + 0.85, -0.75), V3(0.1, py + 0.6, -1.25),
+    V3(-0.55, (py + 0.75) / 2 + 0.2, -1.55), V3(-0.7, 1.05, -1.6), V3(-0.7, 0.75, -1.5), V3(-0.7, 0.75, -1.43),
+  ];
+  const g = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 80, 0.03, 10, false);
+  if (!hose) { hose = mesh(g, M.hose, 0, 0, 0, 'Mavi gaz hortumu'); dev.add(hose); }
+  else { hose.geometry.dispose(); hose.geometry = g; }
+}
+
+/* ---------- racks ---------- */
+const NX = 12, NZ = 4, SX = 0.17, SZ = 0.18;
+const holeX = c => -((NX - 1) / 2) * SX + c * SX;
+const holeZ = r => ((NZ - 1) / 2) * SZ - r * SZ; // r = 0 is the front row
+function plateTex(base, hole, ring) {
+  return canvasTex(1150, 450, g => {
+    g.fillStyle = base; g.fillRect(0, 0, 1150, 450);
+    for (let r = 0; r < NZ; r++) for (let c = 0; c < NX; c++) {
+      const x = 575 + holeX(c) / 2.3 * 1150, y = 225 - holeZ(r) / 0.9 * 450;
+      g.beginPath(); g.arc(x, y, 26, 0, 7); g.fillStyle = hole; g.fill();
+      if (ring) { g.strokeStyle = ring; g.lineWidth = 3; g.stroke(); }
+    }
+    [[30, 30], [1120, 30], [30, 420], [1120, 420]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 14, 0, 7); g.fillStyle = '#8b9096'; g.fill(); });
+  });
+}
+function holedPlate(w, d, t, base, hole, ring, sideMat) {
+  const topMat = new THREE.MeshStandardMaterial({ map: plateTex(base, hole, ring), roughness: 0.45, metalness: 0.25 });
+  const m = new THREE.Mesh(box(w, t, d), [sideMat, sideMat, topMat, sideMat, sideMat, sideMat]);
+  m.castShadow = m.receiveShadow = true; return m;
+}
+function corners(grp, h, label, r = 0.055) {
+  [[-1.12, -0.4], [1.12, -0.4], [-1.12, 0.4], [1.12, 0.4]].forEach(([x, z]) => {
+    grp.add(mesh(cyl(r, r, h, 16), M.alu, x, h / 2, z, label));
+    grp.add(mesh(cyl(r * 0.55, r * 0.55, 0.06, 12), M.chrome, x, h + 0.03, z, label));
+  });
+}
+
+/* waste rack */
+const WASTE_L = 'Atık rafı ve beyaz atık teknesi';
+const wasteRack = new THREE.Group(); dev.add(wasteRack);
+corners(wasteRack, RACK_H, WASTE_L);
+[-0.4, 0.4].forEach(z => wasteRack.add(mesh(box(2.24, 0.03, 0.03), M.chrome, 0, 0.08, z, WASTE_L)));
+[-1.12, 1.12].forEach(x => wasteRack.add(mesh(box(0.03, 0.03, 0.83), M.chrome, x, 0.08, 0, WASTE_L)));
+for (let i = 0; i < 14; i++) wasteRack.add(mesh(box(0.012, 0.012, 0.8), M.chrome, -1.04 + i * 0.16, 0.085, 0, WASTE_L));
+const tub = new THREE.Group(); tub.position.y = 0.1; wasteRack.add(tub);
+const TW = 2.1, TD = 0.8, TH = 0.56;
+tub.add(mesh(box(TW, 0.03, TD), M.tub, 0, 0.015, 0, WASTE_L));
+[TD / 2, -TD / 2].forEach(z => tub.add(mesh(box(TW, TH, 0.03), M.tub, 0, TH / 2, z, WASTE_L)));
+[-TW / 2, TW / 2].forEach(x => tub.add(mesh(box(0.03, TH, TD), M.tub, x, TH / 2, 0, WASTE_L)));
+tub.children.forEach(m => { m.renderOrder = 5; m.castShadow = false; });
+const tubLiqMat = new THREE.MeshStandardMaterial({ color: 0xcfe6f5, roughness: 0.1, transparent: true, opacity: 0.85 });
+const tubLiqGeo = box(TW - 0.06, 1, TD - 0.06); tubLiqGeo.translate(0, 0.5, 0);
+const tubLiq = mesh(tubLiqGeo, tubLiqMat, 0, 0.03, 0, 'Atık sıvı'); tubLiq.renderOrder = 3; tubLiq.castShadow = false; tub.add(tubLiq);
+const TUB_CAP = 1500;
+
+/* collection rack */
+const COLL_L = 'Toplama rafı (12 × 75 mm tüpler)';
+const collRack = new THREE.Group(); dev.add(collRack);
+corners(collRack, RACK_H, COLL_L, 0.06);
+[RACK_H - 0.05, 0.42].forEach(y => { const p = holedPlate(2.3, 0.9, 0.03, '#b9bdc2', '#2b2d31', null, M.alu); p.position.y = y; p.userData.label = COLL_L; collRack.add(p); });
+collRack.add(mesh(box(2.3, 0.025, 0.9), M.alu, 0, 0.04, 0, COLL_L));
+const tubeLiqMat = new THREE.MeshStandardMaterial({ color: 0xd8c8ff, roughness: 0.1, transparent: true, opacity: 0.9 });
+const tubeGeo = cyl(0.052, 0.052, 0.66, 16), tubeBottom = new THREE.SphereGeometry(0.052, 14, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+const tLiqGeo = cyl(0.047, 0.047, 1, 14); tLiqGeo.translate(0, 0.5, 0);
+const tubes = [];
+for (let i = 0; i < 48; i++) {
+  const r = Math.floor(i / NX), c = i % NX;
+  const g = new THREE.Group(); g.position.set(holeX(c), 0.08, holeZ(r));
+  const t = mesh(tubeGeo, M.tubGlass, 0, 0.38, 0, 'Toplama tüpü'); t.renderOrder = 6; t.castShadow = false; g.add(t);
+  const b = mesh(tubeBottom, M.tubGlass, 0, 0.05, 0, 'Toplama tüpü'); b.renderOrder = 6; b.castShadow = false; g.add(b);
+  const l = mesh(tLiqGeo, tubeLiqMat, 0, 0.02, 0, 'Toplanan eluat'); l.renderOrder = 2; l.castShadow = false; l.visible = false; g.add(l);
+  g.visible = false; collRack.add(g); tubes.push({ g, l });
+}
+const TUBE_CAP = 5;
+
+/* column rack */
+const COLR_L = 'Kolon rafı: elindeki kartuşu bir deliğe yerleştir';
+const colRack = new THREE.Group(); dev.add(colRack);
+const cTop = holedPlate(2.3, 0.9, 0.04, '#1e2024', '#050506', '#3a3d42', M.anod); cTop.position.y = 0.4;
+cTop.userData = { label: COLR_L, action: 'rackTop' }; colRack.add(cTop);
+const cMid = holedPlate(2.3, 0.9, 0.03, '#1e2024', '#050506', '#3a3d42', M.anod); cMid.position.y = 0.14; cMid.userData.label = '48 pozisyonlu kolon rafı'; colRack.add(cMid);
+colRack.add(mesh(box(2.3, 0.22, 0.03), M.anod, 0, 0.27, 0.44, 'Raf ön yüzü: tıkla, rafı öne çek / geri it', 'pull'));
+for (let c = 0; c < NX; c++) { const h = mesh(cyl(0.035, 0.035, 0.035, 14), M.rubber, holeX(c), 0.27, 0.452); h.rotation.x = Math.PI / 2; colRack.add(h); }
+[[-1.1, -0.38], [1.1, -0.38], [-1.1, 0.38], [1.1, 0.38]].forEach(([x, z]) => colRack.add(mesh(cyl(0.05, 0.05, 0.4, 16), M.alu, x, 0.2, z, '48 pozisyonlu kolon rafı')));
+
+/* ---------- cartridges (Oasis HLB 3 cc) ---------- */
+const CART_CAP = 3, LIQ_Y0 = 0.25, LIQ_H = 0.56;
+const barrelGeo = cyl(0.048, 0.048, 0.72, 16), flangeGeo = cyl(0.066, 0.066, 0.03, 18), tipGeo = cyl(0.011, 0.024, 0.12, 10), sorbGeo = cyl(0.045, 0.045, 0.08, 14);
+const cLiqGeo = cyl(0.043, 0.043, 1, 14); cLiqGeo.translate(0, 0.5, 0);
+function cartMesh(label, action, liqMat, sorbMat) {
+  const g = new THREE.Group();
+  const b = mesh(barrelGeo, M.pp, 0, 0.48, 0, label, action); b.renderOrder = 6; b.castShadow = false; g.add(b);
+  g.add(mesh(flangeGeo, M.ppSolid, 0, 0.825, 0, label, action));
+  g.add(mesh(tipGeo, M.ppSolid, 0, 0.07, 0, label, action));
+  g.add(mesh(cyl(0.046, 0.046, 0.012, 14), M.ppSolid, 0, 0.155, 0, label, action));
+  g.add(mesh(sorbGeo, sorbMat || new THREE.MeshStandardMaterial({ color: 0xf1efe8, roughness: 0.9 }), 0, 0.205, 0, label, action));
+  g.add(mesh(cyl(0.046, 0.046, 0.012, 14), M.ppSolid, 0, 0.252, 0, label, action));
+  let l = null;
+  if (liqMat) { l = mesh(cLiqGeo, liqMat, 0, LIQ_Y0, 0, label, action); l.renderOrder = 2; l.castShadow = false; l.visible = false; g.add(l); }
+  return { g, l };
+}
+
+/* ---------- bench: erlens, sample tubes, cartridge box ---------- */
+const LIQ = {
+  meoh:   { name: 'MeOH', color: 0xcde6ff, f: 1.7 },
+  water:  { name: 'Su', color: 0xb9e6f0, f: 1.0 },
+  sample: { name: 'Atık su', color: 0xa5813f, f: 0.9 },
+  mix:    { name: 'Su:MeOH 4:1', color: 0xbfe8d6, f: 0.72 },
+  elu:    { name: 'Elüsyon MeOH', color: 0xd6c6ff, f: 1.7 },
+};
+const PROTO = [
+  { short: 'MeOH', name: 'Şartlandırma: 3 mL MeOH', liq: 'meoh', ml: 3 },
+  { short: 'Su', name: 'Şartlandırma: 3 mL su', liq: 'water', ml: 3 },
+  { short: 'Numune', name: 'Yükleme: 10 mL numune', liq: 'sample', ml: 10 },
+  { short: 'Yıkama', name: 'Yıkama: 3 × 3 mL su', liq: 'water', ml: 9 },
+  { short: '4:1', name: 'Yıkama: 3 mL su:MeOH 4:1', liq: 'mix', ml: 3 },
+  { short: 'Kurutma', name: 'Kurutma: 15 dk, 20 psi', dry: 15 },
+  { short: 'Elüsyon', name: 'Elüsyon: 3 mL MeOH', liq: 'elu', ml: 3 },
+];
+const SRC = [
+  { id: 'meoh', liq: 'meoh', title: 'MeOH', sub: 'Şartlandırma', cap: 250, x: -4.7 },
+  { id: 'water', liq: 'water', title: 'Su', sub: 'Şartlandırma, yıkama', cap: 250, x: -3.75 },
+  { id: 'mix', liq: 'mix', title: 'Su:MeOH 4:1', sub: 'Yıkama karışımı', cap: 250, x: -2.8 },
+  { id: 'elu', liq: 'elu', title: 'Elüsyon MeOH', sub: 'Elüsyon', cap: 250, x: -1.85 },
+];
+for (let j = 0; j < 5; j++) SRC.push({ id: 'n' + (j + 1), liq: 'sample', j, title: 'N' + (j + 1), sub: 'Atık su', cap: 10 });
+for (let j = 0; j < 5; j++) SRC.push({ id: 'y' + (j + 1), liq: 'sample', j, spare: true, title: 'Y' + (j + 1), sub: 'Yedek numune', cap: 10 });
+const srcById = Object.fromEntries(SRC.map(s => [s.id, s]));
+
+const bench = new THREE.Group(); dev.add(bench);
+const erlenProfile = [[0, 0], [0.4, 0], [0.42, 0.03], [0.41, 0.1], [0.14, 0.95], [0.115, 1.03], [0.115, 1.25], [0.135, 1.28]].map(([r, y]) => new THREE.Vector2(r, y));
+const erlenGeo = new THREE.LatheGeometry(erlenProfile, 40);
+const ERLEN_FILL = 0.48, rAt = y => 0.41 - (y - 0.1) / 0.85 * 0.27;
+const erlenLiqGeo = new THREE.LatheGeometry([[0.001, 0.02], [0.385, 0.02], [0.395, 0.1], [rAt(ERLEN_FILL) - 0.01, ERLEN_FILL], [0.001, ERLEN_FILL]].map(([r, y]) => new THREE.Vector2(r, y)), 40);
+SRC.filter(s => !s.j && s.j !== 0).forEach(s => {
+  const a = 'src:' + s.id, l = `${s.title} erleni: tıkla, pipetle 3 mL al`;
+  const g = new THREE.Group(); g.position.set(s.x, 0, 2.55);
+  const e = mesh(erlenGeo, M.glass, 0, 0, 0, l, a); e.renderOrder = 6; e.castShadow = false; g.add(e);
+  const lm = mesh(erlenLiqGeo, new THREE.MeshStandardMaterial({ color: LIQ[s.liq].color, roughness: 0.1, transparent: true, opacity: 0.75 }), 0, 0, 0, l, a);
+  lm.renderOrder = 2; g.add(lm);
+  const sp = labelSprite(l, a, 0.95); sp.position.set(0, 1.62, 0); g.add(sp);
+  sp.userData.draw(s.title, `${s.cap} mL`, hex(LIQ[s.liq].color));
+  s.sprite = sp; bench.add(g);
+});
+// sample tube rack
+function tubeStand(x, z, label) {
+  const g = new THREE.Group(); g.position.set(x, 0, z); bench.add(g);
+  g.add(mesh(box(1.75, 0.05, 0.42), M.alu, 0, 0.025, 0, label));
+  g.add(mesh(box(1.75, 0.04, 0.42), M.alu, 0, 0.62, 0, label));
+  [-0.86, 0.86].forEach(x => g.add(mesh(box(0.04, 0.62, 0.42), M.alu, x, 0.31, 0, label)));
+  return g;
+}
+const STR = tubeStand(3.35, 2.45, 'Numune tüp standı');
+const STR2 = tubeStand(3.35, 1.8, 'Yedek numune standı');
+const sTubeGeo = cyl(0.085, 0.085, 1.0, 18), sConeGeo = cyl(0.085, 0.015, 0.16, 18);
+const sLiqGeo = cyl(0.078, 0.078, 1, 16); sLiqGeo.translate(0, 0.5, 0);
+const sampleMat = new THREE.MeshStandardMaterial({ color: LIQ.sample.color, roughness: 0.2, transparent: true, opacity: 0.88 });
+SRC.filter(s => s.liq === 'sample').forEach(s => {
+  const a = 'src:' + s.id, l = s.spare ? `${s.title}: N${s.j + 1} için yedek numune, tıkla, pipetle al` : `${s.title} numune tüpü: tıkla, pipetle al`;
+  const g = new THREE.Group(); g.position.set(-0.64 + s.j * 0.32, 0.05, 0); (s.spare ? STR2 : STR).add(g);
+  const t = mesh(sTubeGeo, M.tubGlass, 0, 0.66, 0, l, a); t.renderOrder = 6; t.castShadow = false; g.add(t);
+  const cn = mesh(sConeGeo, M.tubGlass, 0, 0.08, 0, l, a); cn.renderOrder = 6; g.add(cn);
+  const lq = mesh(sLiqGeo, sampleMat, 0, 0.16, 0, l, a); lq.renderOrder = 2; g.add(lq);
+  const sp = labelSprite(l, a, 0.42); sp.position.set(0, s.spare ? 1.72 : 1.4, 0); g.add(sp);
+  s.liqMesh = lq; s.sprite = sp;
+});
+// cartridge box
+const CB = new THREE.Group(); CB.position.set(-3.3, 0, 0.85); bench.add(CB);
+const CB_L = 'Oasis HLB 3 cc kartuş kutusu: tıkla, bir kartuş al';
+CB.add(mesh(box(0.95, 0.03, 0.5), M.card, 0, 0.015, 0, CB_L, 'box'));
+[[0, 0.25], [0, -0.25]].forEach(([x, z]) => CB.add(mesh(box(0.95, 0.32, 0.02), M.card, x, 0.16, z, CB_L, 'box')));
+[-0.475, 0.475].forEach(x => CB.add(mesh(box(0.02, 0.32, 0.5), M.card, x, 0.16, 0, CB_L, 'box')));
+CB.add(mesh(box(0.95, 0.08, 0.005), M.cardG, 0, 0.22, 0.262, CB_L, 'box'));
+const boxCarts = [];
+for (let k = 0; k < 5; k++) { const { g } = cartMesh(CB_L, 'box'); g.position.set(-0.32 + k * 0.16, 0.0, 0.02); g.scale.setScalar(0.9); CB.add(g); boxCarts.push(g); }
+const cbSprite = labelSprite(CB_L, 'box', 0.9); cbSprite.position.set(0, 1.9, 0); cbSprite.userData.draw('Oasis HLB 3 cc', 'Kartuş kutusu'); CB.add(cbSprite);
+
+/* ---------- held objects ---------- */
+const handObj = new THREE.Group(); handObj.visible = false; scene.add(handObj);
+const heldCart = cartMesh(); handObj.add(heldCart.g); heldCart.g.position.y = 0;
+const tissue = mesh(new THREE.IcosahedronGeometry(0.09, 1), M.white, 0, 0.05, 0); tissue.scale.set(1.5, 0.55, 1.2); handObj.add(tissue);
+const pip = new THREE.Group(); handObj.add(pip);
+pip.add(mesh(cyl(0.006, 0.012, 0.55, 10), M.glass, 0, 0.275, 0));
+pip.add(mesh(cyl(0.032, 0.012, 0.08, 14), M.glass, 0, 0.59, 0));
+pip.add(mesh(cyl(0.032, 0.032, 0.5, 14), M.glass, 0, 0.88, 0));
+pip.add(mesh(new THREE.SphereGeometry(0.06, 16, 12), new THREE.MeshStandardMaterial({ color: 0xd9472b, roughness: 0.6 }), 0, 1.2, 0));
+pip.add(mesh(cyl(0.035, 0.035, 0.08, 14), new THREE.MeshStandardMaterial({ color: 0xd9472b, roughness: 0.6 }), 0, 1.13, 0));
+const pipLiqMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, transparent: true, opacity: 0.9 });
+const pipLiq = mesh(cyl(0.028, 0.028, 1, 12).translate(0, 0.5, 0), pipLiqMat, 0, 0.64, 0); pipLiq.renderOrder = 2; pip.add(pipLiq);
+handObj.children.forEach(o => o.traverse(m => { if (m.isMesh) m.castShadow = false; }));
+const handTarget = V3(0, 3, 2), handPos = V3(0, 3, 2);
+
+/* ---------- drops ---------- */
+const MAXD = 260;
+const drops = new THREE.InstancedMesh(new THREE.SphereGeometry(0.016, 8, 6), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 }), MAXD);
+drops.frustumCulled = false; scene.add(drops);
+const dropS = Array.from({ length: MAXD }, () => ({ on: false, x: 0, y: 0, z: 0, vy: 0, floor: 0 }));
+for (let i = 0; i < MAXD; i++) drops.setColorAt(i, new THREE.Color(0xffffff));
+const dummy = new THREE.Object3D(), tmpC = new THREE.Color();
+function spawnDrop(x, y, z, floor, color) {
+  const i = dropS.findIndex(q => !q.on); if (i < 0) return;
+  Object.assign(dropS[i], { on: true, x, y, z, vy: 0, floor }); drops.setColorAt(i, tmpC.setHex(color)); drops.instanceColor.needsUpdate = true;
+}
+
+/* ---------- holding stand for finished cartridges ---------- */
+const STAND = new THREE.Group(); STAND.position.set(1.95, 0, 2.75); bench.add(STAND);
+const STAND_L = 'Bekleme standı: biten kartuşu buraya koy';
+STAND.add(mesh(box(1.0, 0.3, 0.3), M.alu, 0, 0.15, 0, STAND_L, 'stand'));
+const standTop = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.3), new THREE.MeshStandardMaterial({ map: canvasTex(500, 150, g => {
+  g.fillStyle = '#c4c8cd'; g.fillRect(0, 0, 500, 150);
+  for (let i = 0; i < 5; i++) { g.beginPath(); g.arc(90 + i * 80, 75, 24, 0, 7); g.fillStyle = '#2b2d31'; g.fill(); }
+}), roughness: 0.4, metalness: 0.3 }));
+standTop.rotation.x = -Math.PI / 2; standTop.position.y = 0.301; standTop.userData = { label: STAND_L, action: 'stand' }; STAND.add(standTop);
+const standSprite = labelSprite(STAND_L, 'stand', 0.8); standSprite.position.set(0, 1.35, 0); standSprite.userData.draw('Bekleme standı', 'Biten kartuşlar'); STAND.add(standSprite);
+const standX = k => -0.32 + k * 0.16;
+const TIS = new THREE.Group(); TIS.position.set(-3.85, 0, 0.1); bench.add(TIS);
+const TIS_L = 'Peçete kutusu: tıkla, peçete al';
+TIS.add(mesh(box(0.55, 0.24, 0.34), new THREE.MeshStandardMaterial({ color: 0x9fb8cf, roughness: 0.8 }), 0, 0.12, 0, TIS_L, 'tissue'));
+const tisOut = mesh(box(0.2, 0.14, 0.012), M.white, 0, 0.3, 0, TIS_L, 'tissue'); tisOut.rotation.z = 0.15; TIS.add(tisOut);
+const tisSprite = labelSprite(TIS_L, 'tissue', 0.7); tisSprite.position.set(0, 0.85, 0); tisSprite.userData.draw('Peçete', 'Döküntü için'); TIS.add(tisSprite);
+const BIN = new THREE.Group(); BIN.position.set(-2.8, 0, 0.1); bench.add(BIN);
+const BIN_L = 'Çöp kutusu: kullanılmış kartuşu ya da ıslak peçeteyi at';
+BIN.add(mesh(new THREE.CylinderGeometry(0.24, 0.2, 0.55, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0x6d747c, roughness: 0.6, side: THREE.DoubleSide }), 0, 0.275, 0, BIN_L, 'trash'));
+BIN.add(mesh(cyl(0.2, 0.2, 0.02, 24), M.black, 0, 0.01, 0, BIN_L, 'trash'));
+const binSprite = labelSprite(BIN_L, 'trash', 0.6); binSprite.position.set(0, 0.95, 0); binSprite.userData.draw('Çöp', ''); BIN.add(binSprite);
+
+/* ---------- state ---------- */
+const S = {
+  headDown: false, headT: 0, mode: 'off', adj: 10, max: 20, speed: 10, time: 0,
+  wasteT: 1, collT: 0, colLift: 0, busy: false, p: 0, gaugeL: 0, gaugeR: 0, flow: 0,
+  waste: 0, tubeVol: new Float32Array(48), hand: null, arm: { L: -1e9, R: -1e9 },
+  log: [], logSet: new Set(), pulled: false, pullT: 0, spares: 5,
+};
+const carts = [];
+for (let k = 0; k < 5; k++) {
+  const liqMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, transparent: true, opacity: 0.88 });
+  const sorbMat = new THREE.MeshStandardMaterial({ color: 0xf1efe8, roughness: 0.9 });
+  const m = cartMesh(`K${k + 1} kartuşu`, 'cart:' + k, liqMat, sorbMat);
+  m.g.visible = false; colRack.add(m.g);
+  const lc = document.createElement('canvas'); lc.width = 128; lc.height = 64;
+  const lt = new THREE.CanvasTexture(lc); lt.colorSpace = THREE.SRGBColorSpace;
+  const ls = new THREE.Sprite(new THREE.SpriteMaterial({ map: lt, transparent: true, depthWrite: false }));
+  ls.scale.set(0.15, 0.075, 1); ls.position.set(0, 0.52, 0.06); ls.renderOrder = 8; m.g.add(ls);
+  carts.push({ k, g: m.g, l: m.l, liqMat, sorbMat, lbl: { c: lc, t: lt, cls: null } });
+}
+const LBL_COL = { '': '#5a6470', 's-ok': '#1b7a4b', 's-slow': '#c27800', 's-soon': '#c27800', 's-stop': '#b42318', 's-bad': '#b42318', 's-dry': '#5b48b8' };
+function drawCartLabel(c, cls) {
+  if (c.lbl.cls === cls) return; c.lbl.cls = cls;
+  const g = c.lbl.c.getContext('2d'); g.clearRect(0, 0, 128, 64);
+  rrect(g, 4, 4, 120, 56, 10); g.fillStyle = '#ffffff'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#2b3440'; g.stroke();
+  g.fillStyle = LBL_COL[cls] || '#5a6470'; g.fillRect(6, 6, 16, 52);
+  g.fillStyle = '#15191e'; g.font = 'bold 40px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('K' + (c.k + 1), 72, 34);
+  c.lbl.t.needsUpdate = true;
+}
+const WET_STEPS = new Set([1, 2, 3, 4]); // sorbent conditioned, drying not yet intended
+function freshCart(c, tight) {
+  colRack.add(c.g);
+  Object.assign(c, {
+    where: 'box', hole: -1, lastHole: -1, layers: [], step: 0, added: 0, dry: 0, clog: 0, sorb: 0, eluate: 0, flow: 0,
+    dropAcc: 0, dropT: 0, status: 'none', overDry: 0, overDryTotal: 0, soonWarned: -1,
+    C: 0.22 * (0.8 + Math.random() * 0.4) * (tight ? 0.6 : 1), Pth0: 0.5 + Math.random() * 1.2,
+  });
+  c.lbl.cls = null;
+}
+function resetCarts() {
+  const tight = Math.floor(Math.random() * 5);
+  carts.forEach(c => { freshCart(c, c.k === tight); c.gen = 0; });
+  S.spares = 5;
+}
+function renewCart(c) {
+  if (S.spares <= 0) return toast('Kutuda yedek kartuş kalmadı.');
+  const inHand = S.hand && S.hand.type === 'cart' && S.hand.k === c.k;
+  if (S.hand && !inHand) return toast('Elin dolu. Önce elindekini bırak.');
+  if (c.where === 'rack' && !canTouch()) return toast('Kartuşu değiştirmek için önce kafayı kaldır.');
+  const hole = c.where === 'rack' ? c.hole : c.lastHole;
+  S.spares--;
+  S.log.forEach(e => { if (e.k === c.k && e.gen === c.gen) e.fixed = true; });
+  const gen = c.gen + 1;
+  if (inHand) S.hand = null;
+  freshCart(c, false); c.gen = gen;
+  S.log.unshift({ t: S.time, msg: `K${c.k + 1} yenilendi: eski kartuş çöpe atıldı, kutudan yenisi alındı. MeOH şartlandırmasından başla.`, k: c.k, gen, info: true });
+  renderLog();
+  if (hole >= 0 && holeFree(hole) && canTouch()) { c.where = 'hand'; S.hand = { type: 'cart', k: c.k }; placeCart(hole); }
+  else toast(`K${c.k + 1} yenilendi. Yeni kartuşu kutudan alıp rafa tak.`, true);
+}
+function resetSamples() {
+  const order = [0, 1, 2, 3, 4].sort(() => Math.random() - 0.5);
+  SRC.forEach(s => { s.vol = s.cap; s._shown = -1; });
+  const dirt = [0, 1, 2, 3, 4].map(j => { const rank = order.indexOf(j); return rank === 0 ? 0.95 : rank === 1 ? 0.35 : 0.04 + Math.random() * 0.08; });
+  SRC.filter(s => s.liq === 'sample').forEach(s => { s.dirt = dirt[s.j]; });
+}
+const cartVol = c => c.layers.reduce((a, l) => a + l.v, 0);
+const placed = () => carts.filter(c => c.where === 'rack');
+const used = c => c.step > 0 || c.added > 0 || c.layers.length > 0;
+
+/* ---------- tweens ---------- */
+const tweens = [];
+const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+const tween = (obj, k, to, dur) => new Promise(res => tweens.push({ obj, k, from: obj[k], to, dur, t: 0, res }));
+
+/* ---------- actions ---------- */
+function toast(msg) { say(msg); }
+const fmtT = s => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60; return (h ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
+function log(msg) {
+  const m = /^K(\d):/.exec(msg), k = m ? +m[1] - 1 : -1, gen = k >= 0 ? carts[k].gen : 0;
+  const key = msg + '#' + gen;
+  if (S.logSet.has(key)) return; S.logSet.add(key);
+  S.log.unshift({ t: S.time, msg, k, gen }); renderLog(); toast(msg);
+}
+function renderLog() {
+  $('#log').innerHTML = S.log.map(e => `<li class="${e.info ? 'info' : e.fixed ? 'fixed' : 'err'}"><time>${fmtT(e.t)}</time><span>${e.msg}${e.fixed ? ' (kartuş yenilendi)' : ''}</span></li>`).join('');
+  $('#logEmpty').hidden = S.log.length > 0;
+}
+const canTouch = () => S.headT <= 0.001 && S.colLift <= 0.001 && !S.busy;
+const holeFree = h => h >= 0 && !carts.some(c => c.where === 'rack' && c.hole === h);
+const SUGGEST = [2, 4, 6, 8, 10];
+const nextHole = () => SUGGEST.find(holeFree) ?? [...Array(48).keys()].find(holeFree);
+
+function takeCart() {
+  if (S.hand) return toast(S.hand.type === 'pip' ? 'Önce pipeti bırak.' : S.hand.type === 'tissue' ? 'Önce peçeteyi bırak.' : 'Elinde zaten bir kartuş var.');
+  const c = carts.find(c => c.where === 'box');
+  if (!c) return toast('Kutuda kartuş kalmadı.');
+  c.where = 'hand'; S.hand = { type: 'cart', k: c.k };
+}
+function placeCart(hole) {
+  if (!S.hand || S.hand.type !== 'cart') return;
+  if (!canTouch()) return toast('Kartuş takmak için kafanın yukarıda olması gerekir.');
+  if (!holeFree(hole)) return toast('Bu delik dolu. Başka bir delik seç.');
+  const c = carts[S.hand.k];
+  colRack.add(c.g);
+  c.where = 'rack'; c.hole = hole; c.lastHole = hole; c.dropT = 1;
+  c.g.position.set(holeX(hole % NX), 0, holeZ(Math.floor(hole / NX)));
+  S.hand = null;
+  const n = carts.filter(q => q.where !== 'box' && q.where !== 'hand').length;
+  if (!used(c)) toast(n < 5 ? `K${c.k + 1} yerleştirildi (${n}/5). Kutudan sıradakini al.` : 'Beş kartuş da rafta. Şartlandırmaya geç.', true);
+  else toast(`K${c.k + 1} rafa geri takıldı.`, true);
+}
+function placeNext() {
+  if (!S.hand) takeCart();
+  if (!S.hand || S.hand.type !== 'cart') return;
+  const c = carts[S.hand.k];
+  placeCart(holeFree(c.lastHole) ? c.lastHole : nextHole());
+}
+function putOnStand(c) {
+  STAND.add(c.g); c.g.position.set(standX(c.k), 0.05, 0); c.where = 'stand'; c.hole = -1; c.dropT = 0;
+}
+function liftFromRack(c, toStand) {
+  if (S.hand && !toStand) return toast('Elin dolu. Önce elindekini bırak.');
+  if (!canTouch()) return toast('Kartuşu çıkarmak için önce kafayı kaldır (iki anahtar birlikte).');
+  if (cartVol(c) > 0.02) return toast(`K${c.k + 1} içinde hâlâ sıvı var; akması bitmeden çıkarma.`);
+  c.hole = -1;
+  if (toStand) { putOnStand(c); toast(`K${c.k + 1} bekleme standına alındı. Diğerleri bitince geri tak.`, true); }
+  else { c.where = 'hand'; S.hand = { type: 'cart', k: c.k }; }
+}
+function returnToRack(c) {
+  if (S.hand) return toast('Elin dolu. Önce elindekini bırak.');
+  if (!canTouch()) return toast('Kartuş takmak için kafanın yukarıda olması gerekir.');
+  c.where = 'hand'; S.hand = { type: 'cart', k: c.k };
+  placeCart(holeFree(c.lastHole) ? c.lastHole : nextHole());
+}
+function aspirate(id) {
+  const s = srcById[id];
+  if (S.hand && S.hand.type === 'cart') return toast('Önce elindeki kartuşu yerine koy.');
+  if (S.hand && S.hand.type === 'tissue') return toast('Önce peçeteyi bırak.');
+  if (S.hand && S.hand.type === 'pip' && S.hand.vol > 0.005) {
+    if (S.hand.src === s) { s.vol += S.hand.vol; S.hand = null; return toast(`Pipetteki ${s.title} geri bırakıldı.`); }
+    return toast(`Pipette ${S.hand.vol.toFixed(1)} mL ${S.hand.src.title} var. Önce bir kartuşa ekle ya da bırak.`);
+  }
+  if (s.vol < 0.01) return toast(`${s.title} boş.`);
+  const v = Math.min(3, s.vol); s.vol -= v;
+  S.hand = { type: 'pip', src: s, vol: v };
+  pipLiqMat.color.setHex(LIQ[s.liq].color);
+}
+function dispense(k) {
+  const c = carts[k];
+  if (c.where !== 'rack') return toast(`K${k + 1} rafta değil.`);
+  if (!S.hand || S.hand.type !== 'pip') return toast('Önce bir erlenden ya da numune tüpünden pipetle çözelti çek.');
+  if (!canTouch()) return toast('Kartuşlara çözelti eklemek için kafayı kaldır.');
+  const room = CART_CAP - cartVol(c);
+  if (room < 0.02) return toast(`K${k + 1} dolu (3 mL). Akmasını bekle.`);
+  const src = S.hand.src, v = Math.min(room, S.hand.vol), L = LIQ[src.liq];
+  let exp = PROTO[c.step];
+  if (exp && exp.ml && c.added >= exp.ml - 0.02 && PROTO[c.step + 1] && PROTO[c.step + 1].liq === src.liq) {
+    if (cartVol(c) > 0.02 && exp.liq !== src.liq) log(`K${k + 1}: önceki çözelti (${LIQ[exp.liq].name}) tamamen geçmeden ${L.name} eklendi.`);
+    c.step++; c.added = 0; exp = PROTO[c.step];
+  }
+  if (!exp) log(`K${k + 1}: protokol bittikten sonra ${L.name} eklendi.`);
+  else if (exp.dry) log(`K${k + 1}: kurutma bitmeden ${L.name} eklendi.`);
+  else if (exp.liq !== src.liq) log(`K${k + 1}: "${exp.name}" adımında ${L.name} eklendi (beklenen: ${LIQ[exp.liq].name}).`);
+  else {
+    if (src.liq === 'sample' && src.j !== k) log(`K${k + 1}: N${src.j + 1} numunesi eklendi, beklenen N${k + 1}. Numuneler karıştı.`);
+    c.added += v;
+    if (c.added > exp.ml + 0.05) log(`K${k + 1}: "${exp.name}" adımında fazla hacim eklendi (${c.added.toFixed(1)} mL).`);
+  }
+  const last = c.layers[c.layers.length - 1];
+  if (last && last.liq === src.liq && last.j === (src.j ?? -1)) last.v += v; else c.layers.push({ liq: src.liq, j: src.j ?? -1, v });
+  c.overDry = 0;
+  S.hand.vol -= v;
+  const w = colRack.localToWorld(V3(holeX(c.hole % NX), 0.95, holeZ(Math.floor(c.hole / NX))));
+  for (let i = 0; i < 6; i++) setTimeout(() => spawnDrop(w.x, w.y + 0.1, w.z, w.y - 0.5, L.color), i * 60);
+  if (S.hand.vol < 0.01) S.hand = null;
+  else toast(`K${k + 1} doldu; pipette ${S.hand.vol.toFixed(1)} mL kaldı.`);
+}
+const puddles = [];
+function spill(pt) {
+  const h = S.hand; if (!h || h.type !== 'pip') return;
+  const L = LIQ[h.src.liq], v = h.vol, from = handPos.clone();
+  S.hand = null;
+  for (let i = 0; i < 10; i++) setTimeout(() => spawnDrop(from.x + (Math.random() - 0.5) * 0.01, from.y, from.z, pt.y + 0.01, L.color), i * 45);
+  const m = new THREE.Mesh(new THREE.CircleGeometry(0.1 + 0.09 * Math.sqrt(v), 28), new THREE.MeshStandardMaterial({ color: L.color, transparent: true, opacity: 0.75, roughness: 0.05, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.set(pt.x, pt.y + 0.004, pt.z); m.scale.setScalar(0.05); m.renderOrder = 1; bench.add(m);
+  const pd = { m, age: 0, wipe: -1, liq: h.src.liq };
+  m.userData = { label: `Dökülen ${L.name}: peçeteyle kurula`, action: 'puddle', pd };
+  puddles.push(pd);
+  if (h.src.liq === 'sample') log(`N${h.src.j + 1} numunesinden ${v.toFixed(1)} mL döküldü. Numune kaybı: K${h.src.j + 1} için eksik kalanı Y${h.src.j + 1} yedek tüpünden tamamla.`);
+  else toast(`${v.toFixed(1)} mL ${L.name} döküldü. Pipeti kartuşun üstündeyken sık.`);
+}
+function wipe(pd) {
+  if (pd.wipe >= 0) return;
+  pd.wipe = 0; S.hand = null;
+  toast('Döküntü kurulandı, ıslak peçete çöpe atıldı.', true);
+}
+function dropHand() {
+  if (!S.hand) return;
+  if (S.hand.type === 'tissue') { S.hand = null; return; }
+  if (S.hand.type === 'pip') S.hand.src.vol += S.hand.vol;
+  else { const c = carts[S.hand.k]; if (used(c)) putOnStand(c); else c.where = 'box'; }
+  S.hand = null;
+}
+const held = { L: false, R: false };
+function pressSide(side) {
+  const now = performance.now();
+  const other = side === 'L' ? 'R' : 'L';
+  S.arm[side] = now;
+  if (held[other] || now - S.arm[other] < 900) { S.arm.L = S.arm.R = -1e9; toggleHead(); }
+}
+function toggleHead() {
+  if (S.busy) return;
+  if (!S.headDown && S.pullT > 0.001) return toast('Raf öne çekili. Kafayı indirmeden önce rafı kafanın altına geri it.');
+  S.headDown = !S.headDown;
+  if (S.headDown && !placed().length) toast('Rafta kartuş yok, conta sızdırmaz kapanamaz.');
+}
+async function togglePull() {
+  if (S.busy) return;
+  if (S.headT > 0.001) return toast('Rafı çekmek için önce kafayı kaldır (iki anahtar birlikte).');
+  S.busy = true; S.pulled = !S.pulled;
+  await tween(S, 'pullT', S.pulled ? 1 : 0, 0.8);
+  S.busy = false;
+}
+async function swapRacks() {
+  if (S.busy) return;
+  if (S.headT > 0.001) return toast('Raf değiştirmeden önce basınç kafasını kaldır.');
+  S.busy = true;
+  const toColl = S.wasteT > 0.5;
+  await tween(S, 'colLift', 1, 0.7);
+  if (toColl) { await tween(S, 'wasteT', 0, 1.3); await tween(S, 'collT', 1, 1.3); }
+  else { await tween(S, 'collT', 0, 1.3); await tween(S, 'wasteT', 1, 1.3); }
+  await tween(S, 'colLift', 0, 0.7);
+  S.busy = false;
+}
+function setMode(m) { S.mode = m; document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m))); }
+function setSpeed(v) { S.speed = v; document.querySelectorAll('#speedSeg button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.speed === v))); }
+function reset() {
+  if (S.busy) return;
+  Object.assign(S, { pulled: false, pullT: 0, headDown: false, headT: 0, wasteT: 1, collT: 0, colLift: 0, time: 0, waste: 0, hand: null, log: [], logSet: new Set() });
+  S.tubeVol.fill(0); setMode('off'); tubLiqMat.color.setHex(0xcfe6f5);
+  dropS.forEach(d => d.on = false);
+  puddles.forEach(q => { bench.remove(q.m); }); puddles.length = 0;
+  carts.forEach(c => c.lbl.cls = null);
+  resetCarts(); resetSamples(); renderLog();
+}
+
+/* ---------- panel DOM ---------- */
+const stepsList = ['Hazırlık: 5 kartuşu rafa tak', ...PROTO.slice(0, 6).map(p => p.name), 'Toplama rafına geç', PROTO[6].name, 'Tamamlandı'];
+$('#steps').innerHTML = stepsList.map((s, i) => `<li><i>${i + 1}</i>${s}</li>`).join('');
+$('#lanes').innerHTML = carts.map(c => `
+  <div class="lane off" data-k="${c.k}" tabindex="0" role="button" aria-label="K${c.k + 1}: pipetteki çözeltiyi ekle">
+    <span class="id">K${c.k + 1}</span><span class="pill" id="lsS${c.k}">Kutuda</span>
+    <div class="fl" id="lsF${c.k}">—</div>
+    <div class="stp" id="lsT${c.k}">Kutuda</div>
+    <div class="bar"><i id="lsB${c.k}"></i></div>
+    <span class="od" id="lsO${c.k}"></span><span class="acts"><button class="mini" type="button" id="lsA${c.k}" hidden></button><button class="mini danger" type="button" id="lsR${c.k}" hidden>Yenile</button></span>
+  </div>`).join('');
+$('#samples').innerHTML = SRC.filter(s => s.liq === 'sample').sort((a, b) => (a.spare ? 1 : 0) - (b.spare ? 1 : 0)).map(s => `
+  <button class="bt" type="button" data-src="${s.id}"><span>${s.title}</span><small id="sv_${s.id}"></small></button>`).join('');
+document.querySelectorAll('[data-src]').forEach(b => b.onclick = () => aspirate(b.dataset.src));
+document.querySelectorAll('.lane').forEach(el => {
+  const c = carts[+el.dataset.k];
+  const go = () => { if (UI.mode === 'use' && c.where === 'rack') dispense(c.k); };
+  el.onclick = go; el.onkeydown = e => { if (e.target === el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go(); } };
+  $('#lsA' + c.k).onclick = e => { e.stopPropagation(); if (c.where === 'rack') liftFromRack(c, true); else if (c.where === 'stand') returnToRack(c); };
+  const rb = $('#lsR' + c.k);
+  rb.onclick = e => {
+    e.stopPropagation();
+    const now = performance.now();
+    if (rb.dataset.at && now - +rb.dataset.at < 3000) { rb.dataset.at = ''; renewCart(c); }
+    else { rb.dataset.at = now; rb.textContent = 'Emin misin?'; }
+  };
+});
+$('#btnTake').onclick = takeCart;
+$('#btnPlace').onclick = placeNext;
+$('#btnDrop').onclick = dropHand;
+$('#btnRack').onclick = swapRacks;
+$('#btnReset').onclick = reset;
+$('#btnPull').onclick = togglePull;
+['L', 'R'].forEach(s => {
+  const b = $('#btn' + s);
+  b.addEventListener('pointerdown', e => { e.preventDefault(); held[s] = true; pressSide(s); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, () => held[s] = false));
+  b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pressSide(s); } });
+});
+const KEYMAP = { a: 'L', l: 'R' };
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' && e.target.type !== 'range') return;
+  const side = KEYMAP[e.key.toLowerCase()];
+  if (side && UI.mode !== 'use') return;
+  if (side) { e.preventDefault(); if (!held[side] && !e.repeat) { held[side] = true; pressSide(side); } return; }
+  if (e.key === 'Escape') dropHand();
+});
+addEventListener('keyup', e => { const side = KEYMAP[e.key.toLowerCase()]; if (side) held[side] = false; });
+addEventListener('blur', () => { held.L = held.R = false; });
+const focusStage = () => { const a = document.activeElement; if (!a || a === document.body || a.tagName === 'BUTTON') renderer.domElement.focus({ preventScroll: true }); };
+stage.addEventListener('pointerenter', focusStage);
+stage.addEventListener('pointerdown', () => renderer.domElement.focus({ preventScroll: true }));
+try { window.focus(); } catch (e) {}
+document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+document.querySelectorAll('#speedSeg button').forEach(b => b.onclick = () => setSpeed(+b.dataset.speed));
+function setReg(side, v) {
+  if (!side) return;
+  v = Math.round(Math.min(60, Math.max(0, v)));
+  S[side] = v; $('#' + side).value = v; $('#' + side + 'Out').textContent = v + ' psi';
+  if (typeof syncReg === 'function') syncReg();
+}
+$('#adj').oninput = e => setReg('adj', +e.target.value);
+$('#max').oninput = e => setReg('max', +e.target.value);
+
+let camAnim = null;
+function view(pos, tgt) { camAnim = { t: 0, p0: camera.position.clone(), t0: controls.target.clone(), p1: V3(...pos), t1: V3(...tgt) }; }
+$('#vIso').onclick = () => view(...VIEW_ISO);
+$('#vFront').onclick = () => view([0, 2.4, 7.5], [0, 1.4, 0]);
+$('#vRack').onclick = () => view([1.6, BASE + 2.6, 3.6], [0, BASE + 1.0, RZ]);
+$('#vBack').onclick = () => view([-4.5, 4.5, -8], [0, 2.2, 0]);
+
+/* ---------- picking ---------- */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), tip = $('#tip');
+function pick(e) {
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  for (const h of ray.intersectObject(dev, true)) {
+    let o = h.object, vis = true;
+    for (let q = o; q; q = q.parent) if (!q.visible) vis = false;
+    if (!vis) continue;
+    while (o && !o.userData.label) o = o.parent;
+    if (o) return { o, r, point: h.point };
+  }
+  const p = V3(); if (!ray.ray.intersectPlane(new THREE.Plane(V3(0, 1, 0), 0), p)) p.set(0, 0, 3);
+  return { o: null, r, point: p };
+}
+function holeAt(point) {
+  const l = colRack.worldToLocal(point.clone());
+  const c = Math.round((l.x + ((NX - 1) / 2) * SX) / SX), r = Math.round((((NZ - 1) / 2) * SZ - l.z) / SZ);
+  if (c < 0 || c >= NX || r < 0 || r >= NZ) return -1;
+  return r * NX + c;
+}
+function aimHand(h) {
+  if (!S.hand) return;
+  const a = h.o && h.o.userData.action || '';
+  if (S.hand.type === 'cart' && a === 'rackTop') {
+    const hole = holeAt(h.point);
+    if (hole >= 0) { handTarget.copy(colRack.localToWorld(V3(holeX(hole % NX), 0.75, holeZ(Math.floor(hole / NX))))); return; }
+  }
+  if (S.hand.type === 'pip' && a.startsWith('cart:')) {
+    const c = carts[+a.slice(5)];
+    if (c.where === 'rack') { handTarget.copy(colRack.localToWorld(V3(holeX(c.hole % NX), 0.98, holeZ(Math.floor(c.hole / NX))))); return; }
+  }
+  handTarget.copy(h.point).add(V3(0, S.hand.type === 'pip' ? 0.35 : 0.3, 0));
+}
+renderer.domElement.addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse') return;
+  const h = pick(e);
+  aimHand(h);
+  if (UI.mode === 'parts') partTip(h, e);
+  else if (h.o) { tip.textContent = h.o.userData.label; tip.style.left = (e.clientX - h.r.left) + 'px'; tip.style.top = (e.clientY - h.r.top) + 'px'; tip.hidden = false; }
+  else tip.hidden = true;
+  renderer.domElement.style.cursor = h.o && h.o.userData.action ? 'pointer' : 'grab';
+});
+renderer.domElement.addEventListener('pointerleave', () => tip.hidden = true);
+let down = null;
+let knobDrag = null;
+const knobSide = a => a === 'knobL' ? 'adj' : a === 'knobR' ? 'max' : null;
+stage.addEventListener('pointerdown', e => {
+  if (e.target !== renderer.domElement || UI.mode !== 'use') return;
+  const h = pick(e), side = knobSide(h.o && h.o.userData.action);
+  if (!side) return;
+  e.stopPropagation(); down = null;
+  knobDrag = { side, x: e.clientX, y: e.clientY, v: S[side], moved: false };
+  controls.enabled = false;
+}, true);
+addEventListener('pointermove', e => {
+  if (!knobDrag) return;
+  const d = (e.clientX - knobDrag.x) - (e.clientY - knobDrag.y);
+  if (Math.abs(d) > 6) knobDrag.moved = true;
+  if (knobDrag.moved) setReg(knobDrag.side, knobDrag.v + d / 6);
+});
+addEventListener('pointerup', () => {
+  if (!knobDrag) return;
+  if (!knobDrag.moved) openReg(knobDrag.side);
+  knobDrag = null; controls.enabled = true;
+});
+const regpop = $('#regpop');
+let regSide = null, regRep = null;
+function openReg(side) { regSide = side; regpop.hidden = false; $('#regName').textContent = side === 'adj' ? 'Ayarlanabilir' : 'Maksimum'; syncReg(); }
+function closeReg() { regSide = null; regpop.hidden = true; }
+function syncReg() { if (regSide) $('#regVal').textContent = S[regSide] + ' psi'; }
+function placeReg() {
+  if (!regSide) return;
+  const w = (regSide === 'adj' ? knobL : knobR).localToWorld(V3(0, 0.18, 0.2)).project(camera);
+  const r = renderer.domElement;
+  regpop.style.left = Math.min(r.clientWidth - 120, Math.max(120, (w.x + 1) / 2 * r.clientWidth)) + 'px';
+  regpop.style.top = Math.max(70, (1 - w.y) / 2 * r.clientHeight) + 'px';
+}
+[['regMinus', -1], ['regPlus', 1]].forEach(([id, d]) => {
+  const b = $('#' + id);
+  const stop = () => { clearTimeout(regRep); clearInterval(regRep); regRep = null; };
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault(); stop();
+    setReg(regSide, S[regSide] + d); syncReg();
+    regRep = setTimeout(() => { regRep = setInterval(() => { setReg(regSide, S[regSide] + d); syncReg(); }, 90); }, 380);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, stop));
+  b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setReg(regSide, S[regSide] + d); syncReg(); } });
+});
+$('#regClose').onclick = closeReg;
+renderer.domElement.addEventListener('pointerdown', () => { if (regSide && !knobDrag) closeReg(); });
+stage.addEventListener('wheel', e => {
+  if (e.target !== renderer.domElement || UI.mode !== 'use') return;
+  const h = pick(e), side = knobSide(h.o && h.o.userData.action);
+  if (!side) return;
+  e.preventDefault(); e.stopPropagation();
+  setReg(side, S[side] + (e.deltaY < 0 ? 1 : -1));
+}, { capture: true, passive: false });
+renderer.domElement.addEventListener('pointerdown', e => down = { x: e.clientX, y: e.clientY });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) return;
+  if (UI.mode === 'parts') { partTip(pick(e), e); return; }
+  if (UI.res) return;
+  const h = pick(e); aimHand(h);
+  const isPip = S.hand && S.hand.type === 'pip';
+  if (!h.o) { if (isPip) spill(h.point); return; }
+  const a = h.o.userData.action || '';
+  const CONTROLS = ['twoL', 'twoR', 'mode', 'pull', 'platen', 'knobL', 'knobR'];
+  if (knobSide(a)) return;
+  if (isPip && a === 'trash') { S.hand = null; return toast('Pipetteki sıvı atık olarak atıldı.'); }
+  if (S.hand && S.hand.type === 'tissue' && !CONTROLS.includes(a)) {
+    if (a === 'puddle') wipe(h.o.userData.pd);
+    else if (a === 'trash') { S.hand = null; toast('Peçete çöpe atıldı.'); }
+    else toast('Peçeteyle dökülen sıvıya tıkla.');
+    return;
+  }
+  if (a === 'tissue') { if (S.hand) toast('Elin dolu. Önce elindekini bırak.'); else S.hand = { type: 'tissue' }; return; }
+  if (a === 'trash' && S.hand && S.hand.type === 'cart') {
+    const hc = carts[S.hand.k];
+    if (used(hc)) renewCart(hc); else toast('Kullanılmamış kartuşu kutuya geri koy.');
+    return;
+  }
+  if (isPip && !a.startsWith('src:') && !CONTROLS.includes(a) && !(a.startsWith('cart:') && carts[+a.slice(5)].where === 'rack')) { spill(h.point); return; }
+  const held = S.hand && S.hand.type === 'cart' ? carts[S.hand.k] : null;
+  if (a.startsWith('src:')) aspirate(a.slice(4));
+  else if (a === 'box') {
+    if (held) { if (used(held)) toast('Kullanılmış kartuş kutuya geri konmaz. Bekleme standına koy.'); else { held.where = 'box'; S.hand = null; } }
+    else takeCart();
+  }
+  else if (a === 'stand') { if (held) { putOnStand(held); S.hand = null; } else toast('Standdaki bir kartuşa tıklayarak onu alabilirsin.'); }
+  else if (a === 'rackTop') { if (held) { const hole = holeAt(h.point); if (hole >= 0) placeCart(hole); } else if (S.hand) toast('Pipetteki çözeltiyi bir kartuşa ekle.'); else toast('Önce kutudan bir kartuş al.'); }
+  else if (a.startsWith('cart:')) {
+    const c = carts[+a.slice(5)];
+    if (c.where === 'rack') { if (S.hand && S.hand.type === 'pip') dispense(c.k); else if (!S.hand) liftFromRack(c, false); }
+    else if (c.where === 'stand') { if (!S.hand) { c.where = 'hand'; S.hand = { type: 'cart', k: c.k }; } else toast('Elin dolu.'); }
+  }
+  else if (a === 'twoL') pressSide('L');
+  else if (a === 'twoR') pressSide('R');
+  else if (a === 'mode') setMode({ off: 'adj', adj: 'max', max: 'off' }[S.mode]);
+  else if (a === 'platen') toast('Kafayı indirmek ya da kaldırmak için sağ ve sol anahtarlara aynı anda bas.');
+  else if (e.pointerType !== 'mouse') toast(h.o.userData.label);
+});
+
+/* ---------- per-cartridge tags ---------- */
+
+
+/* ---------- loop ---------- */
+const approach = (v, target, rate) => v + (target - v) * Math.min(1, rate);
+const PULL_D = 0.75;
+const WASTE_PARK = V3(-4.1, 0, -1.3), COLL_PARK = V3(4.1, 0, -1.3), RACK_IN = V3(0, BASE, RZ), RACK_OUT = V3(0, BASE, RZ + 1.95);
+function placeRack(g, park, t) {
+  const u = 1 - t;
+  if (u < 0.35) g.position.lerpVectors(RACK_IN, RACK_OUT, ease(u / 0.35));
+  else { const e = ease((u - 0.35) / 0.65); g.position.lerpVectors(RACK_OUT, park, e); g.position.y += Math.sin(Math.PI * e) * 0.9; }
+}
+const STATUS = {
+  none: ['Kutuda', ''], hand: ['Elinde', ''], stand: ['Standda', 's-dry'], empty: ['Boş', ''], wait: ['Bekliyor', ''],
+  ok: ['Akıyor', 's-ok'], slow: ['Yavaş', 's-slow'], fast: ['Çok hızlı', 's-slow'], stop: ['Akmıyor', 's-stop'],
+  soon: ['Bitmek üzere', 's-soon'], over: ['Kuruyor!', 's-bad'], dry: ['Kurutuluyor', 's-dry'], done: ['Bitti', 's-ok'],
+};
+const el = {
+  P: $('#roP'), F: $('#roF'), T: $('#roT'), D: $('#roD'), Dk: $('#roDk'), dot: $('#dot'), st: $('#statusTxt'), stBox: $('#statusBox'),
+  steps: [...document.querySelectorAll('#steps li')], stTxt: $('#stageTxt'), hand: $('#hand'), handTxt: $('#handTxt'),
+  bRack: $('#btnRack'), bL: $('#btnL'), bR: $('#btnR'), bTake: $('#btnTake'), bPlace: $('#btnPlace'),
+};
+const modeAngle = { off: 0, adj: 0.75, max: -0.75 };
+const projV = V3();
+let last = performance.now(), uiTick = 0, flowOn = false, sealed = false;
+
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const sdt = dt * S.speed;
+  S.time += sdt;
+
+  for (let i = tweens.length - 1; i >= 0; i--) {
+    const tw = tweens[i]; tw.t = Math.min(1, tw.t + dt / tw.dur);
+    tw.obj[tw.k] = tw.from + (tw.to - tw.from) * ease(tw.t);
+    if (tw.t >= 1) { tweens.splice(i, 1); tw.res(); }
+  }
+
+  /* mechanics */
+  S.headT = Math.min(1, Math.max(0, S.headT + (S.headDown ? 1 : -1) * dt / 1.6));
+  platen.position.y = HEAD_UP + (HEAD_DOWN - HEAD_UP) * ease(S.headT);
+  buildHose(platen.position.y);
+  const pullZ = RZ + S.pullT * PULL_D; RACK_IN.z = pullZ; RACK_OUT.z = pullZ + 1.95;
+  placeRack(wasteRack, WASTE_PARK, S.wasteT);
+  placeRack(collRack, COLL_PARK, S.collT);
+  colRack.position.set(0, BASE + RACK_H + S.colLift * 0.45, pullZ);
+  lever.rotation.z = approach(lever.rotation.z, modeAngle[S.mode], dt * 12);
+  const armedL = now - S.arm.L < 900, armedR = now - S.arm.R < 900;
+  rockerL.rotation.x = approach(rockerL.rotation.x, armedL ? 0.25 : -0.12, dt * 16);
+  rockerR.rotation.x = approach(rockerR.rotation.x, armedR ? 0.25 : -0.12, dt * 16);
+  rockerL.userData.mat.emissive.setHex(armedL ? 0x173a7a : 0); rockerR.userData.mat.emissive.setHex(armedR ? 0x173a7a : 0);
+  setKnob(knobL, S.adj); setKnob(knobR, S.max);
+
+  /* pneumatics */
+  const pl = placed();
+  sealed = S.headT >= 1 && pl.length > 0 && (S.wasteT >= 1 || S.collT >= 1) && S.colLift <= 0 && S.pullT <= 0.001;
+  const set = S.mode === 'adj' ? S.adj : S.mode === 'max' ? S.max : 0;
+  const open = pl.filter(c => cartVol(c) < 0.002).length;
+  const targetP = sealed ? set * (1 - 0.015 * open) : set * 0.05;
+  S.p = approach(S.p, targetP, dt * 3);
+  flowOn = sealed && S.mode !== 'off' && S.p > 0.3;
+  const targetF = S.mode === 'off' ? 0 : sealed ? S.p * (0.02 * pl.length + 0.12 * open) : set * 0.48;
+  S.flow = approach(S.flow, Math.min(targetF, 30), dt * 2.5);
+  S.gaugeL = approach(S.gaugeL, S.mode === 'adj' ? S.p : 0, dt * 4);
+  S.gaugeR = approach(S.gaugeR, S.mode === 'max' ? S.p : 0, dt * 4);
+  setNeedle(needleL, S.gaugeL + (S.gaugeL > 1 ? Math.sin(now / 90) * 0.15 : 0));
+  setNeedle(needleR, S.gaugeR + (S.gaugeR > 1 ? Math.sin(now / 90) * 0.15 : 0));
+  ball.position.y = PY(505 - (S.flow / 30) * 340) + (S.flow > 0.3 ? Math.sin(now / 70) * 0.006 : 0);
+
+  /* independent flow through each cartridge */
+  const toWaste = S.wasteT >= 1;
+  for (const c of pl) {
+    const vol = cartVol(c);
+    if (vol < 0.002) {
+      c.flow = 0;
+      const exp = PROTO[c.step];
+      if (exp && exp.dry && flowOn && S.p >= 18) c.dry += sdt;
+      if (WET_STEPS.has(c.step) && flowOn) {
+        c.overDry += sdt; c.overDryTotal += sdt;
+        if (c.overDry > 30) log(`K${c.k + 1}: boşaldıktan sonra basınç altında kaldı, sorbent kurudu ("${PROTO[c.step].name}" öncesi).`);
+      }
+      continue;
+    }
+    if (!flowOn) { c.flow = 0; continue; }
+    const layer = c.layers[0], L = LIQ[layer.liq];
+    const Pth = c.Pth0 + c.clog * 1.0;
+    const cond = c.C * L.f / (1 + c.clog * 0.25);
+    c.flow = Math.max(0, S.p - Pth) * cond; // mL/min
+    const dv = Math.min(layer.v, c.flow / 60 * sdt);
+    if (dv <= 0) continue;
+    layer.v -= dv; if (layer.v < 1e-4) c.layers.shift();
+    if (layer.liq === 'sample') { const s = SRC.find(q => q.j === layer.j && q.liq === 'sample'); c.clog += s.dirt * dv; c.sorb = Math.min(1, c.sorb + dv / 10); }
+    if (layer.liq === 'elu') c.sorb = Math.max(0, c.sorb - dv / 3 * 0.85);
+    if (toWaste) {
+      S.waste += dv; tubLiqMat.color.lerp(tmpC.setHex(L.color), Math.min(1, dv / Math.max(1, S.waste) * 3));
+      if (layer.liq === 'elu') log(`K${c.k + 1}: elüsyon MeOH atık teknesine aktı. Eluat kayboldu.`);
+    } else {
+      S.tubeVol[c.hole] += dv;
+      if (layer.liq === 'elu') c.eluate += dv;
+      else log(`K${c.k + 1}: ${L.name} toplama tüpüne aktı. Eluat kontamine olabilir.`);
+    }
+    c.dropAcc = Math.min(3, c.dropAcc + dv / 0.05);
+    let n = 0;
+    while (c.dropAcc >= 1 && n < 3) {
+      c.dropAcc -= 1; n++;
+      const w = colRack.localToWorld(V3(holeX(c.hole % NX), 0.02, holeZ(Math.floor(c.hole / NX))));
+      const floor = toWaste ? BASE + 0.13 + tubLiq.scale.y : BASE + 0.1 + S.tubeVol[c.hole] / TUBE_CAP * 0.6;
+      spawnDrop(w.x, w.y, w.z, floor, L.color);
+    }
+  }
+
+  /* per-cartridge protocol progression & status */
+  let soonNew = null;
+  for (const c of carts) {
+    if (c.where !== 'rack') { c.status = c.where === 'box' ? 'none' : c.where; continue; }
+    const exp = PROTO[c.step], vol = cartVol(c);
+    const tubeEmpty = exp && exp.liq === 'sample' && c.added > 0 && srcById['n' + (c.k + 1)].vol < 0.01 && srcById['y' + (c.k + 1)].vol < 0.01;
+    if (exp && exp.ml && (c.added >= exp.ml - 0.02 || tubeEmpty) && vol < 0.002) { c.step++; c.added = 0; c.dry = 0; }
+    else if (exp && exp.dry && c.dry >= exp.dry * 60) { c.step++; c.dry = 0; }
+    const wet = c.step <= 4;
+    if (c.step >= PROTO.length && vol < 0.002) c.status = 'done';
+    else if (vol < 0.002) {
+      if (PROTO[c.step] && PROTO[c.step].dry && flowOn && S.p >= 18) c.status = 'dry';
+      else if (WET_STEPS.has(c.step) && flowOn) c.status = 'over';
+      else c.status = 'empty';
+    }
+    else if (!flowOn) c.status = 'wait';
+    else if (c.flow < 0.05) c.status = 'stop';
+    else if (wet && vol < 0.5) c.status = 'soon';
+    else if (c.flow < 0.8) c.status = 'slow';
+    else if (c.flow > 10) c.status = 'fast';
+    else c.status = 'ok';
+    if (c.status === 'soon' && c.soonWarned !== c.step) { c.soonWarned = c.step; soonNew = c; }
+  }
+  if (soonNew) {
+    const others = pl.filter(q => q !== soonNew && cartVol(q) > 0.5).length;
+    if (others > 0) {
+      const slowed = S.speed > 1; if (slowed) setSpeed(1);
+      toast(`K${soonNew.k + 1} bitmek üzere, diğer ${others} kartuş hâlâ akıyor. Boşalınca kafayı kaldırıp K${soonNew.k + 1}'i bekleme standına al; yoksa basınç altında kurur.${slowed ? ' Hız 1×\'e alındı.' : ''}`);
+    }
+  }
+
+  /* visuals for cartridges, tubes, tub */
+  const holes = new Set(pl.map(c => c.hole));
+  for (const c of carts) {
+    c.g.visible = c.where === 'rack' || c.where === 'stand';
+    if (!c.g.visible) continue;
+    c.dropT = Math.max(0, c.dropT - dt * 2.2);
+    if (c.where === 'rack') c.g.position.y = ease(c.dropT) * 0.9;
+    const v = cartVol(c);
+    c.l.visible = v > 0.002;
+    if (c.l.visible) { c.l.scale.y = v / CART_CAP * LIQ_H; c.liqMat.color.setHex(LIQ[c.layers[c.layers.length - 1].liq].color); }
+    c.sorbMat.color.setHex(0xf1efe8).lerp(tmpC.setHex(0x7a5a24), c.sorb * 0.8);
+    if (c.overDryTotal > 30) c.sorbMat.color.lerp(tmpC.setHex(0xfbf7e6), 0.5);
+  }
+  tubes.forEach((t, i) => {
+    t.g.visible = holes.has(i);
+    t.l.visible = S.tubeVol[i] > 0.005;
+    t.l.scale.y = Math.max(0.001, Math.min(1, S.tubeVol[i] / TUBE_CAP) * 0.6);
+  });
+  tubLiq.visible = S.waste > 0.3;
+  tubLiq.scale.y = Math.max(0.001, Math.min(1, S.waste / TUB_CAP) * (TH - 0.06));
+  const inBox = carts.filter(c => c.where === 'box').length;
+  boxCarts.forEach((g, i) => g.visible = i < Math.min(5, inBox + S.spares));
+  SRC.filter(s => s.liq === 'sample').forEach(s => { s.liqMesh.visible = s.vol > 0.01; s.liqMesh.scale.y = Math.max(0.001, s.vol / 15 * 0.98); });
+
+  /* held object */
+  heldCart.g.visible = !!S.hand && S.hand.type === 'cart';
+  pip.visible = !!S.hand && S.hand.type === 'pip';
+  tissue.visible = !!S.hand && S.hand.type === 'tissue';
+  if (S.hand) {
+    if (!handObj.visible) handPos.copy(handTarget);
+    handPos.lerp(handTarget, Math.min(1, dt * 14)); handObj.position.copy(handPos);
+    if (pip.visible) { pipLiq.visible = S.hand.vol > 0.01; pipLiq.scale.y = Math.max(0.001, S.hand.vol / 3 * 0.46); }
+  }
+  handObj.visible = !!S.hand;
+
+  for (let i = puddles.length - 1; i >= 0; i--) {
+    const q = puddles[i]; q.age += dt;
+    if (q.wipe < 0) { q.m.scale.setScalar(Math.min(1, 0.05 + q.age * 2.5)); continue; }
+    q.wipe += dt * 1.6;
+    q.m.scale.setScalar(Math.max(0.01, 1 - q.wipe * 0.6)); q.m.material.opacity = 0.75 * Math.max(0, 1 - q.wipe);
+    if (q.wipe >= 1) { bench.remove(q.m); q.m.geometry.dispose(); q.m.material.dispose(); puddles.splice(i, 1); }
+  }
+  /* drops */
+  let k = 0;
+  for (const d of dropS) {
+    if (d.on) { d.vy -= 9 * dt; d.y += d.vy * dt; if (d.y < d.floor) d.on = false; }
+    dummy.position.set(d.x, d.y, d.z); dummy.scale.setScalar(d.on ? 1 : 0); dummy.updateMatrix();
+    drops.setMatrixAt(k++, dummy.matrix);
+  }
+  drops.instanceMatrix.needsUpdate = true;
+
+  if (camAnim) {
+    camAnim.t = Math.min(1, camAnim.t + dt / 0.8); const e = ease(camAnim.t);
+    camera.position.lerpVectors(camAnim.p0, camAnim.p1, e); controls.target.lerpVectors(camAnim.t0, camAnim.t1, e);
+    if (camAnim.t >= 1) camAnim = null;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+  placeReg();
+
+  if (++uiTick % 4 === 0) updateUI();
+  requestAnimationFrame(frame);
+}
+
+function globalStage() {
+  const act = carts.filter(c => c.where !== 'box');
+  if (act.length < 5 || (carts.every(c => !used(c)) && placed().length < 5)) return 0;
+  const m = Math.min(...act.map(c => c.step));
+  if (m <= 5) return 1 + m;
+  if (m === 6) return (S.collT >= 1 || act.some(c => c.added > 0)) ? 8 : 7;
+  return 9;
+}
+const STAGE_TXT = [
+  'Rafı öne çek, kutudan Oasis HLB 3 cc kartuşları tek tek al ve kolon rafındaki deliklere tak. Aldığın sırayla K1–K5 olarak numaralanır. Altta atık rafı olmalı.',
+  'MeOH erleninden pipetle 3 mL çek ve her kartuşa ekle. Rafı kafanın altına it, sağ ve sol anahtarlara aynı anda basarak kafayı indir ve ADJ modda basınç uygula.',
+  'Kafayı kaldır. Su erleninden her kartuşa 3 mL ekle ve basınçla geçir. Erken biten kartuşu standa almayı unutma.',
+  'Her tüpteki 10 mL atık suyu kendi kartuşuna yükle: N1→K1 … N5→K5 (3 + 3 + 3 + 1 mL). Kartuş yenilendiyse ya da numune döküldüyse Y yedek tüpünü kullan. Akmayan kartuş olursa basıncı yavaşça artır. Biten kartuşları standa al, hepsi bitince geri tak.',
+  'Su erleninden her kartuşa üç kez 3 mL ekleyerek yıka (toplam 9 mL).',
+  'Su:MeOH 4:1 erleninden her kartuşa 3 mL ekle. Standdaki kartuşlar varsa önce rafa geri tak.',
+  'Tüm kartuşlar raftayken kafayı indir, basıncı 20 psi yap ve 15 dakika kurut. Bu adımda kuruma isteniyor. Beklemeyi kısaltmak için hızı 60× yapabilirsin.',
+  'Kafayı kaldır ve "Toplama rafına geç" ile atık rafını toplama rafıyla değiştir. Her kartuşun altına bir tüp gelir.',
+  'Elüsyon MeOH erleninden her kartuşa 3 mL ekle ve eluatı tüplere al.',
+  'Protokol tamamlandı. Tüplerdeki eluatlar analize hazır. Sapma kaydını kontrol et; yeni denemede numunelerin kirlilik dağılımı değişir.',
+];
+
+function updateUI() {
+  const pl = placed();
+  document.querySelectorAll('#side .bt, #side input').forEach(b => b.disabled = UI.mode !== 'use');
+  el.P.innerHTML = S.p.toFixed(1) + '<small>psi</small>';
+  el.F.innerHTML = S.flow.toFixed(1) + '<small>L/dk</small>';
+  el.T.textContent = fmtT(S.time);
+  const inColl = S.collT >= 0.5;
+  el.Dk.textContent = inColl ? 'Eluat' : 'Atık';
+  el.D.innerHTML = (inColl ? pl.reduce((a, c) => a + S.tubeVol[c.hole], 0).toFixed(1) : Math.round(S.waste)) + '<small>mL</small>';
+
+  const gs = globalStage();
+  el.steps.forEach((li, i) => { li.className = i < gs ? 'done' : i === gs ? 'cur' : ''; li.firstChild.textContent = i < gs ? '✓' : i + 1; });
+  if (gs === 9) {
+    const elu = carts.map(c => `K${c.k + 1} ${c.eluate.toFixed(1)} mL`).join(', ');
+    el.stTxt.textContent = `${STAGE_TXT[9]} Toplanan eluat: ${elu}. Sapma sayısı: ${S.log.length}.`;
+  } else el.stTxt.textContent = STAGE_TXT[gs];
+
+  for (const c of carts) {
+    const lane = document.querySelector(`.lane[data-k="${c.k}"]`);
+    lane.classList.toggle('off', c.where !== 'rack');
+    lane.classList.toggle('alert', c.status === 'over' || c.status === 'stop');
+    lane.classList.toggle('soon', c.status === 'soon');
+    const exp = PROTO[c.step], v = cartVol(c);
+    let t;
+    if (c.where === 'box') t = 'Kutuda';
+    else if (c.where === 'hand') t = 'Elinde';
+    else if (!exp) t = `Bitti · eluat ${c.eluate.toFixed(1)} mL`;
+    else if (exp.dry) t = `Kurutma ${(c.dry / 60).toFixed(1)} / 15 dk`;
+    else t = `${exp.short} ${Math.min(c.added, 99).toFixed(1)} / ${exp.ml} mL`;
+    $('#lsT' + c.k).textContent = t;
+    $('#lsF' + c.k).innerHTML = c.where === 'rack' ? c.flow.toFixed(2) + '<small> mL/dk</small>' : '—';
+    const bar = $('#lsB' + c.k); bar.style.width = (v / CART_CAP * 100).toFixed(0) + '%';
+    bar.style.background = v > 0 ? hex(LIQ[c.layers[c.layers.length - 1].liq].color) : 'transparent';
+    const [lbl, cls] = STATUS[c.status];
+    const pill = $('#lsS' + c.k); pill.textContent = lbl; pill.className = 'pill ' + cls;
+    const od = $('#lsO' + c.k);
+    od.textContent = c.overDryTotal > 1 ? `istenmeyen kuruma ${(c.overDryTotal / 60).toFixed(1)} dk` : '';
+    od.classList.toggle('hot', c.overDryTotal > 30);
+    const act = $('#lsA' + c.k);
+    act.hidden = !(c.where === 'rack' && used(c) && v < 0.02) && c.where !== 'stand';
+    act.textContent = c.where === 'stand' ? 'Rafa tak' : 'Standa al';
+    const rb = $('#lsR' + c.k);
+    rb.hidden = !(used(c) && (c.where === 'rack' || c.where === 'stand'));
+    if (!rb.dataset.at || performance.now() - +rb.dataset.at > 3000) { rb.dataset.at = ''; rb.textContent = 'Yenile'; }
+    drawCartLabel(c, cls);
+  }
+  SRC.forEach(s => { const e = $('#sv_' + s.id); if (e) e.textContent = s.vol.toFixed(s.cap > 20 ? 0 : 1) + ' mL'; });
+  SRC.forEach(s => { if (Math.abs((s._shown ?? -1) - s.vol) > 0.05) { s._shown = s.vol; s.sprite.userData.draw(s.title, s.vol.toFixed(s.cap > 20 ? 0 : 1) + ' mL', hex(LIQ[s.liq].color)); } });
+  const boxN = carts.filter(c => c.where === 'box').length + S.spares;
+  if (cbSprite.userData.n !== boxN) { cbSprite.userData.n = boxN; cbSprite.userData.draw('Oasis HLB 3 cc', boxN + ' kartuş'); }
+
+  el.hand.hidden = !S.hand;
+  if (S.hand) el.handTxt.textContent = S.hand.type === 'cart' ? `Elinde: K${S.hand.k + 1}. Rafta bir deliğe, bekleme standına ya da çöpe tıkla` : S.hand.type === 'tissue' ? 'Elinde peçete. Dökülen sıvıya tıkla' : `Pasteur pipeti: ${S.hand.vol.toFixed(1)} mL ${S.hand.src.title}. Bir kartuşa tıkla`;
+  el.bRack.textContent = S.wasteT > 0.5 ? 'Toplama rafına geç' : 'Atık rafına geç';
+  el.bRack.disabled = S.busy;
+  const bp = $('#btnPull'); bp.textContent = S.pulled ? 'Rafı kafanın altına it' : 'Rafı öne çek'; bp.disabled = S.busy;
+  const now = performance.now();
+  el.bL.classList.toggle('armed', now - S.arm.L < 900); el.bR.classList.toggle('armed', now - S.arm.R < 900);
+  el.bTake.disabled = !carts.some(c => c.where === 'box') || !!S.hand;
+  el.bPlace.disabled = !carts.some(c => c.where === 'box') && !(S.hand && S.hand.type === 'cart');
+
+  const by = st => pl.filter(c => c.status === st), names = a => a.map(c => 'K' + (c.k + 1)).join(', ');
+  const over = by('over'), soon = by('soon'), stopped = by('stop'), slow = by('slow'), running = pl.filter(c => ['ok', 'fast', 'slow', 'soon'].includes(c.status));
+  let cls = '', msg;
+  if (S.pullT > 0.001 && S.mode !== 'off') { cls = 'warn'; msg = 'Raf öne çekili: basınç verilemez. Rafı kafanın altına it.'; }
+  else if (S.mode !== 'off' && !sealed && S.headT < 1) { cls = 'warn'; msg = 'Kafa kapalı değil: basınç oluşmuyor, gaz kaçıyor.'; }
+  else if (over.length && over.length === pl.length) { cls = 'bad'; msg = 'Tüm kartuşlar boş ve basınç altında: sorbent kuruyor. Kafayı hemen kaldır.'; }
+  else if (over.length) { cls = 'bad'; msg = `${names(over)} boşaldı ve kuruyor. Kafayı kaldırıp standa al.`; }
+  else if (soon.length) { cls = 'warn'; msg = `${names(soon)} bitmek üzere. Boşalınca kafayı kaldır ve standa al.`; }
+  else if (stopped.length && running.length) { cls = 'warn'; msg = `${names(stopped)} bu basınçta akmıyor; diğerleri akıyor. Basıncı yavaşça artır.`; }
+  else if (stopped.length) { cls = 'warn'; msg = `Hiçbir kartuş akmıyor (${S.p.toFixed(1)} psi). Basıncı artır.`; }
+  else if (running.length) { cls = 'run'; msg = `${running.length} kartuş akıyor${slow.length ? `, ${names(slow)} yavaş` : ''}.`; }
+  else if (pl.some(c => c.status === 'dry')) { cls = 'run'; msg = 'Kartuşlar kurutuluyor.'; }
+  else if (gs === 6 && sealed && S.mode !== 'off' && S.p < 18) { cls = 'warn'; msg = `Kurutma için basınç düşük (${S.p.toFixed(1)} psi). 20 psi'ye ayarla.`; }
+  else if (puddles.some(q => q.wipe < 0)) { cls = 'warn'; msg = 'Tezgâhta dökülmüş sıvı var. Peçete kutusundan peçete alıp kurula.'; }
+  else if (gs === 9) { cls = 'ok'; msg = 'Protokol tamamlandı.'; }
+  else if (sealed && S.mode === 'off') msg = 'Kafa kapalı. Mod seçiciyle gazı aç.';
+  else msg = `Sıradaki: ${stepsList[gs]}.`;
+  el.dot.className = 'dot ' + cls; el.st.textContent = msg;
+  if (UI.mode !== 'use') document.querySelectorAll('#side .bt, #side input, .lane .mini').forEach(b => b.disabled = true);
+  if (UI.task === 'spe' && !UI.res && gs === 9) evaluate();
+  el.stBox.className = 'stl' + (cls === 'warn' ? ' warn' : cls === 'bad' ? ' bad' : '');
+}
+
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h;
+  camera.fov = w < 560 ? 52 : 35;
+  camera.updateProjectionMatrix();
+}
+
+/* ================= pilot kabuğu: parçalar, görevler, değerlendirme ================= */
+const PARTS = [
+  ['body', 'Gövde ve üst tabla', 'Paslanmaz çelik gövdenin içinde basınç regülatörleri ve gaz dağıtım hattı var. Üst tabla raf istifini taşır; ön köşelerdeki yönlendirme çubukları rafı kafanın altına hizalar.'],
+  ['panel', 'Ön kontrol paneli', 'Bütün gaz kontrolleri önde: solda rotametre, ortada iki manometre ve iki regülatör, altta mod seçici. Sağdaki ve soldaki baskı anahtarları basınç kafasını hareket ettirir.'],
+  ['rota', 'Rotametre (akış ölçer)', 'Manifolddan geçen gaz akışını L/dk olarak gösterir. Kartuşlar sıvı doluyken akış düşüktür; kartuşlar boşaldıkça gaz serbestçe geçer ve bilye yükselir. Altındaki iğneli vana akışı sınırlar.'],
+  ['gauge', 'Manometreler (ADJ · MAX)', 'Soldaki ayarlanabilir hattın, sağdaki maksimum hattın basıncını psi olarak gösterir. Seçili moda ait manometre kafaya giden basıncı okur.'],
+  ['knob', 'Akış regülatörleri', 'ADJUSTABLE regülatörü yükleme ve yıkama için ince ayarlı basınç verir. MAXIMUM regülatörü kurutma gibi yüksek basınç gereken adımlar için önceden ayarlanır. Kullanımda düğmeye tıklayıp + / − ile ayarlarsın.'],
+  ['sel', 'Mod seçici', 'ADJ: ayarlanabilir hat açık. OFF: gaz kapalı. MAX: maksimum hat açık. Kafayı kaldırmadan önce seçiciyi OFF konumuna al.'],
+  ['rocker', 'Baskı anahtarları (iki el kumandası)', 'Kafa yalnız iki anahtara aynı anda basılınca hareket eder; böylece eller kafanın altında kalmaz. Simülasyonda klavyedeki A + L tuşları da kullanılabilir.'],
+  ['platen', 'Basınç kafası ve conta', 'İndiğinde silikon conta kartuşların üst ağızlarına oturur ve gaz her kartuşa ayrı ayrı basınç uygular. Raf öne çekiliyken kafa inmez.'],
+  ['post', 'Kılavuz kolonlar', 'Basınç kafası bu iki krom kolon üzerinde dikey kayar ve kartuşlara paralel iner.'],
+  ['colrack', 'Kolon rafı (48 pozisyon)', 'Kartuşlar bu siyah rafın deliklerine takılır. Rafı ön yüzünden tutup öne çekince kartuş takmak ve çözelti eklemek kolaylaşır.'],
+  ['waste', 'Atık rafı ve teknesi', 'Şartlandırma, yükleme ve yıkama sıvıları kolon rafının altındaki beyaz teknede toplanır.'],
+  ['coll', 'Toplama rafı', 'Elüsyondan önce atık rafıyla yer değiştirir; her kartuşun altına bir 12 × 75 mm tüp gelir ve eluat burada toplanır.'],
+  ['hose', 'Gaz hattı', 'Arka paneldeki girişe laboratuvarın azot hattı bağlanır; mavi hortum gazı basınç kafasına taşır.'],
+  ['cart', 'Oasis HLB 3 cc kartuş', 'Suyla ıslanabilen, ters faz polimerik sorbent içeren SPE kartuşu. Hacmi 3 mL; sorbent alttaki iki frit arasında durur.'],
+];
+const PINFO = Object.fromEntries(PARTS.map(p => [p[0], p]));
+function partOf(L) {
+  if (!L) return null;
+  if (/standı|Peçete|Çöp|erleni|numune tüpü|yedek numune|Numune tüp|Dökülen/i.test(L)) return null;
+  if (/manometre/i.test(L)) return 'gauge';
+  if (/regülatör/i.test(L)) return 'knob';
+  if (/Mod seçici/.test(L)) return 'sel';
+  if (/rotametre|Akış ölçer/i.test(L)) return 'rota';
+  if (/baskı anahtarı/i.test(L)) return 'rocker';
+  if (/Basınç kafası|conta|Kelebek|Sıkıştırma|burcu|hortumu bağlantısı/i.test(L)) return 'platen';
+  if (/Kılavuz kolon/.test(L)) return 'post';
+  if (/olon rafı|Raf ön yüzü/.test(L)) return 'colrack';
+  if (/Atık rafı|Atık sıvı/.test(L)) return 'waste';
+  if (/Toplama/.test(L)) return 'coll';
+  if (/hortum|gaz bağlantısı|gaz girişi/i.test(L)) return 'hose';
+  if (/Ön kontrol paneli/.test(L)) return 'panel';
+  if (/kartuş|Oasis/i.test(L)) return 'cart';
+  if (/gövde|Üst tabla|ayak|tutamağı|yönlendirme/i.test(L)) return 'body';
+  return null;
+}
+function partTip(h, e) {
+  const t = $('#tip'), L = h && h.o && h.o.userData.label;
+  if (!L) { t.hidden = true; return; }
+  const id = partOf(L), inf = id && PINFO[id];
+  t.innerHTML = inf ? `<b>${inf[1]}</b><span>${inf[2]}</span>` : `<b>${L.split(':')[0]}</b>`;
+  t.hidden = false;
+  const W = stage.clientWidth, H = stage.clientHeight, x = e.clientX - h.r.left, y = e.clientY - h.r.top;
+  let lx = x + 18, ly = y + 18; if (lx + t.offsetWidth > W - 8) lx = x - t.offsetWidth - 18; if (ly + t.offsetHeight > H - 8) ly = y - t.offsetHeight - 18;
+  t.style.left = Math.max(8, lx) + 'px'; t.style.top = Math.max(8, ly) + 'px';
+  if (inf && !UI.seen[id]) {
+    UI.seen[id] = 1;
+    if (PARTS.every(p => UI.seen[p[0]]) && !UI.done.parts) { UI.done.parts = 1; say('Harika, CEREX 48’in bütün parçalarını tanıdın! Şimdi <b>Görevler</b>’den “Atık suda SPE” görevini başlat.'); }
+    renderTasks();
+  }
+}
+const TASKS = [
+  { id: 'parts', t: 'Parçaları tanı', d: `Fareyi parçaların üzerine getir (${PARTS.length} parça).` },
+  { id: 'spe', t: 'Atık suda SPE · Oasis HLB', d: '5 numune · şartlandırma, yükleme, yıkama, kurutma, elüsyon' },
+  { id: 'free', t: 'Serbest kullanım', d: 'Değerlendirme yok: cihazı dilediğin gibi kullan' },
+];
+function renderTasks() {
+  $('#tasks').innerHTML = TASKS.map((x, i) => `<button class="task${UI.task === x.id ? ' on' : ''}${UI.done[x.id] ? ' done' : ''}" data-t="${x.id}"><span>${UI.done[x.id] ? '✓' : i + 1}</span><div>${x.t}<small>${x.d}</small></div></button>`).join('');
+  $('#tasks').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { $('#tdlg').close(); startTask(b.dataset.t); });
+  $('#pSteps').innerHTML = PARTS.map((p, i) => `<li class="${UI.seen[p[0]] ? 'done' : ''}"><i>${UI.seen[p[0]] ? '✓' : i + 1}</i>${p[1]}</li>`).join('');
+  const cur = $('#pSteps').querySelector('li:not(.done)'); if (cur) cur.className = 'cur';
+}
+function setUIMode(m) {
+  UI.mode = m;
+  $('#mParts').classList.toggle('on', m === 'parts'); $('#mUse').classList.toggle('on', m === 'use');
+  $('#dsp').hidden = m !== 'use'; $('#lanes').hidden = m !== 'use'; $('#tip').hidden = true;
+  $('.rot').style.visibility = m === 'parts' ? 'hidden' : 'visible';
+  if (m === 'parts') { dropHand(); closeReg(); }
+  $('#tName').textContent = TASKS.find(t => t.id === UI.task).t;
+  $('#steps').hidden = UI.task === 'parts'; $('#pSteps').hidden = UI.task !== 'parts';
+  $('#stageTxt').hidden = UI.task === 'parts';
+  document.querySelectorAll('.devh, #log, #logEmpty').forEach(x => x.style.display = UI.task === 'parts' ? 'none' : '');
+  renderTasks(); updateUI();
+}
+function startTask(id) {
+  UI.task = id; UI.res = false; $('#res').innerHTML = ''; $('#res').hidden = true;
+  reset(); setSpeed(10);
+  setUIMode(id === 'parts' ? 'parts' : 'use');
+  say(id === 'parts' ? 'Bu bizim pozitif basınçlı SPE cihazımız: <b>CEREX 48</b>. Fareyi merak ettiğin parçanın üzerine getir (telefonda dokun), açıklaması çıksın. Sahneyi sürükleyerek döndürebilirsin.'
+    : id === 'spe' ? 'Görev: <b>atık suda SPE</b>. Rafı öne çek, kutudan 5 Oasis HLB kartuşunu tek tek al ve rafa tak. Sonra adımları sırayla izle: her kartuş kendi hızında akar, biten kartuşu standa almayı unutma.'
+    : '<b>Serbest kullanım:</b> değerlendirme yok. Kartuş tak, çözelti ekle, basınç ver; cihazın nasıl davrandığını gör.');
+}
+function evaluate() {
+  UI.res = true;
+  const errs = S.log.filter(e => !e.info && !e.fixed), ok = !errs.length;
+  if (ok) UI.done.spe = 1;
+  const over = carts.reduce((a, c) => a + c.overDryTotal, 0) / 60;
+  $('#res').innerHTML = `<div class="card res ${ok ? 'ok' : 'bad'}"><b class="big">${ok ? 'SPE tamamlandı ✓' : 'Protokol sapmalarla tamamlandı'}</b><div class="kv"><span>Toplam süre</span><b>${fmtT(S.time)}</b>${carts.map(c => `<span>K${c.k + 1} eluat</span><b>${c.eluate.toFixed(2)} mL</b>`).join('')}<span>İstenmeyen kuruma (toplam)</span><b>${over.toFixed(1)} dk</b><span>Yenilenen kartuş</span><b>${5 - S.spares}</b></div>${errs.length ? `<ul>${errs.map(e => `<li>${e.msg}</li>`).join('')}</ul>` : '<p class="sub" style="font-size:13px">Beş eluat da azot altında uçurma (evaporasyon) adımına hazır.</p>'}<div class="acts" style="margin-top:6px"><button class="bt full" id="again">Tekrar dene</button></div></div>`;
+  $('#again').onclick = () => startTask('spe');
+  say(ok ? 'Mükemmel! Beş kartuşu da sapmasız işledin: şartlandırma, yükleme, yıkama, kurutma ve elüsyon tamam.' : 'Görev tamamlandı ama protokol sapmaları var. Aşağıdaki notları oku ve tekrar dene.');
+  renderTasks();
+}
+function goLab(e) { if (e && e.preventDefault) e.preventDefault(); const ret = new URLSearchParams(location.search).get('ret'); location.href = (/github\.io$/.test(location.hostname) ? '' : 'https://spemrt.github.io/toksilab/') + 'lab_giris.html' + (ret ? '#' + ret : ''); }
+$('#mHome').onclick = goLab; { const a = document.getElementById('hLab'); if (a) a.onclick = goLab; }
+$('#mTasks').onclick = $('#tOpen').onclick = () => { renderTasks(); $('#tdlg').showModal(); }; $('#tClose').onclick = () => $('#tdlg').close();
+$('#mParts').onclick = () => startTask('parts');
+$('#mUse').onclick = () => { if (UI.task === 'parts') startTask('spe'); else setUIMode('use'); };
+$('#mReset').onclick = () => { UI.done = {}; UI.seen = {}; startTask('parts'); };
+$('#mPanel').onclick = () => { document.body.classList.toggle('panel'); $('#mPanel').classList.toggle('on', document.body.classList.contains('panel')); };
+$('#sideX').onclick = () => { document.body.classList.remove('panel'); $('#mPanel').classList.remove('on'); };
+$('#stepT').onclick = () => $('#stepc').classList.toggle('col');
+if (innerWidth > 900) $('#stepc').classList.remove('col');
+new MutationObserver(() => { const m = document.querySelector('.mentor'); m.classList.remove('pop'); void m.offsetWidth; m.classList.add('pop'); }).observe($('#say'), { childList: true, characterData: true, subtree: true });
+{ const rs = $('#res'); new MutationObserver(() => { if (rs.innerHTML && !rs.querySelector('.resX')) { const b = document.createElement('button'); b.className = 'resX'; b.textContent = '✕'; b.onclick = () => { rs.hidden = true; }; rs.prepend(b); rs.hidden = false; } }).observe(rs, { childList: true }); }
+startTask('parts');
+new ResizeObserver(resize).observe(stage); resize();
+requestAnimationFrame(frame);
+Object.defineProperty(window, 'S', { get: () => S }); window.__spe = { UI, startTask, setUIMode, camera, renderer, THREE, aspirate, dispense, pressSide, setMode, togglePull, placeNext, carts, swapRacks, setReg, setSpeed };
+</script>
+</body>
+</html>

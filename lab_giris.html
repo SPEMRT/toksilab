@@ -284,7 +284,8 @@ const DEVS=[];const DEVI={
  ult:{ic:'〰',n:'Ultrasonik su banyosu (ISOLAB, 3 L)',f:'ultra_pilot.html',d:'Sudaki ses dalgalarıyla kavitasyon oluşturur: LC-MS/MS mobil fazlarındaki çözünmüş gazı uzaklaştırır (degazlama), standart ve numunelerin çözünmesini hızlandırır. Isıtmalıdır (20–80 °C).',t:['LC-MS/MS mobil fazını degaze et']},
  hsgc:{ic:'🔥',n:'HS-GC-MS (Agilent 7694E · 6890N · 5975B)',f:'hsgcms_pilot.html',d:'Headspace gaz kromatografi-kütle spektrometrisi. Soldaki 7694E headspace örnekleyici kapalı vialdeki örneği ısıtır; uçucu maddeler vialin üst boşluğuna (headspace) geçer ve gri transfer hattıyla 6890N gaz kromatografına verilir. Kolonda ayrılan bileşikler 5975B kütle seçici dedektörde (MSD) tanımlanır. Kanda etanol ve metanol gibi uçucuların analizi bu cihazla yapılır. Üstteki 7683B otomatik enjektör ise sıvı enjeksiyonlu GC-MS analizleri içindir.',t:['Kanda etanol / metanol: HS vial hazırlama','Headspace parametreleri (Zone Temps · Vial Parameters)','GC fırın programı ve MSD','Kalibrasyon ve sonuç']},
  cal:{ic:'🧮',n:'Kalibrasyon çalışma masası',f:'kalibrasyon_pilot.html',d:'Kalibrasyon çözeltilerinin hesabını burada yaparsın: 1 mg/mL ana stoktan ara stoklarla metanolde 0,05–5 ng/mL kalibratörlere inersin. Birim çevirme ve C₁V₁ = C₂V₂.',t:['Bilgi: birimler ve formül','Çözümlü örnek: fentanil 0,05–5 ng/mL','Sıra sende: alıştırma tablosu']},
- pip:{ic:'💧',n:'Döner pipet standı',f:'pipet_pilot.html',d:'P10, P20, P100, P200, P1000 ve P5000 otomatik pipetler. Kullanılmayan pipet standda dik asılı durur.',t:['150 µL su (ileri pipetaj)','200 µL kan (ters pipetaj)','5 µL ara stok · 100 µL DCM']}};
+ pip:{ic:'💧',n:'Döner pipet standı',f:'pipet_pilot.html',d:'P10, P20, P100, P200, P1000 ve P5000 otomatik pipetler. Kullanılmayan pipet standda dik asılı durur.',t:['150 µL su (ileri pipetaj)','200 µL kan (ters pipetaj)','5 µL ara stok · 100 µL DCM']},
+ spe:{ic:'🧫',n:'Pozitif basınçlı SPE (CEREX 48)',f:'spe_pilot.html',d:'Katı faz ekstraksiyonu (SPE) için pozitif basınçlı manifold. Kartuşlar kolon rafına takılır; iki baskı anahtarına birlikte basınca kafa iner ve azot her kartuşa ayrı basınç uygular. Şartlandırma, yükleme ve yıkama sıvıları atık teknesine, eluat toplama tüplerine akar.',t:['Parçaları tanı','Atık suda SPE · Oasis HLB (5 numune)','Serbest kullanım']}};
 const R2={x0:2,x1:10,z0:-14,z1:-8,dz:-11};const OBST=[];const R2INFO={};
 {const RM=new THREE.Group();scene.add(RM);const A=(geo,mat,x,y,z,sh=true,par=RM)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=sh;m.receiveShadow=true;par.add(m);return m};
  const info=(m,id,t,d)=>{R2INFO[id]=[t,d];hot(m,'r2:'+id);return m};
@@ -341,7 +342,7 @@ const R2={x0:2,x1:10,z0:-14,z1:-8,dz:-11};const OBST=[];const R2INFO={};
   for(let x=x0+.2;x<=x1-.15;x+=1.2)A(new THREE.BoxGeometry(.02,.2,.3),mat.steel,x,1.69,zw+dir*.16);
   const hb=A(new THREE.BoxGeometry(L,.95,deep),new THREE.MeshBasicMaterial({visible:false}),cx,.48,zc,false);
   OBST.push({x0:x0-.02,x1:x1+.02,z0:Math.min(zw,zw+dir*deep),z1:Math.max(zw,zw+dir*deep)});return hb}
- info(bench(4.85,9.97,-8.0,-1),'benchR','Yan tezgah (sağ)','Kimyasal dayanımlı epoksi tezgah; altında kapaklı dolaplar ve çekmeceler var. Duvarda priz bandı ve raf bulunur. Cihazlar (vorteks, santrifüj, buzdolabı) buraya yerleştirilecek.');
+ info(bench(4.85,9.97,-8.0,-1),'benchR','Yan tezgah (sağ)','Kimyasal dayanımlı epoksi tezgah; altında kapaklı dolaplar ve çekmeceler var. Duvarda priz bandı ve raf bulunur. Pipet standının karşısında pozitif basınçlı SPE manifoldu (CEREX 48), yanında çözelti erlenleri ve numune tüpleri durur.');
  info(bench(4.45,9.97,-14.0,1),'benchL','Yan tezgah (sol)','Uzun çalışma tezgahı; altı dolaplı. Pipetleme, numune etiketleme ve çözelti hazırlama burada yapılır.');
  /* orta tezgah (ada) */
  {const x0=4.7,x1=8.5,zc=-11,w=1.3,cx=(x0+x1)/2,L=x1-x0;
@@ -450,6 +451,44 @@ const R2={x0:2,x1:10,z0:-14,z1:-8,dz:-11};const OBST=[];const R2INFO={};
    B(g,new THREE.CylinderGeometry(.009,.004,.06,10),wht,x,.13,z);B(g,new THREE.CylinderGeometry(.012,.011,.15,14),wht,x,.235,z);B(g,new THREE.CylinderGeometry(.009,.009,.02,12),new THREE.MeshStandardMaterial({color:'#B9C1C5'}),x,.32,z);
    B(g,new THREE.CylinderGeometry(.008,.008,.016,12),new THREE.MeshPhysicalMaterial({color:c,roughness:.3,clearcoat:.6}),x,.34,z)});
   DEVS.push({k:'pip',g,x:5.55,z:-10.62,y:1.38})}
+ /* SPE · CEREX 48 — sağ tezgah, döner pipet standının karşısı (ön yüzü orta tezgaha bakar) */
+ {const g=D(5.9,.918,-8.33,Math.PI);
+  const ss=new THREE.MeshStandardMaterial({color:'#C3C9CD',metalness:.85,roughness:.3}),bkS=new THREE.MeshStandardMaterial({color:'#1E2124',roughness:.55}),wtS=new THREE.MeshStandardMaterial({color:'#F2F3F2',roughness:.5});
+  const W=.34,H=.19,Dp=.3,y0=.012,top=y0+H+.006;
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>B(g,new THREE.CylinderGeometry(.014,.016,y0,12),rub,a*(W/2-.03),y0/2,b*(Dp/2-.03)));
+  B(g,RB(W,H,Dp,.008),ss,0,y0+H/2,0);
+  const pan=canvasTex(1200,650,(c,w,h)=>{c.fillStyle='#F4F5F4';c.fillRect(0,0,w,h);c.fillStyle='#1D58B8';c.fillRect(40,118,1120,6);c.fillRect(40,620,1120,6);
+   c.fillStyle='#121418';c.font='italic 900 52px Arial';c.fillText('CEREX',470,98);c.font='italic 900 42px Arial';c.fillText('48',650,98);c.fillStyle='#1D58B8';c.font='bold 40px Arial';c.fillText('SPE',910,100);
+   c.fillStyle='#D6DCE3';c.fillRect(212,140,90,390);c.fillStyle='#2A63C4';c.fillRect(272,160,22,350);c.fillStyle='#E8F2FF';c.fillRect(232,160,26,350);
+   [[480,250],[830,250]].forEach(([x,y])=>{c.fillStyle='#15171A';c.fillRect(x-76,y-76,152,152);c.fillStyle='#1F4FAE';c.beginPath();c.arc(x,y,62,0,7);c.fill();c.strokeStyle='#fff';c.lineWidth=4;c.beginPath();c.moveTo(x,y);c.lineTo(x+30,y-40);c.stroke()});
+   c.fillStyle='#1D58B8';c.fillRect(560,365,190,22);c.fillStyle='#fff';c.font='bold 15px Arial';c.textAlign='center';c.fillText('FLOW CONTROL',655,381);
+   c.fillStyle='#121418';c.font='bold 13px Arial';c.fillText('ADJUSTABLE FLOW',480,420);c.fillText('MAXIMUM FLOW',830,420);c.fillText('OFF',655,528);
+   [[70,300],[1130,300]].forEach(([x,y])=>{c.fillStyle='#1B1C1F';c.fillRect(x-30,y-52,60,104)})});
+  B(g,new THREE.PlaneGeometry(W-.012,H-.012),new THREE.MeshStandardMaterial({map:pan,roughness:.5}),0,y0+H/2,Dp/2+.001,false);
+  const fx=px=>-(W-.012)/2+px/1200*(W-.012),fy=py=>y0+H/2+(H-.012)/2-py/650*(H-.012);
+  [[480,510],[830,510]].forEach(([x,y])=>{const k=B(g,new THREE.CylinderGeometry(.014,.016,.018,18),bkS,fx(x),fy(y),Dp/2+.009);k.rotation.x=Math.PI/2});
+  {const k=B(g,new THREE.CylinderGeometry(.01,.011,.008,16),M.steel,fx(655),fy(575),Dp/2+.004);k.rotation.x=Math.PI/2}
+  B(g,new THREE.BoxGeometry(W+.004,.006,Dp+.004),ss,0,y0+H+.003,0);
+  /* raf istifi: atık teknesi + kolon rafı + 5 kartuş */
+  const rz=.015;[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>B(g,new THREE.CylinderGeometry(.005,.005,.08,10),M.steel,a*.112,top+.04,rz+b*.04));
+  B(g,new THREE.BoxGeometry(.21,.055,.08),new THREE.MeshPhysicalMaterial({color:'#F3F4F2',transparent:true,opacity:.75,roughness:.6,depthWrite:false}),0,top+.0375,rz,false);
+  B(g,new THREE.BoxGeometry(.23,.004,.09),bkS,0,top+.08+.04,rz);B(g,new THREE.BoxGeometry(.23,.003,.09),bkS,0,top+.08+.014,rz);B(g,new THREE.BoxGeometry(.23,.022,.003),bkS,0,top+.08+.027,rz+.044);
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>B(g,new THREE.CylinderGeometry(.005,.005,.04,10),M.steel,a*.11,top+.08+.02,rz+b*.038));
+  [-2,-1,0,1,2].forEach(i=>{const x=i*.034;B(g,new THREE.CylinderGeometry(.0048,.0048,.072,12),new THREE.MeshPhysicalMaterial({color:'#F7F8F6',transparent:true,opacity:.6,roughness:.3}),x,top+.08+.048,rz+.027,false);B(g,new THREE.CylinderGeometry(.0066,.0066,.003,12),wtS,x,top+.08+.084,rz+.027)});
+  /* kılavuz kolonlar ve basınç kafası (yukarıda) */
+  [-.155,.155].forEach(x=>{B(g,new THREE.CylinderGeometry(.006,.006,.318,14),M.steel,x,top+.159,-.055);B(g,new THREE.CylinderGeometry(.008,.008,.005,14),M.steel,x,top+.318,-.055)});
+  const ph=top+.243;B(g,new THREE.BoxGeometry(.325,.02,.162),bkS,0,ph+.017,0);B(g,new THREE.BoxGeometry(.3,.012,.15),bkS,0,ph+.006,0);B(g,new THREE.BoxGeometry(.23,.005,.092),new THREE.MeshStandardMaterial({color:'#45484D',roughness:.8}),0,ph-.002,rz);
+  B(g,new THREE.BoxGeometry(.055,.022,.036),bkS,0,ph+.038,-.015);B(g,new THREE.CylinderGeometry(.003,.003,.022,8),M.steel,0,ph+.058,-.015);B(g,new THREE.BoxGeometry(.032,.004,.005),M.steel,0,ph+.068,-.015);
+  {const cv=new THREE.CatmullRomCurve3([new THREE.Vector3(.032,ph+.05,-.06),new THREE.Vector3(.04,ph+.085,-.075),new THREE.Vector3(.01,ph+.06,-.125),new THREE.Vector3(-.055,(ph+.075)/2+.02,-.155),new THREE.Vector3(-.07,.105,-.16),new THREE.Vector3(-.07,.075,-.152)]);
+   B(g,new THREE.TubeGeometry(cv,48,.003,8,false),new THREE.MeshStandardMaterial({color:'#1F5FD6',roughness:.35}),0,0,0,false)}
+  [[-.07],[.07]].forEach(([x])=>{const f=B(g,new THREE.CylinderGeometry(.006,.006,.01,12),new THREE.MeshStandardMaterial({color:'#E8642C',roughness:.45}),x,.075,-Dp/2-.005);f.rotation.x=Math.PI/2});
+  DEVS.push({k:'spe',g,x:5.9,z:-8.33,y:1.45})}
+ /* SPE yanındaki çözelti erlenleri ve numune tüpleri (görsel) */
+ {const g=D(6.42,.918,-8.36,Math.PI);const gl=new THREE.MeshPhysicalMaterial({color:'#EAF6FA',roughness:.05,transparent:true,opacity:.35,depthWrite:false,side:THREE.DoubleSide});
+  const prof=[[0,0],[.04,0],[.042,.003],[.041,.01],[.014,.095],[.0115,.103],[.0115,.125],[.0135,.128]].map(([r,y])=>new THREE.Vector2(r,y));const eg=new THREE.LatheGeometry(prof,24);
+  ['#CDE6FF','#B9E6F0','#BFE8D6','#D6C6FF'].forEach((col,i)=>{const x=-.06+i*.095;B(g,eg,gl,x,0,0,false);const lq=B(g,new THREE.CylinderGeometry(.03,.039,.04,20),new THREE.MeshStandardMaterial({color:col,transparent:true,opacity:.75,roughness:.1}),x,.021,0,false)});
+  const rk=B(g,new THREE.BoxGeometry(.17,.06,.04),new THREE.MeshStandardMaterial({color:'#C4C8CD',metalness:.4,roughness:.35}),.09,.03,-.11);
+  for(let i=0;i<5;i++){const x=.026+i*.032;B(g,new THREE.CylinderGeometry(.0085,.0085,.11,12),gl,x,.07,-.11,false);B(g,new THREE.CylinderGeometry(.0078,.0078,.065,12),new THREE.MeshStandardMaterial({color:'#A5813F',transparent:true,opacity:.85}),x,.046,-.11,false)}}
 
  /* kalibrasyon çalışma masası — orta tezgah, pencere tarafı */
  {const g=D(7.6,.918,-10.55,0);const blkM=new THREE.MeshStandardMaterial({color:'#22272A',roughness:.4,metalness:.3});
@@ -896,7 +935,7 @@ say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri 
 {const m=location.hash.match(/^#r([12])-(\w+)/);if(m){const no=+m[1],k=m[2];history.replaceState(null,'',location.pathname+location.search);
  $('#intro').classList.add('out');started=true;inside=true;teamMode='home';TP.forEach(p=>{p.root.position.set(p.o.home.x,0,p.o.home.z);p.root.rotation.y=p.o.home.ry;p.dest=null;p.arrived=true});
  openRoomDoor=no;inRoom=no;roomUI();const d=DEVS.find(x=>x.k===k)||DEVS.find(x=>(x.room||2)===no);
- const sp={ult:[6.32,-12.5],elga:[5.5,-12.45],bal:[3.6,-12.25],cen:[8.9,-12.55],vor:[7.9,-12.55],pip:[5.5,-9.75],cal:[7.6,-9.75],hsgc:[5.0,-3.7]}[d.k]||[3,RBD[no].dz];
+ const sp={ult:[6.32,-12.5],elga:[5.5,-12.45],bal:[3.6,-12.25],cen:[8.9,-12.55],vor:[7.9,-12.55],pip:[5.5,-9.75],cal:[7.6,-9.75],spe:[5.9,-9.3],hsgc:[5.0,-3.7]}[d.k]||[3,RBD[no].dz];
  G.x=P.x=sp[0];G.z=P.z=sp[1];G.yaw=P.yaw=Math.atan2(-(d.x-sp[0]),-(d.z-sp[1]));G.pitch=P.pitch=-.3;doorOpen=1;drawMap();nearDev=d;{const c=$('#devchip');c.innerHTML=`${DEVI[d.k].ic} <b>${DEVI[d.k].n}</b> · bilgi ve kullanım ›`;c.onclick=()=>openDev(d.k)}
  say(`Tekrar hoş geldin! <b>${RBD[no].n}</b>’ndasın, <b>${DEVI[d.k].n}</b> önünde kaldığın yerdesin. Başka bir cihaza geçebilir ya da <b>‹ Koridora dön</b> ile koridora çıkabilirsin.`)}}
 $('#mHome').onclick=()=>window.open(BASE+'my_toksilab.html','_blank','noopener');
