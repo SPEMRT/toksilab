@@ -5,258 +5,345 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SPE · CEREX 48 · Gerçekçi Pilot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
-:root{--bg:#0E1518;--card:#1E2A30;--card2:#25333A;--line:#34454D;--ink:#EAF2F3;--muted:#9BB0B6;--blue:#2F7DE1;--ok:#2DBE5B;--bad:#E5484D;--warn:#F2B632;
- --f-display:'Barlow Condensed',system-ui,sans-serif;--f-body:'Source Sans 3',system-ui,sans-serif;--f-mono:'IBM Plex Mono',ui-monospace,monospace}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0E1518}}
-:root[data-theme="light"]{--bg:#0E1518}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:radial-gradient(ellipse at 30% 0%,#1A2A30,var(--bg) 60%);color:var(--ink);font-family:var(--f-body);min-height:100vh;padding:14px 16px 28px}
-button{font:inherit;color:inherit;cursor:pointer}
-.wrap{max-width:1240px;margin:0 auto;display:grid;gap:12px}
-.hdr{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:10px}.brand b{font:700 24px/1 var(--f-display)}.brand b i{font-style:normal;color:#2BD9C0}
-.pill{font:600 10.5px var(--f-mono);letter-spacing:.1em;border-radius:999px;padding:4px 9px;background:var(--warn);color:#2A2000}
-.hdr a{color:#7FDCD0;font-weight:600;font-size:14px}
-.grid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:12px;align-items:start}
-.stage{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);background:#DDE3E6}
-#cv3{position:relative;width:100%;aspect-ratio:9/7;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
-#cv3 canvas{display:block;width:100%!important;height:100%!important}
-#ov{position:absolute;left:0;top:0;pointer-events:none}
-#ov .pl{pointer-events:auto;cursor:pointer}#ov .pl:hover rect.lb{stroke:#2F7DE1;stroke-width:2}
-.snav{position:absolute;left:8px;top:8px;z-index:4;display:grid;gap:6px;background:#16242A;border-radius:12px;padding:6px;width:74px;box-shadow:0 6px 18px rgba(0,0,0,.3)}
-.snav button{border:0;border-radius:9px;background:#25333A;color:#fff;display:grid;place-items:center;gap:2px;font:600 11px var(--f-body);padding:8px 2px;line-height:1.1}
-.snav button span{font-size:20px;line-height:1}.snav button.on{background:var(--blue)}
-.dsp{position:absolute;right:10px;top:10px;z-index:3;width:210px;background:rgba(20,30,34,.92);border-radius:14px;padding:10px 12px;display:grid;gap:4px;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none}
-.dsp[hidden]{display:none}.dsp small{font:600 10px var(--f-mono);letter-spacing:.08em;color:#9BB0B6}
-.dsp .val{font:600 25px var(--f-mono);color:#EAF6F8;text-align:right;letter-spacing:-.5px}.dsp .mg{font:500 12.5px var(--f-mono);color:#7CF2D8;text-align:right}
-.dsp .st{display:flex;justify-content:space-between;font:600 11px var(--f-mono)}.stb{color:#2DBE5B}.ust{color:#F2B632}
-.lvrow{display:flex;align-items:center;gap:10px;margin-top:4px;padding-top:6px;border-top:1px solid #34454D}.lvrow svg{width:64px;height:64px;flex:none}.lvrow span{font:600 11.5px var(--f-mono);line-height:1.35}
-.fpop{position:absolute;z-index:5;transform:translate(-50%,calc(-100% - 18px));background:#16242A;border-radius:12px;padding:7px;display:grid;gap:5px;box-shadow:0 8px 20px rgba(0,0,0,.4);text-align:center}.fpop[hidden]{display:none}.fpop b{font-size:12px;color:#fff}.fpop div{display:flex;gap:6px}.fpop button{width:48px;height:42px;border:0;border-radius:9px;background:#2F7DE1;color:#fff;font-size:24px;font-weight:700}
-.smenu{position:absolute;z-index:6;transform:translate(-50%,calc(-100% - 16px));width:200px;background:#16242A;border-radius:12px;padding:10px;display:grid;gap:6px;box-shadow:0 10px 24px rgba(0,0,0,.45)}.smenu[hidden]{display:none}.smenu b{color:#fff;font:700 17px var(--f-display)}.smenu .sub{color:#9BB0B6}.smenu button{border:0;border-radius:9px;background:#25333A;color:#fff;padding:9px;font-weight:700;font-size:14px}.smenu button.on{background:#2F7DE1}.smenu .u2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.smenu .x{background:#3A4B53}
-@keyframes hwP{0%,100%{box-shadow:0 0 0 2px #E5484D}50%{box-shadow:0 0 0 4px #FF1F1F,0 0 16px rgba(255,40,40,.85)}}.hw{animation:hwP 1s infinite}
-.tip{position:absolute;z-index:7;max-width:270px;background:rgba(18,28,32,.95);color:#EAF2F3;border-radius:11px;padding:9px 12px;font-size:13.5px;line-height:1.4;pointer-events:none;box-shadow:0 8px 22px rgba(0,0,0,.35);border-left:4px solid #2BD9C0}.tip[hidden]{display:none}.tip b{display:block;font:700 16px var(--f-display);color:#7CF2D8;margin-bottom:2px}
-.held{position:absolute;left:96px;bottom:10px;z-index:3;background:rgba(47,125,225,.95);color:#fff;font-weight:700;font-size:13.5px;border-radius:999px;padding:6px 12px;pointer-events:none}
-.held[hidden]{display:none}
-.rot{position:absolute;right:10px;bottom:10px;z-index:3;font:600 11px var(--f-mono);color:#3E4C52;background:rgba(255,255,255,.75);border-radius:999px;padding:4px 10px;pointer-events:none}
-.nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:#132228;font-size:16px}
-.nogl[hidden]{display:none}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:7px}
-.card h2{font:700 21px/1 var(--f-display)}.card h3{font:700 15px var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.sub{font:500 11px var(--f-mono);color:var(--muted)}
-.acts{display:grid;grid-template-columns:1fr 1fr;gap:5px}.acts3{grid-template-columns:1fr 1fr 1fr}
-.bt{border-radius:10px;padding:7px;font-weight:700;font-size:13.5px;background:var(--card2);border:1px solid var(--line)}
-.bt.on{background:var(--blue);border-color:var(--blue);color:#fff}.bt.full{grid-column:1/-1}.bt:disabled{opacity:.4;cursor:not-allowed}
-.tband{grid-template-columns:1fr auto;align-items:center;padding:10px 14px}.tband b{display:block;font:700 18px var(--f-display);margin-top:2px}
-.steps{list-style:none;display:grid;gap:3px}.steps li{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
-.steps li i{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#33444C;font-size:11px;font-weight:700;font-style:normal}
-.steps li.done{color:var(--ink)}.steps li.done i{background:var(--ok)}.steps li.cur{color:#fff}.steps li.cur i{background:var(--blue)}
-.mentor{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;background:#F4F8F9;color:#132228;border-radius:14px;padding:12px 14px;border-left:6px solid #0E6B68}
-.mentor img{width:52px;height:52px;border-radius:50%;object-fit:cover}.mentor .nm{font:600 11px var(--f-mono);letter-spacing:.08em;color:#0E6B68}.mentor p{font-size:15.5px;line-height:1.4}
-.res{border-width:2px}.res.ok{border-color:var(--ok)}.res.bad{border-color:var(--bad)}.res b.big{font:700 22px var(--f-display)}
-.res ul{padding-left:18px;display:grid;gap:3px;font-size:14px;color:#C7D6DA}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px}.kv span{color:var(--muted)}.kv b{font:600 14px var(--f-mono);text-align:right}
-.tasks{display:grid;gap:6px}
-.task{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:center;text-align:left;background:var(--card2);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
-.task.on{border-color:var(--blue)}.task span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#3A4B53;font-size:12px;font-weight:700}.task.done span{background:var(--ok)}
-.task small{display:block;color:var(--muted);font-size:12.5px}
-dialog.tdlg{margin:auto;width:min(460px,92vw);border:0;border-radius:16px;background:var(--card);color:var(--ink);padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-dialog.tdlg::backdrop{background:rgba(5,10,12,.65)}dialog.tdlg h3{font:700 22px var(--f-display);margin-bottom:10px}
-.tdlg .close{width:100%;margin-top:12px;background:var(--blue);border:0;color:#fff}
-@media (max-width:900px){.grid{grid-template-columns:1fr}.snav{position:static;display:flex;width:auto;border-radius:0;padding:5px;gap:5px}.snav button{flex:1;font-size:10px;padding:6px 1px}.snav button span{font-size:17px}
- #cv3{aspect-ratio:1/1.02}.dsp{width:150px;padding:8px}.dsp .val{font-size:17px}.lvrow svg{width:46px;height:46px}.lvrow span{font-size:10px}.held{left:10px;font-size:12px}.rot{display:none}}
-
-/* ===== tam sayfa düzen ===== */
-html,body{height:100%;overflow:hidden}body{padding:0;background:#0E1518}
-.wrap,.grid{display:block;max-width:none;margin:0}
-.stage{position:fixed;inset:0;border-radius:0;box-shadow:none;z-index:1}
-#cv3{aspect-ratio:auto!important;width:100vw;height:100vh;height:100dvh}
-.hdr{position:fixed;top:10px;left:96px;z-index:6;background:rgba(14,21,24,.82);backdrop-filter:blur(6px);border-radius:12px;padding:7px 12px;gap:12px}
-.hdr .brand b{font-size:20px}
-#tband{position:fixed;top:58px;left:96px;z-index:6;padding:7px 12px;background:rgba(30,42,48,.9);backdrop-filter:blur(6px);gap:12px;max-width:430px}
-#tband b{font-size:16px}#tband .bt{padding:5px 10px}
-.mentor{position:fixed;z-index:6;left:50%;bottom:14px;transform:translateX(-50%);width:min(680px,calc(100vw - 600px));min-width:380px;box-shadow:0 10px 30px rgba(0,0,0,.4);background:rgba(244,248,249,.96);transition:left .3s}
-.mentor p{font-size:15px}
-.mentor.pop{animation:mpop .6s ease}@keyframes mpop{0%{transform:translateX(-50%) scale(.97);box-shadow:0 0 0 4px #2BD9C0}100%{transform:translateX(-50%) scale(1)}}
-.stepc{position:fixed;z-index:6;left:12px;bottom:14px;width:270px;max-height:calc(100vh - 140px);overflow:auto;background:rgba(30,42,48,.92);backdrop-filter:blur(6px);gap:5px}
-.stepc h3{cursor:pointer;display:flex;justify-content:space-between}.stepc.col li:not(.cur){display:none}.stepc:not(.col) h3 span{transform:rotate(90deg)}.stepc h3 span{display:inline-block;transition:transform .2s}
-#side{position:fixed;z-index:9;top:0;right:0;bottom:0;width:370px;overflow:auto;padding:12px;background:rgba(14,21,24,.94);backdrop-filter:blur(8px);display:grid;gap:12px;align-content:start;transform:translateX(105%);transition:transform .3s;box-shadow:-10px 0 30px rgba(0,0,0,.4)}
-body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;width:calc(100vw - 676px);min-width:0;animation:none}body.panel .rot{display:none}body.panel .dsp{right:382px}
-.sideX{justify-self:end;border:0;border-radius:9px;background:#25333A;color:#fff;padding:6px 12px;font-weight:700}
-#mPanel.on{background:#2F7DE1}
-.held{left:50%;transform:translateX(-50%);bottom:auto;top:64px}
-#res{position:fixed;z-index:15;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 24px));max-height:80vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.6);border-radius:14px}
-#res:empty,#res[hidden]{display:none}#res .resX{position:sticky;top:0;float:right;margin:6px;z-index:2;border:0;border-radius:9px;background:#25333A;color:#fff;padding:5px 10px;font-weight:700}
-.rot{bottom:auto;top:12px;right:auto;left:calc(100vw - 520px)}
-@media (max-width:900px){
- .hdr{display:none}
- .snav{position:fixed!important;top:0;left:0;right:0;z-index:8}
- #tband{top:60px;left:8px;right:8px;max-width:none;padding:6px 10px}#tband .sub{display:none}#tband b{font-size:14px;margin:0}
- .stepc{top:108px;bottom:auto;left:8px;width:calc(100vw - 200px);max-height:45vh;padding:8px 10px}.stepc h3{font-size:13px}.stepc li{font-size:12px}
- .dsp{top:108px!important;right:8px!important}
- .mentor{left:8px;right:8px;width:auto;min-width:0;transform:none;bottom:8px;grid-template-columns:38px 1fr;gap:8px;padding:8px 10px;max-height:28vh;overflow:auto}.mentor img{width:38px;height:38px}.mentor p{font-size:13.5px}
- .mentor.pop{animation:none}body.panel .mentor{left:8px}
- #side{top:auto;left:0;width:auto;height:auto;max-height:72vh;border-radius:16px 16px 0 0;transform:translateY(105%)}body.panel #side{transform:none}body.panel .dsp{right:8px}
- .held{top:auto;bottom:calc(28vh + 20px);left:50%}.dsp{width:175px}
+/* Layout: one-screen operator console — readout bar on top, protocol left, 3D bench centre, controls right, cartridge dock along the bottom */
+:root {
+  --bg: #0E1518;
+  --panel: #16242A;
+  --fg: #EAF2F3;
+  --muted: #9BB0B6;
+  --line: #34454D;
+  --chip: #25333A;
+  --accent: #2F7DE1;
+  --accent-ink: #ffffff;
+  --stage: #9FB3BA;
+  --grid: #7C929A;
+  --ok: #2DBE5B;
+  --warn: #F2B632;
+  --bad: #E5484D;
+  --dry: #A99BF5;
+  --brand: #2BD9C0;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Source Sans 3", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
 }
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; overflow: hidden; }
+.app {
+  display: grid; height: 100%;
+  grid-template-columns: 268px minmax(0, 1fr) 300px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "top top top" "left stage right" "dock dock dock";
+}
+.gut { padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); }
+
+/* top bar */
+.top { grid-area: top; background: var(--panel); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 18px; padding-block: 8px; flex-wrap: wrap; }
+.brand { display: flex; flex-direction: column; line-height: 1; }
+.brand b { font: italic 700 26px var(--font-display); }
+.brand b sup { font-size: .45em; font-style: normal; }
+.brand span { font: 600 10.5px var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-top: 3px; }
+.ros { display: flex; gap: 16px; }
+.ro .k { font: 500 10.5px var(--font-body); color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+.ro .v { font: 500 18px var(--font-mono); font-variant-numeric: tabular-nums; }
+.ro .v small { font-size: 11px; color: var(--muted); margin-left: 2px; }
+.status { flex: 1 1 260px; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 1.3; padding: 7px 10px; border-radius: 6px; background: var(--chip); }
+.status.warn { background: color-mix(in srgb, var(--warn) 16%, transparent); }
+.status.bad { background: color-mix(in srgb, var(--bad) 16%, transparent); }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; background: var(--muted); }
+.dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); } .dot.bad { background: var(--bad); } .dot.run { background: var(--accent); animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .dot.run { animation: none; } }
+.speed { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+
+/* side panels */
+.side { background: var(--panel); overflow-y: auto; min-height: 0; padding-block: 14px; display: flex; flex-direction: column; gap: 18px; }
+.left { grid-area: left; border-right: 1px solid var(--line); }
+.right { grid-area: right; border-left: 1px solid var(--line); }
+h2 { font: 600 11px var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+ol.steps { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 4px; counter-reset: s; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 20px 1fr; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); line-height: 1.25; }
+ol.steps li::before {
+  content: counter(s); width: 19px; height: 19px; border-radius: 50%; border: 1px solid var(--line);
+  display: grid; place-items: center; font: 500 10.5px var(--font-mono); color: var(--muted);
+}
+ol.steps li.now { color: var(--fg); font-weight: 600; } ol.steps li.now::before { border-color: var(--accent); color: var(--accent); }
+ol.steps li.done::before { content: "✓"; background: var(--ok); border-color: var(--ok); color: var(--panel); }
+.card { border: 1px solid var(--accent); border-radius: 8px; padding: 10px 12px; font-size: 13.5px; line-height: 1.45; margin: 0; }
+ul.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 1.35; }
+ul.log li { display: grid; grid-template-columns: 46px 1fr; gap: 6px; }
+ul.log time { font: 500 11px var(--font-mono); color: var(--muted); padding-top: 1px; }
+ul.log li.err span { color: var(--bad); }
+ul.log li.fixed span { color: var(--muted); text-decoration: line-through; }
+ul.log li.info span { color: var(--ok); }
+.empty { color: var(--muted); font-size: 12.5px; margin: 0; }
+.note { font-size: 11.5px; color: var(--muted); line-height: 1.4; margin: 0; }
+
+.btn, .seg button, .views button {
+  font: 600 12.5px/1.1 var(--font-body); color: var(--fg); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; cursor: pointer;
+}
+.btn:hover:not(:disabled), .seg button:hover:not(:disabled), .views button:hover { border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, .lane:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.armed { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.stack { display: flex; flex-direction: column; gap: 8px; }
+.srcs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.srcs .btn { display: flex; justify-content: space-between; align-items: center; gap: 6px; text-align: left; }
+.srcs .btn small, .samples .btn small { font: 500 10.5px var(--font-mono); color: var(--muted); }
+.sw { width: 10px; height: 10px; border-radius: 2px; flex: none; border: 1px solid var(--line); }
+.nm { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.samples { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.samples .btn { padding: 6px 2px; display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.lbl { font-size: 12.5px; margin-bottom: 5px; display: flex; justify-content: space-between; gap: 8px; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; border-right: 1px solid var(--line); font: 600 12px var(--font-display); letter-spacing: .05em; padding: 8px 2px; }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.speed .seg button { padding: 6px 10px; }
+output { font: 500 12px var(--font-mono); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
+
+/* stage */
+.stage { grid-area: stage; position: relative; min-width: 0; min-height: 0; background: var(--stage); overflow: hidden; }
+#c { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+.views { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); bottom: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+.hint { position: absolute; top: 10px; left: max(12px, env(safe-area-inset-left, 0px)); font: 500 11.5px var(--font-mono); color: var(--muted); }
+.hand {
+  position: absolute; top: 8px; right: 10px; display: flex; align-items: center; gap: 8px; z-index: 2;
+  background: var(--panel); border: 1px solid var(--accent); border-radius: 6px; padding: 5px 5px 5px 10px; font-size: 12.5px; max-width: calc(100% - 20px);
+}
+.hand button { font: 600 12px var(--font-body); background: var(--chip); color: var(--fg); border: 0; border-radius: 4px; padding: 5px 8px; cursor: pointer; }
+.tip { position: absolute; pointer-events: none; transform: translate(12px, 12px); background: var(--fg); color: var(--bg); font: 500 12px var(--font-body); padding: 5px 8px; border-radius: 5px; max-width: 240px; z-index: 3; }
+.regpop {
+  position: absolute; z-index: 5; transform: translate(-50%, calc(-100% - 18px)); display: flex; align-items: center; gap: 6px;
+  background: var(--panel); border: 1px solid var(--accent); border-radius: 8px; padding: 6px 8px; box-shadow: 0 6px 20px rgb(0 0 0 / .18);
+}
+.regpop span { font: 600 11px var(--font-body); color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-right: 2px; }
+.regpop output { font: 500 16px var(--font-mono); min-width: 58px; text-align: center; }
+.regpop button { font: 600 18px/1 var(--font-body); width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--line); background: var(--chip); color: var(--fg); cursor: pointer; touch-action: none; }
+.regpop #regClose { width: 26px; height: 26px; font-size: 15px; background: transparent; border: 0; color: var(--muted); }
+.toast {
+  position: absolute; left: 50%; top: 46px; transform: translateX(-50%); z-index: 4;
+  background: var(--panel); border: 1px solid var(--warn); color: var(--fg);
+  font: 500 13px var(--font-body); padding: 8px 12px; border-radius: 6px; max-width: calc(100% - 24px);
+}
+.toast.good { border-color: var(--ok); }
+.tags { position: absolute; inset: 0; pointer-events: none; }
+.tag {
+  position: absolute; transform: translate(-50%, -100%); white-space: nowrap;
+  font: 500 11px var(--font-mono); padding: 3px 6px; border-radius: 4px;
+  background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-left: 3px solid var(--muted);
+}
+.tag.s-ok { border-left-color: var(--ok); } .tag.s-slow { border-left-color: var(--warn); } .tag.s-dry { border-left-color: var(--dry); }
+.tag.s-stop, .tag.s-bad { border-left-color: var(--bad); color: var(--bad); }
+.tag.s-soon { border-left-color: var(--warn); color: var(--warn); }
+
+/* cartridge dock */
+.dock { grid-area: dock; background: var(--panel); border-top: 1px solid var(--line); padding-block: 8px 10px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.lane { border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 3px 8px; align-items: center; min-width: 0; background: var(--panel); }
+.lane:hover { border-color: var(--accent); }
+.lane.off { opacity: .55; }
+.lane.alert { border-color: var(--bad); box-shadow: inset 0 0 0 1px var(--bad); }
+.lane.soon { border-color: var(--warn); box-shadow: inset 0 0 0 1px var(--warn); }
+.lane .id { font: 700 18px var(--font-display); }
+.lane .fl { font: 500 15px var(--font-mono); font-variant-numeric: tabular-nums; grid-column: 1 / -1; }
+.lane .fl small { font-size: 10.5px; color: var(--muted); }
+.lane .stp { font-size: 12px; color: var(--muted); grid-column: 1 / -1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lane .bar { height: 5px; background: var(--chip); border-radius: 3px; overflow: hidden; grid-column: 1 / -1; }
+.lane .bar i { display: block; height: 100%; width: 0; }
+.lane .od { font: 500 10.5px var(--font-mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lane .od.hot { color: var(--bad); }
+.lane .acts { display: flex; gap: 4px; justify-content: flex-end; }
+.lane .mini.danger { color: var(--bad); }
+.lane .mini { font: 600 11.5px var(--font-body); padding: 4px 8px; border-radius: 5px; border: 1px solid var(--line); background: var(--chip); color: var(--fg); cursor: pointer; white-space: nowrap; }
+.pill { font: 600 10.5px var(--font-body); letter-spacing: .03em; padding: 2px 7px; border-radius: 10px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+.pill.s-ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.pill.s-slow, .pill.s-soon { background: color-mix(in srgb, var(--warn) 20%, transparent); color: var(--warn); }
+.pill.s-stop, .pill.s-bad { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+.pill.s-dry { background: color-mix(in srgb, var(--dry) 18%, transparent); color: var(--dry); }
+
+@media (max-width: 1180px) { .app { grid-template-columns: 236px minmax(0, 1fr) 270px; } .ros { gap: 12px; } }
+@media (max-width: 980px) {
+  body { overflow: auto; }
+  .app { height: auto; grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "top" "stage" "dock" "right" "left"; }
+  .stage { height: 58svh; min-height: 340px; }
+  .side { overflow: visible; border: 0; border-top: 1px solid var(--line); }
+  .dock { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .status { order: 3; flex-basis: 100%; }
+}
+/* toksilab uyumu */
+body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
+.top, .side, .dock { background: rgba(14, 21, 24, .92); }
+.btn, .seg button, .views button, .lane { background: var(--chip); }
+.btn:hover:not(:disabled), .seg button:hover:not(:disabled), .views button:hover { background: #2E3F47; }
+.card { background: #1E2A30; }
+.lane.off { opacity: .5; }
+.hand, .regpop, .toast { background: #1E2A30; }
+.tip { background: rgba(18, 28, 32, .95); color: var(--fg); border-left: 4px solid var(--brand); }
+.status { background: #1E2A30; }
+.hint { color: #24343A; }
+.labbtn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font: 700 13.5px var(--font-body); color: #062126; background: linear-gradient(90deg, #2BD9C0, #7CF2D8); border-radius: 999px; padding: 7px 13px; white-space: nowrap; }
+.labbtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.brand .my { font: 700 13px var(--font-display); letter-spacing: .02em; color: var(--muted); }
+.brand .my i { font-style: normal; color: var(--brand); }
 </style>
 </head>
 <body>
-<style>
-[hidden]{display:none!important}
-/* SPE pilotu: vorteks kabuğu + kartuş kartı, regülatör balonu ve sapma listesi */
-.dsp{width:240px}.dsp .row2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.dsp .val{font-size:22px}.dsp .val small{font-size:12px;color:#9BB0B6;margin-left:2px}
-.dsp .stl{display:flex;gap:7px;align-items:flex-start;margin-top:4px;padding-top:6px;border-top:1px solid #34454D;font:600 12px/1.35 var(--f-body);color:#EAF2F3}
-.dsp .dot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:3px;background:#9BB0B6}.dsp .dot.ok{background:#2DBE5B}.dsp .dot.warn{background:#F2B632}.dsp .dot.bad{background:#E5484D}.dsp .dot.run{background:#2BD9C0}
-.dsp .stl.warn{color:#FFD77A}.dsp .stl.bad{color:#FF9EA1}
-.carts{position:absolute;right:10px;top:190px;z-index:3;width:240px;display:grid;gap:5px}
-.carts[hidden]{display:none}
-body.panel .carts{right:382px}
-.lane{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:2px 8px;align-items:center;background:rgba(20,30,34,.92);border:1px solid #34454D;border-radius:10px;padding:6px 9px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.25)}
-.lane:hover{border-color:#2F7DE1}.lane.off{opacity:.6}.lane.alert{border-color:#E5484D;box-shadow:0 0 0 1px #E5484D}.lane.soon{border-color:#F2B632;box-shadow:0 0 0 1px #F2B632}
-.lane .id{font:700 18px var(--f-display);grid-row:span 2}
-.lane .fl{font:600 13px var(--f-mono);color:#EAF6F8;white-space:nowrap}.lane .fl small{font-size:10px;color:#9BB0B6}
-.lane .stp{font-size:11.5px;color:#9BB0B6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;grid-column:2/4}
-.lane .bar{grid-column:1/-1;height:4px;border-radius:3px;background:#33444C;overflow:hidden}.lane .bar i{display:block;height:100%;width:0}
-.lane .od{grid-column:1/3;font:500 10.5px var(--f-mono);color:#9BB0B6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lane .od.hot{color:#FF8A8D}
-.lane .acts{display:flex;gap:4px;justify-content:flex-end}
-.lane .mini{border:1px solid #34454D;border-radius:7px;background:#25333A;color:#fff;padding:3px 7px;font:600 11px var(--f-body);white-space:nowrap}.lane .mini.danger{color:#FF9EA1}
-.pill{justify-self:start;font:600 10.5px var(--f-body);padding:2px 7px;border-radius:999px;background:#33444C;color:#C7D6DA;white-space:nowrap}
-.pill.s-ok{background:#173D27;color:#7BE39A}.pill.s-slow,.pill.s-soon{background:#3D3010;color:#FFD77A}.pill.s-stop,.pill.s-bad{background:#43161A;color:#FF9EA1}.pill.s-dry{background:#2B2450;color:#C3B6FF}
-.regpop{position:absolute;z-index:5;transform:translate(-50%,calc(-100% - 18px));display:flex;align-items:center;gap:6px;background:#16242A;border-radius:12px;padding:7px 9px;box-shadow:0 8px 20px rgba(0,0,0,.4)}
-.regpop[hidden]{display:none}.regpop span{font:600 11px var(--f-mono);color:#9BB0B6;letter-spacing:.06em;text-transform:uppercase}
-.regpop output{font:700 16px var(--f-mono);min-width:62px;text-align:center;color:#fff}
-.regpop button{width:44px;height:40px;border:0;border-radius:9px;background:#2F7DE1;color:#fff;font-size:20px;font-weight:700;touch-action:none}
-.regpop #regClose{width:28px;height:28px;background:#25333A;font-size:14px}
-#hand{pointer-events:auto;display:flex;gap:10px;align-items:center}#hand[hidden]{display:none}#hand button{border:0;border-radius:999px;background:rgba(255,255,255,.2);color:#fff;padding:3px 10px;font-weight:700}
-@media (min-width:901px){.stepc{max-height:calc(100vh - 380px)}}
-.stepc .stx{font-size:13px;line-height:1.45;color:#EAF2F3;background:#16242A;border-radius:10px;padding:8px 10px}
-.stepc.col .stx,.stepc.col .devh,.stepc.col #log,.stepc.col #logEmpty{display:none}
-.devh{font:700 13px var(--f-display);letter-spacing:.05em;text-transform:uppercase;color:#9BB0B6;margin-top:4px}
-ul.log{list-style:none;display:grid;gap:5px;font-size:12.5px;line-height:1.35}ul.log li{display:grid;grid-template-columns:44px 1fr;gap:6px}
-ul.log time{font:600 10.5px var(--f-mono);color:#9BB0B6;padding-top:1px}ul.log li.err span{color:#FF9EA1}ul.log li.fixed span{color:#7C8E94;text-decoration:line-through}ul.log li.info span{color:#7BE39A}
-#logEmpty{font-size:12.5px;color:#9BB0B6}
-#side .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}#side .seg .bt[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
-.lblr{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#C7D6DA}.lblr output{font:700 13px var(--f-mono);color:#fff}
-#side input[type=range]{width:100%;accent-color:#2BD9C0}
-.samples{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.samples .bt{display:grid;gap:1px;padding:6px 2px;font-size:13px}.samples .bt small{font:500 10px var(--f-mono);color:#9BB0B6}
-.bt.armed{background:var(--blue);border-color:var(--blue);color:#fff}
-@media (max-width:900px){.carts{top:auto;bottom:calc(28vh + 70px);right:8px;width:190px}.lane{padding:4px 7px}.lane .od,.lane .bar{display:none}.dsp{width:175px}.dsp .val{font-size:16px}}
-</style>
-<div class="wrap">
- <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">SPE · CEREX 48 · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
- <div class="grid">
-  <div style="display:grid;gap:12px">
-   <div class="stage" id="stg"><nav class="snav" aria-label="SPE menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav>
-    <div id="cv3">
-     <div class="dsp" id="dsp" hidden><small>CEREX 48 · MANİFOLD</small>
-      <div class="row2"><div class="val" id="roP">0.0<small>psi</small></div><div class="mg" id="roF">0.0<small> L/dk</small></div></div>
-      <div class="st"><span>Saat <b id="roT" style="color:#EAF2F3">00:00</b></span><span><span id="roDk">Atık</span> <b id="roD" style="color:#EAF2F3">0</b></span></div>
-      <div class="stl" id="statusBox"><span class="dot" id="dot"></span><span id="statusTxt"></span></div>
-     </div>
-     <div class="carts" id="lanes" hidden></div>
-     <div class="regpop" id="regpop" hidden><span id="regName"></span><button type="button" id="regMinus" aria-label="Basıncı azalt">−</button><output id="regVal">0 psi</output><button type="button" id="regPlus" aria-label="Basıncı artır">+</button><button type="button" id="regClose" aria-label="Kapat">✕</button></div>
-     <div class="tip" id="tip" hidden></div>
-     <div class="held" id="hand" hidden><span id="handTxt"></span><button type="button" id="btnDrop">Bırak</button></div>
-     <div class="rot">Sürükle: döndür · Tekerlek: yakınlaş</div>
-     <div class="nogl" id="nogl" hidden>3B görüntü için tarayıcının WebGL desteği gerekiyor. Lütfen güncel Chrome, Edge ya da Safari ile aç.</div></div></div>
-   <div class="mentor"><img id="av" alt=""><div><div class="nm">UZM. MY</div><p id="say"></p></div></div>
-   <div id="res"></div>
-   <div class="card tband" id="tband"><div><span class="sub">AKTİF GÖREV</span><b id="tName"></b></div><button class="bt" id="tOpen">Görevler</button></div>
-   <div class="card stepc col" id="stepc"><h3 id="stepT">Adımlar <span>▸</span></h3><ol class="steps" id="steps"></ol><ol class="steps" id="pSteps" hidden></ol><p class="stx" id="stageTxt"></p><div class="devh">Protokol sapmaları</div><ul class="log" id="log"></ul><p id="logEmpty">Henüz sapma yok.</p></div>
-  </div>
-  <div id="side"><button class="sideX" id="sideX">✕ Kapat</button>
-   <div class="card">
-    <div><h2>CEREX 48 · SPE</h2><div class="sub">Pozitif basınçlı manifold · Oasis HLB 3 cc</div></div>
-    <div class="sub">Numune tüpleri (N) ve yedekler (Y) · pipetle 3 mL</div>
-    <div class="samples" id="samples"></div>
-    <div class="sub">Çözeltiler için 3B sahnede erlenlere tıkla. Dökülen sıvıyı peçeteyle kurula.</div>
-   </div>
-   <div class="card">
-    <h3>Kartuş ve raf</h3>
-    <div class="acts"><button class="bt" id="btnTake" type="button">Kutudan al</button><button class="bt" id="btnPlace" type="button">Rafa yerleştir</button><button class="bt full" id="btnPull" type="button">Rafı öne çek</button><button class="bt full" id="btnRack" type="button">Toplama rafına geç</button></div>
-   </div>
-   <div class="card">
-    <h3>Basınç kafası</h3>
-    <div class="sub">İki anahtara aynı anda bas (klavye: A + L)</div>
-    <div class="acts"><button class="bt" id="btnL" type="button">Sol anahtar (A)</button><button class="bt" id="btnR" type="button">Sağ anahtar (L)</button></div>
-   </div>
-   <div class="card">
-    <h3>Gaz</h3>
-    <div class="sub">Mod seçici</div>
-    <div class="seg" role="group" aria-label="Mod seçici" id="modeSeg"><button class="bt" type="button" data-mode="adj" aria-pressed="false">ADJ</button><button class="bt" type="button" data-mode="off" aria-pressed="true">OFF</button><button class="bt" type="button" data-mode="max" aria-pressed="false">MAX</button></div>
-    <label class="lblr" for="adj">Ayarlanabilir akış <output id="adjOut">10 psi</output></label><input type="range" id="adj" min="0" max="60" step="1" value="10">
-    <label class="lblr" for="max">Maksimum akış <output id="maxOut">20 psi</output></label><input type="range" id="max" min="0" max="60" step="1" value="20">
-   </div>
-   <div class="card">
-    <h3>Simülasyon</h3>
-    <div class="sub">Hız</div>
-    <div class="seg" role="group" aria-label="Simülasyon hızı" id="speedSeg"><button class="bt" type="button" data-speed="1" aria-pressed="false">1×</button><button class="bt" type="button" data-speed="10" aria-pressed="true">10×</button><button class="bt" type="button" data-speed="60" aria-pressed="false">60×</button></div>
-    <div class="sub">Kamera</div>
-    <div class="acts"><button class="bt" id="vIso" type="button">Tezgâh</button><button class="bt" id="vFront" type="button">Ön panel</button><button class="bt" id="vRack" type="button">Kartuşlar</button><button class="bt" id="vBack" type="button">Arka</button></div>
-    <button class="bt full" id="btnReset" type="button">Yeni deneme</button>
-   </div>
-  </div>
- </div>
+
+<div class="app">
+  <header class="top gut">
+    <a class="labbtn" href="lab_giris.html" id="hLab" title="Laboratuvara dön">‹ Laboratuvar</a>
+    <div class="brand"><span class="my">MY_<i>ToksiLab</i></span><b>CEREX<sup>®</sup> 48</b><span>SPE · Oasis HLB 3 cc</span></div>
+    <div class="ros">
+      <div class="ro"><div class="k">Basınç</div><div class="v" id="roP">0.0<small>psi</small></div></div>
+      <div class="ro"><div class="k">Gaz</div><div class="v" id="roF">0.0<small>L/dk</small></div></div>
+      <div class="ro"><div class="k">Saat</div><div class="v" id="roT">00:00</div></div>
+      <div class="ro"><div class="k" id="roDk">Atık</div><div class="v" id="roD">0<small>mL</small></div></div>
+    </div>
+    <div class="status" id="statusBox"><span class="dot" id="dot"></span><span id="statusTxt"></span></div>
+    <div class="speed">Hız
+      <div class="seg" role="group" aria-label="Simülasyon hızı" id="speedSeg">
+        <button type="button" data-speed="1" aria-pressed="false">1×</button>
+        <button type="button" data-speed="10" aria-pressed="true">10×</button>
+        <button type="button" data-speed="60" aria-pressed="false">60×</button>
+      </div>
+    </div>
+  </header>
+
+  <aside class="side left gut">
+    <section>
+      <h2>Protokol</h2>
+      <ol class="steps" id="steps"></ol>
+      <p class="card" id="stageTxt"></p>
+    </section>
+    <section>
+      <h2>Protokol sapmaları</h2>
+      <ul class="log" id="log"></ul>
+      <p class="empty" id="logEmpty">Henüz sapma yok.</p>
+    </section>
+    <p class="note">Her kartuşun kendi direnci ve açılma basıncı var; atık sudaki partiküller yükleme sırasında kartuşu tıkar. Basınç altında boşalan kartuş kurumaya başlar: biten kartuşu kafayı kaldırıp bekleme standına al. Kartuş takarken ve çözelti eklerken rafı öne çekebilirsin; basınç için geri it. Pipeti kartuş dışında sıkarsan çözelti dökülür. Hatalı bir kartuşu alttaki kartında “Yenile” ile değiştirebilirsin; regülatör düğmelerine 3D'de tıklayıp + / − ile ayarlayabilirsin. 4:1 yıkama hacmi 3 mL varsayıldı.</p>
+  </aside>
+
+  <section class="stage" id="stage">
+    <canvas id="c" tabindex="0" aria-label="CEREX 48 ve laboratuvar tezgâhının etkileşimli 3D modeli"></canvas>
+    <div class="hint">Sürükle: döndür · Kaydır: yakınlaş · Nesneye tıkla</div>
+    <div class="hand" id="hand" hidden><span id="handTxt"></span><button type="button" id="btnDrop">Bırak</button></div>
+    <div class="views" role="group" aria-label="Kamera açısı">
+      <button id="vIso" type="button">Tezgâh</button>
+      <button id="vFront" type="button">Ön panel</button>
+      <button id="vRack" type="button">Kartuşlar</button>
+      <button id="vBack" type="button">Arka</button>
+    </div>
+    <div id="tip" class="tip" hidden></div>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <div class="regpop" id="regpop" hidden>
+      <span id="regName"></span>
+      <button type="button" id="regMinus" aria-label="Basıncı azalt">−</button>
+      <output id="regVal">0 psi</output>
+      <button type="button" id="regPlus" aria-label="Basıncı artır">+</button>
+      <button type="button" id="regClose" aria-label="Kapat">×</button>
+    </div>
+  </section>
+
+  <aside class="side right gut">
+    <section>
+      <h2>Numune tüpleri (N) ve yedekler (Y) · 3 mL çek</h2>
+      <div class="stack">
+        <div class="samples" id="samples"></div>
+        <p class="note">Çözeltiler için 3D sahnede erlenlere tıkla. Dökülen sıvıyı peçeteyle kurula.</p>
+      </div>
+    </section>
+    <section>
+      <h2>Kartuş</h2>
+      <div class="row2">
+        <button class="btn" id="btnTake" type="button">Kutudan al</button>
+        <button class="btn" id="btnPlace" type="button">Rafa yerleştir</button>
+      </div>
+      <button class="btn" id="btnPull" type="button" style="width:100%;margin-top:6px">Rafı öne çek</button>
+    </section>
+    <section class="stack">
+      <h2>Cihaz</h2>
+      <div>
+        <div class="lbl">Kafa · iki anahtara aynı anda bas</div>
+        <div class="row2">
+          <button class="btn" id="btnL" type="button">Sol anahtar (A)</button>
+          <button class="btn" id="btnR" type="button">Sağ anahtar (L)</button>
+        </div>
+      </div>
+      <button class="btn" id="btnRack" type="button">Toplama rafına geç</button>
+      <div>
+        <div class="lbl">Mod seçici</div>
+        <div class="seg" role="group" aria-label="Mod seçici" id="modeSeg">
+          <button type="button" data-mode="adj" aria-pressed="false">ADJ</button>
+          <button type="button" data-mode="off" aria-pressed="true">OFF</button>
+          <button type="button" data-mode="max" aria-pressed="false">MAX</button>
+        </div>
+      </div>
+      <div>
+        <label class="lbl" for="adj">Ayarlanabilir akış <output id="adjOut">10 psi</output></label>
+        <input type="range" id="adj" min="0" max="60" step="1" value="10">
+      </div>
+      <div>
+        <label class="lbl" for="max">Maksimum akış <output id="maxOut">20 psi</output></label>
+        <input type="range" id="max" min="0" max="60" step="1" value="20">
+      </div>
+      <button class="btn" id="btnReset" type="button">Yeni deneme</button>
+    </section>
+  </aside>
+
+  <section class="dock gut" id="lanes" aria-label="Kartuşlar"></section>
 </div>
-<dialog class="tdlg" id="tdlg"><h3>Görevler</h3><div class="tasks" id="tasks"></div><button class="bt close" id="tClose">Kapat</button></dialog>
 
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module">
-import * as THREE from 'three';
-import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
-const AVATAR='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwQDAwQEBAQFBQQFBwsHBwYGBw4KCggLEA4RERAOEA8SFBoWEhMYEw8QFh8XGBsbHR0dERYgIh8cIhocHRz/2wBDAQUFBQcGBw0HBw0cEhASHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBz/wAARCADIAMgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3/NOFMxT1rrLFUUUtLikAlOoAp4XikxoctPAFMHFPTmoZQ/pXyn8UozJ4/wBZHYyL/wCgivqPU70adp1zdHpEu4naWxyBkgdhnP4V85/EDSJ9S+IOpi3KsjESeb/AECg7yR2xzxXRhJxjKTk7JIwxEXKKSXU5rwtrsmhabdwxxrIJpCcntg109x4hstc0K2g1DfAI5CMoM5rN0fwnO1ldvKnk2MTlhe3ZEUTg8ghicYPb681Pqtn/AGNptrbXWnyySzP5mIRuWFMfelkHyIO+AxJ9utQsXg42lzq789f69fmQ8JiJTkuR29NDb+HnibRPBmq39y9zJJHJFhMLycdq7iy+Lej6iZJnhljTIw5GRXkL+GpYLd9Qne1trKFEleWWdAqq3Q4BJ5zwMZPbJqt4Y8Z6Z4l8T61o1n/pGn2aRrDcFMNJtXD5AzxuBI9M1pUxWElNRjJO+7T0Xz2IjhsRGDfLa2ya3/U7z4raxp/iO80xrKbfsiIbHY1wfgXS3gmS53EkGTj8a6nX9MH2i0kgtpY4mi3b2jKg84zyOnvWJ4XuxYwp9oYRhnkVQ3BY7jwB3rs5qboNU5JpXMaaqe0TmrNnrXh74myeFLae0Fms4mYPnuDXsmhTnU9ES9ltjblh5hVq8C0jRbPVnHm3Ygn3KqAjg++a9o1C5vvC0NjbPPHc2sqbM9CDivmczpw9nGNNe899/wDhj0aNR88nJ6I43UPE1mfEsMtohVopNsgUferdvPEsviDU4dMs90MR++WGD+FM8L+B7PUp7zUb1riO7W4+RYmATb1596574l6xb/D3xHpclrbqUuond3uJDwwPFeYsLGrUjCirtLS/cUYVFBzk7Js37rQJ7XUILSSVjFI3DntXd21g2naXdxtcyTf6O2C/b5lrwS8+ON7cyo6f2esifdbriuz+GXjXVPGV1r0d5exTpBYB1SNAApMij+lerhsHWoUr1Y69dfMUYw57xZ1BPPNNNPbaGK7lLDggGmE4r0UyhCKKUCincDMxQBTsUoHNUIBS0AU4LmlcBBUopuABycY7k0PIsMcjOyqsYyzNwF471DYyO7d44GeNWdkZdyoMnbkZwPXFUJ/EVhHbvPDf2zLEN8hDjaqgZJZicIAOSTyMdM8V5P8AFnx/feFdK1K7Q29vclVS3M8BTzDnaWKjlsHgAkDhichfm+e9a8VfYNEu7nxBfvPrepmKRotOjjhPlphgrnGOpVjhRyqjLFTjzZ4tzuqS8v8AhjujhlFJ1H5nuPjT48i+sBpnhO5ttQ8Q3EvkCGMDYAxxlUOS3bqQQTnAArh/G3iG8tbefwl9v0ywN3+6vLmJjJe3srffEdujfLCuWVVbYoGW+nhfhrX5dD1eXVtHgNzqAzLFLdRiR7NScb9v3TIc8OeFBzjJ42tQ+K/iOCK4ijv7ia4uTmWRrdcg+iZUbR7gAn6cVzVMPVlO97+v9Wsv67m8K1KMdVb0/rdlyTToLCWIxarp8Nla/Oj6ncfaZmfuUihVkU4x0JI/vel/Rp9F8TXyXXijxjf3C20p2Q29g8aIMAKu5tyqgxxwCM5PrXmGp6leXW5r9Yo7lxv3MgSQH0YKB19+av6JdQEQJrN/dTWaHizgOAR/JfrjNayoNxvfXyt+GhnGulKyWnn+uv8Amdf4l1sXedM0PS47PTrDdNl0/eRtjhzIWbLEAAMeueOK4jSbV1MQjmuI7UthhGVXDHn5t3yk4HfjAra1zVIrzT7ays1lt7OJfkghDAZ9SDyzH1JP4CsaG0Rb/wApYkDKieaJJcLuxye5x34960pw5YWehNSfNO61/rodwfF2v/a1TSvFGs30/wDqCTKEFsoUf6uQMYxxkfKBjHvXpXgK506xtZ7nVtbt7q8OyJhNqCyXKEk87sujDg/KNrH3ri7G7sraGEXEfhC5t4lBMLWzNJtH3gHIBLH1J6+1cdqd5pV0pj+yfYXBO1objzIfphgSPrz9K5FGTfue7bqv6R1vlivf1v0f9M+ioPiN4aNyLaHV4LmWRtsaQBg59cqRhcdznH0r0XWZr6Tw5Z3M7vHIHzEnm7yE7EkHGT7EgccmvhuxvZn1SBRa2U1zGBsV5hum7ghvuk9hggn616/pnxX13U7SGz0/RVVYsq9uWlJPoyjO046Efe9z2744ucJRVb3kuun/AADzKuBhVUpUdJPpr/wT7L+DWoXd74ev5blmkdbjAJ9MCuF/aNjF1qGlRSKGXyehHT5hXQfAHWLefRL1JL0m8mkV1t5AIsAjqqEkk5GDnkYwQKxPj7NFNq1hskRmjTY4U5KtuBwfQ81nh3F5g5Q2d/yJnGUMPyT3R5hrHhCxtysxt1KMo5XjBxXY/BjUj4c1XWobHSb/AFGW+tFiCW43eVhwdzE9F96ZdJ9otTE33WXA9q6D4H2piv8AxOrk/wDHioP/AH9Fe5Xd6Lv5fmccElUTNfU/EPjGPUrmGw+HtzcFHwLg3sMccnuCxBx+Fc94s8W/FDR2tv7N+HdvevMpyV1BWEeOxwa9Uhg8jfufeSxIJGMD0ob5uDXHTulqb2T20PBP+Eq+P17/AKjwZoFkD/z3ugSP/HqK952e1Fa83kTy+Zm2souIIpgRtkQOMdMEZqcVg6n4s0nSryytpbuJftedjhhtGBxn0z2oTxpofnLF9uDFo5JNyIzLhCA3IHqarle9gujfpQa55fHGgSs6pqUblUEnyqxyDjGOOTyOBzzUc/jvQre4e3a8YTptBjMbZyxAA6deRn0zU8kuw+ZdzpJlieGUT7DAUPmb/u7cc59sV4p8QGg0ae3kbxhrdiJ5VhsNMjm824uJGJ2kEgui5wAM54JJHSux8YeJtRsLZRPDa6Tp4IMlxczLNJKd2FRIl9Tz8xGQrZGAQfkbWPGmo+LvEeo3ejQbdR1CQRwTctcIhB3OZDkr+7Uj5AAN5wM4ryMXUdWTpR2W7/Q9DDQVNKpLrsjnPin/AGlZ61eW0mq6pdmNtkkl3OT5j98KSTtz03YJHOB0rnJrSxe6jm1nV52uZSvmxWNr5qxKFGcyMyjOB0XPXrTbbQTdatcRXt9b2MUL7p7iSM+Wgz0CryW44XGTz0wTW3PB4OtWiFxea1dWu4u53wwNKCeSqbX25x1JNWvdSjH8EQ05tyenqzeX4gva6JLYaNNZ2umMqr5Mton2qYr0AzlcA+mPxNcRD44k029E1vCjXaNuDsgJRvXHr/nFaF3rHhJmP2LTWt1PCNNF57kdgSXOfqFH0qQ63ZyFJFEM8mOjRhNp6c8dcAf40U4RinaO5c5yk0+fbsZVxqV34jljmvYUuNowvmQrx/wLg1r6XpmiqT5pVbpsbYoZWC9ed3BOMZ6d6Dp2q6qGnttAtUgIyblvljP/AALOCfoCfaub1HUZrWQ2cDRNIG/efZVwi/7O7qx9TxWiStZaehk24vmnr6nY+LdY0jToUsrBMvxlsYDN+pwPcmsXQvD/ANu1AaheXstujE4McYLZxgdep9gK5ZrW8kud0pAmboG4x/hXQaboGqXUyFLsFl6L/d/AcijkUY2TGqjnO7j8jc1XQltoVWG/8uADCwspaUj1dsjn2AwO3rXIXul20c6mSWXafUdfpzmuv1K11mzhT7aEkijQ/N5hdUHp0yD+Fcw17ZRMXlDSP2VSwH6/4U4LTcVW19rC2jStZvbpvMSAP/qgjgZ7kD5lOcflWjo3iLUbK6j8rVLmO74WMhigcjopOeD6Hpnr1zVSDxA2FiEDSIpyqAbdv0rW0/UNNMoF3HJHIx2vC6bg/oDxwc9+CKznBWelzSnPVWlY6vRvGOpnUDfSarIbeb/XafNcNgSdV24OAGxxzxyMEYr3nXfGmheKdJ8PJZWsGkzxW+ZrIRGFVYtyQD6kHPJPuRg18p2to8d41neQq9pc5VXGBlT6HjkHBwe4969L8Has2jtDoWp68IFSMrAZvLkijO8MNj87AcYKHGPcgVzwksLUVSK9fT/gHS4fWYOEv6f/AAT6aW3jCRnG5SoIIPtW18KWRPEHiyOP+GxQkfWQVn6GLPVLezC3xeZ0+ZW2hwwHIIHH5cEEEcGux8G6Ja6Vq+v3ELFpbiwUPn2kGK9edaMqej3t+aPKdKUZWa2OgZs1yXj/AMTz+ENFttQt7ZLhpb+2syjsVAEsgQtx3Gc11ROTXHfE/wAP6p4n8Lx2WkC1N/DfW13GLpykZ8qQOQSATziqja6uTK9tDJ8XeL/Ekfi218J+FLbTW1M2b6hc3OpF/KiiD7FUKnJZmz7ACiqd/wCEvHF9rdr4stbjw9Y+IzayaddWrebLavAX3xurcNvU546HNFarlt0I9bl4fDS1Lbn1K8bAMYGE/wBUeNnT9etS/wDCubIrIn2y9VZC+RG4QYYqcAAYAyo+vOa7fZmjbU+1l3K5Eclb/D7R7WzjtohcqsTb0cSkMrYADA+vAqYeB9IkF49x5rJcANO0kvBx1Zj745rp9ma5X4iS6ZZ+FbyfU0hePBjiWYbgZGBAwv8AEQMkDnkConVcYuTY401JpJHzt8d/GWjzTwLHdy3VxYq08NpCcQozAxoZW6kqpGFXpl8nnFeTaL4gHh7w/frBbrZ3WtxqqXSna3lhvnRBklEOCBzltp7EVp+O0t9Ovdc1G8fy7xp1tbWwVV2wQhBtZ/8AgKjavvuPUCvNryY6g1hsRjFDGigZzn1/ma8ijBVI80uur/P8z06rdOXLHpovyMW5ma6leFNzL5wYRgcnt0/z1roLfwJqar9sv1lt4mj83eyk8ZwD378Yr1j4LfC63vZE1HUJEa5PMMMg3Er2brX0Lc+AdP8A7Nlt9ozKNjFF4OevHTpmuPE5qqdTkh0PRweS+1p+0qvfY+Kk0XSVQuNTtvMz827GMfqRUCazHpZP2ZrZiOnlDJ/MgCu/8f8AwsfQtduPIG60Kh0k3YJBz19Dx17+lcTH4fjIBgEVwnYmZQR7cV6FHEQqxUkzzq+Eq0ZuPLYqTeIfEGpkxbXMMnBxcDcR7n09hgVsadpD29puurKztH2/LJGwaQfUlcUW97caOxRNP+bp+5KyD884p9/Fc31ukzRSWy7ceZcyqcfQA4H4CttOhglbV6s57UZbWBpBNfTuT90lcAe+B1+tUdOvGtnEdm7MsjDOWOR9MVBc2kKTsiyiWTd800hOM+3rW1pUWn6U0cksnnSA7sfdyfX1x+VVYxTbl2Nc2cWd91buQ5O4oM89/wAe9Ymp2On/ADyQwSh8/wDPLj8eetTSeI21LUprt4WSxjGxRECAq/yOevOe1Wr3WNKkC+T5xmC8iSRV+nHWktDSXLJaHItqF5ajybctEM/eK/07VcW6u5EWS44nzw/lghh69Ktm4095S8qhZByBGcn/AAq2byxmhCCUhF52unJPrntTaRnG/cnsdcnNu9rdRoYZMYcqDtI6EDp/iKs6X/ZupiXTNRLWb7yIposeUZCOMA4CE8Z52nuARmueuNRtIz5bB1kTO0EYU98EH19q6TSYNN8VRbEV7S/jj+RXfejEcg84xyMH65ORkjGqla+3mdNKTbSvfyZ9Dfsx25udXmsRqU9lPGrQLY3J8xdwyVDMMEEgNjAwCrL0K19b2OjW2mzXzpO8tw9ltfJ+X768gV+cHg3xJPoPiGCexeeK8ICyu6hWhKkHKjJ3HAyMkfd+lff3gnWL3Uftn9ozRXVz/Z6t9pgjKxyqWQhtv8BIPK5ODnBIrOi53ab0Vvxf+Y8Qo2Ul1/T/AIBtkU00/epPBBqG5Ywxlvl9txxXpJ3PPutwoqgNXs0AE15ao3cGZeP1op2Y0y+UxTSMUy51axgwfOyPZTUMmsaevPn9f9k1CbKaJ8ZrzD42+ILPQNCtZNkL6u7lrUSLuZdvAIz9353U54ztxXoA1yzDcM7D2Q14Z+0L4kUPo4toI1SItKZZY8sz7o8NjphACcnPPQcZrPEpuk0aYe3tUfK2q6fNfTzrqEkhcyG4cEncwACAnPPOOO549a6H4d+F4Nd12Jj5axhuY36KM8ADvXFalLdTuvnSSs9w+5nYktIQcdT75OfU+1fQnwL8Jszx30sCMqAfOzgnr3A7/XmuDG1VRoOz1PSy+j7bEJNaHvOh6TFpNuIYQFRhuKhMfMep/H0raMXyAenI9jUEJy5JAHarQYqPWvjr3d2faWsrIwde8Mpqf75I4fN2lWjZcrKPQ/lwa+WfiN8LEttS/wBAtJF8xGfZjcBg8gEc9+47V9jg+YP4h6EVjeIPD1trEKyEAXETB1lAwwIyP5E114bEyoy5os5sRh4V48lRH5+yaVd6VK8ZieKSPkh9x465AA5FZl2k1/IXLSkj+ORzx9BzivrnxX8OWWUXxslnZDiRUU4kQ9xjuOoxXn/iD4ZpKn2nTo9r45iYeWzr7ds+hHBr3aWZxlbmPBr5LJX9mzxLS9MsY8i4eR/ZNxx+I6VeuDoVt5gs7R5G7ySZwfqzZ/SugufATozCedpLcMcSS7h5Z9GyOCPQ/WqNz4OudPnCsG6BldXzG6noRXYsTTk9zz3gasF8JhSifVlWJ1WOBeQoyoz681ZPhJYIllVx2I2jJI/Tj61oRxXsokgt4oknjOdqnJI/4FnH6VWkg1KNyz2s6zqcMWJbnt93mtfaxva5h9XdrtXIZVtrePZ9iYsvXzSEQ/nnFZ1xfQ7/ACltoIo8jMwXIz+nA9atRG8uXcqqz7eWCE4/GrMhsIo2/tDTncqM5QE/yA4981fNHqZ+zm1dIrw6BJqsJijeOWXrGFXkjuAvf8KowvLo7iYMgaGYqRwR1x1H1HI9DU0Gsmxk8ywtAlqDu2iQsc9SORgY9BVnW9dsNXt4p5tMIkncFpkm8vcwBHzqBzyBkjB+tK77aB7trp6l+31KxvdS8y2XyLySMFFckpJMmCAvHy5xtweORj0r7V8F+PIvDfwZh1nT5TdJFb/ZPIlUu8MgYYRskHGSDzyAe+K+G4bHyYdPvAilQhkKDoSuR/Rfyr62Gn3Gm/s3Wc0F3JcWdzO/nwzrukt51fLYcdVKbeGyQRkHkisUkqsVfR2/NGzk3Sba1/4DKo+PPjC5liZLHSkgMyI7LC527mx1Jrnf2qvGGsw6V4ftmud0MkshYRr5ZyFHcGuFn8ZRj7JE0uy2jeLescZG4KwOT6mt/wDaJ1WDxZomkXGmQzyxWLvJM7R7dqlRg89a9twsm7Jeh4kJTd+Y8a0vxXqVpCrQtGpIHLIGPHTk0Va0rwTr+qWdvLaaYzQyKGVzIo3D160VcXKwNH6L4BYZHeuxvvCcF7axy26iOXYOAODTNX8MbZRNaDgnJSuqt1KwRg8EKBXzlfE35ZU2evGHKmmeS6jbtpsc7TAosKs7YHYDJx+VfPv7TOnPDBoEs1zFJ9os5VdYgdsTMyHaGz85AJyQB0r6z+IdjE/hbVJwMSpF94e7Af1r4j+L8Uk3g7Q1nuGjt4b668vuzRshLY+jBgPdvaonj5TqQprS+524bAKWHqYi/wANl95wnwZ8CxfEvxvf393vOk6VGHWFjuBGcInoB619eadpttpsJitrdIYh0VFAArk/2XPBMWhfC+DUJIlW61qRronv5QO1Bn0wCfxrqvGvjWw8JSi0i0m6vJSd0sq7SiD065H4ivHx8pV67jF6LRHsZa4UKKutXqzVhjbrtPPrU5jIxz+BFcp4V+JNhrmFni+yuzbV8w7R9OeprvAqSIHBBQjINedKhKLsz1VXUtUUEVlOdoP0NTcScN196tLahh8px60jRsnHaqUGkJ1Eyn9mByo5X+6RWZd6CjZ2ZRTzgDIJ9a2sru4ODTHdvQEfWlYpNnBal4IW5Z5dituPzYOCR/X6V5/q3w4GjXUU9vBGbJt/nQuuUwccgjoM84wRya96fY3zEYPeoJI42RwQrhxgg9D7e1UqsobMbSluj5e8WeCpNEEWu2Frt/s/DzxAj5oM/NgjrgHIPpXT614F8uK3v7YKgDqpVlysiOQCMduoPpkcV6vqOiLNYSWgAZHj8vpyoIwaiitRHCLdkxGr7kAH3RnIHtj+grR4qTS8vyJWHgpNrZ/mfONx8PpdM8ZaVJb4jXUzJC6HlQ6oXDA+nH1+taviLwbbraSceVJtZfLUZKP2Iz2PtxXt76HbPdw3Drl4STF6KSMH9OKgvtMglWZ2UliuB7cVf1uUmr9CI4WnHmS2bufCl5BLpXiWe3eMPbnOV+noa1P7Igulht41BW2LfMeSXxux7dMfjWp8Swlj4qmZVHDYwe5yOPp7+lYOg309teXG5sGQsSxHUtwOPxr6qjJzpqXkfGV4xpVpQ6XNmwhlieGd0JTY8dvjsxzkkHrw2fyr6Ut0vNf/AGb9N+wQXVzdz6x501msTNLG+1hvwP4HQIwI461806beSrb2shUSfY2yA2cRggjdj8sfhX25pWrar4O8D+FtAayitry205UllwRIHDONwbIyMHIz604QlLER5VqRVnFULN6HzPL8PPFOotuTw3q7EKVA+ysBn15FekXXgTVNU0yDTb3w5qMySRKrReQecAe9XWvfHNzdSQjxFIQnRpC/I7d6DpHiq6mjmuteR5IwQrbWJGeveve9nJO90eMnHVpMXTfh7qmiWwjtPC9/CgAGNqr0+rUVI3h/WJf9drZP0jz/ADNFUov+ZfiPnXZ/gfaT8Yp/YYrG17XYNCsPtk6u8W4L8gyea5PQvi3Ya7rtro8NjcpNcMyq7YwMDJzXwXtoqXJ1Pe9lJx5lsdR4zjEvhLW0JAzaSEZ9QMj9QK+LP2kJjqKeGvCmk2486S5a3tlBwcnCsT9SW596+zfHkkkPhPUWVc8Rggenmpn9M18xad4bfWP2g9GN7Az2+nWsupRSMPlYeYQpA7/Mw57EU3NRqxk+ibPQwUb4WrfrZf5/get2qJ4U0Wx0uGMBbS1WBFHAAVQv9K8ovdMa+lnkknlSZ5CwbduC/QHt7V6v4nmE2oTjHygbB64rwL4mzXfhyS2vI9Pm1C3R8yIDJHhf95Tj8686hJuo4rdnsqmo0lUemhznjnRtc08vewW73sSDdmD5XQgdfl5PrVX4f/tAXemzrZ6qk08CLg7vvpjrXSaP8QfDUgjgvL7UtFuJI/MEWoRl49vruIPHvkVzvjfQvDmssbxRbXDHpfaZIC3/AAJR/wDXr04SVvZ14fM5JwbftMNU17H0n4c8V6f4i08XmnXAmXHzL3Wt5LtJBzXxV4TTWfCt3Fcabdm4tN+GaPhtp7Efr7V9K+HfF8d7bkynEiKC+fX6Vy16Hs3eDujsw9T2ytNWkdywUyHAzUxtQQMDmsu3vAYw54LHOCOgq0uoEOMnvXLZdTplCS2JHtWBO0HFVZbcrkkMDV9bsSDgjJ71E3JyD+NZzh2CM5Lcx5XKA5w1VnCzHkYP61uyWyOMsoPvis25tMD92fwNc9mjVTTM2WMRqcnrWD4hvotP0+SRwSMGtmVmL4btxXm3xa1abSdJaRIi1s3yuSOnuD2P14rooU+eaiZV6nJByPnL4kzJe6tKgGQjna+MEg8gEeoOa443BZlcAbthbA6HpxV7UbuXUr15N+4A4J9QOlVItNbLSjO1RgA+/P8AjX2tCnyU1E+ExFR1Kjkup1vwstbTVfFuiRa0+3TJ7yJLtzkgRZAY/kMfjX2f8QPGfhy51CxEGrJcCC1WNnCtnI9eOp6186fBvwzHBAdWdkaN1aHy8d/lbI+hAH4V6hrVliC0u4gSJQyvn2PFdtOioKOIe+y9DknNybo/eWP+Eu0bd8l3uPshqVfFVg33PNbPcJXMGPPDIhHuoo+ywNz5EefYYrSWJl0REaK6nUL4nsznEVyfpHRXIS6UjDMayLn+65FFR9Yn5FexifY+rwaZrPhKJZ5iLOExK7q2GDccfWuW0Hwx4a0jxDBqkdy63EDuEidsEbhjOO5rzTxLo+uXXi9PIvzHZ/aVYxvIQGPHOB3qz4r0DXRr08v22Is7KV/eYPQV59LL4ySbla67HTOu43SWzPZfFHifSLvTJdNjvY2mu5YoNqn5lzIuT+ABNcR4VEGqePfEOpxhhHY2VvYxRgfJEpZ5doPrgrn6+9ctbeE9ZvRFdW6xtdNIrxO79XVgRn2yMH2NdF8PJJ/sXi+/ntpLWSbVJo/JkILRrEqxBeOOqtjHFeNmdBUWuV3VvxPUy+SnCUWrO6+4sXoW4vZ5M7tzHoOKxdZsRdWbRtEJgOqdyPUe9X0kdZC3Pzc4qckyAfKQ2K8RQa1R9co2SXQ+dfHPwrsfFQD2uoeTdxIYdjp/DkkKVyGXHqMjnGK4/Q/g1c6RLc3F08ckhjEcQgmZMd9xJAyen619Z3Gl29+MXFjDMPV4wTWU3hSxt38xLOCIDnIWu+ljKsVZs4qmBoTlzNanz5ofhnXLRrlbi0lj2LvWRwNkozjhgcbv5/hXtXgbw1FcWC3Fwo88HDADqR3rSl06GRdhUlM52jgGt7RrRreJSvyqfSsamIc3Y6I0VTjcz9Yt5LG2d0yQhz1615J4i+IWr2oZbWPEuCBg456Z9v8A69eueLdWNtbtGBukf5V/xrwHxFpEkNreaiWnllTH7uOMyOzHsAO1Vh3Hm94Kzk4K25yt98S/iNE7MjTLEoyEjiDD6/X6VQX45eMLF1S6nnUkcn7OVJ/z61THikac8U2om+t7SSQxrMFV1yBk/KOeBXtvhLTtO1fTxd2t9YasNoJjR9sqgjPKnpx6gV6U5xpq8qasePGk6smoVnddzhvD/wAavEWrhmN5ArrjCyAp3/L8D+ldza/EPxBpl0j39mZrYk71gIfGOcg9ce3P6VZu7Hw953lT2ccErfLtnQLn6HofzqJvD0dnzZOyDHETMSh/Dt9RXLKVGo7qNjpjSrU1ZzudzaataeIbeO/sGJhlUMAy7SPUEduara7pMGraJfWlyoZJImB49qreEHhhtHiERjmL5kwcqTjqPr+PSnePdVj0HwdrGoO+zyoGC4ODubgfzriVO1RRidntP3bc+x8PMBBql7FEwMI3BWI9+P1q1oMV/e6hZ6fbIsl3euFjVuRknHPp2yfTNZVvDdSPsjRnubmQKgA5Yk/5/OvqH4X/AAz0TwWbfW/FyQnV7o+XFazOw2BsAFdh3A+jDpX1WKxVPCwXPrf7z5DB4Oti5v2XT+rG94e8P23h/SLWzt1Kqsalgf720Bj7ZIz9Sa6WQRS6VbQEA8OD+LVzpuHSaeDzWljhmkjSQnJdVcqCfU4A5rufCNvDcadvljVyrnBNe1i5pYeNRbaW+48ihF+2lB76/mcGunXM0pjS3kdgcfKpNdTo/wANta1LaTbrBGf4pTj9K7sFbZ1KKFU+gxzXQ2molVHzV4OIxlS3uI9Slh4X95ngd7CNM1CS1lIbyZCjFe+D2oqXXgJNZv365mY/rRXWqfMk2zBz5W0kdj4g8a6Na+LUtLq78u5juFJTbnrjFavizx54Zg1RY31EJLleGTmvPrv4cT6hqseoajrcdxfKys8qRbQxB44qfxD8M7PXdTiuhrJSYgFlMfAI9K4qmMx1OpGMKd4pPU9qlg8qnBOpVab39fuPR7PVCtjFdRSH7OMyhs4465pfh5fA+BrcqcvNE11KBj780jPyRwT83b61574n0nXdL8NX8dh4iga0gs5MxG2O84Q5AYHj611OjzT2Dafbf6yzXT40EigBQyqqke/fn/A1zZv8MLPV3ZllkE6k+ytY6OPGQSF564q5GqlQOmapRt8oypUY6EYqwkqhe/PrXiRaPqGrrQmchQOaz71yUwDnNPllJIC8msq+S4mcqHKRoMtj37UN3LpxtqJwH2g9e1bkcq29qpOAVFZtpaNkBwd/fHan6krCIpn6g0rWKklJpM57VB/aDksOFPHsKy5tI813liOMfeUdxWlFOnmMm4Y6DNaljAAQcdajVO6NLXVjyPxX8O9N1W0aO9jdVLbkvI+NjHj5uMHjjkc+orza0+BtxomqQXUV9IbWMlxJaGSKduDgA8gD6E19Ytp6qSUClSOVNZreF7F33RJLbsf+eDlV/LpXXDGVKasmcFfB0az5pLXufPotfiDayrbK8epWDZG7UIQ7gehIwTx+dd54c0PWLZEgurcID0COWjH+7nkD2r0dfDixPu8yV8dN7Zq2sP2cALy1YVcS5bJIqnh1HS7fqZFnpRtMscbiACa8j/aP1o2PhKz0qN/3moXAJHqicn9SPyr3CVznG3pXzf8AFbR7rx/8UrbSYGEdhpNtHJdTBv8AVozDcPZjnAH+FbYBqVZTntHUwxykqDpw3lovmUvgf4It9Tj/ALanED3YbNvG5z5KDgPt7knp6Ac9a9NvNIkl8R386EtJBwryEsWdUByT6Dlj9AO4o8EaELW/cQbYtNsVI3jhVQf/AFq9EstPQ+G9Q1G42LdX0byqmRuSNuQPqeCfwHauumpYzFc0vh/TsOvUjlOE5KfxNW+fV/15HmEKpHEiJnCqAM9a9D8GHGknHeQ1wEaKAMV3nhFtumYH/PRq+3zNL2Fl3Pz3B/xLnRud6YpouWTjNIDxzUEgyxzXzypp6HqubR5rqXzXtyx6lz/Oirl7Ev2mbj+I0V6cUrHI73MGT466KDkWV4R9BWhpfxZstQSS8h0u7MUXBJwK8kTwbbyABpHB9BXofgvwnHLpDWcSzSyTyeXHHGMvIxPCqO5NdM6cYK72OeEqk3ZbmnrnxITWdIv7G00e8kuLqB4o0QBiWKnGAMk/QCukn15LmDSfKLSJsgUKAFXdgdh/DyD9cV7r8K/g5pngawa7vYEuNbuoysjsd4t0YYMaH6Hlh1+lfNT2n9ly3WnJa+XNojzafuI+YMrHyzjjgoqn8R2r5vNbTcZQWiPfyidpShJ3f9bHrglLxhztL9Dt9fSokuEYsTcR7QMkKcn6Vz6vcr4TkuLaVRNHAdjE8Z9eO4H614Xqvi+PTNRhtri7bzxIMzt95m7gZOO4rwaVGVRs+lnXVNI+oF2quVP4+tcL481rV9IQy6ZFDKJCA4lLALjqOOefWuEi8e61awbfKYurg+ayknHYYx6Dp9a5PWvEura5MbaSSRUAV5OACFyc459ewrpo4eSeuwpYuMVs7nt/hzxmzafbmZzEZV3FHIPPTr7dM1r3fiS3uSEVfmIwWVTg+9fPFl4jlW0kk3OkMLiNdwyHJ9PU/Sqd3rlnqWrRwXW8yHG2YSsvlsenQ8D6V0PCJgsXB2elz3+50+OPThKrYcuMMD15rprBlMYUj516471594WtLy+itBJcia2TDAhi27HQlj1r0ILtYMOK86paLte53PVF4YwVB96rksG4AyOenWneYBj1prSgnnGPX3qG00QtCN5nUcrz39qrtOW46YNSTTAg4HXg1WLxxxu7kAKpY56cVPKmTKVkZ2v6zBoGlT31wRiJSwBOM+1ebfDzwxPq1ncavrMkrpq8hu0t4mKyHrs3H2GcDoNxqHx1qn/CV63pOgI8P2S8k8zlwpaJRlj+XGPf2r0X+27LQglrYCOW7UfuoEIKx9gzY+6o/XGAK6VSm1GlTXvS/I5Y1oxcq83aMV+P9fmcX441i807wxcaVpVgIkkAWURnJiQ8ku56uw4A7Ak+lcv4Tj1yXU7c3lndJbGNyZGlJUfKccV3HiVlj8LXFvGS2Blnb7zsTksT3JPJ+taGlzP/AGPGGPH2c8H/AHa+7y7BRwdDkWre78z4TM8wnjsR7R6Louy/z7nNqgUAZruPCBB0xvaU1waSxSkbZU/76Fd14TV0sDgjyxI2fXNdOZRfsde5y4N/vDoHbFQt8zVIxDc1SnuoIX2vMiMecMwFeGkemzkLoD7TLx/EaKbc5YXTphh8xBBzRXctjlb1PW9O/Zl8P6fAZ9Z16+n2As5hCQRgAZJyQxx75ruPhz8N9C8MNJqlhaTxmYYthdSGSSOM/wAfP3WcdcdFwPWtQpLrupx6b5ajTbcLNdsJN3mHPyREYxhiNx5PC4/irqvNRmZVYFh1ArglObfvP8Tab5Fyrd+S2+Xf+twnlEMMknUKK+OvjBp1xo/xBvL5JHS28SWrMFRcfvkXY4z3Yx7WHfg19aa5ceXaCMdXP6V4H8frKe78GG5tFzfadKLy2O4r8ygll/4Em5fxpvD+2pSX3GmEqexmp/1Y4bRJbttFitWCgf6rBODgE5/z3q5P4D0bUrZlvLSKYSKVbeoOQRgiuU8G69/wkFzFeRgAzoDCAS2QRk8D/CvTXVoQV5H1718jVUoT7M+2ozjOGmqPJpoPEPhVjZWbW+pW0RxHFdoDJtxwA/fj1/Ok0TxHouq3dzZ+ItHWylnQIzRgo6Dp07j/AHTXda6kIQSyt5bDgSHp+NZd6+ka1Yi21KzguCgwkiHa4OOORXbTmpRu0dUYQmuVb9jC1f4Z6VMIYbXU7QWO9ZP3kmWYc/8A1vyritV8C3+nanNfzQo0SAiOZQH8wAcH6d/rXQ3ngWH5prLXLiIAZ8ucB8n0Gc/zqnDJ4r0WPyra/tLu1OQYJEIDD6cj+VbQlJbSOevgI2u4mt4O8ZtoccNtc+Wxdckqxyg9Np9M5+ma9Is/HmkX6hfOVN5Crk9T7HuK8U1EatrwlMXhJVvCoX7QlyEjU+vIzWFpOla1p5ktb61SIFlACP5iMc5BHAwe1YzoQndt2fyOV1atJqNrr5n0/wDaQOM8UrXIdCcZA5OOtcz4Se6udFSe9QRyOzNjP8OeP8+tJq2trYnbCwkYRnIHBOSOh7EV50YtvlOyVRWubV9exW0DSl8YGcryc+mPevM/EXjCXVoikEnlWxTc8m/AXCk5/HFNvdRnvbWKZZNiKGEfQsxbgDHfoT7cVW8P/Dm/+LWrT6DoifY7HTIRLezlvl34ykO4fxyc5PO1ecc16GGw95W6nm4vE8sHJuyG+ArBdSgvddv4YnGoqqW0bICEgU/Lj0ycnpnpWxokCxapqixoqxgpwowOldE9mthCbYxNC9vmJomGDGy8FSOxGMVz+gyj+1dYGf4kx+VfcYaEYQShsfEYiUpzbluWvEmF0S6PsKo+IklvPAlzBbRySXElthEiBLE47Yq74pUnQbth2A/nXQ+Cifs2ElMUosJTuChiBs9DXdSrOjJVUr8rv9xySp+09zufJ1hpWrR3Vu/kXKpHKm9iDhee9fVfga4eXRnJbdiVuR+FZt7bNDbu0AVCoVs7R1HQ1w+reKPEkN/Puv5hukZvkCgH34FcfFnEjq+zh7Lu9H/wD3OGOGPbRnUVZKztqj23/WNtJxx0r4h8daN4ki1zVZZ4dWML3TGBpN5BjBONvtXvfh/x1q2oaFJHb6nJmCRhIQVLEgdScZHWsO88ca/P4jsZrnVizxyBI3k25UgfLjjrmvm8Bmbq4lYb2duZpXeyv8j1MwyL2OFniXVT5E3Zbu3+div8D01EeAtUa5Epczy7fMJLAAYxz0oq7qvi3xkl07TX9+ZMuzggDjPJIxRX3P8AYM1o60Pvf+R+fLP4vajP7l/mfddi0mg6QsDlG1GcmW5dOR5jdQPZQAo9lqTRbtjdbXJOfWqEm6TJJyaWzzBOj981826K5Hfc+ov+Jf1mXzLraOQoryL453DWnw/1icf8srWZv/IT16ndN5lxIx9cV5b8fE3fDDxFx920f8iCP61pSXJBAlrY+Pfg695oCaAl8pexvo2SMO21Y5lb5lJBz0Ab86+s9OeDUbUSK7OpJwzD7w/If59a+bdA0WTxF4PvNPttsd9bTmW1kIHyScEc9geQfY1v+DvHF8LVbYl47uzHlSwTNuKyg4OSTzjt7V8hiIvEXkt0z6rDv6vaD2a0/U9u1HQWvreSFCpVuBnt+NfP3izwbrGlapKdPEogV8sI5MqvuT6n+te2Wfim38iDfKsjDarM/G76Ae5/H2p1pqdrfGTAE2wbWBGA2Djp64FY0ZSpM7pwjVS5vkeUeGbTXRFGuoxGVCvLZwwPQgg13FpYBAp8oJ67sZrsls7W+VJHhwzcKT1+nHpVebR0AKo5Jz+VRVruT2saxTirczfqZ8cEACscbSMfWs7UYbaSdG8obVIGQKtX6xaeHNxcKoUd+n0+tcTqOvLJeLFFOpUxMVcnCtxnr09P8jFZ04OTIqVVHc0fEvil0t2sbUBZGVgVIBGOx46CsSO8ihd/t0m1lhGdzfebnn26n35HpXL6p4ysIboxxB73UZMLHFECWLcYG0dicHn86b4e8D694ou45PEV0+n6WvLwJJmRkHJ3sPujGTxz713xpRpwvPRHnTrOpP3NfyXqQnUNR8Ua+uk6AIJL6UhJrpUxFAP7xPPOAML3xX278LPC+l/D3wvY6dpsbFSPMup5OZLmVvvyOe7EivkH4BeJNI8U6rqbaTax2sMGruFiTj/R9mIT/wB8r+efWvtTSgVsIQ3p/Wvfjh40qKcVZs8GtV9tJ8zujjvjJ4Ia4U+ItKt3mmk2R3cMQGXzhUlA9Rwreowf4a8A0XS7qz1zWYrqCWCZChMcyFGHHcHmvszTHi1C0msrhFdCpRkYZDoeCK5290XTtXim0XxBB589iALe9BxP5LZ2OH65GCrdiVyRzXRSxM6Wj2OGVKM9HuvyPmLxMMaBeBvQfzrxHxN4u8VidLWK+vIrC1R1g8iPZ8pPPzAZYfUmvr6/+E2swanPFNYw67oLRkx+TMIpW9NyEjkf7JwfQdKZe6faCztNFv8ASWsrS2iMEME++LCkkkAt15PYmvfyrPqOBqOUqSnfvbT0v1/q55+Ky2pXjaM+X01++36nyt8GdS1XWviRotprbXuoaSyu8ttI7Ksu1CQCfTIH1r6UtdMsddaO+nhuree4kY+WUBVQDgA8dMYFbNjoelaRcQ3FtpyLNCMIWkY4GMdM+hq1CIrcMIoFAY55dj/M1nmmaQx1T2kafL039R4TCPDrl57/AC9Dh/CvhDw5p/huazsNJhtw892008ZIkmJYgbj6DsK53wf8PtIn+INk97Z/2lFHJ5/2e5AaMuIyVIA6YNeq2Gn2FhH5cdhFt3M3Mjnljk/xVJptlpmi6r/adjpNpDfYx5uXJ6Y7tjpXhyV00o7+Z3xlFddjNvtB0/WtRv5pUvEuQ2SxwFIJ+6PUUV0p1INkmztiW68N/jRUuL6RKU11Z2wWjGD9KKK7CQHzHPevOvjjHv8Ahh4rwMldNmk/75Un+lFFFr6DTtqfNXwyuwqiReUuFWQY+n+Bra8b/DmTXpW1PRpltdXO0OrHEVwB/eA7jPDUUV8LUqSpVeaB9vGnGrRSmjzOTxzqnhO5nstZtJbWXbgtOCVY8/dboQf1rc8J+PkgnluriQPHIxKuD1zjJHr0/QUUV7UaMKlLna1Z4qxNSlW9nF6I66P4mx+Ujo8SqinMe7JQEkfzI/DFXZfiikVv9plkVFVmZlVssBgfpnJH5UUVzywtPax0fXKurueca78Tb7xWsltpNpNc3RclWToq9OWPGMnpUGneCfEOtyIdV1EwRLgMlt94jByC5/oPxooqcRL6v7lNWFhYfWVz1Xf8j0rwp4E07RQw0+3EatjzJWO5m+pPJq58Q75dI8Hahbwkrc3yfZI8dQG++3/fII/EUUV5cZOdVczueo4RjBqKseO/swRNZ/FjxBpkXyxyRxTqoGMAOM/o5r9FbU4toh/siiivtIe9Rjc+OmrSaXd/mRQXL2t0JV6g81a8VQG70+LVrZpFuLDLusZ+Z4iP3i478AMB6qPWiiorqzRmtGpeZL4f1M3Efkl0lH3kZBg4Pcdjn8K2buSBrXZPGk8cnBRlDKfqDRRUVPdegpwXOcDrfgRLiCa68OqlveIpb+z5nIt5T/snkxn3Hy+o714Dq/xE8WaLem0vvAF7bTAkASS5DY64YDB/A0UUUqrjKMejNFTVTmv0MyX4ueJUOF8EzN9ZT/hUL/FvxbjcPA74/wCuzf8AxNFFeryR7Hn3fcb/AMLh8WAHHgf/AMjP/wDE0UUVapQ7GbnLuf/Z';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
-
-const say = t => { $('#say').innerHTML = t; };
-const stage = $('#cv3');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const stage = $('#stage');
 const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
-const UI = { mode: 'parts', task: 'parts', done: {}, seen: {}, res: false };
 
-/* ---------- renderer / sahne ---------- */
-let renderer;
-try { renderer = new THREE.WebGLRenderer({ antialias: true }); } catch (err) { $('#nogl').hidden = false; throw err; }
-renderer.setPixelRatio(Math.min(2, devicePixelRatio));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.domElement.tabIndex = 0; renderer.domElement.style.outline = 'none';
-stage.prepend(renderer.domElement);
+/* ---------- renderer / scene ---------- */
+const renderer = new THREE.WebGLRenderer({ canvas: $('#c'), antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#9FB3BA'); scene.fog = new THREE.Fog('#A9BBC1', 40, 90);
-{ const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), .04).texture; }
-const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 160);
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 120);
 const VIEW_ISO = [[7.4, 7.6, 12.6], [0, 1.5, 0.9]];
 camera.position.set(...VIEW_ISO[0]);
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.target.set(...VIEW_ISO[1]);
 controls.enableDamping = true;
 controls.minDistance = 2; controls.maxDistance = 22;
 controls.maxPolarAngle = Math.PI * 0.495;
-scene.add(new THREE.HemisphereLight('#EAF6FF', '#6F7E84', .45));
-const key = new THREE.DirectionalLight('#FFF2DF', 2.2);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x7d8794, 0.8));
+const key = new THREE.DirectionalLight(0xffffff, 0.95);
 key.position.set(5, 12, 8); key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048);
-Object.assign(key.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 40 });
-key.shadow.bias = -0.0005; key.shadow.radius = 4;
+Object.assign(key.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 34 });
+key.shadow.bias = -0.0005;
 scene.add(key);
-const fill = new THREE.DirectionalLight('#EAF4FF', .5); fill.position.set(-7, 4, 5); scene.add(fill);
-/* tezgâh ve duvar */
-{
-  const nt = (base, amt, n = 512, speck = 0) => { const c = document.createElement('canvas'); c.width = c.height = n; const g = c.getContext('2d'); g.fillStyle = base; g.fillRect(0, 0, n, n); const d = g.getImageData(0, 0, n, n); for (let i = 0; i < d.data.length; i += 4) { const v = (Math.random() - .5) * amt; d.data[i] += v; d.data[i + 1] += v; d.data[i + 2] += v; } g.putImageData(d, 0, 0); for (let i = 0; i < speck; i++) { g.fillStyle = `rgba(${Math.random() < .5 ? '60,70,75' : '255,255,255'},${.15 + Math.random() * .25})`; g.fillRect(Math.random() * n, Math.random() * n, 1 + Math.random() * 2, 1 + Math.random() * 2); } const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; };
-  const bt = nt('#7F8E95', 12, 512, 2600); bt.repeat.set(6, 3);
-  const top = new THREE.Mesh(new THREE.BoxGeometry(30, .4, 13), new THREE.MeshStandardMaterial({ map: bt, roughness: .55 }));
-  top.position.set(0, -.2, .9); top.receiveShadow = true; scene.add(top);
-  const edge = new THREE.Mesh(new THREE.BoxGeometry(30, .3, .15), new THREE.MeshPhysicalMaterial({ color: '#2E373C', roughness: .4, clearcoat: .5 }));
-  edge.position.set(0, -.15, 7.45); scene.add(edge);
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(40, 18), new THREE.MeshStandardMaterial({ color: '#B7CAD0', roughness: .9 }));
-  wall.position.set(0, 8, -5.6); scene.add(wall);
-  const tile = (() => { const c = document.createElement('canvas'); c.width = 512; c.height = 256; const g = c.getContext('2d'); g.fillStyle = '#9DB3BB'; g.fillRect(0, 0, 512, 256); for (let y = 0; y < 4; y++) for (let x = 0; x < 8; x++) { g.fillStyle = `hsl(192,${18 + Math.random() * 8}%,${70 + Math.random() * 5}%)`; g.fillRect(x * 64 + 2, y * 64 + 2, 60, 60); } const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(12, 1.2); return t; })();
-  const tw = new THREE.Mesh(new THREE.PlaneGeometry(40, 2.6), new THREE.MeshStandardMaterial({ map: tile, roughness: .35 }));
-  tw.position.set(0, 1.3, -5.58); scene.add(tw);
+const fill = new THREE.DirectionalLight(0xdfe8ff, 0.35); fill.position.set(-7, 4, -3); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 0.3); rim.position.set(0, 5, -9); scene.add(rim);
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: 0.2 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+const grid = new THREE.GridHelper(26, 52);
+grid.material.transparent = true; grid.material.opacity = 0.18; scene.add(grid);
+function applyTheme() {
+  scene.background = new THREE.Color(css('--stage') || '#dfe4e9');
+  grid.material.color.set(css('--grid') || '#8f9aa6');
 }
+applyTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
 /* ---------- materials & helpers ---------- */
 const M = {
@@ -289,11 +376,11 @@ function mesh(geo, mat, x, y, z, label, action) {
 }
 const cyl = (r1, r2, h, s = 20) => new THREE.CylinderGeometry(r1, r2, h, s);
 const box = (x, y, z) => new THREE.BoxGeometry(x, y, z);
-const canvasTex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), c); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+const canvasTex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), c); const t = new THREE.CanvasTexture(c); t.anisotropy = 8; return t; };
 function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 function labelSprite(label, action, w = 1.0) {
   const c = document.createElement('canvas'); c.width = 512; c.height = 168;
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const t = new THREE.CanvasTexture(c);
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false }));
   sp.scale.set(w, w * 168 / 512, 1);
   sp.userData = { label, action, draw(t1, t2, sw) {
@@ -704,7 +791,7 @@ for (let k = 0; k < 5; k++) {
   const m = cartMesh(`K${k + 1} kartuşu`, 'cart:' + k, liqMat, sorbMat);
   m.g.visible = false; colRack.add(m.g);
   const lc = document.createElement('canvas'); lc.width = 128; lc.height = 64;
-  const lt = new THREE.CanvasTexture(lc); lt.colorSpace = THREE.SRGBColorSpace;
+  const lt = new THREE.CanvasTexture(lc);
   const ls = new THREE.Sprite(new THREE.SpriteMaterial({ map: lt, transparent: true, depthWrite: false }));
   ls.scale.set(0.15, 0.075, 1); ls.position.set(0, 0.52, 0.06); ls.renderOrder = 8; m.g.add(ls);
   carts.push({ k, g: m.g, l: m.l, liqMat, sorbMat, lbl: { c: lc, t: lt, cls: null } });
@@ -765,7 +852,8 @@ const ease = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 const tween = (obj, k, to, dur) => new Promise(res => tweens.push({ obj, k, from: obj[k], to, dur, t: 0, res }));
 
 /* ---------- actions ---------- */
-function toast(msg) { say(msg); }
+const toastEl = $('#toast'); let toastTimer;
+function toast(msg, good) { toastEl.textContent = msg; toastEl.className = 'toast' + (good ? ' good' : ''); toastEl.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.hidden = true, 3600); }
 const fmtT = s => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60; return (h ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
 function log(msg) {
   const m = /^K(\d):/.exec(msg), k = m ? +m[1] - 1 : -1, gen = k >= 0 ? carts[k].gen : 0;
@@ -938,7 +1026,7 @@ function reset() {
 
 /* ---------- panel DOM ---------- */
 const stepsList = ['Hazırlık: 5 kartuşu rafa tak', ...PROTO.slice(0, 6).map(p => p.name), 'Toplama rafına geç', PROTO[6].name, 'Tamamlandı'];
-$('#steps').innerHTML = stepsList.map((s, i) => `<li><i>${i + 1}</i>${s}</li>`).join('');
+$('#steps').innerHTML = stepsList.map(s => `<li><span>${s}</span></li>`).join('');
 $('#lanes').innerHTML = carts.map(c => `
   <div class="lane off" data-k="${c.k}" tabindex="0" role="button" aria-label="K${c.k + 1}: pipetteki çözeltiyi ekle">
     <span class="id">K${c.k + 1}</span><span class="pill" id="lsS${c.k}">Kutuda</span>
@@ -948,11 +1036,11 @@ $('#lanes').innerHTML = carts.map(c => `
     <span class="od" id="lsO${c.k}"></span><span class="acts"><button class="mini" type="button" id="lsA${c.k}" hidden></button><button class="mini danger" type="button" id="lsR${c.k}" hidden>Yenile</button></span>
   </div>`).join('');
 $('#samples').innerHTML = SRC.filter(s => s.liq === 'sample').sort((a, b) => (a.spare ? 1 : 0) - (b.spare ? 1 : 0)).map(s => `
-  <button class="bt" type="button" data-src="${s.id}"><span>${s.title}</span><small id="sv_${s.id}"></small></button>`).join('');
+  <button class="btn" type="button" data-src="${s.id}"><span>${s.title}</span><small id="sv_${s.id}"></small></button>`).join('');
 document.querySelectorAll('[data-src]').forEach(b => b.onclick = () => aspirate(b.dataset.src));
 document.querySelectorAll('.lane').forEach(el => {
   const c = carts[+el.dataset.k];
-  const go = () => { if (UI.mode === 'use' && c.where === 'rack') dispense(c.k); };
+  const go = () => { if (c.where === 'rack') dispense(c.k); };
   el.onclick = go; el.onkeydown = e => { if (e.target === el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go(); } };
   $('#lsA' + c.k).onclick = e => { e.stopPropagation(); if (c.where === 'rack') liftFromRack(c, true); else if (c.where === 'stand') returnToRack(c); };
   const rb = $('#lsR' + c.k);
@@ -979,7 +1067,6 @@ const KEYMAP = { a: 'L', l: 'R' };
 addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' && e.target.type !== 'range') return;
   const side = KEYMAP[e.key.toLowerCase()];
-  if (side && UI.mode !== 'use') return;
   if (side) { e.preventDefault(); if (!held[side] && !e.repeat) { held[side] = true; pressSide(side); } return; }
   if (e.key === 'Escape') dropHand();
 });
@@ -1046,8 +1133,7 @@ renderer.domElement.addEventListener('pointermove', e => {
   if (e.pointerType !== 'mouse') return;
   const h = pick(e);
   aimHand(h);
-  if (UI.mode === 'parts') partTip(h, e);
-  else if (h.o) { tip.textContent = h.o.userData.label; tip.style.left = (e.clientX - h.r.left) + 'px'; tip.style.top = (e.clientY - h.r.top) + 'px'; tip.hidden = false; }
+  if (h.o) { tip.textContent = h.o.userData.label; tip.style.left = (e.clientX - h.r.left) + 'px'; tip.style.top = (e.clientY - h.r.top) + 'px'; tip.hidden = false; }
   else tip.hidden = true;
   renderer.domElement.style.cursor = h.o && h.o.userData.action ? 'pointer' : 'grab';
 });
@@ -1056,7 +1142,7 @@ let down = null;
 let knobDrag = null;
 const knobSide = a => a === 'knobL' ? 'adj' : a === 'knobR' ? 'max' : null;
 stage.addEventListener('pointerdown', e => {
-  if (e.target !== renderer.domElement || UI.mode !== 'use') return;
+  if (e.target !== renderer.domElement) return;
   const h = pick(e), side = knobSide(h.o && h.o.userData.action);
   if (!side) return;
   e.stopPropagation(); down = null;
@@ -1100,7 +1186,7 @@ function placeReg() {
 $('#regClose').onclick = closeReg;
 renderer.domElement.addEventListener('pointerdown', () => { if (regSide && !knobDrag) closeReg(); });
 stage.addEventListener('wheel', e => {
-  if (e.target !== renderer.domElement || UI.mode !== 'use') return;
+  if (e.target !== renderer.domElement) return;
   const h = pick(e), side = knobSide(h.o && h.o.userData.action);
   if (!side) return;
   e.preventDefault(); e.stopPropagation();
@@ -1109,8 +1195,6 @@ stage.addEventListener('wheel', e => {
 renderer.domElement.addEventListener('pointerdown', e => down = { x: e.clientX, y: e.clientY });
 renderer.domElement.addEventListener('pointerup', e => {
   if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) return;
-  if (UI.mode === 'parts') { partTip(pick(e), e); return; }
-  if (UI.res) return;
   const h = pick(e); aimHand(h);
   const isPip = S.hand && S.hand.type === 'pip';
   if (!h.o) { if (isPip) spill(h.point); return; }
@@ -1379,7 +1463,6 @@ const STAGE_TXT = [
 
 function updateUI() {
   const pl = placed();
-  document.querySelectorAll('#side .bt, #side input').forEach(b => b.disabled = UI.mode !== 'use');
   el.P.innerHTML = S.p.toFixed(1) + '<small>psi</small>';
   el.F.innerHTML = S.flow.toFixed(1) + '<small>L/dk</small>';
   el.T.textContent = fmtT(S.time);
@@ -1388,7 +1471,7 @@ function updateUI() {
   el.D.innerHTML = (inColl ? pl.reduce((a, c) => a + S.tubeVol[c.hole], 0).toFixed(1) : Math.round(S.waste)) + '<small>mL</small>';
 
   const gs = globalStage();
-  el.steps.forEach((li, i) => { li.className = i < gs ? 'done' : i === gs ? 'cur' : ''; li.firstChild.textContent = i < gs ? '✓' : i + 1; });
+  el.steps.forEach((li, i) => li.className = i < gs ? 'done' : i === gs ? 'now' : '');
   if (gs === 9) {
     const elu = carts.map(c => `K${c.k + 1} ${c.eluate.toFixed(1)} mL`).join(', ');
     el.stTxt.textContent = `${STAGE_TXT[9]} Toplanan eluat: ${elu}. Sapma sayısı: ${S.log.length}.`;
@@ -1456,11 +1539,8 @@ function updateUI() {
   else if (sealed && S.mode === 'off') msg = 'Kafa kapalı. Mod seçiciyle gazı aç.';
   else msg = `Sıradaki: ${stepsList[gs]}.`;
   el.dot.className = 'dot ' + cls; el.st.textContent = msg;
-  if (UI.mode !== 'use') document.querySelectorAll('#side .bt, #side input, .lane .mini').forEach(b => b.disabled = true);
-  if (UI.task === 'spe' && !UI.res && gs === 9) evaluate();
-  el.stBox.className = 'stl' + (cls === 'warn' ? ' warn' : cls === 'bad' ? ' bad' : '');
+  el.stBox.className = 'status' + (cls === 'warn' ? ' warn' : cls === 'bad' ? ' bad' : '');
 }
-
 
 function resize() {
   const w = stage.clientWidth, h = stage.clientHeight;
@@ -1468,116 +1548,12 @@ function resize() {
   camera.fov = w < 560 ? 52 : 35;
   camera.updateProjectionMatrix();
 }
-
-/* ================= pilot kabuğu: parçalar, görevler, değerlendirme ================= */
-const PARTS = [
-  ['body', 'Gövde ve üst tabla', 'Paslanmaz çelik gövdenin içinde basınç regülatörleri ve gaz dağıtım hattı var. Üst tabla raf istifini taşır; ön köşelerdeki yönlendirme çubukları rafı kafanın altına hizalar.'],
-  ['panel', 'Ön kontrol paneli', 'Bütün gaz kontrolleri önde: solda rotametre, ortada iki manometre ve iki regülatör, altta mod seçici. Sağdaki ve soldaki baskı anahtarları basınç kafasını hareket ettirir.'],
-  ['rota', 'Rotametre (akış ölçer)', 'Manifolddan geçen gaz akışını L/dk olarak gösterir. Kartuşlar sıvı doluyken akış düşüktür; kartuşlar boşaldıkça gaz serbestçe geçer ve bilye yükselir. Altındaki iğneli vana akışı sınırlar.'],
-  ['gauge', 'Manometreler (ADJ · MAX)', 'Soldaki ayarlanabilir hattın, sağdaki maksimum hattın basıncını psi olarak gösterir. Seçili moda ait manometre kafaya giden basıncı okur.'],
-  ['knob', 'Akış regülatörleri', 'ADJUSTABLE regülatörü yükleme ve yıkama için ince ayarlı basınç verir. MAXIMUM regülatörü kurutma gibi yüksek basınç gereken adımlar için önceden ayarlanır. Kullanımda düğmeye tıklayıp + / − ile ayarlarsın.'],
-  ['sel', 'Mod seçici', 'ADJ: ayarlanabilir hat açık. OFF: gaz kapalı. MAX: maksimum hat açık. Kafayı kaldırmadan önce seçiciyi OFF konumuna al.'],
-  ['rocker', 'Baskı anahtarları (iki el kumandası)', 'Kafa yalnız iki anahtara aynı anda basılınca hareket eder; böylece eller kafanın altında kalmaz. Simülasyonda klavyedeki A + L tuşları da kullanılabilir.'],
-  ['platen', 'Basınç kafası ve conta', 'İndiğinde silikon conta kartuşların üst ağızlarına oturur ve gaz her kartuşa ayrı ayrı basınç uygular. Raf öne çekiliyken kafa inmez.'],
-  ['post', 'Kılavuz kolonlar', 'Basınç kafası bu iki krom kolon üzerinde dikey kayar ve kartuşlara paralel iner.'],
-  ['colrack', 'Kolon rafı (48 pozisyon)', 'Kartuşlar bu siyah rafın deliklerine takılır. Rafı ön yüzünden tutup öne çekince kartuş takmak ve çözelti eklemek kolaylaşır.'],
-  ['waste', 'Atık rafı ve teknesi', 'Şartlandırma, yükleme ve yıkama sıvıları kolon rafının altındaki beyaz teknede toplanır.'],
-  ['coll', 'Toplama rafı', 'Elüsyondan önce atık rafıyla yer değiştirir; her kartuşun altına bir 12 × 75 mm tüp gelir ve eluat burada toplanır.'],
-  ['hose', 'Gaz hattı', 'Arka paneldeki girişe laboratuvarın azot hattı bağlanır; mavi hortum gazı basınç kafasına taşır.'],
-  ['cart', 'Oasis HLB 3 cc kartuş', 'Suyla ıslanabilen, ters faz polimerik sorbent içeren SPE kartuşu. Hacmi 3 mL; sorbent alttaki iki frit arasında durur.'],
-];
-const PINFO = Object.fromEntries(PARTS.map(p => [p[0], p]));
-function partOf(L) {
-  if (!L) return null;
-  if (/standı|Peçete|Çöp|erleni|numune tüpü|yedek numune|Numune tüp|Dökülen/i.test(L)) return null;
-  if (/manometre/i.test(L)) return 'gauge';
-  if (/regülatör/i.test(L)) return 'knob';
-  if (/Mod seçici/.test(L)) return 'sel';
-  if (/rotametre|Akış ölçer/i.test(L)) return 'rota';
-  if (/baskı anahtarı/i.test(L)) return 'rocker';
-  if (/Basınç kafası|conta|Kelebek|Sıkıştırma|burcu|hortumu bağlantısı/i.test(L)) return 'platen';
-  if (/Kılavuz kolon/.test(L)) return 'post';
-  if (/olon rafı|Raf ön yüzü/.test(L)) return 'colrack';
-  if (/Atık rafı|Atık sıvı/.test(L)) return 'waste';
-  if (/Toplama/.test(L)) return 'coll';
-  if (/hortum|gaz bağlantısı|gaz girişi/i.test(L)) return 'hose';
-  if (/Ön kontrol paneli/.test(L)) return 'panel';
-  if (/kartuş|Oasis/i.test(L)) return 'cart';
-  if (/gövde|Üst tabla|ayak|tutamağı|yönlendirme/i.test(L)) return 'body';
-  return null;
-}
-function partTip(h, e) {
-  const t = $('#tip'), L = h && h.o && h.o.userData.label;
-  if (!L) { t.hidden = true; return; }
-  const id = partOf(L), inf = id && PINFO[id];
-  t.innerHTML = inf ? `<b>${inf[1]}</b><span>${inf[2]}</span>` : `<b>${L.split(':')[0]}</b>`;
-  t.hidden = false;
-  const W = stage.clientWidth, H = stage.clientHeight, x = e.clientX - h.r.left, y = e.clientY - h.r.top;
-  let lx = x + 18, ly = y + 18; if (lx + t.offsetWidth > W - 8) lx = x - t.offsetWidth - 18; if (ly + t.offsetHeight > H - 8) ly = y - t.offsetHeight - 18;
-  t.style.left = Math.max(8, lx) + 'px'; t.style.top = Math.max(8, ly) + 'px';
-  if (inf && !UI.seen[id]) {
-    UI.seen[id] = 1;
-    if (PARTS.every(p => UI.seen[p[0]]) && !UI.done.parts) { UI.done.parts = 1; say('Harika, CEREX 48’in bütün parçalarını tanıdın! Şimdi <b>Görevler</b>’den “Atık suda SPE” görevini başlat.'); }
-    renderTasks();
-  }
-}
-const TASKS = [
-  { id: 'parts', t: 'Parçaları tanı', d: `Fareyi parçaların üzerine getir (${PARTS.length} parça).` },
-  { id: 'spe', t: 'Atık suda SPE · Oasis HLB', d: '5 numune · şartlandırma, yükleme, yıkama, kurutma, elüsyon' },
-  { id: 'free', t: 'Serbest kullanım', d: 'Değerlendirme yok: cihazı dilediğin gibi kullan' },
-];
-function renderTasks() {
-  $('#tasks').innerHTML = TASKS.map((x, i) => `<button class="task${UI.task === x.id ? ' on' : ''}${UI.done[x.id] ? ' done' : ''}" data-t="${x.id}"><span>${UI.done[x.id] ? '✓' : i + 1}</span><div>${x.t}<small>${x.d}</small></div></button>`).join('');
-  $('#tasks').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { $('#tdlg').close(); startTask(b.dataset.t); });
-  $('#pSteps').innerHTML = PARTS.map((p, i) => `<li class="${UI.seen[p[0]] ? 'done' : ''}"><i>${UI.seen[p[0]] ? '✓' : i + 1}</i>${p[1]}</li>`).join('');
-  const cur = $('#pSteps').querySelector('li:not(.done)'); if (cur) cur.className = 'cur';
-}
-function setUIMode(m) {
-  UI.mode = m;
-  $('#mParts').classList.toggle('on', m === 'parts'); $('#mUse').classList.toggle('on', m === 'use');
-  $('#dsp').hidden = m !== 'use'; $('#lanes').hidden = m !== 'use'; $('#tip').hidden = true;
-  $('.rot').style.visibility = m === 'parts' ? 'hidden' : 'visible';
-  if (m === 'parts') { dropHand(); closeReg(); }
-  $('#tName').textContent = TASKS.find(t => t.id === UI.task).t;
-  $('#steps').hidden = UI.task === 'parts'; $('#pSteps').hidden = UI.task !== 'parts';
-  $('#stageTxt').hidden = UI.task === 'parts';
-  document.querySelectorAll('.devh, #log, #logEmpty').forEach(x => x.style.display = UI.task === 'parts' ? 'none' : '');
-  renderTasks(); updateUI();
-}
-function startTask(id) {
-  UI.task = id; UI.res = false; $('#res').innerHTML = ''; $('#res').hidden = true;
-  reset(); setSpeed(10);
-  setUIMode(id === 'parts' ? 'parts' : 'use');
-  say(id === 'parts' ? 'Bu bizim pozitif basınçlı SPE cihazımız: <b>CEREX 48</b>. Fareyi merak ettiğin parçanın üzerine getir (telefonda dokun), açıklaması çıksın. Sahneyi sürükleyerek döndürebilirsin.'
-    : id === 'spe' ? 'Görev: <b>atık suda SPE</b>. Rafı öne çek, kutudan 5 Oasis HLB kartuşunu tek tek al ve rafa tak. Sonra adımları sırayla izle: her kartuş kendi hızında akar, biten kartuşu standa almayı unutma.'
-    : '<b>Serbest kullanım:</b> değerlendirme yok. Kartuş tak, çözelti ekle, basınç ver; cihazın nasıl davrandığını gör.');
-}
-function evaluate() {
-  UI.res = true;
-  const errs = S.log.filter(e => !e.info && !e.fixed), ok = !errs.length;
-  if (ok) UI.done.spe = 1;
-  const over = carts.reduce((a, c) => a + c.overDryTotal, 0) / 60;
-  $('#res').innerHTML = `<div class="card res ${ok ? 'ok' : 'bad'}"><b class="big">${ok ? 'SPE tamamlandı ✓' : 'Protokol sapmalarla tamamlandı'}</b><div class="kv"><span>Toplam süre</span><b>${fmtT(S.time)}</b>${carts.map(c => `<span>K${c.k + 1} eluat</span><b>${c.eluate.toFixed(2)} mL</b>`).join('')}<span>İstenmeyen kuruma (toplam)</span><b>${over.toFixed(1)} dk</b><span>Yenilenen kartuş</span><b>${5 - S.spares}</b></div>${errs.length ? `<ul>${errs.map(e => `<li>${e.msg}</li>`).join('')}</ul>` : '<p class="sub" style="font-size:13px">Beş eluat da azot altında uçurma (evaporasyon) adımına hazır.</p>'}<div class="acts" style="margin-top:6px"><button class="bt full" id="again">Tekrar dene</button></div></div>`;
-  $('#again').onclick = () => startTask('spe');
-  say(ok ? 'Mükemmel! Beş kartuşu da sapmasız işledin: şartlandırma, yükleme, yıkama, kurutma ve elüsyon tamam.' : 'Görev tamamlandı ama protokol sapmaları var. Aşağıdaki notları oku ve tekrar dene.');
-  renderTasks();
-}
-function goLab(e) { if (e && e.preventDefault) e.preventDefault(); const ret = new URLSearchParams(location.search).get('ret'); location.href = (/github\.io$/.test(location.hostname) ? '' : 'https://spemrt.github.io/toksilab/') + 'lab_giris.html' + (ret ? '#' + ret : ''); }
-$('#mHome').onclick = goLab; { const a = document.getElementById('hLab'); if (a) a.onclick = goLab; }
-$('#mTasks').onclick = $('#tOpen').onclick = () => { renderTasks(); $('#tdlg').showModal(); }; $('#tClose').onclick = () => $('#tdlg').close();
-$('#mParts').onclick = () => startTask('parts');
-$('#mUse').onclick = () => { if (UI.task === 'parts') startTask('spe'); else setUIMode('use'); };
-$('#mReset').onclick = () => { UI.done = {}; UI.seen = {}; startTask('parts'); };
-$('#mPanel').onclick = () => { document.body.classList.toggle('panel'); $('#mPanel').classList.toggle('on', document.body.classList.contains('panel')); };
-$('#sideX').onclick = () => { document.body.classList.remove('panel'); $('#mPanel').classList.remove('on'); };
-$('#stepT').onclick = () => $('#stepc').classList.toggle('col');
-if (innerWidth > 900) $('#stepc').classList.remove('col');
-new MutationObserver(() => { const m = document.querySelector('.mentor'); m.classList.remove('pop'); void m.offsetWidth; m.classList.add('pop'); }).observe($('#say'), { childList: true, characterData: true, subtree: true });
-{ const rs = $('#res'); new MutationObserver(() => { if (rs.innerHTML && !rs.querySelector('.resX')) { const b = document.createElement('button'); b.className = 'resX'; b.textContent = '✕'; b.onclick = () => { rs.hidden = true; }; rs.prepend(b); rs.hidden = false; } }).observe(rs, { childList: true }); }
-startTask('parts');
+function goLab(e) { if (e && e.preventDefault) e.preventDefault(); const ret = new URLSearchParams(location.search).get('ret') || 'r2-spe'; location.href = (/github\.io$/.test(location.hostname) ? '' : 'https://spemrt.github.io/toksilab/') + 'lab_giris.html#' + ret; }
+$('#hLab').onclick = goLab;
+reset();
 new ResizeObserver(resize).observe(stage); resize();
 requestAnimationFrame(frame);
-Object.defineProperty(window, 'S', { get: () => S }); window.__spe = { UI, startTask, setUIMode, camera, renderer, THREE, aspirate, dispense, pressSide, setMode, togglePull, placeNext, carts, swapRacks, setReg, setSpeed };
+})();
 </script>
 </body>
 </html>
