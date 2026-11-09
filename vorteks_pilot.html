@@ -114,7 +114,7 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
  <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">VORTEKS · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
  <div class="grid">
   <div style="display:grid;gap:12px">
-   <div class="stage" id="stg"><nav class="snav" aria-label="Vorteks menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav>
+   <div class="stage" id="stg"><nav class="snav" aria-label="Vorteks menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
     <div id="cv3"><svg id="ov"></svg>
      <div class="dsp" id="dsp" hidden><small>VORTEKS</small><div class="val" id="dRpm">0 rpm</div><div class="mg" id="dMode"></div><div class="st"><span id="dT" style="color:#EAF2F3"></span><span id="dMixT" style="color:#9BB0B6"></span></div><div class="bar"><i id="dBar"></i></div></div>
      <div class="kpop" id="kpop" hidden><b>Hız kademesi</b><div><button id="kpM">−</button><span id="kpV">0</span><button id="kpP">+</button></div></div>
@@ -193,7 +193,7 @@ function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;
 function noiseTex(base,amt,n=512,speck=0){return canvasTex(n,n,(c,w,h)=>{c.fillStyle=base;c.fillRect(0,0,w,h);const d=c.getImageData(0,0,w,h);for(let i=0;i<d.data.length;i+=4){const v=(Math.random()-.5)*amt;d.data[i]+=v;d.data[i+1]+=v;d.data[i+2]+=v}c.putImageData(d,0,0);for(let i=0;i<speck;i++){c.fillStyle=`rgba(${Math.random()<.5?'60,70,75':'255,255,255'},${.15+Math.random()*.25})`;c.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1+Math.random()*2)}})}
 function hot(o,id){o.userData.hot=id;HOT.push(o);return o}
 const RACK={hs:[16,4],fal:[20.5,4],ep:[25,4]};
-function build(){const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+function build(){const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(1.5,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  box.prepend(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color('#9FB3BA');scene.fog=new THREE.Fog('#A9BBC1',120,300);const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;
  const cam=new THREE.PerspectiveCamera(30,1,1,600);const ctl=new OrbitControls(cam,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minPolarAngle=.45;ctl.maxPolarAngle=1.42;ctl.minAzimuthAngle=-1.0;ctl.maxAzimuthAngle=1.0;ctl.minDistance=18;ctl.maxDistance=150;
@@ -328,9 +328,28 @@ function sync(t){const now=performance.now(),dt=Math.min(.1,(now-lastF)/1000);la
  K.capFal.visible=S.caps.fal;K.capFalBench.visible=!S.caps.fal;if(K.capEp)K.capEp.rotation.z=S.caps.ep?0:1.9,K.capEp.position.x=S.caps.ep?0:.75;
  K.spillM.forEach((m,i)=>{const s=S.spills[i];m.visible=!!s;if(s){m.position.x=s[0];m.position.z=s[1]}});
  curWarn.forEach(o=>{const k=.55+.45*Math.sin(t/160);o.material.opacity=k;o.children[0].material.opacity=.06+.12*k})}
+/* ---------- performans: kare hızı sınırı, boşta yavaşlama, otomatik kalite (simülasyon mantığına dokunmaz) ---------- */
+const PERF={on:false,lvl:0,lastIn:performance.now(),lastR:0,ema:16.7,lastDrop:0,shadows:true,applied:false,mv:false};
+try{PERF.on=localStorage.getItem('toksilab_perf')==='1'}catch(e){}
+['pointerdown','pointermove','wheel','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{PERF.lastIn=performance.now()},{passive:true,capture:true}));
+function perfApply(){if(!R3)return;PERF.applied=true;const r=R3.renderer,c=r.domElement;
+ const pr=Math.min(devicePixelRatio,PERF.on?1:[1.5,1.25,1][PERF.lvl]);
+ if(Math.abs(r.getPixelRatio()-pr)>.01){r.setPixelRatio(pr);r.setSize(c.clientWidth,c.clientHeight,false)}
+ const sh=!PERF.on&&PERF.lvl<2;
+ if(sh!==PERF.shadows){PERF.shadows=sh;r.shadowMap.enabled=sh;R3.scene.traverse(o=>{if(o.isLight&&o.shadow){if(o.userData.cs0===undefined)o.userData.cs0=o.castShadow;o.castShadow=sh&&o.userData.cs0}if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)})}
+ if(sh&&PERF.lvl>=1)R3.scene.traverse(o=>{if(o.isDirectionalLight&&o.shadow&&o.shadow.mapSize.x>1024){o.shadow.mapSize.set(1024,1024);if(o.shadow.map){o.shadow.map.dispose();o.shadow.map=null}r.shadowMap.type=THREE.PCFShadowMap}});
+ const b=document.getElementById('mPerf');if(b)b.classList.toggle('on',PERF.on);PERF.lastR=0}
+function perfShouldRender(){const now=performance.now();if(!PERF.applied)perfApply();
+ const busy=PERF.mv||!!camAnim||now-PERF.lastIn<2000;
+ const fps=busy?(PERF.on?30:60):(PERF.on?15:20);
+ if(now-PERF.lastR<1000/fps-2)return false;const iv=now-PERF.lastR;PERF.lastR=now;
+ if(busy&&!PERF.on&&iv<200){PERF.ema=PERF.ema*.92+iv*.08;if(PERF.ema>26&&PERF.lvl<2&&now-PERF.lastDrop>3000){PERF.lvl++;PERF.lastDrop=now;PERF.ema=16.7;perfApply()}}
+ return true}
+{const b=document.getElementById('mPerf');if(b)b.onclick=()=>{PERF.on=!PERF.on;try{localStorage.setItem('toksilab_perf',PERF.on?'1':'0')}catch(e){}perfApply();
+ if(typeof say==='function')say(PERF.on?'<b>Performans modu açık</b>: gölgeler kapandı, çözünürlük ve kare hızı düşürüldü. Ayar laboratuvarda ve diğer cihaz sayfalarında da geçerli.':'Performans modu kapandı.')}}
 function animate(t){requestAnimationFrame(animate);if(!R3)return;
  if(camAnim){const k=Math.min(1,(performance.now()-camAnim.s)/700),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;R3.cam.position.lerpVectors(camAnim.p0,camAnim.p,e);R3.ctl.target.lerpVectors(camAnim.t0,camAnim.t,e);if(k>=1)camAnim=null}
- R3.ctl.update();sync(t||0);R3.renderer.render(R3.scene,R3.cam);placeKnob()}
+ PERF.mv=R3.ctl.update();sync(t||0);if(perfShouldRender())R3.renderer.render(R3.scene,R3.cam);placeKnob()}
 /* açıklama balonu */
 function partOf(h){if(!h)return null;const [a,b]=h.split(':');return a==='part'?b:a==='tube'?b:a}
 let tipId=null;

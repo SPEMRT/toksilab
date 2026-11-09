@@ -123,7 +123,7 @@ dialog.odlg pre{white-space:pre-wrap;background:#0E1518;border-radius:10px;paddi
  <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">GAZ TÜP ODASI · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
  <div class="grid">
   <div style="display:grid;gap:12px">
-   <div class="stage" id="stg"><nav class="snav" aria-label="Gaz odası menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav>
+   <div class="stage" id="stg"><nav class="snav" aria-label="Gaz odası menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
     <div id="cv3"><svg id="ov"></svg>
      <div class="dsp" id="dsp" hidden><small id="dSt">HAT</small><div class="val" id="dR">—</div><div class="mg" id="dT"></div><div class="st"><span id="dV" style="color:#EAF2F3"></span><span id="dB" style="color:#9BB0B6"></span></div></div>
      <div class="bpop" id="bpop" hidden></div>
@@ -246,7 +246,7 @@ function makeCyl(g,par){const G=new THREE.Group();par.add(G);const col=GCOL[g];
  const tag=add(new THREE.PlaneGeometry(8,5),new THREE.MeshBasicMaterial({map:tt}),0,127,10.6,G,false);tag.rotation.x=-.5;
  const o={G,body,vh,cap,band,bandT,tag,tt,tc,lastTag:null,setTag(t){if(o.lastTag===t)return;o.lastTag=t;tag.visible=!!t;if(!t)return;const x=tc.getContext('2d');x.fillStyle={DOLU:'#2DBE5B',KULLANIMDA:'#F2B632',YEDEK:'#2F7DE1','BOŞ':'#E0403A'}[t]||'#999';x.fillRect(0,0,160,100);x.fillStyle='#fff';x.font=`800 ${t.length>7?26:32}px Arial`;x.textAlign='center';x.fillText(t,80,62);tt.needsUpdate=true}};
  return o}
-function build(){const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+function build(){const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(1.5,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  box.prepend(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color('#D9DFE0');const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;
  const cam=new THREE.PerspectiveCamera(34,1,1,2600);const ctl=new OrbitControls(cam,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minPolarAngle=.5;ctl.maxPolarAngle=1.62;ctl.minAzimuthAngle=-1.0;ctl.maxAzimuthAngle=1.0;ctl.minDistance=30;ctl.maxDistance=1100;
@@ -577,9 +577,28 @@ function finish(ok,msg){const t=T();S.res={ok};if(ok)S.done[t.id]=1;const f=S.fl
  $('#res').innerHTML=`<div class="card res ${ok?'ok':'bad'}"><b class="big">${ok?'Görev tamamlandı ✓':'Görev tamamlandı, ama hatalar var'}</b>${f.length?`<ul>${f.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}<p class="sub" style="font-size:13px">${msg}</p><button class="bt" id="again">Tekrar dene</button></div>`;
  $('#again').onclick=()=>{reset(t.id);S.mode='use';render()};say(ok?'Mükemmel! '+msg:'Görevi bitirdin ama bazı adımlar hatalıydı; aşağıdaki notları oku.');render()}
 let liveT=0;
+/* ---------- performans: kare hızı sınırı, boşta yavaşlama, otomatik kalite (simülasyon mantığına dokunmaz) ---------- */
+const PERF={on:false,lvl:0,lastIn:performance.now(),lastR:0,ema:16.7,lastDrop:0,shadows:true,applied:false,mv:false};
+try{PERF.on=localStorage.getItem('toksilab_perf')==='1'}catch(e){}
+['pointerdown','pointermove','wheel','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{PERF.lastIn=performance.now()},{passive:true,capture:true}));
+function perfApply(){if(!R3)return;PERF.applied=true;const r=R3.renderer,c=r.domElement;
+ const pr=Math.min(devicePixelRatio,PERF.on?1:[1.5,1.25,1][PERF.lvl]);
+ if(Math.abs(r.getPixelRatio()-pr)>.01){r.setPixelRatio(pr);r.setSize(c.clientWidth,c.clientHeight,false)}
+ const sh=!PERF.on&&PERF.lvl<2;
+ if(sh!==PERF.shadows){PERF.shadows=sh;r.shadowMap.enabled=sh;R3.scene.traverse(o=>{if(o.isLight&&o.shadow){if(o.userData.cs0===undefined)o.userData.cs0=o.castShadow;o.castShadow=sh&&o.userData.cs0}if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)})}
+ if(sh&&PERF.lvl>=1)R3.scene.traverse(o=>{if(o.isDirectionalLight&&o.shadow&&o.shadow.mapSize.x>1024){o.shadow.mapSize.set(1024,1024);if(o.shadow.map){o.shadow.map.dispose();o.shadow.map=null}r.shadowMap.type=THREE.PCFShadowMap}});
+ const b=document.getElementById('mPerf');if(b)b.classList.toggle('on',PERF.on);PERF.lastR=0}
+function perfShouldRender(){const now=performance.now();if(!PERF.applied)perfApply();
+ const busy=PERF.mv||!!camAnim||now-PERF.lastIn<2000;
+ const fps=busy?(PERF.on?30:60):(PERF.on?15:20);
+ if(now-PERF.lastR<1000/fps-2)return false;const iv=now-PERF.lastR;PERF.lastR=now;
+ if(busy&&!PERF.on&&iv<200){PERF.ema=PERF.ema*.92+iv*.08;if(PERF.ema>26&&PERF.lvl<2&&now-PERF.lastDrop>3000){PERF.lvl++;PERF.lastDrop=now;PERF.ema=16.7;perfApply()}}
+ return true}
+{const b=document.getElementById('mPerf');if(b)b.onclick=()=>{PERF.on=!PERF.on;try{localStorage.setItem('toksilab_perf',PERF.on?'1':'0')}catch(e){}perfApply();
+ if(typeof say==='function')say(PERF.on?'<b>Performans modu açık</b>: gölgeler kapandı, çözünürlük ve kare hızı düşürüldü. Ayar laboratuvarda ve diğer cihaz sayfalarında da geçerli.':'Performans modu kapandı.')}}
 function animate(t){requestAnimationFrame(animate);if(!R3)return;const ck=S.mode+document.body.classList.contains('panel');if(ck!==camKey){if(camKey)goCam();camKey=ck}
  if(camAnim){const k=Math.min(1,(performance.now()-camAnim.s)/800),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;R3.cam.position.lerpVectors(camAnim.p0,camAnim.p,e);R3.ctl.target.lerpVectors(camAnim.t0,camAnim.t,e);if(k>=1)camAnim=null}
- R3.ctl.update();step(performance.now());hints();if(performance.now()-liveT>400){liveT=performance.now();live()}R3.renderer.render(R3.scene,R3.cam)}
+ PERF.mv=R3.ctl.update();step(performance.now());hints();if(performance.now()-liveT>400){liveT=performance.now();live()}if(perfShouldRender())R3.renderer.render(R3.scene,R3.cam)}
 function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
 $('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}
 $('#ordB').onclick=()=>openOrder();

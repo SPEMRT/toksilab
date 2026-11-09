@@ -117,7 +117,7 @@ dialog.wdlg button{width:100%;margin-top:10px;border:0;border-radius:10px;paddin
  <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">ULTRASONİK BANYO · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
  <div class="grid">
   <div style="display:grid;gap:12px">
-   <div class="stage" id="stg"><nav class="snav" aria-label="Ultrasonik banyo menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav>
+   <div class="stage" id="stg"><nav class="snav" aria-label="Ultrasonik banyo menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
     <div id="cv3"><svg id="ov"></svg>
      <div class="dsp" id="dsp" hidden><small id="dSt">KAPALI</small><div class="val" id="dR">—</div><div class="mg" id="dT"></div><div class="st"><span id="dV" style="color:#EAF2F3"></span><span id="dB" style="color:#9BB0B6"></span></div><div class="bar"><i id="dBar"></i></div></div>
      <div class="bpop" id="bpop" hidden></div>
@@ -207,7 +207,7 @@ function drawPanel(now){if(!pcv)return;const on=S.pow,blink=Math.floor(now/450)%
  c.fillStyle='#fff';c.font='700 19px Arial';c.textAlign='center';c.fillText('Memory Quick',BTN.go[0]*W,BTN.go[1]*H-34);c.fillText('Start / Pause',BTN.go[0]*W,BTN.go[1]*H+46);c.fillText('Min.',(BTN.tUp[0]+BTN.tDn[0])/2*W,BTN.tUp[1]*H+58);c.fillText('°C',(BTN.sUp[0]+BTN.sDn[0])/2*W,BTN.sUp[1]*H+58);c.fillText('On/Off',BTN.pw[0]*W,BTN.pw[1]*H+44);c.textAlign='left';
  c.restore();ptex.needsUpdate=true}
 const heating=()=>S.pow&&S.set>S.act+.3;
-function build(){const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+function build(){const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(1.5,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  box.prepend(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color('#9FB3BA');scene.fog=new THREE.Fog('#A9BBC1',160,360);const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;
  const cam=new THREE.PerspectiveCamera(30,1,1,700);const ctl=new OrbitControls(cam,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minPolarAngle=.35;ctl.maxPolarAngle=1.48;ctl.minAzimuthAngle=-1.1;ctl.maxAzimuthAngle=1.1;ctl.minDistance=22;ctl.maxDistance=220;
@@ -429,9 +429,28 @@ function finish(ok,f,msg){const t=T();S.res={ok};if(ok)S.done[t.id]=1;
  $('#again').onclick=()=>{reset(t.id);S.mode='use';render()};say(ok?'Mükemmel! '+msg:'Görev kabul edilmedi. Aşağıdaki notları oku ve tekrar dene.');render()}
 /* ---------- döngü ---------- */
 let liveT=0;
+/* ---------- performans: kare hızı sınırı, boşta yavaşlama, otomatik kalite (simülasyon mantığına dokunmaz) ---------- */
+const PERF={on:false,lvl:0,lastIn:performance.now(),lastR:0,ema:16.7,lastDrop:0,shadows:true,applied:false,mv:false};
+try{PERF.on=localStorage.getItem('toksilab_perf')==='1'}catch(e){}
+['pointerdown','pointermove','wheel','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{PERF.lastIn=performance.now()},{passive:true,capture:true}));
+function perfApply(){if(!R3)return;PERF.applied=true;const r=R3.renderer,c=r.domElement;
+ const pr=Math.min(devicePixelRatio,PERF.on?1:[1.5,1.25,1][PERF.lvl]);
+ if(Math.abs(r.getPixelRatio()-pr)>.01){r.setPixelRatio(pr);r.setSize(c.clientWidth,c.clientHeight,false)}
+ const sh=!PERF.on&&PERF.lvl<2;
+ if(sh!==PERF.shadows){PERF.shadows=sh;r.shadowMap.enabled=sh;R3.scene.traverse(o=>{if(o.isLight&&o.shadow){if(o.userData.cs0===undefined)o.userData.cs0=o.castShadow;o.castShadow=sh&&o.userData.cs0}if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)})}
+ if(sh&&PERF.lvl>=1)R3.scene.traverse(o=>{if(o.isDirectionalLight&&o.shadow&&o.shadow.mapSize.x>1024){o.shadow.mapSize.set(1024,1024);if(o.shadow.map){o.shadow.map.dispose();o.shadow.map=null}r.shadowMap.type=THREE.PCFShadowMap}});
+ const b=document.getElementById('mPerf');if(b)b.classList.toggle('on',PERF.on);PERF.lastR=0}
+function perfShouldRender(){const now=performance.now();if(!PERF.applied)perfApply();
+ const busy=PERF.mv||!!camAnim||now-PERF.lastIn<2000;
+ const fps=busy?(PERF.on?30:60):(PERF.on?15:20);
+ if(now-PERF.lastR<1000/fps-2)return false;const iv=now-PERF.lastR;PERF.lastR=now;
+ if(busy&&!PERF.on&&iv<200){PERF.ema=PERF.ema*.92+iv*.08;if(PERF.ema>26&&PERF.lvl<2&&now-PERF.lastDrop>3000){PERF.lvl++;PERF.lastDrop=now;PERF.ema=16.7;perfApply()}}
+ return true}
+{const b=document.getElementById('mPerf');if(b)b.onclick=()=>{PERF.on=!PERF.on;try{localStorage.setItem('toksilab_perf',PERF.on?'1':'0')}catch(e){}perfApply();
+ if(typeof say==='function')say(PERF.on?'<b>Performans modu açık</b>: gölgeler kapandı, çözünürlük ve kare hızı düşürüldü. Ayar laboratuvarda ve diğer cihaz sayfalarında da geçerli.':'Performans modu kapandı.')}}
 function animate(t){requestAnimationFrame(animate);if(!R3)return;const ck=S.mode+document.body.classList.contains('panel');if(ck!==camKey){if(camKey)goCam();camKey=ck}
  if(camAnim){const k=Math.min(1,(performance.now()-camAnim.s)/700),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;R3.cam.position.lerpVectors(camAnim.p0,camAnim.p,e);R3.ctl.target.lerpVectors(camAnim.t0,camAnim.t,e);if(k>=1)camAnim=null}
- R3.ctl.update();step(performance.now());hints();if(performance.now()-liveT>300){liveT=performance.now();live();if(S.mode==='use')$('#steps').innerHTML=steps().map(s=>`<li class="${s.st}">${s.t}</li>`).join('')}R3.renderer.render(R3.scene,R3.cam)}
+ PERF.mv=R3.ctl.update();step(performance.now());hints();if(performance.now()-liveT>300){liveT=performance.now();live();if(S.mode==='use')$('#steps').innerHTML=steps().map(s=>`<li class="${s.st}">${s.t}</li>`).join('')}if(perfShouldRender())R3.renderer.render(R3.scene,R3.cam)}
 /* ---------- girişler ---------- */
 function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
 $('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}

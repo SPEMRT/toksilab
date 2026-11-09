@@ -107,7 +107,7 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
  <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">ANALİTİK TERAZİ · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
  <div class="grid">
   <div style="display:grid;gap:12px">
-   <div class="stage" id="stg"><nav class="snav" aria-label="Terazi menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button></nav>
+   <div class="stage" id="stg"><nav class="snav" aria-label="Terazi menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
     <div id="cv3"><svg id="ov"></svg><div class="dsp" id="dsp" hidden><small>EKRAN (YAKIN)</small><div class="val" id="dVal"></div><div class="mg" id="dMg"></div><div class="st"><span id="dSt"></span><span id="dDoor" style="color:#9BB0B6"></span></div><div class="lvrow"><svg id="dLvl" viewBox="-50 -50 100 100"></svg><span id="dLvT"></span></div></div><div class="smenu" id="smenu" hidden><b>Ayarlar</b><button id="smCal">⚖ İç kalibrasyon</button><span class="sub">Tartım birimi</span><div class="u2"><button id="smG">g</button><button id="smMg">mg</button></div><button id="smX" class="x">Kapat</button></div><div class="fpop" id="fpop" hidden><b id="fpT"></b><div><button id="fpCW">↻</button><button id="fpCCW">↺</button></div></div>
      <div class="tip" id="tip" hidden></div><div class="held" id="held" hidden></div><div class="rot">Sürükle: döndür · Tekerlek: yakınlaş</div><div class="nogl" id="nogl" hidden>3B görüntü için tarayıcının WebGL desteği gerekiyor. Lütfen güncel Chrome, Edge ya da Safari ile aç.</div></div></div>
    <div class="mentor"><img id="av" alt=""><div><div class="nm">UZM. MY</div><p id="say"></p></div></div>
@@ -194,7 +194,7 @@ function drawScreen(){if(!stex)return;const st=stable(),lv=levelOk();const dd=dv
  c.textAlign='right';c.fillStyle='#132228';c.font='600 66px "IBM Plex Mono",monospace';const uw=c.measureText(dd.u).width;if(!S.calRun)c.fillText(dd.u,980,268);c.font=(S.calRun?'600 74px':'600 120px')+' "IBM Plex Mono",monospace';c.fillText(val,S.calRun?975:960-uw,268);
  c.textAlign='center';KEYS.forEach(([k,l,cx])=>{c.fillStyle=k==='s'?'#2DBE5B':'#D5E0E7';c.beginPath();c.roundRect(cx-110,306,220,76,14);c.fill();c.fillStyle=k==='s'?'#fff':'#132228';c.font='700 36px "Source Sans 3",sans-serif';c.fillText(l,cx,356)});
  stex.needsUpdate=true}
-function build(){const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+function build(){const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(1.5,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  box.prepend(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color('#9FB3BA');scene.fog=new THREE.Fog('#A9BBC1',150,330);const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;
  const cam=new THREE.PerspectiveCamera(30,1,1,600);const ctl=new OrbitControls(cam,renderer.domElement);ctl.enableDamping=true;ctl.enablePan=false;ctl.minPolarAngle=.45;ctl.maxPolarAngle=1.42;ctl.minAzimuthAngle=-1.0;ctl.maxAzimuthAngle=1.0;ctl.minDistance=28;ctl.maxDistance=190;
@@ -365,10 +365,29 @@ function sync(t){const pl=S.boat==='pl',al=S.boat==='al';K.doorL.position.z=1-15
  K.hAl.visible=S.held==='al';K.hPl.visible=S.held==='pl';[K.hAl,K.hPl].forEach(b=>{b.position.set(side*18,11+bob,4);b.rotation.set(.35,0,side*-.2);const p=b.userData.pow;p.visible=S.heldPow>0;if(p.visible){const q=.3+Math.sqrt(S.heldPow)*.24;p.scale.set(q,q*.35,q*.85)}});
  const sp=K.spat;sp.visible=S.held==='sp';if(sp.visible){const inP=S.hand>0?Math.min(1,(1.1-S.hand)*4+.0)*Math.min(1,S.hand*3):0;const x0=side*19,x1=side*1.8;sp.position.set(x0+(x1-x0)*inP,(11+bob)+(6.6-11-bob)*inP,2+(-1)*inP);sp.rotation.set(0,side>0?0:Math.PI,side>0?-.08-.25*inP:-.08-.25*inP);K.spPow.visible=S.spLoad&&!(S.hand>0&&inP>.8)}
  curWarn.forEach(o=>{const k=.55+.45*Math.sin(t/160);o.material.opacity=k;o.children[0].material.opacity=.06+.12*k})}
+/* ---------- performans: kare hızı sınırı, boşta yavaşlama, otomatik kalite (simülasyon mantığına dokunmaz) ---------- */
+const PERF={on:false,lvl:0,lastIn:performance.now(),lastR:0,ema:16.7,lastDrop:0,shadows:true,applied:false,mv:false};
+try{PERF.on=localStorage.getItem('toksilab_perf')==='1'}catch(e){}
+['pointerdown','pointermove','wheel','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{PERF.lastIn=performance.now()},{passive:true,capture:true}));
+function perfApply(){if(!R3)return;PERF.applied=true;const r=R3.renderer,c=r.domElement;
+ const pr=Math.min(devicePixelRatio,PERF.on?1:[1.5,1.25,1][PERF.lvl]);
+ if(Math.abs(r.getPixelRatio()-pr)>.01){r.setPixelRatio(pr);r.setSize(c.clientWidth,c.clientHeight,false)}
+ const sh=!PERF.on&&PERF.lvl<2;
+ if(sh!==PERF.shadows){PERF.shadows=sh;r.shadowMap.enabled=sh;R3.scene.traverse(o=>{if(o.isLight&&o.shadow){if(o.userData.cs0===undefined)o.userData.cs0=o.castShadow;o.castShadow=sh&&o.userData.cs0}if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)})}
+ if(sh&&PERF.lvl>=1)R3.scene.traverse(o=>{if(o.isDirectionalLight&&o.shadow&&o.shadow.mapSize.x>1024){o.shadow.mapSize.set(1024,1024);if(o.shadow.map){o.shadow.map.dispose();o.shadow.map=null}r.shadowMap.type=THREE.PCFShadowMap}});
+ const b=document.getElementById('mPerf');if(b)b.classList.toggle('on',PERF.on);PERF.lastR=0}
+function perfShouldRender(){const now=performance.now();if(!PERF.applied)perfApply();
+ const busy=PERF.mv||!!camAnim||now-PERF.lastIn<2000;
+ const fps=busy?(PERF.on?30:60):(PERF.on?15:20);
+ if(now-PERF.lastR<1000/fps-2)return false;const iv=now-PERF.lastR;PERF.lastR=now;
+ if(busy&&!PERF.on&&iv<200){PERF.ema=PERF.ema*.92+iv*.08;if(PERF.ema>26&&PERF.lvl<2&&now-PERF.lastDrop>3000){PERF.lvl++;PERF.lastDrop=now;PERF.ema=16.7;perfApply()}}
+ return true}
+{const b=document.getElementById('mPerf');if(b)b.onclick=()=>{PERF.on=!PERF.on;try{localStorage.setItem('toksilab_perf',PERF.on?'1':'0')}catch(e){}perfApply();
+ if(typeof say==='function')say(PERF.on?'<b>Performans modu açık</b>: gölgeler kapandı, çözünürlük ve kare hızı düşürüldü. Ayar laboratuvarda ve diğer cihaz sayfalarında da geçerli.':'Performans modu kapandı.')}}
 function animate(t){requestAnimationFrame(animate);if(!R3)return;
  if(lastMode!==S.mode){lastMode=S.mode;goCam()}
  if(camAnim){const k=Math.min(1,(performance.now()-camAnim.s)/700),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;R3.cam.position.lerpVectors(camAnim.p0,camAnim.p,e);R3.ctl.target.lerpVectors(camAnim.t0,camAnim.t,e);if(k>=1)camAnim=null}
- R3.ctl.update();sync(t||0);drawScreen();R3.renderer.render(R3.scene,R3.cam);labels();placePop();placeMenu()}
+ PERF.mv=R3.ctl.update();sync(t||0);drawScreen();if(perfShouldRender())R3.renderer.render(R3.scene,R3.cam);labels();placePop();placeMenu()}
 /* üzerine gelince açıklama */
 const INFO=Object.fromEntries(PARTS.map(p=>[p[0],[p[1],p[2]]]));Object.assign(INFO,{
  kz:['→0← Sıfırla','Boş kefede ekranı sıfırlar. Kefede kap varken Dara kullanılır.'],kt:['→T← Dara','Kefedeki kabın (kayığın) ağırlığını düşer; ekran sıfır olur, sonra yalnız eklediğin madde okunur.'],
