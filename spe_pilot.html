@@ -187,6 +187,7 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
 .tip { background: rgba(18, 28, 32, .95); color: var(--fg); border-left: 4px solid var(--brand); }
 .status { background: #1E2A30; }
 .hint { color: #24343A; }
+#btnPerf.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .labbtn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font: 700 13.5px var(--font-body); color: #062126; background: linear-gradient(90deg, #2BD9C0, #7CF2D8); border-radius: 999px; padding: 7px 13px; white-space: nowrap; }
 .labbtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .brand .my { font: 700 13px var(--font-display); letter-spacing: .02em; color: var(--muted); }
@@ -206,6 +207,7 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
       <div class="ro"><div class="k" id="roDk">Atık</div><div class="v" id="roD">0<small>mL</small></div></div>
     </div>
     <div class="status" id="statusBox"><span class="dot" id="dot"></span><span id="statusTxt"></span></div>
+    <button class="btn" id="btnPerf" type="button" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer">⚡ Performans</button>
     <div class="speed">Hız
       <div class="seg" role="group" aria-label="Simülasyon hızı" id="speedSeg">
         <button type="button" data-speed="1" aria-pressed="false">1×</button>
@@ -310,7 +312,7 @@ const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
 
 /* ---------- renderer / scene ---------- */
 const renderer = new THREE.WebGLRenderer({ canvas: $('#c'), antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
@@ -326,7 +328,7 @@ controls.maxPolarAngle = Math.PI * 0.495;
 scene.add(new THREE.HemisphereLight(0xffffff, 0x7d8794, 0.8));
 const key = new THREE.DirectionalLight(0xffffff, 0.95);
 key.position.set(5, 12, 8); key.castShadow = true;
-key.shadow.mapSize.set(2048, 2048);
+key.shadow.mapSize.set(2048, 2048); renderer.shadowMap.autoUpdate = false;
 Object.assign(key.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 34 });
 key.shadow.bias = -0.0005;
 scene.add(key);
@@ -1261,6 +1263,48 @@ const modeAngle = { off: 0, adj: 0.75, max: -0.75 };
 const projV = V3();
 let last = performance.now(), uiTick = 0, flowOn = false, sealed = false;
 
+/* ---------- performans: gerektiğinde çiz, kare hızı sınırı, otomatik kalite ---------- */
+const PERF = { on: false, lvl: 0, lastIn: performance.now(), lastR: 0, ema: 16.7, lastDrop: 0, shadows: true };
+try { PERF.on = localStorage.getItem('toksilab_perf') === '1'; } catch (e) {}
+['pointerdown', 'pointermove', 'wheel', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, () => { PERF.lastIn = performance.now(); }, { passive: true, capture: true }));
+function perfApply() {
+  const pr = Math.min(window.devicePixelRatio || 1, PERF.on ? 1 : [1.5, 1.25, 1][PERF.lvl]);
+  if (Math.abs(renderer.getPixelRatio() - pr) > .01) { renderer.setPixelRatio(pr); resize(); }
+  const sh = !PERF.on && PERF.lvl < 2;
+  if (sh !== PERF.shadows) {
+    PERF.shadows = sh; renderer.shadowMap.enabled = sh; key.castShadow = sh;
+    scene.traverse(o => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.needsUpdate = true); });
+  }
+  if (sh && PERF.lvl >= 1 && key.shadow.mapSize.x > 1024) { key.shadow.mapSize.set(1024, 1024); if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; } renderer.shadowMap.type = THREE.PCFShadowMap; }
+  $('#btnPerf').classList.toggle('on', PERF.on);
+  PERF.lastR = 0;
+}
+$('#btnPerf').onclick = () => {
+  PERF.on = !PERF.on;
+  try { localStorage.setItem('toksilab_perf', PERF.on ? '1' : '0'); } catch (e) {}
+  perfApply();
+  toast(PERF.on ? 'Performans modu açık: gölgeler kapandı, çözünürlük ve kare hızı düşürüldü. Ayar laboratuvarda ve diğer cihaz sayfalarında da geçerli.' : 'Performans modu kapandı.');
+};
+/* 2 = tam hız (hareket var), 1 = yavaş (gaz açık, ibreler oynuyor), 0 = boşta */
+function perfTier(now, camMoved) {
+  if (camMoved || now - PERF.lastIn < 1500 || tweens.length || camAnim || S.hand || (S.headT > 0 && S.headT < 1)
+    || now - S.arm.L < 900 || now - S.arm.R < 900 || dropS.some(d => d.on) || carts.some(c => c.dropT > 0)
+    || puddles.some(q => q.wipe >= 0 || q.age < 1) || Math.abs(lever.rotation.z - modeAngle[S.mode]) > .01) return 2;
+  if (S.mode !== 'off' || S.p > .2 || S.flow > .2) return 1;
+  return 0;
+}
+function perfShouldRender(now, camMoved) {
+  const tier = perfTier(now, camMoved);
+  const fps = tier === 2 ? (PERF.on ? 30 : 60) : tier === 1 ? 15 : 4;
+  if (now - PERF.lastR < 1000 / fps - 2) return false;
+  const iv = now - PERF.lastR; PERF.lastR = now;
+  if (tier === 2 && !PERF.on && iv < 200) {
+    PERF.ema = PERF.ema * .92 + iv * .08;
+    if (PERF.ema > 26 && PERF.lvl < 2 && now - PERF.lastDrop > 3000) { PERF.lvl++; PERF.lastDrop = now; PERF.ema = 16.7; perfApply(); }
+  }
+  return true;
+}
+
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   const sdt = dt * S.speed;
@@ -1432,8 +1476,8 @@ function frame(now) {
     camera.position.lerpVectors(camAnim.p0, camAnim.p1, e); controls.target.lerpVectors(camAnim.t0, camAnim.t1, e);
     if (camAnim.t >= 1) camAnim = null;
   }
-  controls.update();
-  renderer.render(scene, camera);
+  const camMoved = controls.update();
+  if (perfShouldRender(now, camMoved)) { renderer.shadowMap.needsUpdate = true; renderer.render(scene, camera); }
   placeReg();
 
   if (++uiTick % 4 === 0) updateUI();
@@ -1551,7 +1595,7 @@ function resize() {
 function goLab(e) { if (e && e.preventDefault) e.preventDefault(); const ret = new URLSearchParams(location.search).get('ret') || 'r2-spe'; location.href = (/github\.io$/.test(location.hostname) ? '' : 'https://spemrt.github.io/toksilab/') + 'lab_giris.html#' + ret; }
 $('#hLab').onclick = goLab;
 reset();
-new ResizeObserver(resize).observe(stage); resize();
+new ResizeObserver(resize).observe(stage); resize(); perfApply();
 requestAnimationFrame(frame);
 })();
 </script>

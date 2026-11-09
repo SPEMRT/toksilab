@@ -149,7 +149,7 @@ body.fps #gmode{background:rgba(14,21,24,.8);color:#EAF2F3}body.fps .moves,body.
 #joy i{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:rgba(43,217,192,.85);box-shadow:0 4px 12px rgba(0,0,0,.35)}
 @media (pointer:coarse){#gmode{display:none}#joy{display:block}.moves{display:none!important}}
 </style>
-<nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mMap" class="on"><span>▦</span>Harita</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button></nav>
+<nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mMap" class="on"><span>▦</span>Harita</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
 <div id="wv" hidden><div class="wvb"><video id="wvV" playsinline preload="auto" poster="karsilama.jpg" src="karsilama.mp4"></video><div class="wvc"><button id="wvS" aria-label="Sesi aç/kapat">🔊</button><span style="flex:1"></span><button id="wvX">Geç ›</button></div></div></div>
 <div class="hdr2"><b>MY_<i>ToksiLab</i></b><span class="pill">LABORATUVAR GİRİŞİ · 3B</span></div>
 <div id="cv3"></div>
@@ -184,7 +184,7 @@ const ROOMS=[
  {no:5,z:-28.9,n:'Gaz Tüp Odası',k:'GAZ TÜP ODASI',c:'#E8B923',ic:'⬣',haz:'gas',sub:'Basınçlı gaz · sigara içilmez',d:'Basınçlı gaz tüpleri tek bir odada toplanır; tüpler duvara zincirle sabitlenir, manifold ve regülatörlerden ince paslanmaz borularla odalara dağıtılır.',l:['Azot-1 (N₂, tek tüp) → Kromatografi · LC-MS/MS ve GC','Argon-1 (Ar, tek tüp) → Kromatografi · LC-MS/MS','Argon-2 (Ar, çift tüp) → İnorganik Analiz · ICP-MS','Helyum (He, çift tüp) → Kromatografi ve Yangın-Patlayıcı · GC-MS','Azot-2 (N₂, çift tüp) → Örnek Hazırlama · evaporatör, SPE','Çift tüplü regülatörler kesintisiz gaz sağlar · gaz kaçak dedektörü · havalandırma'],st:'info',small:true},
  {no:6,z:-11,side:'L',dx:-6,n:'Yangın ve Patlayıcı Analiz Laboratuvarı',k:'YANGIN VE PATLAYICI',c:'#6A4FB3',ic:'💥',haz:'exp',sub:'Yangın ve patlayıcı analiz laboratuvarı',d:'Yangın yerinden alınan enkazda hızlandırıcı (benzin, tiner, gazyağı vb.) kalıntıları ile patlama sonrası örneklerde patlayıcı madde kalıntıları analiz edilir.',l:['GC-MS · yangın hızlandırıcı kalıntısı (ILR) analizi','Headspace ve aktif karbon şeritle örnekleme','Patlayıcı kalıntı analizi (TNT, RDX, PETN…)','Delil saklama ve delil zinciri kaydı'],st:'soon'}];
 /* ============ sahne ============ */
-const box=$('#cv3');const LOW=matchMedia('(pointer:coarse)').matches||Math.min(innerWidth,innerHeight)<700;const renderer=new THREE.WebGLRenderer({antialias:!LOW,powerPreference:'high-performance'});renderer.setPixelRatio(LOW?Math.min(1.25,devicePixelRatio):Math.min(2,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.shadowMap.enabled=!LOW;renderer.shadowMap.type=THREE.PCFSoftShadowMap;box.appendChild(renderer.domElement);
+const box=$('#cv3');const LOW=matchMedia('(pointer:coarse)').matches||Math.min(innerWidth,innerHeight)<700;const renderer=new THREE.WebGLRenderer({antialias:!LOW,powerPreference:'high-performance'});renderer.setPixelRatio(LOW?Math.min(1.25,devicePixelRatio):Math.min(1.5,devicePixelRatio));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.shadowMap.enabled=!LOW;renderer.shadowMap.type=THREE.PCFSoftShadowMap;box.appendChild(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color('#BFD9E6');scene.fog=new THREE.Fog('#BFD9E6',30,90);
 const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(new RoomEnvironment(),.04).texture;
 const cam=new THREE.PerspectiveCamera(72,1,.05,300);cam.rotation.order='YXZ';
@@ -908,11 +908,34 @@ function drawMap(){const s=$('#mapS');const zx=z=>14+(-z)/30*190;let h=`<rect x=
  TP.forEach(p=>{h+=`<circle cx="${zx(Math.min(0,p.root.position.z))}" cy="${58+p.root.position.x*7}" r="2.6" fill="#fff" stroke="#1F9A97"/>`});const px=zx(Math.min(0,P.z)),py=P.x>2?76+(P.x-2)/8*34:58+(P.x)*7;const a=-P.yaw;h+=`<g transform="translate(${px} ${py}) rotate(${(-90+a*180/Math.PI)})"><path d="M0 -9 L6 6 L0 3 L-6 6Z" fill="#F2B632" stroke="#16242A"/></g>`;
  s.innerHTML=h;s.querySelectorAll('.dr').forEach(g=>g.onclick=()=>{if(!started){enter();return}openDoorCard(+g.dataset.no)})}
 let mapT=0;
+/* ---------- performans: kare hızı sınırı, boşta yavaşlama, otomatik kalite ---------- */
+const PERF={on:false,lvl:0,lastIn:performance.now(),lastR:0,ema:16.7,lastDrop:0,shadows:!LOW};
+try{PERF.on=localStorage.getItem('toksilab_perf')==='1'}catch(e){}
+['pointerdown','pointermove','wheel','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{PERF.lastIn=performance.now()},{passive:true,capture:true}));
+function perfApply(){
+ const pr=Math.min(devicePixelRatio,PERF.on?1:LOW?1.25:[1.5,1.25,1][PERF.lvl]);
+ if(Math.abs(renderer.getPixelRatio()-pr)>.01){renderer.setPixelRatio(pr);fit()}
+ const sh=!LOW&&!PERF.on&&PERF.lvl<2;
+ if(sh!==PERF.shadows){PERF.shadows=sh;renderer.shadowMap.enabled=sh;sun.castShadow=sh;scene.traverse(o=>{if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)})}
+ if(sh&&PERF.lvl>=1&&sun.shadow.mapSize.x>1024){sun.shadow.mapSize.set(1024,1024);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}renderer.shadowMap.type=THREE.PCFShadowMap}
+ if(PERF.on&&!LOW&&!scene.userData.lowAmb)lowPass();
+ const b=$('#mPerf');if(b)b.classList.toggle('on',PERF.on)}
+$('#mPerf').onclick=()=>{PERF.on=!PERF.on;try{localStorage.setItem('toksilab_perf',PERF.on?'1':'0')}catch(e){}
+ if(!PERF.on&&scene.userData.lowAmb&&!LOW){say('Performans modu kapandı. Gölgeler ve ışıklar sayfa yenilenince tam kaliteye döner.')}
+ else say(PERF.on?'<b>Performans modu açık</b>: gölgeler kapandı, çözünürlük ve kare hızı düşürüldü. Ayar diğer cihaz sayfalarında da geçerli.':'Performans modu kapandı.');perfApply()};
+function perfGate(now,busy){
+ const fps=PERF.on?30:busy?60:30, minI=1000/fps;
+ if(now-PERF.lastR<minI-2)return false;
+ const iv=now-PERF.lastR;PERF.lastR=now;
+ if(busy&&!PERF.on&&!LOW&&iv<200){PERF.ema=PERF.ema*.92+iv*.08;
+  if(PERF.ema>26&&PERF.lvl<2&&now-PERF.lastDrop>3000){PERF.lvl++;PERF.lastDrop=now;PERF.ema=16.7;perfApply()}}
+ return true}
+perfApply();
 /* döngü */
 let last=performance.now(),bob=0;
 let lowN=0,lowSkip=0;function lowPass(){const rm=[];scene.traverse(o=>{if(o.isPointLight)rm.push(o);if(o.isMesh){o.castShadow=false;(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(!m)return;if(m.transmission>0){m.transmission=0;m.needsUpdate=true}if(m.clearcoat>0){m.clearcoat=0;m.needsUpdate=true}})}});rm.forEach(l=>l.parent&&l.parent.remove(l));
  if(!scene.userData.lowAmb){scene.userData.lowAmb=1;scene.add(new THREE.AmbientLight('#FFF6EA',.55));scene.traverse(o=>{if(o.isHemisphereLight)o.intensity=1.15})}}
-function loop(t){requestAnimationFrame(loop);if(LOW){lowN++;if(lowN===2||lowN%240===0)lowPass();if((lowSkip^=1))return}const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;
+function loop(t){requestAnimationFrame(loop);{const n0=performance.now();const busy=!started||n0-PERF.lastIn<2000||Object.values(keys).some(Boolean)||joy.on||teamMode==='greet'||Math.hypot(G.x-P.x,G.z-P.z)>.01||Math.abs(G.yaw-P.yaw)>.002||TP.some(p=>p.dest&&!p.arrived);if(!perfGate(n0,busy))return}if(LOW){lowN++;if(lowN===2||lowN%240===0)lowPass();if((lowSkip^=1))return}const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;
  let kw=false;if(started&&inside){const sp=1.8*(keys['shift']?1.7:1)*dt;let f=0,sd=0;if(keys['arrowup']||keys['w'])f+=1;if(keys['arrowdown']||keys['s'])f-=1;if(keys['a'])sd-=1;if(keys['d'])sd+=1;if(joy.on){f-=joy.y;sd+=joy.x}
   if(keys['arrowleft'])turn(1.3*dt);if(keys['arrowright'])turn(-1.3*dt);if(f||sd){const m=Math.max(1,Math.hypot(f,sd));walk(f/m*sp,sd/m*sp);kw=true}}
  const k=Math.min(1,dt*(kw?12:started?2.2:1.2));const mv=Math.hypot(G.x-P.x,G.z-P.z);P.x+=(G.x-P.x)*k;P.z+=(G.z-P.z)*k;let dy=G.yaw-P.yaw;P.yaw+=dy*Math.min(1,dt*4);P.pitch+=(G.pitch-P.pitch)*Math.min(1,dt*4);
