@@ -20,6 +20,7 @@ button,input,select{font:inherit;color:inherit}button{cursor:pointer}a{color:#7F
 .mentor{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;background:#F1F6F7;color:#16242A;border-radius:14px;padding:10px 14px;border-left:5px solid var(--teal);box-shadow:0 8px 22px rgba(0,0,0,.3)}
 .mentor img{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#cfd8da}.mentor .nm{font:600 11px var(--f-mono);color:#1F9A97;letter-spacing:.08em}.mentor p{font-size:15px;line-height:1.45}
 .lay{display:grid;grid-template-columns:290px 1fr;gap:12px;align-items:start}
+body.tek .side{display:none}body.tek .lay{grid-template-columns:1fr;max-width:1000px;margin:0 auto;width:100%}
 .side{position:sticky;top:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:4px}
 .side h3{font:700 19px var(--f-display);margin:2px 4px 2px}.side .meta{font:600 11px var(--f-mono);color:var(--muted);margin:0 4px 6px}
 .side a{display:grid;grid-template-columns:26px 1fr;gap:9px;align-items:center;padding:7px 8px;border-radius:10px;color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:600}
@@ -88,7 +89,19 @@ const T=window.TLE,$=s=>document.querySelector(s);
 const m=new URLSearchParams(location.search).get('m')||'etanol';
 const M=T.MOD[m];
 if(!M||M.durum!=='aktif'){document.querySelector('.lay').innerHTML='<div class="card"><h2>Bu modül hazırlanıyor</h2><p><a href="egitimler.html">Eğitimler sayfasına dön</a></p></div>';throw 0}
-T.basla(m);document.title=M.ad+' · Eğitim · MY ToksiLab';$('#pill').textContent='EĞİTİM · '+M.ad.toUpperCase();
+/* tek konu modu (Eğitimler kataloğundan): ?tek=kkd — modül adımlaması, yan pencere ve eğitim çubuğu yok */
+const TEK=(()=>{const t=new URLSearchParams(location.search).get('tek');return M.adimlar.some(a=>a.id===t&&a.tur==='ic')?t:null})();
+if(TEK){{const s0=T.oku();s0.mod=s0.mod||{};if(!s0.mod[m]){s0.mod[m]={bas:Date.now(),adim:{}};T.yaz(s0)}}document.body.classList.add('tek');const A=M.adimlar.find(a=>a.id===TEK);document.title=A.ad+' · Eğitim · MY ToksiLab';$('#pill').textContent='EĞİTİM · '+A.ad.toLocaleUpperCase('tr');
+ document.querySelector('.hdr nav').innerHTML='<a href="index.html#menu">Ana sayfa</a><a href="index.html#egitim">‹ Eğitimler</a>'}
+else{T.basla(m);document.title=M.ad+' · Eğitim · MY ToksiLab';$('#pill').textContent='EĞİTİM · '+M.ad.toUpperCase()}
+/* tek modda: "Adım x / 9" ve "Sonraki: …" bağlantıları yerine Eğitimlere dönüş ve Tekrar dene */
+function tekDuzelt(){if(!TEK)return;const mn=$('#main');if(!mn||mn.dataset.fix==='1')return;mn.dataset.fix='1';
+ mn.querySelectorAll('.card > .sub').forEach(e=>{if(/Adım/.test(e.textContent))e.textContent='EĞİTİM'});
+ mn.querySelectorAll('a[href^="#"]').forEach(a=>{if(!a.closest('.fb')){a.href='index.html#egitim';a.textContent='‹ Eğitimlere dön';a.classList.remove('p')}});
+ const ok=mn.querySelector('.st.ok');if(ok&&TEK!=='on'&&TEK!=='final'&&!mn.querySelector('#tekrar')){const b=document.createElement('button');b.className='bt';b.id='tekrar';b.textContent='↻ Tekrar dene';
+  b.onclick=()=>{T.geriAl(m,TEK);const s2=T.oku();if(s2.mod&&s2.mod[m]){if(TEK==='kkd'){delete s2.mod[m].kkdSec;delete s2.mod[m].kkdOk}if(TEK==='kalib')delete s2.mod[m].kal;T.yaz(s2)}git()};ok.after(b)}
+ mn.dataset.fix=''}
+new MutationObserver(()=>tekDuzelt()).observe(document.getElementById('main'),{childList:true,subtree:true});
 const say=h=>$('#say').innerHTML=h;
 const fmt=(n,d=3)=>Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const num=v=>{v=String(v==null?'':v).trim().replace(/\s/g,'').replace(/,/g,'.').replace(/×/g,'*').replace(/÷/g,'/');if(v==='')return NaN;if(!/^[0-9.+\-*/()]+$/.test(v))return NaN;try{const r=Function('"use strict";return ('+v+')')();return typeof r==='number'&&isFinite(r)?r:NaN}catch(e){return NaN}};
@@ -102,7 +115,7 @@ function side(cur){const P=T.ilerleme(m);
   ${M.adimlar.map((a,i)=>`<a href="#${a.id}" class="${T.bitti(m,a.id)?'ok ':''}${cur===a.id?'on':''}"><i>${T.bitti(m,a.id)?'✓':i+1}</i><span>${a.ad}<small>${a.tur==='ic'?'bu sayfada':a.sayfa.split('?')[0]}</small></span></a>`).join('')}`}
 
 /* ---------------- yönlendirme ---------------- */
-function git(){const id=location.hash.slice(1);const a=M.adimlar.find(x=>x.id===id);side(a&&a.id);window.scrollTo(0,0);
+function git(){const id=TEK||location.hash.slice(1);const a=M.adimlar.find(x=>x.id===id);side(a&&a.id);window.scrollTo(0,0);
  if(!a)return genel();const ic={on:onTest,kkd:kkd,kalib:kalib,final:final}[a.id];ic?ic(a):dis(a)}
 addEventListener('hashchange',git);addEventListener('focus',()=>{T.otoKontrol();const id=location.hash.slice(1);side(id||null)});
 

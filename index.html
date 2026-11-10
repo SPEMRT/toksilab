@@ -91,7 +91,7 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 .subs a,.subs span{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;font-size:13.5px;font-weight:600;text-decoration:none;background:rgba(255,255,255,.04);color:#DCE7EA;border:1px solid transparent}
 .subs a:hover{border-color:rgba(43,217,192,.5);background:rgba(43,217,192,.08)}
 .subs span{color:#C9D7DB;cursor:default}
-.basla{display:block;text-align:center;padding:9px 12px;border-radius:11px;font:700 14px var(--f-body);text-decoration:none;color:#062126;background:linear-gradient(90deg,var(--teal),var(--mint));transition:filter .2s}.basla:hover{filter:brightness(1.08)}.basla.yok{background:rgba(255,255,255,.05);color:#7F959B;cursor:default}.subs i{font-style:normal;font:700 10px var(--f-mono);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#33444C;color:#EAF2F3;flex:none}
+.basla{display:block;text-align:center;padding:9px 12px;border-radius:11px;font:700 14px var(--f-body);text-decoration:none;color:#062126;background:linear-gradient(90deg,var(--teal),var(--mint));transition:filter .2s}.basla:hover{filter:brightness(1.08)}.basla.tamam{background:#1E4D43;color:var(--mint)}.basla.yok{background:rgba(255,255,255,.05);color:#7F959B;cursor:default}.subs i{font-style:normal;font:700 10px var(--f-mono);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#33444C;color:#EAF2F3;flex:none}
 .subs a.ok i{background:var(--ok);color:#062126}
 .prog{height:6px;border-radius:9px;background:#22323A;overflow:hidden}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--mint))}
 .devs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
@@ -281,8 +281,8 @@ const KAT=[
 const CIHAZ=[['⚖️','Analitik terazi','terazi_pilot.html','Oda 2','Mikroterazi, 1 µg okunabilirlik'],['💧','Otomatik pipet','pipet_pilot.html','Oda 2','P10 · P200 · P1000'],['🌀','Vorteks','vorteks_pilot.html','Oda 2','Orbital karıştırıcı'],['🔄','Santrifüj','santrifuj_pilot.html','Oda 2','Dengeleme ve rotor'],['🫧','Ultrasonik banyo','ultra_pilot.html','Oda 2','Çözme, gaz giderme'],['🚰','Ultra saf su','su_pilot.html','Oda 2','Tip I su sistemi'],['🧮','Kalibrasyon masası','kalibrasyon_pilot.html','Oda 2','Seyreltme hesapları'],['🧪','Örnek hazırlama','ornek_hazirlama.html','Oda 2','Kanda alkol çözeltileri, 12 vial'],['🧫','SPE · CEREX 48','spe_pilot.html','Oda 2','Basınçlı manifold, Oasis HLB'],['🔥','HS-GC-MS','hsgcms_pilot.html','Oda 1','Gerçek fotoğraflı, ALKOL2.M'],['🛢️','Gaz tüp odası','gaz_pilot.html','Oda 5','N₂, Ar, He hatları']];
 const BD={h:['HAZIR','h'],y:['YAKINDA','y'],k:['KISMEN','k']};
 /* her konunun "Başla" adresi; alt maddeler yalnızca bilgi */
-const GO={'KKD ve laboratuvar güvenliği':'egitim.html?m=etanol#kkd','Analitik terazi':'terazi_pilot.html','Otomatik pipet':'pipet_pilot.html','Vorteks':'vorteks_pilot.html','Santrifüj':'santrifuj_pilot.html','Ultrasonik banyo':'ultra_pilot.html','Ultra saf su':'su_pilot.html',
- 'Kalibrasyon çözeltisi hazırlama':'kalibrasyon_pilot.html','Stok ve ara stok hazırlama':'ornek_hazirlama.html','Kalibrasyon eğrisi oluşturma':'egitim.html?m=etanol#kalib','Headspace vial hazırlama':'ornek_hazirlama.html','Katı faz ekstraksiyonu (SPE)':'spe_pilot.html',
+const GO={'KKD ve laboratuvar güvenliği':'egitim.html?m=etanol&tek=kkd','Analitik terazi':'terazi_pilot.html','Otomatik pipet':'pipet_pilot.html','Vorteks':'vorteks_pilot.html','Santrifüj':'santrifuj_pilot.html','Ultrasonik banyo':'ultra_pilot.html','Ultra saf su':'su_pilot.html',
+ 'Kalibrasyon çözeltisi hazırlama':'kalibrasyon_pilot.html','Stok ve ara stok hazırlama':'ornek_hazirlama.html','Kalibrasyon eğrisi oluşturma':'egitim.html?m=etanol&tek=kalib','Headspace vial hazırlama':'ornek_hazirlama.html','Katı faz ekstraksiyonu (SPE)':'spe_pilot.html',
  'HS-GC-MS':'hsgcms_pilot.html','Kanda alkol analizi (HS-GC-MS)':'egitim.html?m=etanol','Atık suda SPE':'spe_pilot.html'};
 
 function panelAc(tur,kat){const P=$('#pn');P.classList.add('on');P.setAttribute('aria-hidden','false');$('#ov').classList.add('on');
@@ -304,13 +304,14 @@ function egitimCiz(aktif){const s=T?T.oku():{};
   if(it.modul&&T){const P=T.ilerleme(it.modul);pr=`<div class="prog" title="%${P.yuzde}"><i style="width:${P.yuzde}%"></i></div>`}
   return `<div class="it"><div class="h"><div class="i">${it.ic}</div><div><b>${it.ad}</b><p>${it.d}</p></div><span class="bd ${BD[it.dr][1]}">${BD[it.dr][0]}</span></div>${pr}
    ${it.s.length?`<div class="subs">${it.s.map((x,i)=>`<span><i>${i+1}</i>${x.ad}</span>`).join('')}</div>`:''}
-   ${GO[it.ad]&&it.dr!=='y'?`<a class="basla" href="${GO[it.ad]}">Başla ›</a>`:`<span class="basla yok">Hazırlanıyor</span>`}</div>`}).join('');
+   ${GO[it.ad]&&it.dr!=='y'?(()=>{const tk=(GO[it.ad].match(/tek=(\w+)/)||[])[1],bit=tk&&T&&T.bitti('etanol',tk);return `<a class="basla${bit?' tamam':''}" href="${GO[it.ad]}">${bit?'✓ Tamamlandı · Tekrar dene ›':'Başla ›'}</a>`})():`<span class="basla yok">Hazırlanıyor</span>`}</div>`}).join('');
  $('#pb').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>egitimCiz(b.dataset.k))}
 function panelKapat(){$('#pn').classList.remove('on');$('#pn').setAttribute('aria-hidden','true');$('#ov').classList.remove('on')}
 document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>panelAc(b.dataset.p));
 $('#pnX').onclick=panelKapat;$('#ov').onclick=panelKapat;addEventListener('keydown',e=>{if(e.key==='Escape'&&!introOn)panelKapat()});
 window.__G={panelAc,introBitir,introBasla};
 if(['egitim','nasil'].includes(HSH))setTimeout(()=>panelAc(HSH),350);
+addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(['egitim','nasil'].includes(h)){introBitir();panelAc(h)}});
 </script>
 </body>
 </html>
