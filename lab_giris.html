@@ -961,7 +961,7 @@ say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri 
  const sp={ult:[6.32,-12.5],elga:[5.5,-12.45],bal:[3.6,-12.25],cen:[8.9,-12.55],vor:[7.9,-12.55],pip:[5.5,-9.75],cal:[7.6,-9.75],spe:[5.9,-9.3],hsgc:[4.85,-4.75]}[d.k]||[3,RBD[no].dz];
  G.x=P.x=sp[0];G.z=P.z=sp[1];G.yaw=P.yaw=Math.atan2(-(d.x-sp[0]),-(d.z-sp[1]));G.pitch=P.pitch=d.k==='hsgc'?-.12:-.3;doorOpen=1;drawMap();nearDev=d;{const c=$('#devchip');c.innerHTML=`${DEVI[d.k].ic} <b>${DEVI[d.k].n}</b> · bilgi ve kullanım ›`;c.onclick=()=>openDev(d.k)}
  say(`Tekrar hoş geldin! <b>${RBD[no].n}</b>’ndasın, <b>${DEVI[d.k].n}</b> önünde kaldığın yerdesin. Başka bir cihaza geçebilir ya da <b>‹ Koridora dön</b> ile koridora çıkabilirsin.`)}}
-$('#mHome').onclick=()=>window.open(BASE+'my_toksilab.html','_blank','noopener');
+$('#mHome').onclick=()=>{location.href=BASE+'index.html'};
 $('#mMap').onclick=()=>{const m=$('#map');m.hidden=!m.hidden;$('#mMap').classList.toggle('on',!m.hidden)};
 $('#mVid').onclick=()=>playWelcome(null);
 $('#mEgt').onclick=()=>{location.href=BASE+'egitimler.html'};
