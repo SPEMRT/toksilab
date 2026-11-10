@@ -185,22 +185,23 @@ function onTest(a){say('Önce kısa bir ön bilgi. Sonra 8 soruluk ön test: ama
 const KK=[['🥼','Uzun kollu, önü kapalı laboratuvar önlüğü',1,'Deri ve giysiyi kan sıçramasından korur.'],['🧤','Nitril eldiven',1,'Kan ve kimyasallara karşı bariyer; lateks alerjisi riski yok.'],['🥽','Koruyucu gözlük',1,'Pipetleme ve vortekste sıçramaya karşı gözü korur.'],['👟','Kapalı ayakkabı',1,'Dökülen sıvı ve kırık cama karşı.'],['💇','Uzun saç toplu',1,'Saç kontaminasyonu ve cihaz hareketli parçaları için.'],
  ['🩳','Şort ve sandalet',0,'Laboratuvarda bacak ve ayak açık olamaz.'],['🧤','Pudralı lateks eldiven',0,'Pudra kontaminasyon, lateks alerji riski taşır.'],['💍','Yüzük ve bileklik',0,'Eldiveni deler, altında bulaşık kalır; takılmaz.'],['☕','Tezgâhta kahve',0,'Laboratuvarda yemek-içmek yasaktır.'],['📱','Eldivenle telefon kullanmak',0,'Kontaminasyonu laboratuvar dışına taşır.']];
 function kkd(a){const v=veri(a.id),s=T.oku(),d=s.mod[m];let sec=new Set((d.kkdSec)||[]),kontrol=!!(d.kkdOk);
- say('Kan potansiyel enfeksiyöz bir örnektir; organik çözücülerle de çalışacağız. Doğru <b>KKD ve davranışları</b> seç, sonra laboratuvarı gez.');
+ say('Kan potansiyel enfeksiyöz bir örnektir; organik çözücülerle de çalışacağız. Doğru <b>KKD ve davranışları</b> seç, sonra güvenlik kurallarını oku.');
  const draw=()=>{const ok=KK.every((k,i)=>sec.has(i)===!!k[2]);
-  $('#main').innerHTML=`<div class="card"><div class="sub">Adım ${M.adimlar.indexOf(a)+1} / ${M.adimlar.length}</div><h2>${a.ic} KKD ve laboratuvar</h2>
+  $('#main').innerHTML=`<div class="card"><div class="sub">Adım ${M.adimlar.indexOf(a)+1} / ${M.adimlar.length}</div><h2>${a.ic} KKD ve laboratuvar güvenliği</h2>
    <h3>1 · Doğru olanları seç</h3><div class="kk" id="K">${KK.map((k,i)=>`<button data-i="${i}" class="${sec.has(i)?'sec ':''}${kontrol?(k[2]?(sec.has(i)?'dogru':'yanlis'):(sec.has(i)?'yanlis':'')):''}"><span>${k[0]}</span>${k[1]}</button>`).join('')}</div>
    ${kontrol?`<div class="fb ${ok?'ok':'no'}">${ok?'✓ Tamam. Önlük, nitril eldiven, gözlük, kapalı ayakkabı ve toplu saç: kan ve uçucu çözücülerle çalışmanın asgarisi.':'Bazı seçimler hatalı (kırmızı). '+KK.filter((k,i)=>sec.has(i)!==!!k[2]).map(k=>'<b>'+k[1]+'</b>: '+k[3]).join(' ')}</div>`:''}
    <div class="row"><button class="bt b" id="kon">Kontrol et</button></div>
-   <h3>2 · Laboratuvarı gez</h3>
-   <div class="box"><p>Laboratuvara gir. <b>Oda 2 · Örnek Hazırlama</b>’da terazi, pipet, vorteks ve kalibrasyon masasını; <b>Oda 1 · Kromatografi</b>’de HS-GC-MS’i bul. Eğitim çubuğu laboratuvarda da görünür.</p>
-    <div class="row"><a class="bt p" href="lab_giris.html">Laboratuvara gir ›</a>
-    <label class="row" style="gap:6px;font-size:14.5px"><input type="checkbox" id="tur" ${d.kkdTur?'checked':''} style="accent-color:var(--teal);width:18px;height:18px"> Oda 1 ve Oda 2’yi gezdim</label></div></div>
-   <div class="row">${v?`<span class="st ok">✓ Tamamlandı · ${tarih(v.t)}</span><a class="bt p" href="#tartim">Sonraki: Tartım ›</a>`:`<button class="bt p" id="tam" ${ok&&kontrol&&d.kkdTur?'':'disabled'}>✓ Adımı tamamla</button><span class="sub">${!(ok&&kontrol)?'önce KKD seçimini doğru yap':!d.kkdTur?'laboratuvarı gezdiğini işaretle':''}</span>`}</div></div>`;
+   <h3>2 · Güvenlik kuralları</h3>
+   <div class="box"><ul>
+    <li><b>Kan</b> potansiyel enfeksiyözdür: tüm örneklerle eldivenle çalış, tüpleri kapalı karıştır, aerosol oluşturma.</li>
+    <li><b>Metanol, etanol, n-propanol</b> yanıcıdır: stokları çeker ocakta hazırla, açık alevden uzak tut, şişeleri kapalı sakla.</li>
+    <li><b>Dökülmede</b> emici malzemeyle topla, yüzeyi dezenfekte et; kanlı atık tıbbi atığa, çözücü atığı ayrı kaba.</li>
+    <li><b>Eldiveni</b> kirlendiğinde değiştir; eldivenle kapı kolu, telefon ve klavyeye dokunma. Çıkarken ellerini yıka.</li></ul></div>
+   <div class="row">${v?`<span class="st ok">✓ Tamamlandı · ${tarih(v.t)}</span><a class="bt p" href="#tartim">Sonraki: Tartım ›</a>`:`<button class="bt p" id="tam" ${ok&&kontrol?'':'disabled'}>✓ Adımı tamamla</button><span class="sub">${!(ok&&kontrol)?'önce KKD seçimini doğru yap':''}</span>`}</div></div>`;
   $('#K').onclick=e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;sec.has(i)?sec.delete(i):sec.add(i);kontrol=false;kay();draw()};
   $('#kon').onclick=()=>{kontrol=true;kay();draw()};
-  $('#tur').onchange=e=>{d.kkdTur=e.target.checked;kay();draw()};
   const t=$('#tam');if(t)t.onclick=()=>{T.tamamla(m,a.id,{kkd:1});git()}};
- const kay=()=>{const s2=T.oku();Object.assign(s2.mod[m],{kkdSec:[...sec],kkdOk:kontrol,kkdTur:d.kkdTur});T.yaz(s2)};
+ const kay=()=>{const s2=T.oku();Object.assign(s2.mod[m],{kkdSec:[...sec],kkdOk:kontrol});T.yaz(s2)};
  draw()}
 
 /* ---------------- kalibrasyon hesabı ---------------- */

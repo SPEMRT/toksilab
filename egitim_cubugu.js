@@ -13,8 +13,8 @@ var MOD={
   adimlar:[
    {id:'on',ad:'Ön bilgi ve ön test',ic:'📘',sayfa:'egitim.html?m=etanol#on',tur:'ic',
     gorev:'Kısa ön bilgiyi oku ve 8 soruluk ön testi çöz. Ön test başarı şartı değildir; finalde ne kadar ilerlediğini gösterir.'},
-   {id:'kkd',ad:'KKD ve laboratuvar',ic:'🥼',sayfa:'egitim.html?m=etanol#kkd',tur:'ic',ek:['lab_giris.html'],
-    gorev:'Kan örneğiyle çalışırken gereken kişisel koruyucu donanımı seç, sonra laboratuvara gir: Oda 2 Örnek Hazırlama ve Oda 1 Kromatografi’yi gez.'},
+   {id:'kkd',ad:'KKD ve laboratuvar güvenliği',ic:'🥼',sayfa:'egitim.html?m=etanol#kkd',tur:'ic',
+    gorev:'Kan örneğiyle ve uçucu çözücülerle çalışırken gereken kişisel koruyucu donanımı seç; temel güvenlik kurallarını oku.'},
    {id:'tartim',ad:'Tartım',ic:'⚖️',sayfa:'terazi_pilot.html?ret=r2-bal',tur:'dis',
     gorev:'Mikroterazinin parçalarını tanı; seviyeyi ayarla ve iç kalibrasyonu yap; 10,00 mg referans standardı tart. (5,00 mg plastik kayık ve serbest tartım isteğe bağlı.)',
     olcut:['Parçaları tanı','Seviye ve iç kalibrasyon','10,00 mg referans standart tart'],takip:{sayfa:'terazi_pilot.html',gorev:['parts','level','w10']}},
