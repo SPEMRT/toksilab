@@ -533,5 +533,6 @@ new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.
 {const rs=$('#res');new MutationObserver(()=>{if(rs.innerHTML&&!rs.querySelector('.resX')){const b=document.createElement('button');b.className='resX';b.textContent='✕';b.onclick=()=>{rs.hidden=true};rs.prepend(b);rs.hidden=false}}).observe(rs,{childList:true})}
 </script>
 
+<script src="anamenu.js" charset="utf-8" defer></script>
 </body>
 </html>

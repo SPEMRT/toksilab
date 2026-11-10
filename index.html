@@ -116,7 +116,6 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
   <div class="isub">ADLİ TOKSİKOLOJİ · EĞİTİM VE SİMÜLASYON LABORATUVARI</div>
   <div class="itag">Numune kabulden rapora: gerçek cihazlar, gerçek yöntemler, adım adım.</div>
  </div>
- <div class="peak" id="pk1">MeOH · 2,91 dk</div><div class="peak" id="pk2">EtOH · 3,17 dk</div><div class="peak" id="pk3">n-PrOH (İS) · 3,79 dk</div>
  <button class="skip" id="skip">Tanıtımı geç ›</button>
 </div>
 
@@ -178,37 +177,73 @@ function bgDraw(){bx.clearRect(0,0,BW,BH);const L=130;
 /* ---------- tanıtım: kromatogram çizilir, logo kurulur ---------- */
 const ch=$('#chrom'),cx=ch.getContext('2d');let CW,CH;
 function chSize(){CW=innerWidth;CH=innerHeight;ch.width=CW*DPR;ch.height=CH*DPR;ch.style.width=CW+'px';ch.style.height=CH+'px';cx.setTransform(DPR,0,0,DPR,0,0)}chSize();
-const PK=[[.32,.42,.012],[.5,.92,.011],[.72,.62,.012]];/* x, yükseklik, genişlik (oran) */
-const sig=u=>PK.reduce((s,[x,h,w])=>s+h*Math.exp(-((u-x)**2)/(2*w*w)),0)+.012*Math.sin(u*90)*.3;
+if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()};
+/* ---------- 4 sahne: HS-GC-MS · GC-MS · LC-MS/MS · ICP-MS ---------- */
+const SD=1900,S0=300,SAHNE=4,LOGO_T=S0+SAHNE*SD;/* her sahne 1,9 s; sonra logo */
+const MONO='600 12px "IBM Plex Mono",ui-monospace,monospace';
+const ease=x=>x<0?0:x>1?1:1-Math.pow(1-x,3);
+function etiket(txt,alt,a){cx.globalAlpha=a;cx.textAlign='center';cx.fillStyle='#7CF2D8';cx.font='600 13px "IBM Plex Mono",ui-monospace,monospace';
+ cx.fillText(txt,CW/2,CH*.2);cx.fillStyle='rgba(201,215,219,.85)';cx.font='600 17px "Source Sans 3",system-ui,sans-serif';cx.fillText(alt,CW/2,CH*.2+24);cx.textAlign='left'}
+function glow(on){cx.shadowColor='rgba(43,217,192,.85)';cx.shadowBlur=on?14:0}
+/* 1 · HS-GC-MS kromatogramı */
+const PK=[[.3,.42,.013,'MeOH 2,91'],[.5,.92,.012,'EtOH 3,17'],[.72,.62,.013,'n-PrOH (İS) 3,79']];
+const sig=u=>PK.reduce((s,[x,h,w])=>s+h*Math.exp(-((u-x)**2)/(2*w*w)),0);
+function s1(u,a){const x0=CW*.12,x1=CW*.88,base=CH*.66,amp=CH*.3,v=ease(u*1.25);etiket('01 · HS-GC-MS','Kanda etanol — headspace kromatogramı',a);
+ cx.globalAlpha=a;cx.strokeStyle='rgba(124,242,216,.25)';cx.lineWidth=1;cx.beginPath();cx.moveTo(x0,base+1);cx.lineTo(x1,base+1);cx.stroke();
+ const g=cx.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'#2BD9C0');g.addColorStop(1,'#7CF2D8');cx.strokeStyle=g;cx.lineWidth=2.4;glow(1);cx.beginPath();
+ for(let i=0;i<=500*v;i++){const q=i/500,x=x0+(x1-x0)*q,y=base-sig(q)*amp;i?cx.lineTo(x,y):cx.moveTo(x,y)}cx.stroke();glow(0);
+ if(v<1){const x=x0+(x1-x0)*v;cx.fillStyle='#fff';cx.beginPath();cx.arc(x,base-sig(v)*amp,3.5,0,7);cx.fill()}
+ cx.font=MONO;cx.fillStyle='#7CF2D8';cx.textAlign='center';PK.forEach(([px,h,,t])=>{if(v>px+.02)cx.fillText(t,x0+(x1-x0)*px,base-h*amp-12)});cx.textAlign='left'}
+/* 2 · GC-MS EI kütle spektrumu */
+const SP=[[42,12],[77,15],[82,100],[83,26],[94,21],[105,18],[122,9],[150,7],[182,86],[198,9],[272,6],[303,31]];
+function s2(u,a){etiket('02 · GC-MS','EI kütle spektrumu — kütüphane eşleşmesi',a);const x0=CW*.18,x1=CW*.82,base=CH*.68,amp=CH*.34,m0=30,m1=320;cx.globalAlpha=a;
+ cx.strokeStyle='rgba(124,242,216,.25)';cx.lineWidth=1;cx.beginPath();cx.moveTo(x0,base);cx.lineTo(x1,base);cx.stroke();
+ cx.font=MONO;cx.textAlign='center';
+ SP.forEach(([m,h],i)=>{const k=ease(u*2.2-i*.07),x=x0+(x1-x0)*(m-m0)/(m1-m0),y=base-amp*h/100*k;cx.strokeStyle=h===100?'#FFFFFF':'#2BD9C0';cx.lineWidth=h>50?4:3;glow(h>50);cx.beginPath();cx.moveTo(x,base);cx.lineTo(x,y);cx.stroke();glow(0);
+  if((h>=30||m===94)&&k>.9){cx.fillStyle='#7CF2D8';cx.fillText(m,x,y-8)}});
+ const k=ease((u-.55)*3);if(k>0){cx.globalAlpha=a*k;cx.font='700 15px "Source Sans 3",system-ui,sans-serif';cx.fillStyle='#EAF2F3';cx.fillText('Kütüphane eşleşmesi: %94',CW/2,base+34)}cx.textAlign='left'}
+/* 3 · LC-MS/MS: Q1 → q2 → Q3 ve MRM */
+function s3(u,a,t){etiket('03 · LC-MS/MS','MRM: öncül iyon → çarpışma → ürün iyonları',a);cx.globalAlpha=a;
+ const y=CH*.47,w=Math.min(CW*.62,760),x0=CW/2-w/2,bw=w*.22,gap=(w-3*bw)/2;const B=[['Q1','304,2'],['q2','çarpışma'],['Q3','182,1 · 82,1']];
+ B.forEach(([n,d],i)=>{const x=x0+i*(bw+gap);cx.strokeStyle='rgba(124,242,216,.55)';cx.lineWidth=1.5;cx.beginPath();cx.roundRect(x,y-26,bw,52,12);cx.stroke();
+  cx.textAlign='center';cx.fillStyle='#EAF2F3';cx.font='700 18px "Barlow Condensed",system-ui,sans-serif';cx.fillText(n,x+bw/2,y-2);cx.fillStyle='#7CF2D8';cx.font=MONO;cx.fillText(d,x+bw/2,y+16)});
+ /* iyonlar */
+ for(let i=0;i<26;i++){const ph=((t/900)+i/26)%1,xx=x0+ph*w,yy=y-40+Math.sin(i*7.3+t/300)*6;const ur=ph>.4;cx.fillStyle=ur?(i%2?'#7CF2D8':'#4EA3FF'):'#FFFFFF';cx.globalAlpha=a*.85;cx.beginPath();cx.arc(xx,yy-(ph>.4&&ph<.62?Math.sin((ph-.4)/.22*Math.PI)*10:0),ur?2.6:3.2,0,7);cx.fill()}
+ cx.globalAlpha=a;
+ /* MRM pikleri */
+ const bx=CW/2-w*.3,bw2=w*.6,base=CH*.8,amp=CH*.17,v=ease(u*1.4);const pk=(q,h)=>h*Math.exp(-((q-.5)**2)/(2*.06*.06));
+ [['#2BD9C0',1],['#4EA3FF',.55]].forEach(([c,h])=>{cx.strokeStyle=c;cx.lineWidth=2.2;glow(1);cx.beginPath();for(let i=0;i<=300*v;i++){const q=i/300,X=bx+bw2*q,Y=base-pk(q,h)*amp;i?cx.lineTo(X,Y):cx.moveTo(X,Y)}cx.stroke();glow(0)});
+ cx.strokeStyle='rgba(124,242,216,.25)';cx.lineWidth=1;cx.beginPath();cx.moveTo(bx,base+1);cx.lineTo(bx+bw2,base+1);cx.stroke();cx.textAlign='left'}
+/* 4 · ICP-MS: periyodik tablo, toksik elementler */
+const EL='H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La'.split(' ').concat('Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn'.split(' '));
+function konum(i){/* i: 0 tabanlı EL indeksi → [satır, sütun] */const Z=i<57?i+1:i+15;
+ if(Z<=2)return [0,Z===1?0:17];if(Z<=10)return [1,Z<=4?Z-3:Z+7];if(Z<=18)return [2,Z<=12?Z-11:Z-1];if(Z<=36)return [3,Z-19];if(Z<=54)return [4,Z-37];if(Z<=57)return [5,Z-55];return [5,Z-69]}
+const TOK={As:'75',Cd:'111',Hg:'202',Tl:'205',Pb:'208',Cr:'52'};const TOKS=['As','Cd','Hg','Tl','Pb','Cr'];
+function s4(u,a){etiket('04 · ICP-MS','Toksik elementler — saç, kan, idrar',a);const cw=Math.min(CW*.8,920)/18,ch=cw*.92,X0=CW/2-cw*9,Y0=CH*.34;
+ EL.forEach((e,i)=>{const [r,c]=konum(i),k=ease(u*2.4-(r*18+c)*.004);if(k<=0)return;const x=X0+c*cw,y=Y0+r*ch,tk=TOKS.indexOf(e),on=tk>=0&&u>.42+tk*.07;
+  cx.globalAlpha=a*k*(on?1:.55);cx.fillStyle=on?'rgba(43,217,192,.22)':'rgba(255,255,255,.035)';cx.strokeStyle=on?'#7CF2D8':'rgba(124,242,216,.18)';cx.lineWidth=on?1.6:1;glow(on);
+  cx.beginPath();cx.roundRect(x+2,y+2,cw-4,ch-4,5);cx.fill();cx.stroke();glow(0);
+  cx.textAlign='center';cx.fillStyle=on?'#FFFFFF':'rgba(201,215,219,.7)';cx.font=`${on?700:600} ${Math.round(cw*.34)}px "Source Sans 3",system-ui,sans-serif`;cx.fillText(e,x+cw/2,y+ch*(on?.7:.62));
+  if(on){cx.textAlign='left';cx.fillStyle='#7CF2D8';cx.font=`600 ${Math.max(8,Math.round(cw*.2))}px "IBM Plex Mono",monospace`;cx.fillText(TOK[e],x+5,y+ch*.32)}});cx.textAlign='left'}
+function chDraw(t){cx.clearRect(0,0,CW,CH);const tt=t-S0;if(tt<0||tt>=SAHNE*SD)return;const n=Math.floor(tt/SD),u=(tt-n*SD)/SD;
+ const a=Math.min(1,u/.12,(1-u)/.14);cx.save();[s1,s2,s3,s4][n](u,Math.max(0,a),t);cx.restore();cx.globalAlpha=1;
+ /* sahne noktaları */
+ for(let i=0;i<SAHNE;i++){cx.fillStyle=i===n?'#2BD9C0':'rgba(124,242,216,.25)';cx.beginPath();cx.arc(CW/2+(i-1.5)*18,CH*.92,i===n?4:3,0,7);cx.fill()}}
 let T0=0,phase=0,introOn=true;
-function chDraw(t){cx.clearRect(0,0,CW,CH);const x0=CW*.08,x1=CW*.92,base=CH*.62,amp=CH*.3;
- /* çizim ilerlemesi 0.4s→2.6s */
- const u=Math.max(0,Math.min(1,(t-400)/2200));const fade=t<3000?1:Math.max(0,1-(t-3000)/700);if(fade<=0)return;
- cx.globalAlpha=fade;
- /* eksen */
- cx.strokeStyle='rgba(124,242,216,.25)';cx.lineWidth=1;cx.beginPath();cx.moveTo(x0,base+1);cx.lineTo(x0+(x1-x0)*Math.min(1,u*1.4),base+1);cx.stroke();
- /* sinyal */
- const g=cx.createLinearGradient(x0,0,x1,0);g.addColorStop(0,'#2BD9C0');g.addColorStop(1,'#7CF2D8');
- cx.strokeStyle=g;cx.lineWidth=2.4;cx.shadowColor='rgba(43,217,192,.8)';cx.shadowBlur=14;cx.beginPath();
- const N=600;for(let i=0;i<=N*u;i++){const v=i/N,x=x0+(x1-x0)*v,y=base-sig(v)*amp;i?cx.lineTo(x,y):cx.moveTo(x,y)}cx.stroke();cx.shadowBlur=0;
- /* kalem ucu */
- if(u>0&&u<1){const x=x0+(x1-x0)*u,y=base-sig(u)*amp;cx.fillStyle='#fff';cx.beginPath();cx.arc(x,y,3.5,0,7);cx.fill()}
- /* pik etiketleri */
- PK.forEach(([px,h],i)=>{const e=$('#pk'+(i+1));if(u>px+.02&&t<3000){e.style.left=(x0+(x1-x0)*px)+'px';e.style.top=(base-h*amp-12)+'px';e.classList.add('on')}else if(t>=3000)e.classList.remove('on')});
- cx.globalAlpha=1}
 function harfler(){const s='MY ToksiLab';$('#ititle').innerHTML=[...s].map((c,i)=>`<span class="${i>=5?'t':''}" style="animation-delay:${i*.05}s">${c===' '?'&nbsp;':c}</span>`).join('')}harfler();
 function setPhase(p){phase=p;const I=$('#intro');if(p>=2)I.classList.add('s2');if(p>=3)I.classList.add('s3');if(p>=4)I.classList.add('s4')}
 function introBitir(){if(!introOn)return;introOn=false;$('#intro').classList.add('bitti');$('#app').classList.add('on');try{sessionStorage.setItem('toksilab_intro','1')}catch(e){}
- document.querySelectorAll('.peak').forEach(e=>e.classList.remove('on'))}
+}
 function introBasla(){introOn=true;phase=0;T0=performance.now();const I=$('#intro');I.className='';$('#app').classList.remove('on');harfler()}
 $('#skip').onclick=introBitir;addEventListener('keydown',e=>{if(introOn&&(e.key==='Escape'||e.key===' '||e.key==='Enter')){e.preventDefault();introBitir()}});
 $('#replay').onclick=()=>{window.scrollTo(0,0);introBasla()};$('#logoTop').onclick=e=>{e.preventDefault();introBasla()};
 
 let gecildi=false;try{gecildi=sessionStorage.getItem('toksilab_intro')==='1'}catch(e){}
-if(gecildi||RM){introOn=false;$('#intro').classList.add('bitti');$('#app').classList.add('on');bgA=1}else{introBasla()}
+const HSH=location.hash.slice(1);if(HSH)history.replaceState(null,'',location.pathname+location.search);
+if(gecildi||RM||HSH){introOn=false;$('#intro').classList.add('bitti');$('#app').classList.add('on');bgA=1}else{introBasla()}
 function loop(now){
  if(introOn){const t=now-T0;bgA=Math.min(1,t/1800);chDraw(t);
-  if(phase<2&&t>3100)setPhase(2);if(phase<3&&t>4200)setPhase(3);if(phase<4&&t>5000)setPhase(4);if(t>7600)introBitir()}
+  if(phase<2&&t>LOGO_T)setPhase(2);if(phase<3&&t>LOGO_T+1100)setPhase(3);if(phase<4&&t>LOGO_T+1900)setPhase(4);if(t>LOGO_T+4300)introBitir()}
  else{bgA+=(.75-bgA)*.03;cx.clearRect(0,0,CW,CH)}
  bgDraw();requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
@@ -222,23 +257,23 @@ const H=(ad,url)=>({ad,url});
 const KAT=[
  {id:'beceri',ic:'🧤',ad:'Temel beceriler',acik:'Her analizin temelindeki el becerileri ve güvenlik.',it:[
   {ic:'🥼',ad:'KKD ve laboratuvar güvenliği',d:'Önlük, nitril eldiven, gözlük; kan ve çözücülerle güvenli çalışma.',dr:'h',s:[H('KKD seçimi','egitim.html?m=etanol#kkd'),H('Laboratuvar turu','lab_giris.html')]},
-  {ic:'⚖️',ad:'Analitik terazi',d:'Seviye, iç kalibrasyon, dara, mg düzeyinde tartım.',dr:'h',s:[H('Parçaları tanı','terazi_pilot.html'),H('Seviye ve iç kalibrasyon','terazi_pilot.html'),H('10,00 mg standart tartımı','terazi_pilot.html'),H('Serbest tartım','terazi_pilot.html')]},
-  {ic:'💧',ad:'Otomatik pipet',d:'Doğru pipet seçimi, ileri ve ters pipetleme.',dr:'h',s:[H('Parçaları tanı','pipet_pilot.html'),H('Su aktarımı','pipet_pilot.html'),H('Kan: ters pipetleme','pipet_pilot.html'),H('Organik çözücü (DCM)','pipet_pilot.html')]},
-  {ic:'🌀',ad:'Vorteks',d:'Karıştırma modları, hız ve süre.',dr:'h',s:[H('HS vialini karıştır','vorteks_pilot.html'),H('Sıvı-sıvı ekstraksiyon','vorteks_pilot.html')]},
-  {ic:'🔄',ad:'Santrifüj',d:'Dengeleme, rotor, devir ve süre.',dr:'h',s:[H('Santrifüjü kullan','santrifuj_pilot.html')]},
-  {ic:'🫧',ad:'Ultrasonik banyo',d:'Çözme ve gaz giderme.',dr:'h',s:[H('Ultrasonik banyoyu kullan','ultra_pilot.html')]},
-  {ic:'🚰',ad:'Ultra saf su',d:'Tip I su, direnç ve TOC kontrolü.',dr:'h',s:[H('Su sistemini kullan','su_pilot.html')]}]},
+  {ic:'⚖️',ad:'Analitik terazi',d:'Seviye, iç kalibrasyon, dara, mg düzeyinde tartım.',dr:'h',s:[H('Parçaları tanı','terazi_pilot.html?gorev=parts'),H('Seviye ve iç kalibrasyon','terazi_pilot.html?gorev=level'),H('10,00 mg standart tartımı','terazi_pilot.html?gorev=w10'),H('Plastik kayıkla 5,00 mg','terazi_pilot.html?gorev=w5'),H('Serbest tartım','terazi_pilot.html?gorev=free')]},
+  {ic:'💧',ad:'Otomatik pipet',d:'Doğru pipet seçimi, ileri ve ters pipetleme.',dr:'h',s:[H('Parçaları tanı','pipet_pilot.html?gorev=parts'),H('150 µL su aktarımı','pipet_pilot.html?gorev=su'),H('200 µL kan: ters pipetleme','pipet_pilot.html?gorev=kan'),H('5 µL ara stok','pipet_pilot.html?gorev=stok'),H('Organik çözücü (DCM)','pipet_pilot.html?gorev=dcm')]},
+  {ic:'🌀',ad:'Vorteks',d:'Karıştırma modları, hız ve süre.',dr:'h',s:[H('Parçaları tanı','vorteks_pilot.html?gorev=parts'),H('HS vialini karıştır (TOUCH)','vorteks_pilot.html?gorev=hs'),H('Sıvı-sıvı ekstraksiyon','vorteks_pilot.html?gorev=lle'),H('Serbest kullanım','vorteks_pilot.html?gorev=free')]},
+  {ic:'🔄',ad:'Santrifüj',d:'Dengeleme, rotor, devir ve süre.',dr:'h',s:[H('Parçaları tanı','santrifuj_pilot.html?gorev=parts'),H('Santrifüjü kullan','santrifuj_pilot.html')]},
+  {ic:'🫧',ad:'Ultrasonik banyo',d:'Çözme ve gaz giderme.',dr:'h',s:[H('Parçaları tanı','ultra_pilot.html?gorev=parts'),H('Mobil faz degazlama','ultra_pilot.html?gorev=degas'),H('Serbest kullanım','ultra_pilot.html?gorev=free')]},
+  {ic:'🚰',ad:'Ultra saf su',d:'Tip I su, direnç ve TOC kontrolü.',dr:'h',s:[H('Parçaları tanı','su_pilot.html?gorev=parts'),H('500 mL şişeye su','su_pilot.html?gorev=man'),H('1000 mL mobil faz suyu','su_pilot.html?gorev=vol'),H('Kartuş sızıntısı','su_pilot.html?gorev=leak')]}]},
  {id:'kalib',ic:'🧪',ad:'Çözelti ve kalibrasyon',acik:'Stok, ara stok, kalibratör ve kalibrasyon eğrisi.',it:[
-  {ic:'🧮',ad:'Kalibrasyon çözeltisi hazırlama',d:'C₁V₁ = C₂V₂, seyreltme zinciri, birim dönüşümleri.',dr:'h',s:[H('Bilgi','kalibrasyon_pilot.html'),H('Çözümlü örnek','kalibrasyon_pilot.html'),H('Sıra sende','kalibrasyon_pilot.html')]},
+  {ic:'🧮',ad:'Kalibrasyon çözeltisi hazırlama',d:'C₁V₁ = C₂V₂, seyreltme zinciri, birim dönüşümleri.',dr:'h',s:[H('Bilgi','kalibrasyon_pilot.html?gorev=0'),H('Çözümlü örnek','kalibrasyon_pilot.html?gorev=1'),H('Sıra sende','kalibrasyon_pilot.html?gorev=2')]},
   {ic:'🧴',ad:'Stok ve ara stok hazırlama',d:'Saf maddeden ana stok, ara stok ve iç standart.',dr:'h',s:[H('Hesap planı','ornek_hazirlama.html'),H('Ana ve ara stok','ornek_hazirlama.html')]},
-  {ic:'📈',ad:'Kalibrasyon eğrisi oluşturma',d:'Alan oranı, doğrusal regresyon, R², QC kabulü.',dr:'h',s:[H('Alıştırma veri seti','egitim.html?m=etanol#kalib'),H('Cihazda eğri (ChemStation)','hsgcms_pilot.html')]}]},
+  {ic:'📈',ad:'Kalibrasyon eğrisi oluşturma',d:'Alan oranı, doğrusal regresyon, R², QC kabulü.',dr:'h',s:[H('Alıştırma veri seti','egitim.html?m=etanol#kalib'),H('Cihazda eğri (ChemStation)','hsgcms_pilot.html?gorev=pc')]}]},
  {id:'ornek',ic:'🧫',ad:'Örnek hazırlama teknikleri',acik:'Matrikse göre örnek hazırlama yöntemleri.',it:[
-  {ic:'🧪',ad:'Headspace vial hazırlama',d:'Kan + tuzlu su + iç standart, kapak ve crimp.',dr:'h',s:[H('12 vial hazırla','ornek_hazirlama.html'),H('Vialleri HS-GC-MS’e al','hsgcms_pilot.html#prep')]},
+  {ic:'🧪',ad:'Headspace vial hazırlama',d:'Kan + tuzlu su + iç standart, kapak ve crimp.',dr:'h',s:[H('12 vial hazırla','ornek_hazirlama.html'),H('Vialleri HS-GC-MS’e al','hsgcms_pilot.html?gorev=prep')]},
   {ic:'🚰',ad:'Katı faz ekstraksiyonu (SPE)',d:'CEREX 48, Oasis HLB: şartlandırma → yükleme → yıkama → elüsyon.',dr:'h',s:[H('SPE simülatörü','spe_pilot.html')]},
   {ic:'⚗️',ad:'Sıvı-sıvı ekstraksiyon',d:'pH ayarı, çözücü seçimi, faz ayırma.',dr:'y',s:[]},
   {ic:'💇',ad:'Saç örneği hazırlama',d:'Yıkama, kurutma, kesme, mikrodalga asit yakma.',dr:'y',s:[]}]},
  {id:'cihaz',ic:'📊',ad:'Analitik cihazlar',acik:'Her cihazda: tanı, numune ver, sonuca bak, eğri kur.',it:[
-  {ic:'🔥',ad:'HS-GC-MS',d:'Agilent 7694E · 6890N · 5975B — kanda etanol / metanol (ALKOL2.M).',dr:'h',s:[H('Cihazı tanı','hsgcms_pilot.html'),H('Numune verme (sekans)','hsgcms_pilot.html'),H('Sonuçlara bakma','hsgcms_pilot.html'),H('Kalibrasyon eğrisi','hsgcms_pilot.html')]},
+  {ic:'🔥',ad:'HS-GC-MS',d:'Agilent 7694E · 6890N · 5975B — kanda etanol / metanol (ALKOL2.M).',dr:'h',s:[H('Cihazı tanı','hsgcms_pilot.html?gorev=main'),H('Vial hazırlama','hsgcms_pilot.html?gorev=prep'),H('Numune verme (HS’e yükle)','hsgcms_pilot.html?gorev=hslid'),H('Sekans ve sonuçlar (ChemStation)','hsgcms_pilot.html?gorev=pc')]},
   {ic:'⚛️',ad:'ICP-MS',d:'Saç, kan ve idrarda toksik elementler (As, Pb, Cd, Hg, Tl).',dr:'y',s:[H('Cihazı tanı'),H('Numune verme'),H('Sonuçlara bakma'),H('Kalibrasyon eğrisi')]},
   {ic:'💉',ad:'LC-MS/MS',d:'İlaç ve uyuşturucu taraması, MRM geçişleri.',dr:'y',s:[H('Cihazı tanı'),H('Numune verme'),H('Sonuçlara bakma'),H('Kalibrasyon eğrisi')]},
   {ic:'🌡️',ad:'GC-MS',d:'Sıvı enjeksiyonlu GC-MS, kütüphane taraması.',dr:'y',s:[H('Cihazı tanı'),H('Numune verme'),H('Sonuçlara bakma')]}]},
@@ -274,6 +309,7 @@ function panelKapat(){$('#pn').classList.remove('on');$('#pn').setAttribute('ari
 document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>panelAc(b.dataset.p));
 $('#pnX').onclick=panelKapat;$('#ov').onclick=panelKapat;addEventListener('keydown',e=>{if(e.key==='Escape'&&!introOn)panelKapat()});
 window.__G={panelAc,introBitir,introBasla};
+if(['egitim','cihaz','nasil'].includes(HSH))setTimeout(()=>panelAc(HSH),350);
 </script>
 </body>
 </html>

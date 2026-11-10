@@ -115,7 +115,7 @@ function ciz(){
   else h+='<a class="tl gz sk" href="egitim.html?m='+m+'#final">Eğitim raporu ›</a>';
  }
  h+='<button class="ik" data-x="menu" title="Adımlar">☰</button><button class="ik" data-x="kucult" title="'+(k?'Genişlet':'Küçült')+'">'+(k?'▸':'–')+'</button>';
- EL.innerHTML=h;
+ EL.innerHTML=h;gorunurluk();
  EL.onclick=function(e){var b=e.target.closest('[data-x]');if(!b)return;var x=b.getAttribute('data-x');
   if(x==='ok'){if(bitti(m,a.id)){geriAl(m,a.id);toast('Adım işareti kaldırıldı')}else{tamamla(m,a.id,{elle:1});toast('✓ '+a.ad+' tamamlandı')}}
   else if(x==='menu'){menu(m,a)}
@@ -131,6 +131,8 @@ function menu(m,a){
  MENU.innerHTML=h;MENU.hidden=false;var r=EL.getBoundingClientRect();MENU.style.left=Math.min(innerWidth-12-Math.min(380,innerWidth-24),Math.max(12,r.left+r.width/2-190))+'px';MENU.style.transform='none';if(r.top>innerHeight/2){MENU.style.top='auto';MENU.style.bottom=(innerHeight-r.top+8)+'px'}else{MENU.style.bottom='auto';MENU.style.top=(r.bottom+8)+'px'}
  MENU.querySelector('[data-cik]').onclick=function(e){e.preventDefault();cik();MENU.hidden=true;toast('Eğitim duraklatıldı · Eğitimler sayfasından devam edebilirsin')};
 }
+function gorunur(){var i=document.getElementById('intro');return !(BU==='lab_giris.html'&&i&&!i.classList.contains('out'))}
+function gorunurluk(){if(EL)EL.style.display=gorunur()?'':'none';if(MENU&&!gorunur())MENU.hidden=true}
 function kaldir(){if(EL){EL.remove();EL=null}if(MENU){MENU.remove();MENU=null}}
 
 /* eğitim sayfasından gelen bağlantılar ?egitim=etanol ile etkinleştirir */
@@ -144,4 +146,5 @@ window.TLE={MOD:MOD,oku:oku,yaz:yaz,basla:basla,cik:cik,sifirla:sifirla,tamamla:
  olay:function(id,veri){var s=oku();if(s.aktif&&MOD[s.aktif]&&MOD[s.aktif].adimlar.some(function(a){return a.id===id}))tamamla(s.aktif,id,veri)}};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ciz);else ciz();
 setInterval(takipEt,1500);
+(function(){var i=document.getElementById('intro');if(BU==='lab_giris.html'&&i&&window.MutationObserver)new MutationObserver(gorunurluk).observe(i,{attributes:true,attributeFilter:['class']})})();
 })();
