@@ -288,7 +288,7 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
       </div>
       <div>
         <label class="lbl" for="adj">Ayarlanabilir akış <output id="adjOut">10 psi</output></label>
-        <input type="range" id="adj" min="0" max="60" step="1" value="10">
+        <input type="range" id="adj" min="0" max="15" step="1" value="10">
       </div>
       <div>
         <label class="lbl" for="max">Maksimum akış <output id="maxOut">20 psi</output></label>
@@ -396,6 +396,34 @@ function labelSprite(label, action, w = 1.0) {
   return sp;
 }
 const hex = n => '#' + n.toString(16).padStart(6, '0');
+/* Kabın ön yüzüne yapışık etiket (düz ya da silindire sarılı). labelSprite ile aynı draw(t1, t2, renk) arayüzü.
+   geo: 'flat' → w × h düzlem; { r, arc } → yarıçapı r olan silindir dilimi (ön yüz, +z). */
+function labelPlane(label, action, w, h, geo = 'flat') {
+  const tall = h > w * 0.9, cw = tall ? 256 : 512, ch = Math.round(cw * h / w);
+  const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4;
+  const g3 = geo === 'flat' ? new THREE.PlaneGeometry(w, h) : new THREE.CylinderGeometry(geo.r, geo.r, h, 24, 1, true, -geo.arc / 2, geo.arc);
+  const m = new THREE.Mesh(g3, new THREE.MeshStandardMaterial({ map: t, roughness: 0.6, transparent: true, polygonOffset: true, polygonOffsetFactor: -2 }));
+  m.renderOrder = 7; m.castShadow = false;
+  m.userData = { label, action, draw(t1, t2, sw) {
+    const g = c.getContext('2d'); g.clearRect(0, 0, cw, ch);
+    const pad = Math.round(cw * 0.03), rad = Math.round(Math.min(cw, ch) * 0.12);
+    rrect(g, pad, pad, cw - 2 * pad, ch - 2 * pad, rad); g.fillStyle = '#FBFBF7'; g.fill(); g.lineWidth = Math.max(3, cw * 0.008); g.strokeStyle = '#2b3440'; g.stroke();
+    g.textBaseline = 'middle'; g.textAlign = tall ? 'center' : 'left';
+    if (sw) { g.fillStyle = sw; if (tall) g.fillRect(pad * 2, pad * 2, cw - pad * 4, ch * 0.08); else { rrect(g, cw * 0.06, ch * 0.2, ch * 0.22, ch * 0.22, 6); g.fill(); } }
+    const fit = (txt, size, max) => { let f = size; g.font = `bold ${f}px Arial`; while (g.measureText(txt).width > max && f > 10) { f -= 2; g.font = `bold ${f}px Arial`; } };
+    if (tall) {
+      g.fillStyle = '#15191e'; fit(t1, Math.round(cw * 0.42), cw * 0.84); g.fillText(t1, cw / 2, ch * 0.42);
+      g.fillStyle = '#4a5562'; g.font = `${Math.round(cw * 0.17)}px Arial`; g.fillText(t2 || '', cw / 2, ch * 0.72);
+    } else {
+      const x0 = sw ? cw * 0.06 + ch * 0.3 : cw * 0.07;
+      g.fillStyle = '#15191e'; fit(t1, Math.round(ch * 0.36), cw - x0 - pad * 3); g.fillText(t1, x0, ch * (t2 ? 0.34 : 0.5));
+      if (t2) { g.fillStyle = '#4a5562'; g.font = `${Math.round(ch * 0.24)}px Arial`; g.fillText(t2, cw * 0.07, ch * 0.72); }
+    }
+    t.needsUpdate = true;
+  } };
+  return m;
+}
 
 const dev = new THREE.Group(); scene.add(dev);
 
@@ -452,15 +480,16 @@ const panelTex = canvasTex(2400, 1300, g => {
 const panel = mesh(new THREE.PlaneGeometry(PW, PH), new THREE.MeshStandardMaterial({ map: panelTex, roughness: 0.55 }), 0, PCY, FZ + 0.004, 'Ön kontrol paneli');
 panel.castShadow = false; dev.add(panel);
 
-function dialTexture(title) {
+function dialTexture(title, full = 60) {
   return canvasTex(512, 512, g => {
     g.fillStyle = '#151619'; g.fillRect(0, 0, 512, 512);
     g.strokeStyle = '#3d424a'; g.lineWidth = 6; g.strokeRect(20, 20, 472, 472);
     g.beginPath(); g.arc(256, 256, 218, 0, 7); g.fillStyle = '#1f4fae'; g.fill();
     g.lineWidth = 4; g.strokeStyle = '#dbe6ff'; g.beginPath(); g.arc(256, 256, 202, 0, 7); g.stroke();
     g.textAlign = 'center'; g.textBaseline = 'middle';
-    for (let v = 0; v <= 60; v += 2) {
-      const a = (-135 + v / 60 * 270) * Math.PI / 180, major = v % 10 === 0, r2 = major ? 160 : 178;
+    const st = full <= 15 ? 1 : 2, mj = full <= 15 ? 5 : 10;
+    for (let v = 0; v <= full; v += st) {
+      const a = (-135 + v / full * 270) * Math.PI / 180, major = v % mj === 0, r2 = major ? 160 : 178;
       g.lineWidth = major ? 6 : 3; g.strokeStyle = '#fff';
       g.beginPath(); g.moveTo(256 + Math.sin(a) * 196, 256 - Math.cos(a) * 196); g.lineTo(256 + Math.sin(a) * r2, 256 - Math.cos(a) * r2); g.stroke();
       if (major) { g.fillStyle = '#fff'; g.font = 'bold 34px Arial'; g.fillText(v, 256 + Math.sin(a) * 128, 256 - Math.cos(a) * 128); }
@@ -469,10 +498,10 @@ function dialTexture(title) {
     g.font = '18px Arial'; g.fillText(title, 256, 378);
   });
 }
-function makeGauge(px, py, title, label) {
+function makeGauge(px, py, title, label, full = 60) {
   const grp = new THREE.Group(); grp.position.set(PX(px), PY(py), FZ);
   grp.add(mesh(box(0.44, 0.44, 0.07), M.black, 0, 0, 0.035, label));
-  const face = mesh(new THREE.PlaneGeometry(0.42, 0.42), new THREE.MeshStandardMaterial({ map: dialTexture(title), roughness: 0.35 }), 0, 0, 0.072, label);
+  const face = mesh(new THREE.PlaneGeometry(0.42, 0.42), new THREE.MeshStandardMaterial({ map: dialTexture(title, full), roughness: 0.35 }), 0, 0, 0.072, label);
   face.castShadow = false; grp.add(face);
   const ng = box(0.012, 0.15, 0.006); ng.translate(0, 0.055, 0);
   const needle = new THREE.Mesh(ng, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 }));
@@ -481,9 +510,10 @@ function makeGauge(px, py, title, label) {
   const gl = mesh(new THREE.PlaneGeometry(0.42, 0.42), M.glass, 0, 0, 0.092, label); gl.castShadow = false; grp.add(gl);
   dev.add(grp); return needle;
 }
-const needleL = makeGauge(480, 250, 'ADJ', 'Ayarlanabilir akış manometresi (0–60 psi)');
+const ADJ_MAX = 15; /* ADJ: düşük basınç regülatörü, 0–15 psi */
+const needleL = makeGauge(480, 250, 'ADJ', 'Ayarlanabilir akış manometresi (0–15 psi)', ADJ_MAX);
 const needleR = makeGauge(830, 250, 'MAX', 'Maksimum akış manometresi (0–60 psi)');
-const setNeedle = (n, v) => { n.rotation.z = -((-135 + Math.min(Math.max(v, 0), 60) / 60 * 270) * Math.PI / 180); };
+const setNeedle = (n, v, full = 60) => { n.rotation.z = -((-135 + Math.min(Math.max(v, 0), full) / full * 270) * Math.PI / 180); };
 
 function makeKnob(px, py, label, act) {
   const grp = new THREE.Group(); grp.position.set(PX(px), PY(py), FZ);
@@ -496,7 +526,7 @@ function makeKnob(px, py, label, act) {
 }
 const knobL = makeKnob(480, 510, 'Ayarlanabilir akış regülatörü: tıkla ve + / − ile ayarla', 'knobL');
 const knobR = makeKnob(830, 510, 'Maksimum akış regülatörü: tıkla ve + / − ile ayarla', 'knobR');
-const setKnob = (k, v) => { k.rotation.z = 2.3 - v / 60 * 4.6; };
+const setKnob = (k, v, full = 60) => { k.rotation.z = 2.3 - v / full * 4.6; };
 
 const SEL_L = 'Mod seçici: ADJ / OFF / MAX (tıkla)';
 const sel = new THREE.Group(); sel.position.set(PX(655), PY(575), FZ);
@@ -693,7 +723,7 @@ SRC.filter(s => !s.j && s.j !== 0).forEach(s => {
   const e = mesh(erlenGeo, M.glass, 0, 0, 0, l, a); e.renderOrder = 6; e.castShadow = false; g.add(e);
   const lm = mesh(erlenLiqGeo, new THREE.MeshStandardMaterial({ color: LIQ[s.liq].color, roughness: 0.1, transparent: true, opacity: 0.75 }), 0, 0, 0, l, a);
   lm.renderOrder = 2; g.add(lm);
-  const sp = labelSprite(l, a, 0.95); sp.position.set(0, 1.62, 0); g.add(sp);
+  const sp = labelPlane(l, a, 0.56, 0.31); sp.position.set(0, 0.4, rAt(0.4) + 0.012); sp.rotation.x = -Math.atan(0.27 / 0.85); g.add(sp);
   sp.userData.draw(s.title, `${s.cap} mL`, hex(LIQ[s.liq].color));
   s.sprite = sp; bench.add(g);
 });
@@ -716,7 +746,7 @@ SRC.filter(s => s.liq === 'sample').forEach(s => {
   const t = mesh(sTubeGeo, M.tubGlass, 0, 0.66, 0, l, a); t.renderOrder = 6; t.castShadow = false; g.add(t);
   const cn = mesh(sConeGeo, M.tubGlass, 0, 0.08, 0, l, a); cn.renderOrder = 6; g.add(cn);
   const lq = mesh(sLiqGeo, sampleMat, 0, 0.16, 0, l, a); lq.renderOrder = 2; g.add(lq);
-  const sp = labelSprite(l, a, 0.42); sp.position.set(0, s.spare ? 1.72 : 1.4, 0); g.add(sp);
+  const sp = labelPlane(l, a, 0.19, 0.3, { r: 0.089, arc: 2.2 }); sp.position.set(0, s.spare ? 0.95 : 0.86, 0); g.add(sp);
   s.liqMesh = lq; s.sprite = sp;
 });
 // cartridge box
@@ -728,7 +758,7 @@ CB.add(mesh(box(0.95, 0.03, 0.5), M.card, 0, 0.015, 0, CB_L, 'box'));
 CB.add(mesh(box(0.95, 0.08, 0.005), M.cardG, 0, 0.22, 0.262, CB_L, 'box'));
 const boxCarts = [];
 for (let k = 0; k < 5; k++) { const { g } = cartMesh(CB_L, 'box'); g.position.set(-0.32 + k * 0.16, 0.0, 0.02); g.scale.setScalar(0.9); CB.add(g); boxCarts.push(g); }
-const cbSprite = labelSprite(CB_L, 'box', 0.9); cbSprite.position.set(0, 1.9, 0); cbSprite.userData.draw('Oasis HLB 3 cc', 'Kartuş kutusu'); CB.add(cbSprite);
+const cbSprite = labelPlane(CB_L, 'box', 0.8, 0.24); cbSprite.position.set(0, 0.15, 0.266); cbSprite.userData.draw('Oasis HLB 3 cc', 'Kartuş kutusu'); CB.add(cbSprite);
 
 /* ---------- held objects ---------- */
 const handObj = new THREE.Group(); handObj.visible = false; scene.add(handObj);
@@ -766,18 +796,18 @@ const standTop = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.3), new THREE.Mes
   for (let i = 0; i < 5; i++) { g.beginPath(); g.arc(90 + i * 80, 75, 24, 0, 7); g.fillStyle = '#2b2d31'; g.fill(); }
 }), roughness: 0.4, metalness: 0.3 }));
 standTop.rotation.x = -Math.PI / 2; standTop.position.y = 0.301; standTop.userData = { label: STAND_L, action: 'stand' }; STAND.add(standTop);
-const standSprite = labelSprite(STAND_L, 'stand', 0.8); standSprite.position.set(0, 1.35, 0); standSprite.userData.draw('Bekleme standı', 'Biten kartuşlar'); STAND.add(standSprite);
+const standSprite = labelPlane(STAND_L, 'stand', 0.8, 0.22); standSprite.position.set(0, 0.15, 0.153); standSprite.userData.draw('Bekleme standı', 'Biten kartuşlar'); STAND.add(standSprite);
 const standX = k => -0.32 + k * 0.16;
-const TIS = new THREE.Group(); TIS.position.set(-3.85, 0, 0.1); bench.add(TIS);
+const TIS = new THREE.Group(); TIS.position.set(-4.75, 0, -0.4); bench.add(TIS);
 const TIS_L = 'Peçete kutusu: tıkla, peçete al';
 TIS.add(mesh(box(0.55, 0.24, 0.34), new THREE.MeshStandardMaterial({ color: 0x9fb8cf, roughness: 0.8 }), 0, 0.12, 0, TIS_L, 'tissue'));
 const tisOut = mesh(box(0.2, 0.14, 0.012), M.white, 0, 0.3, 0, TIS_L, 'tissue'); tisOut.rotation.z = 0.15; TIS.add(tisOut);
-const tisSprite = labelSprite(TIS_L, 'tissue', 0.7); tisSprite.position.set(0, 0.85, 0); tisSprite.userData.draw('Peçete', 'Döküntü için'); TIS.add(tisSprite);
-const BIN = new THREE.Group(); BIN.position.set(-2.8, 0, 0.1); bench.add(BIN);
+const tisSprite = labelPlane(TIS_L, 'tissue', 0.46, 0.16); tisSprite.position.set(0, 0.12, 0.172); tisSprite.userData.draw('Peçete', 'Döküntü için'); TIS.add(tisSprite);
+const BIN = new THREE.Group(); BIN.position.set(-4.05, 0, -0.4); bench.add(BIN);
 const BIN_L = 'Çöp kutusu: kullanılmış kartuşu ya da ıslak peçeteyi at';
 BIN.add(mesh(new THREE.CylinderGeometry(0.24, 0.2, 0.55, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0x6d747c, roughness: 0.6, side: THREE.DoubleSide }), 0, 0.275, 0, BIN_L, 'trash'));
 BIN.add(mesh(cyl(0.2, 0.2, 0.02, 24), M.black, 0, 0.01, 0, BIN_L, 'trash'));
-const binSprite = labelSprite(BIN_L, 'trash', 0.6); binSprite.position.set(0, 0.95, 0); binSprite.userData.draw('Çöp', ''); BIN.add(binSprite);
+const binSprite = labelPlane(BIN_L, 'trash', 0.3, 0.17, { r: 0.232, arc: 1.3 }); binSprite.position.set(0, 0.3, 0); binSprite.userData.draw('Çöp', ''); BIN.add(binSprite);
 
 /* ---------- state ---------- */
 const S = {
@@ -1082,7 +1112,7 @@ document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => setM
 document.querySelectorAll('#speedSeg button').forEach(b => b.onclick = () => setSpeed(+b.dataset.speed));
 function setReg(side, v) {
   if (!side) return;
-  v = Math.round(Math.min(60, Math.max(0, v)));
+  v = Math.round(Math.min(side === 'adj' ? ADJ_MAX : 60, Math.max(0, v)));
   S[side] = v; $('#' + side).value = v; $('#' + side + 'Out').textContent = v + ' psi';
   if (typeof syncReg === 'function') syncReg();
 }
@@ -1329,7 +1359,7 @@ function frame(now) {
   rockerL.rotation.x = approach(rockerL.rotation.x, armedL ? 0.25 : -0.12, dt * 16);
   rockerR.rotation.x = approach(rockerR.rotation.x, armedR ? 0.25 : -0.12, dt * 16);
   rockerL.userData.mat.emissive.setHex(armedL ? 0x173a7a : 0); rockerR.userData.mat.emissive.setHex(armedR ? 0x173a7a : 0);
-  setKnob(knobL, S.adj); setKnob(knobR, S.max);
+  setKnob(knobL, S.adj, ADJ_MAX); setKnob(knobR, S.max);
 
   /* pneumatics */
   const pl = placed();
@@ -1343,7 +1373,7 @@ function frame(now) {
   S.flow = approach(S.flow, Math.min(targetF, 30), dt * 2.5);
   S.gaugeL = approach(S.gaugeL, S.mode === 'adj' ? S.p : 0, dt * 4);
   S.gaugeR = approach(S.gaugeR, S.mode === 'max' ? S.p : 0, dt * 4);
-  setNeedle(needleL, S.gaugeL + (S.gaugeL > 1 ? Math.sin(now / 90) * 0.15 : 0));
+  setNeedle(needleL, S.gaugeL + (S.gaugeL > 1 ? Math.sin(now / 90) * 0.15 : 0), ADJ_MAX);
   setNeedle(needleR, S.gaugeR + (S.gaugeR > 1 ? Math.sin(now / 90) * 0.15 : 0));
   ball.position.y = PY(505 - (S.flow / 30) * 340) + (S.flow > 0.3 ? Math.sin(now / 70) * 0.006 : 0);
 
@@ -1499,7 +1529,7 @@ const STAGE_TXT = [
   'Her tüpteki 10 mL atık suyu kendi kartuşuna yükle: N1→K1 … N5→K5 (3 + 3 + 3 + 1 mL). Kartuş yenilendiyse ya da numune döküldüyse Y yedek tüpünü kullan. Akmayan kartuş olursa basıncı yavaşça artır. Biten kartuşları standa al, hepsi bitince geri tak.',
   'Su erleninden her kartuşa üç kez 3 mL ekleyerek yıka (toplam 9 mL).',
   'Su:MeOH 4:1 erleninden her kartuşa 3 mL ekle. Standdaki kartuşlar varsa önce rafa geri tak.',
-  'Tüm kartuşlar raftayken kafayı indir, basıncı 20 psi yap ve 15 dakika kurut. Bu adımda kuruma isteniyor. Beklemeyi kısaltmak için hızı 60× yapabilirsin.',
+  'Tüm kartuşlar raftayken kafayı indir, MAX moda geç, basıncı 20 psi yap ve 15 dakika kurut (ADJ en fazla 15 psi verir). Bu adımda kuruma isteniyor. Beklemeyi kısaltmak için hızı 60× yapabilirsin.',
   'Kafayı kaldır ve "Toplama rafına geç" ile atık rafını toplama rafıyla değiştir. Her kartuşun altına bir tüp gelir.',
   'Elüsyon MeOH erleninden her kartuşa 3 mL ekle ve eluatı tüplere al.',
   'Protokol tamamlandı. Tüplerdeki eluatlar analize hazır. Sapma kaydını kontrol et; yeni denemede numunelerin kirlilik dağılımı değişir.',
@@ -1577,7 +1607,7 @@ function updateUI() {
   else if (stopped.length) { cls = 'warn'; msg = `Hiçbir kartuş akmıyor (${S.p.toFixed(1)} psi). Basıncı artır.`; }
   else if (running.length) { cls = 'run'; msg = `${running.length} kartuş akıyor${slow.length ? `, ${names(slow)} yavaş` : ''}.`; }
   else if (pl.some(c => c.status === 'dry')) { cls = 'run'; msg = 'Kartuşlar kurutuluyor.'; }
-  else if (gs === 6 && sealed && S.mode !== 'off' && S.p < 18) { cls = 'warn'; msg = `Kurutma için basınç düşük (${S.p.toFixed(1)} psi). 20 psi'ye ayarla.`; }
+  else if (gs === 6 && sealed && S.mode !== 'off' && S.p < 18) { cls = 'warn'; msg = `Kurutma için basınç düşük (${S.p.toFixed(1)} psi). MAX modda 20 psi'ye ayarla.`; }
   else if (puddles.some(q => q.wipe < 0)) { cls = 'warn'; msg = 'Tezgâhta dökülmüş sıvı var. Peçete kutusundan peçete alıp kurula.'; }
   else if (gs === 9) { cls = 'ok'; msg = 'Protokol tamamlandı.'; }
   else if (sealed && S.mode === 'off') msg = 'Kafa kapalı. Mod seçiciyle gazı aç.';
