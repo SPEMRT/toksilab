@@ -286,3 +286,4 @@ $('#dlgX').onclick=()=>{$('#dlg').close();$('#dlg').classList.remove('big')};$('
 $('#bMode').onclick=()=>{$('#dlgB').innerHTML=`<h2 style="font:700 22px var(--disp);margin:0 0 8px">Mod seç</h2><p>Tezgâh sıfırlanır.</p><div class="row"><button class="p" id="mF">Tam: tuzlu su + stoklar + vialler</button><button id="mQ">Hızlı: stoklar hazır, yalnız vialler</button></div>`;$('#dlg').showModal();$('#mF').onclick=()=>{$('#dlg').close();UP=null;reset('full');setTimeout(planDlg,200)};$('#mQ').onclick=()=>{$('#dlg').close();UP=null;reset('quick');setTimeout(planDlg,200)}};
 sop();reset(/quick/.test(location.hash)?'quick':'full');setTimeout(planDlg,300);
 </script>
+<script src="egitim_cubugu.js" charset="utf-8" defer></script>

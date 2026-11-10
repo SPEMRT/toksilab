@@ -149,7 +149,7 @@ body.fps #gmode{background:rgba(14,21,24,.8);color:#EAF2F3}body.fps .moves,body.
 #joy i{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:rgba(43,217,192,.85);box-shadow:0 4px 12px rgba(0,0,0,.35)}
 @media (pointer:coarse){#gmode{display:none}#joy{display:block}.moves{display:none!important}}
 </style>
-<nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mMap" class="on"><span>▦</span>Harita</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
+<nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mMap" class="on"><span>▦</span>Harita</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button><button id="mEgt" title="Eğitim modülleri"><span>🎓</span>Eğitimler</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
 <div id="wv" hidden><div class="wvb"><video id="wvV" playsinline preload="auto" poster="karsilama.jpg" src="karsilama.mp4"></video><div class="wvc"><button id="wvS" aria-label="Sesi aç/kapat">🔊</button><span style="flex:1"></span><button id="wvX">Geç ›</button></div></div></div>
 <div class="hdr2"><b>MY_<i>ToksiLab</i></b><span class="pill">LABORATUVAR GİRİŞİ · 3B</span></div>
 <div id="cv3"></div>
@@ -958,13 +958,15 @@ say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri 
 {const m=location.hash.match(/^#r([12])-(\w+)/);if(m){const no=+m[1],k=m[2];history.replaceState(null,'',location.pathname+location.search);
  $('#intro').classList.add('out');started=true;inside=true;teamMode='home';TP.forEach(p=>{p.root.position.set(p.o.home.x,0,p.o.home.z);p.root.rotation.y=p.o.home.ry;p.dest=null;p.arrived=true});
  openRoomDoor=no;inRoom=no;roomUI();const d=DEVS.find(x=>x.k===k)||DEVS.find(x=>(x.room||2)===no);
- const sp={ult:[6.32,-12.5],elga:[5.5,-12.45],bal:[3.6,-12.25],cen:[8.9,-12.55],vor:[7.9,-12.55],pip:[5.5,-9.75],cal:[7.6,-9.75],spe:[5.9,-9.3],hsgc:[5.0,-3.7]}[d.k]||[3,RBD[no].dz];
- G.x=P.x=sp[0];G.z=P.z=sp[1];G.yaw=P.yaw=Math.atan2(-(d.x-sp[0]),-(d.z-sp[1]));G.pitch=P.pitch=-.3;doorOpen=1;drawMap();nearDev=d;{const c=$('#devchip');c.innerHTML=`${DEVI[d.k].ic} <b>${DEVI[d.k].n}</b> · bilgi ve kullanım ›`;c.onclick=()=>openDev(d.k)}
+ const sp={ult:[6.32,-12.5],elga:[5.5,-12.45],bal:[3.6,-12.25],cen:[8.9,-12.55],vor:[7.9,-12.55],pip:[5.5,-9.75],cal:[7.6,-9.75],spe:[5.9,-9.3],hsgc:[4.85,-4.75]}[d.k]||[3,RBD[no].dz];
+ G.x=P.x=sp[0];G.z=P.z=sp[1];G.yaw=P.yaw=Math.atan2(-(d.x-sp[0]),-(d.z-sp[1]));G.pitch=P.pitch=d.k==='hsgc'?-.12:-.3;doorOpen=1;drawMap();nearDev=d;{const c=$('#devchip');c.innerHTML=`${DEVI[d.k].ic} <b>${DEVI[d.k].n}</b> · bilgi ve kullanım ›`;c.onclick=()=>openDev(d.k)}
  say(`Tekrar hoş geldin! <b>${RBD[no].n}</b>’ndasın, <b>${DEVI[d.k].n}</b> önünde kaldığın yerdesin. Başka bir cihaza geçebilir ya da <b>‹ Koridora dön</b> ile koridora çıkabilirsin.`)}}
 $('#mHome').onclick=()=>window.open(BASE+'my_toksilab.html','_blank','noopener');
 $('#mMap').onclick=()=>{const m=$('#map');m.hidden=!m.hidden;$('#mMap').classList.toggle('on',!m.hidden)};
 $('#mVid').onclick=()=>playWelcome(null);
+$('#mEgt').onclick=()=>{location.href=BASE+'egitimler.html'};
 $('#mIntro').onclick=()=>{teamForm();inRoom=false;roomUI();openRoomDoor=0;started=false;inside=false;closeRoom();P.z=14;P.x=0;G.x=0;G.z=9.5;$('#intro').classList.remove('out');say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.')};
 document.getElementById('back').onclick=leaveRoom;
 window.__proj=(x,y,z)=>{const v=new THREE.Vector3(x,y,z).project(cam);const r=renderer.domElement.getBoundingClientRect();return [r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height]};Object.assign(window,{playWelcome,openDev,enterRoom2,enterRoom,leaveRoom,openInfo,teamDisperse,openTeam,TP,GG:G,openPoster,enter,goStop,openDoorCard,closeRoom,step,turn,__lab:1,PP:P});
 </script>
+<script src="egitim_cubugu.js" charset="utf-8" defer></script>

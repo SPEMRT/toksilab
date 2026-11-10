@@ -449,7 +449,9 @@ $('#stepT').onclick=()=>$('#stepc').classList.toggle('col');
 if(innerWidth>900)$('#stepc').classList.remove('col');
 new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')}).observe($('#say'),{childList:true,characterData:true,subtree:true});
 {const rs=$('#res');new MutationObserver(()=>{if(rs.innerHTML&&!rs.querySelector('.resX')){const b=document.createElement('button');b.className='resX';b.textContent='✕';b.onclick=()=>{rs.hidden=true};rs.prepend(b);rs.hidden=false}}).observe(rs,{childList:true})}
+window.TL_GOREV=()=>S&&S.done; /* eğitim çubuğu için (salt okunur) */
 </script>
 
+<script src="egitim_cubugu.js" charset="utf-8" defer></script>
 </body>
 </html>

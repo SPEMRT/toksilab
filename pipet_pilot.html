@@ -563,7 +563,9 @@ new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.
 {const rs=$('#res');new MutationObserver(()=>{if(rs.innerHTML&&!rs.querySelector('.resX')){const b=document.createElement('button');b.className='resX';b.textContent='✕';b.onclick=()=>{rs.hidden=true};rs.prepend(b);rs.hidden=false}}).observe(rs,{childList:true})}
 
 Object.assign(window,{reset,render,tapLoc,go,immerse,withdraw,eject,setDepth,slowRelease,setVol,choosePip,standTap,onHot,pose});Object.defineProperty(window,'S',{get:()=>S});window.scrOf=n=>{const o=K.models[n]||K[n];const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};window.__pip=1;window.__pk=(x,y)=>{const r=R3.renderer.domElement.getBoundingClientRect();const ptr=new THREE.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);const rc=new THREE.Raycaster();rc.setFromCamera(ptr,R3.cam);const h=rc.intersectObjects(HOT.filter(o=>visibleDeep(o)),false)[0];return h?h.object.userData.hot:null};
+window.TL_GOREV=()=>S&&S.done; /* eğitim çubuğu için (salt okunur) */
 </script>
 
+<script src="egitim_cubugu.js" charset="utf-8" defer></script>
 </body>
 </html>

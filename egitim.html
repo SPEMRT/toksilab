@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eğitim · MY ToksiLab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0E1518;--card:#1E2A30;--card2:#25333A;--line:#34454D;--ink:#EAF2F3;--muted:#9BB0B6;--blue:#2F7DE1;--ok:#2DBE5B;--bad:#E5484D;--warn:#F2B632;--teal:#2BD9C0;
+ --f-display:'Barlow Condensed',system-ui,sans-serif;--f-body:'Source Sans 3',system-ui,sans-serif;--f-mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(ellipse at 30% 0%,#1A2A30,var(--bg) 60%);color:var(--ink);font-family:var(--f-body);min-height:100vh;padding:12px 16px 48px}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}a{color:#7FDCD0}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:12px}
+.hdr{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}.brand b{font:700 24px/1 var(--f-display)}.brand b i{font-style:normal;color:var(--teal)}
+.pill{font:600 10.5px var(--f-mono);letter-spacing:.1em;border-radius:999px;padding:4px 9px;background:var(--warn);color:#2A2000}
+.hdr nav{display:flex;gap:14px;font-weight:600;font-size:14px}
+.mentor{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;background:#F1F6F7;color:#16242A;border-radius:14px;padding:10px 14px;border-left:5px solid var(--teal);box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.mentor img{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#cfd8da}.mentor .nm{font:600 11px var(--f-mono);color:#1F9A97;letter-spacing:.08em}.mentor p{font-size:15px;line-height:1.45}
+.lay{display:grid;grid-template-columns:290px 1fr;gap:12px;align-items:start}
+.side{position:sticky;top:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:4px}
+.side h3{font:700 19px var(--f-display);margin:2px 4px 2px}.side .meta{font:600 11px var(--f-mono);color:var(--muted);margin:0 4px 6px}
+.side a{display:grid;grid-template-columns:26px 1fr;gap:9px;align-items:center;padding:7px 8px;border-radius:10px;color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:600}
+.side a:hover{background:var(--card2)}.side a.on{background:#1C3A3A;outline:1px solid #2B6B63}
+.side a i{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#33444C;font:700 11px var(--f-mono)}
+.side a.ok i{background:var(--ok);color:#062126}.side a small{display:block;font:500 10.5px var(--f-mono);color:var(--muted);font-weight:500}
+.bar{height:8px;border-radius:9px;background:#2C3B42;overflow:hidden;margin:2px 4px 8px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),#7CF2D8)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 26px rgba(0,0,0,.28);display:grid;gap:12px;align-content:start}
+.card h2{font:700 28px/1.05 var(--f-display)}.card h3{font:700 20px var(--f-display);color:#CFE3EA}
+.card p,.card li{font-size:15px;line-height:1.55;color:#D3E0E4}.card ul,.card ol{padding-left:20px;display:grid;gap:4px}
+.sub{font:600 11px var(--f-mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.box{background:var(--card2);border-radius:12px;padding:12px 14px;display:grid;gap:6px}
+.box b.k{font:700 17px var(--f-display);color:var(--teal)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bt{border:0;border-radius:11px;padding:10px 16px;font-weight:700;font-size:14.5px;background:var(--card2);color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.bt:hover{background:#30434B}.bt.p{background:linear-gradient(90deg,var(--teal),#7CF2D8);color:#062126}.bt.b{background:var(--blue);color:#fff}.bt.s{font-size:13px;padding:7px 12px}
+.bt:disabled{opacity:.45;cursor:not-allowed}
+.st{display:inline-flex;align-items:center;gap:6px;font:700 12px var(--f-mono);letter-spacing:.04em;border-radius:999px;padding:5px 10px;background:#33444C;color:#C9D7DB}.st.ok{background:#1E4D43;color:#7CF2D8}
+.olc{list-style:none;padding:0!important}.olc li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start}.olc li::before{content:'□';color:var(--teal);font-weight:700}
+/* test */
+.q{background:var(--card2);border-radius:12px;padding:12px 14px;display:grid;gap:8px}
+.q .qt{font-weight:700;font-size:15.5px;line-height:1.4}.q .qt span{font:700 12px var(--f-mono);color:var(--teal);margin-right:6px}
+.q label{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;padding:7px 10px;border-radius:9px;background:#1B262B;border:1px solid transparent;cursor:pointer;font-size:14.5px;line-height:1.4}
+.q label:hover{border-color:#3C5059}.q input{margin-top:3px;accent-color:var(--teal)}
+.q label.dogru{border-color:var(--ok);background:#173528}.q label.yanlis{border-color:var(--bad);background:#3A1C1F}
+.q .ac{font-size:13.5px;color:#BFD2D6;line-height:1.45;border-left:3px solid var(--teal);padding-left:10px}
+.skor{font:700 40px var(--f-display);color:var(--teal)}
+/* kkd */
+.kk{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.kk button{border:1.5px solid var(--line);background:var(--card2);border-radius:12px;padding:12px;text-align:left;display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:center;font-size:14px;line-height:1.3}
+.kk button span{font-size:24px}.kk button.sec{border-color:var(--teal);background:#183632}
+.kk button.dogru{border-color:var(--ok)}.kk button.yanlis{border-color:var(--bad);background:#3A1C1F}
+/* kalibrasyon */
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:7px 8px;border-bottom:1px solid #2E3E45;text-align:right}th:first-child,td:first-child{text-align:left}
+th{font:600 11px var(--f-mono);letter-spacing:.05em;color:var(--muted);text-transform:uppercase}
+td input,.inp{background:#0E1518;border:1px solid #33444C;border-radius:9px;padding:6px 9px;width:110px;text-align:right}
+td input.ok,.inp.ok{border-color:var(--ok);background:#12281F}td input.no,.inp.no{border-color:var(--bad);background:#2A1416}
+.mono{font-family:var(--f-mono)}
+.chart{background:#0E1518;border-radius:12px;padding:8px}
+.fb{font-size:14px;line-height:1.45;border-radius:10px;padding:8px 12px;background:#1B262B}.fb.ok{background:#12281F;color:#9CF0C4}.fb.no{background:#2A1416;color:#FFB4B4}
+.sel{display:flex;gap:6px;flex-wrap:wrap}.sel button{border:1.5px solid var(--line);background:var(--card2);border-radius:10px;padding:7px 12px;font-weight:600;font-size:14px}.sel button.sec{border-color:var(--teal);background:#183632}
+/* rapor */
+.rapor{background:#fff;color:#16242A;border-radius:14px;padding:26px 30px;display:grid;gap:14px}
+.rapor h2{font:700 30px var(--f-display);color:#0E3B3A}.rapor h3{font:700 18px var(--f-display);color:#0E3B3A;border-bottom:2px solid #2BD9C0;padding-bottom:3px}
+.rapor table{font-size:13.5px}.rapor th{color:#58707A}.rapor td,.rapor th{border-bottom:1px solid #DCE4E6}
+.rapor .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.rapor .kv div{background:#F1F6F7;border-radius:10px;padding:8px 10px;font-size:12px;color:#58707A}.rapor .kv b{display:block;font:700 22px var(--f-display);color:#16242A}
+.rapor .imza{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px}.rapor .imza div{border-top:1px solid #16242A;padding-top:4px;font-size:12.5px;color:#58707A}
+.rapor p{color:#16242A}.rapor td:nth-child(2),.rapor td:nth-child(3),.rapor th:nth-child(2),.rapor th:nth-child(3){text-align:left}
+.gec{color:#1E8E4A}.kal{color:#C62828}
+@media (max-width:900px){.lay{grid-template-columns:1fr}.side{position:static}.g2,.g3{grid-template-columns:1fr}.rapor .kv{grid-template-columns:1fr 1fr}}
+@media print{body{background:#fff;padding:0}.hdr,.mentor,.side,.noprint{display:none!important}.lay{display:block}.card{box-shadow:none;border:0;padding:0;background:#fff}.rapor{padding:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill" id="pill">EĞİTİM</span></div>
+  <nav><a href="egitimler.html">‹ Eğitimler</a><a href="lab_giris.html">Laboratuvar</a></nav></div>
+ <div class="mentor"><img src="avatar.jpg" alt="Uzm. MY"><div><div class="nm">UZM. MY</div><p id="say"></p></div></div>
+ <div class="lay"><aside class="side" id="side"></aside><main id="main"></main></div>
+</div>
+<script src="egitim_cubugu.js" charset="utf-8"></script>
+<script>
+window.TLE_CUBUK_YOK=true;
+const T=window.TLE,$=s=>document.querySelector(s);
+const m=new URLSearchParams(location.search).get('m')||'etanol';
+const M=T.MOD[m];
+if(!M||M.durum!=='aktif'){document.querySelector('.lay').innerHTML='<div class="card"><h2>Bu modül hazırlanıyor</h2><p><a href="egitimler.html">Eğitimler sayfasına dön</a></p></div>';throw 0}
+T.basla(m);document.title=M.ad+' · Eğitim · MY ToksiLab';$('#pill').textContent='EĞİTİM · '+M.ad.toUpperCase();
+const say=h=>$('#say').innerHTML=h;
+const fmt=(n,d=3)=>Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const num=v=>{v=String(v==null?'':v).trim().replace(/\s/g,'').replace(/,/g,'.').replace(/×/g,'*').replace(/÷/g,'/');if(v==='')return NaN;if(!/^[0-9.+\-*/()]+$/.test(v))return NaN;try{const r=Function('"use strict";return ('+v+')')();return typeof r==='number'&&isFinite(r)?r:NaN}catch(e){return NaN}};
+const veri=id=>{const s=T.oku();return (s.mod&&s.mod[m]&&s.mod[m].adim[id])||null};
+const tarih=t=>t?new Date(t).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+
+/* ---------------- yan menü ---------------- */
+function side(cur){const P=T.ilerleme(m);
+ $('#side').innerHTML=`<h3>${M.ic} ${M.ad}</h3><div class="meta">${M.sure} · %${P.yuzde} tamamlandı</div><div class="bar"><i style="width:${P.yuzde}%"></i></div>
+  <a href="#" class="${!cur?'on':''}"><i>≡</i><span>Genel bakış</span></a>
+  ${M.adimlar.map((a,i)=>`<a href="#${a.id}" class="${T.bitti(m,a.id)?'ok ':''}${cur===a.id?'on':''}"><i>${T.bitti(m,a.id)?'✓':i+1}</i><span>${a.ad}<small>${a.tur==='ic'?'bu sayfada':a.sayfa.split('?')[0]}</small></span></a>`).join('')}`}
+
+/* ---------------- yönlendirme ---------------- */
+function git(){const id=location.hash.slice(1);const a=M.adimlar.find(x=>x.id===id);side(a&&a.id);window.scrollTo(0,0);
+ if(!a)return genel();const ic={on:onTest,kkd:kkd,kalib:kalib,final:final}[a.id];ic?ic(a):dis(a)}
+addEventListener('hashchange',git);addEventListener('focus',()=>{T.otoKontrol();const id=location.hash.slice(1);side(id||null)});
+
+function genel(){const P=T.ilerleme(m);
+ say(P.n?`Kaldığın yerden devam edelim: sıradaki adım <b>${P.siradaki?P.siradaki.ad:'—'}</b>.`:`Hoş geldin! Bu modülde <b>kanda etanol</b> analizini baştan sona yapacaksın. Önce kısa bir ön bilgi ve ön testle başlayalım.`);
+ $('#main').innerHTML=`<div class="card"><div class="sub">Modül</div><h2>${M.ic} ${M.ad}</h2><p>${M.ozet}</p>
+  <div class="g2"><div class="box"><b class="k">Kazanımlar</b><ul>${M.kazanim.map(k=>`<li>${k}</li>`).join('')}</ul></div>
+  <div class="box"><b class="k">Nasıl ilerlenir?</b><p style="font-size:14px">Bazı adımlar bu sayfada (test, KKD, hesap, rapor), bazıları cihaz sayfalarında yapılır. Cihaz sayfalarında üstte <b>eğitim çubuğu</b> görünür: hangi adımda olduğunu, ilerlemeyi ve sonraki adımı gösterir. Cihaz sayfasındaki gerekli görevleri bitirdiğinde adım kendiliğinden işaretlenir.</p>
+   <div class="row"><a class="bt p" href="#${P.siradaki?P.siradaki.id:'final'}">${P.n?'Devam et':'Başla'} ›</a></div></div></div>
+  <h3>Adımlar</h3>
+  <div style="display:grid;gap:8px">${M.adimlar.map((a,i)=>{const v=veri(a.id);return `<div class="box" style="grid-template-columns:40px 1fr auto;align-items:center"><div style="font-size:26px">${a.ic}</div>
+   <div><b>${i+1}. ${a.ad}</b><div style="font-size:13.5px;color:#BFD2D6">${a.gorev}</div></div>
+   <div class="row" style="justify-content:flex-end">${v?`<span class="st ok">✓ ${tarih(v.t)}</span>`:''}<a class="bt s" href="#${a.id}">Aç ›</a></div></div>`}).join('')}</div></div>`}
+
+/* ---------------- cihaz sayfasındaki adımlar ---------------- */
+function dis(a){const v=veri(a.id),i=M.adimlar.indexOf(a),nx=M.adimlar[i+1];
+ say(`<b>${a.ad}</b> adımı cihaz sayfasında. Sayfayı aç ve görevleri yap; ${a.takip||a.oto?'gerekli görevler bitince adım <b>kendiliğinden</b> işaretlenir. Gerekirse üstteki eğitim çubuğundan elle de işaretleyebilirsin.':'bitince üstteki eğitim çubuğundan <b>✓ Adımı tamamla</b>’ya bas.'}`);
+ const prep=a.oto==='prep'?(()=>{try{return JSON.parse(localStorage.getItem('toksilab_prep_v1')||'null')}catch(e){return null}})():null;
+ $('#main').innerHTML=`<div class="card"><div class="sub">Adım ${i+1} / ${M.adimlar.length} · cihaz sayfası</div><h2>${a.ic} ${a.ad}</h2>
+  <div class="box"><b class="k">Görev</b><p>${a.gorev}</p></div>
+  ${a.olcut?`<div class="box"><b class="k">Başarı ölçütleri${a.takip?' <span class="sub">· cihaz sayfasında otomatik izlenir</span>':''}</b><ul class="olc">${a.olcut.map(o=>`<li>${o}</li>`).join('')}</ul></div>`:''}
+  ${a.oto==='prep'?`<div class="fb ${v?'ok':''}">${v&&v.oto?'✓ Vialler örnek hazırlama sayfasından kaydedildi ('+tarih(v.t)+'); adım kendiliğinden tamamlandı.':prep?'Önceki bir oturumdan kayıtlı vial seti var ('+tarih(prep.t)+'). Bu eğitimde viallerini yeniden hazırlayıp göndermen gerekiyor.':'Vialleri hazırlayıp <b>Vialleri gönder</b> dediğinde bu adım kendiliğinden tamamlanır.'}</div>`:''}
+  <div class="row"><a class="bt p" href="${a.sayfa}">${a.sayfa.split('?')[0]} sayfasını aç ›</a>
+   ${v?`<span class="st ok">✓ Tamamlandı · ${tarih(v.t)}</span><button class="bt s" id="geri">İşareti kaldır</button>`:`<button class="bt" id="tam">✓ Tamamladım</button>`}
+   ${nx?`<a class="bt s" href="#${nx.id}">Sonraki: ${nx.ad} ›</a>`:''}</div></div>`;
+ const t=$('#tam');if(t)t.onclick=()=>{T.tamamla(m,a.id,{elle:1});git()};const g=$('#geri');if(g)g.onclick=()=>{T.geriAl(m,a.id);git()}}
+
+/* ---------------- testler ---------------- */
+const ON=[
+ ['HS-GC-MS’te “headspace” neyi ifade eder?',['Kapalı vialde sıvının üstündeki gaz fazını','Kolonun giriş ucundaki boşluğu','Kütle dedektöründeki vakum bölgesini','Vialin dibine çöken katı kısmı'],0,'Isıtılan kapalı vialde uçucu maddeler sıvı ile üstteki gaz faz arasında dengeye gelir; bu gaz fazdan örnek alınıp GC’ye verilir.'],
+ ['Vial’e iç standart (n-propanol) neden eklenir?',['Hacim, enjeksiyon ve cihaz değişkenliğini dengelemek için; hesap analit/İS alan oranıyla yapılır','Etanolün kaynama noktasını düşürmek için','Kanın pıhtılaşmasını önlemek için','Kolonu temizlemek için'],0,'İç standart her viale aynı miktarda eklenir. Analit alanı iç standardın alanına bölündüğünde enjeksiyon ve headspace dengesindeki küçük değişimler birbirini götürür.'],
+ ['Vial’e %20 NaCl çözeltisi eklenmesinin amacı nedir?',['Tuzla çıkarma (salting-out): alkollerin gaz faza geçişini artırmak','Örneği steril etmek','pH’yı asidik yapmak','Hemolizi önlemek'],0,'Tuz, sudaki çözünürlüğü düşürerek uçucu alkollerin headspace’e geçişini artırır ve matriks farklarını azaltır.'],
+ ['Kan gibi viskoz örneklerde hangi pipetleme tekniği tercih edilir?',['Ters pipetleme','İleri pipetleme','Çok basamaklı dağıtım','Ağızla pipetleme'],0,'Ters pipetlemede fazla hacim çekilip ikinci durağa basılmadan verilir; viskoz ve köpüren sıvılarda daha doğru sonuç verir.'],
+ ['Bu SOP’ta kalibrasyon eğrisinin kabul ölçütü hangisidir?',['R² ≥ 0,995','R² ≥ 0,90','En az 2 seviye','Eğim 1’e eşit olmalı'],0,'ALKOL2.M değerlendirmesinde doğrusal eğri için R² ≥ 0,995 aranır.'],
+ ['QC (0,25 g/L) sonucu hangi aralıkta olmalıdır?',['Nominal değerin ±%15’i','Nominal değerin ±%50’si','Sadece pozitif olması yeterli','Nominal değerin ±%1’i'],0,'QC sonucu nominal değerin ±%15’i içinde değilse seri kabul edilmez; neden araştırılır.'],
+ ['DB-WAX kolonda alkollerin çıkış sırası hangisidir?',['Metanol → etanol → n-propanol','n-Propanol → etanol → metanol','Etanol → metanol → n-propanol','Hepsi aynı anda çıkar'],0,'Yaklaşık metanol 2,91 dk, etanol 3,17 dk, n-propanol 3,79 dk.'],
+ ['10 g/L ana stoktan 25 mL 2 g/L ara stok için kaç mL alınır?',['5 mL','2 mL','10 mL','12,5 mL'],0,'C₁V₁ = C₂V₂ → V₁ = 2 × 25 / 10 = 5 mL.']];
+const FIN=[
+ ['250 mL %20 (a/h) NaCl çözeltisi için kaç g NaCl tartılır?',['50 g','20 g','25 g','200 g'],0,'%20 (a/h) = 100 mL’de 20 g → 250 mL’de 50 g.'],
+ ['Analitik terazide tartımdan önce yapılması gereken ilk kontroller hangileridir?',['Düzeç ve iç kalibrasyon','Sadece dara','Kapakları açık bırakmak','Kefeyi elle silmek'],0,'Terazi düz değilse ve kalibrasyonu doğrulanmamışsa okuma güvenilir değildir.'],
+ ['İç standart eklenmeden kapatılmış bir vial için doğru karar hangisidir?',['Vial hesaplanamaz; yeniden hazırlanır','Sonuç 2 ile çarpılır','Ortalama bir İS alanı kullanılır','Sonuç doğrudan raporlanır'],0,'Analit/İS oranı kurulamadığı için vial değerlendirilemez.'],
+ ['HS vialinin kapağı crimp edilmezse ne beklenir?',['Uçucular kaçar, sonuç düşük çıkar','Sonuç yükselir','Hiçbir etkisi olmaz','Kolon zarar görür'],0,'Isıtma sırasında sızdıran vialde etanol ve iç standart kaybolur; oranlar ve tekrarlanabilirlik bozulur.'],
+ ['Üç alkol arasında yalnız etanolde bulunan SIM iyonu hangisidir?',['m/z 45','m/z 31','m/z 41','m/z 59'],0,'m/z 31 üç alkolde de vardır; 45 etanole özgüdür, 59 n-propanol, 32 metanol için ayırt edicidir.'],
+ ['Blank vialde belirgin etanol piki görülürse ne yapılır?',['Kontaminasyon / taşınma araştırılır; seri değerlendirilmeden önce neden giderilir','Blank sonucu numuneden çıkarılır','Önemsizdir, rapor yazılır','İç standart artırılır'],0,'Blankta analit olması kontaminasyon veya taşınma (carry-over) göstergesidir.'],
+ ['Kalibrasyon: eğim 3,85, kesişim 0,004. Numunenin alan oranı 1,20 ise derişim yaklaşık kaçtır?',['0,311 g/L','0,460 g/L','4,62 g/L','0,250 g/L'],0,'x = (y − a) / b = (1,20 − 0,004) / 3,85 ≈ 0,311 g/L.'],
+ ['Numune sonucu en yüksek kalibratörün (0,5 g/L) üstündeyse?',['Numune seyreltilip tekrar çalışılır','Eğri uzatılarak hesaplanır','En yüksek değer (0,5) raporlanır','Sonuç geçersiz sayılır, numune atılır'],0,'Kalibrasyon aralığı dışına ekstrapolasyon yapılmaz; numune seyreltilip aralığa getirilir.'],
+ ['QC nominal 0,25 g/L, ölçülen 0,21 g/L. Sapma ve karar?',['−%16; seri kabul edilmez','−%4; kabul','+%16; kabul','−%16; kabul'],0,'(0,21 − 0,25)/0,25 = −%16 → ±%15 dışında.'],
+ ['Kan döküldüğünde doğru ilk müdahale hangisidir?',['Eldivenle emici malzemeyle topla, yüzeyi dezenfekte et, atığı biyolojik atığa at','Kâğıt havluyla çıplak elle sil','Üzerine su dökerek lavaboya akıt','Kurumasını bekle'],0,'Kan potansiyel enfeksiyöz materyaldir; KKD ile toplanır, yüzey dezenfekte edilir, tıbbi atık kutusuna atılır.'],
+ ['Vial vorteksle karıştırılırken hangisi doğrudur?',['Kapak kapalıyken, tüp sıkıca tutularak','Kapak açıkken, en yüksek hızda','Vorteks gerekmez, ters çevirmek yeterli','Eldivensiz'],0,'Kapalı kap ve güvenli tutuş sıçramayı ve aerosolü önler.'],
+ ['Kanda etanol sonucu raporda hangi birimle verilir?',['g/L (≈ promil)','mg/kg saç','ng/mL idrar','mol/L'],0,'Adli raporda kan alkolü g/L (≈ promil) olarak verilir; belirsizlik SOP’a göre eklenir.']];
+
+function test(a,soru,anahtar,baslik,acik,gecme){const v=veri(a.id);let sec={};
+ const draw=(sonuc)=>{$('#main').innerHTML=`<div class="card"><div class="sub">Adım ${M.adimlar.indexOf(a)+1} / ${M.adimlar.length}</div><h2>${a.ic} ${baslik}</h2>${acik}
+  ${v&&!sonuc?`<div class="fb ok">Önceki deneme: <b>%${v.puan}</b> (${tarih(v.son)}). İstersen tekrar çözebilirsin.</div>`:''}
+  <div style="display:grid;gap:10px" id="Q">${soru.map((q,i)=>`<div class="q"><div class="qt"><span>${String(i+1).padStart(2,'0')}</span>${q[0]}</div>
+   ${q[1].map((o,j)=>`<label class="${sonuc?(j===q[2]?'dogru':sec[i]===j?'yanlis':''):''}"><input type="radio" name="q${i}" value="${j}" ${sec[i]===j?'checked':''} ${sonuc?'disabled':''}><span>${o}</span></label>`).join('')}
+   ${sonuc?`<div class="ac">${q[3]}</div>`:''}</div>`).join('')}</div>
+  ${sonuc?`<div class="box"><div class="skor">%${sonuc.puan}</div><p>${sonuc.d}/${soru.length} doğru. ${gecme?(sonuc.puan>=gecme?'<b class="gec">Geçtin.</b>':'<b class="kal">Geçme notu %'+gecme+'. Açıklamaları oku ve tekrar dene.</b>'):'Ön test başarı şartı değil; final testinde karşılaştırılacak.'}</p>
+   <div class="row"><button class="bt" id="tek">Tekrar çöz</button>${(!gecme||sonuc.puan>=gecme)?`<a class="bt p" href="#${(M.adimlar[M.adimlar.indexOf(a)+1]||{id:'final'}).id}" id="dvm">${a.id==='final'?'Raporu gör ↓':'Sonraki adım ›'}</a>`:''}</div></div>`
+  :`<div class="row"><button class="bt p" id="bit">Testi bitir</button><span class="sub" id="kalan"></span></div>`}</div><div id="ek"></div>`;
+  $('#Q').onchange=e=>{const n=e.target.name;if(n){sec[+n.slice(1)]=+e.target.value;upd()}};
+  const upd=()=>{const k=soru.length-Object.keys(sec).length;const s=$('#kalan');if(s)s.textContent=k?k+' soru boş':'hepsi yanıtlandı'};upd();
+  const b=$('#bit');if(b)b.onclick=()=>{if(Object.keys(sec).length<soru.length&&!confirm('Boş sorular var. Yine de bitirilsin mi?'))return;
+   const d=soru.reduce((s,q,i)=>s+(sec[i]===q[2]?1:0),0),puan=Math.round(100*d/soru.length);
+   const o={puan,d,cevap:soru.map((q,i)=>sec[i]??null)};if(!gecme||puan>=gecme)T.tamamla(m,a.id,o);
+   const s=T.oku();s.mod[m][anahtar]=o;T.yaz(s);side(a.id);draw(o);window.scrollTo(0,0);if(a.id==='final')rapor()};
+  const t=$('#tek');if(t)t.onclick=()=>{sec={};draw(null)};
+  if(sonuc&&a.id==='final')rapor()};
+ draw(null)}
+/* seçenekleri karıştır (her açılışta) */
+function karis(arr){return arr.map(q=>{const idx=q[1].map((_,i)=>i).sort(()=>Math.random()-.5);return [q[0],idx.map(i=>q[1][i]),idx.indexOf(q[2]),q[3]]})}
+
+function onTest(a){say('Önce kısa bir ön bilgi. Sonra 8 soruluk ön test: amacı ne bildiğini görmek; puan bir sonraki adıma geçmeni engellemez.');
+ test(a,karis(ON),'onTest','Ön bilgi ve ön test',`<div class="g3">
+  <div class="box"><b class="k">Neden kanda etanol?</b><p style="font-size:14px">Trafik kazaları, adli olaylar ve ölüm nedeni araştırmalarında kan alkol düzeyi temel delildir. Sonuç <b>g/L (≈ promil)</b> olarak raporlanır.</p></div>
+  <div class="box"><b class="k">Headspace + GC-MS</b><p style="font-size:14px">20 mL vialde <b>250 µL kan + %20 NaCl + iç standart</b>, 80 °C’de ısıtılır. Gaz fazdan alınan örnek DB-WAX kolonda ayrılır, 5975B MSD’de SIM iyonlarıyla tanımlanır.</p></div>
+  <div class="box"><b class="k">İç standart ve kalibrasyon</b><p style="font-size:14px">Her viale <b>70 µL n-propanol (2 g/L)</b> → vialde 0,07 g/L. 0,01–0,5 g/L arasında 9 kalibratör; hesap etanol/n-propanol <b>alan oranıyla</b> yapılır.</p></div></div>`,0)}
+
+/* ---------------- KKD ---------------- */
+const KK=[['🥼','Uzun kollu, önü kapalı laboratuvar önlüğü',1,'Deri ve giysiyi kan sıçramasından korur.'],['🧤','Nitril eldiven',1,'Kan ve kimyasallara karşı bariyer; lateks alerjisi riski yok.'],['🥽','Koruyucu gözlük',1,'Pipetleme ve vortekste sıçramaya karşı gözü korur.'],['👟','Kapalı ayakkabı',1,'Dökülen sıvı ve kırık cama karşı.'],['💇','Uzun saç toplu',1,'Saç kontaminasyonu ve cihaz hareketli parçaları için.'],
+ ['🩳','Şort ve sandalet',0,'Laboratuvarda bacak ve ayak açık olamaz.'],['🧤','Pudralı lateks eldiven',0,'Pudra kontaminasyon, lateks alerji riski taşır.'],['💍','Yüzük ve bileklik',0,'Eldiveni deler, altında bulaşık kalır; takılmaz.'],['☕','Tezgâhta kahve',0,'Laboratuvarda yemek-içmek yasaktır.'],['📱','Eldivenle telefon kullanmak',0,'Kontaminasyonu laboratuvar dışına taşır.']];
+function kkd(a){const v=veri(a.id),s=T.oku(),d=s.mod[m];let sec=new Set((d.kkdSec)||[]),kontrol=!!(d.kkdOk);
+ say('Kan potansiyel enfeksiyöz bir örnektir; organik çözücülerle de çalışacağız. Doğru <b>KKD ve davranışları</b> seç, sonra laboratuvarı gez.');
+ const draw=()=>{const ok=KK.every((k,i)=>sec.has(i)===!!k[2]);
+  $('#main').innerHTML=`<div class="card"><div class="sub">Adım ${M.adimlar.indexOf(a)+1} / ${M.adimlar.length}</div><h2>${a.ic} KKD ve laboratuvar</h2>
+   <h3>1 · Doğru olanları seç</h3><div class="kk" id="K">${KK.map((k,i)=>`<button data-i="${i}" class="${sec.has(i)?'sec ':''}${kontrol?(k[2]?(sec.has(i)?'dogru':'yanlis'):(sec.has(i)?'yanlis':'')):''}"><span>${k[0]}</span>${k[1]}</button>`).join('')}</div>
+   ${kontrol?`<div class="fb ${ok?'ok':'no'}">${ok?'✓ Tamam. Önlük, nitril eldiven, gözlük, kapalı ayakkabı ve toplu saç: kan ve uçucu çözücülerle çalışmanın asgarisi.':'Bazı seçimler hatalı (kırmızı). '+KK.filter((k,i)=>sec.has(i)!==!!k[2]).map(k=>'<b>'+k[1]+'</b>: '+k[3]).join(' ')}</div>`:''}
+   <div class="row"><button class="bt b" id="kon">Kontrol et</button></div>
+   <h3>2 · Laboratuvarı gez</h3>
+   <div class="box"><p>Laboratuvara gir. <b>Oda 2 · Örnek Hazırlama</b>’da terazi, pipet, vorteks ve kalibrasyon masasını; <b>Oda 1 · Kromatografi</b>’de HS-GC-MS’i bul. Eğitim çubuğu laboratuvarda da görünür.</p>
+    <div class="row"><a class="bt p" href="lab_giris.html">Laboratuvara gir ›</a>
+    <label class="row" style="gap:6px;font-size:14.5px"><input type="checkbox" id="tur" ${d.kkdTur?'checked':''} style="accent-color:var(--teal);width:18px;height:18px"> Oda 1 ve Oda 2’yi gezdim</label></div></div>
+   <div class="row">${v?`<span class="st ok">✓ Tamamlandı · ${tarih(v.t)}</span><a class="bt p" href="#tartim">Sonraki: Tartım ›</a>`:`<button class="bt p" id="tam" ${ok&&kontrol&&d.kkdTur?'':'disabled'}>✓ Adımı tamamla</button><span class="sub">${!(ok&&kontrol)?'önce KKD seçimini doğru yap':!d.kkdTur?'laboratuvarı gezdiğini işaretle':''}</span>`}</div></div>`;
+  $('#K').onclick=e=>{const b=e.target.closest('[data-i]');if(!b)return;const i=+b.dataset.i;sec.has(i)?sec.delete(i):sec.add(i);kontrol=false;kay();draw()};
+  $('#kon').onclick=()=>{kontrol=true;kay();draw()};
+  $('#tur').onchange=e=>{d.kkdTur=e.target.checked;kay();draw()};
+  const t=$('#tam');if(t)t.onclick=()=>{T.tamamla(m,a.id,{kkd:1});git()}};
+ const kay=()=>{const s2=T.oku();Object.assign(s2.mod[m],{kkdSec:[...sec],kkdOk:kontrol,kkdTur:d.kkdTur});T.yaz(s2)};
+ draw()}
+
+/* ---------------- kalibrasyon hesabı ---------------- */
+const LV=[.01,.05,.1,.2,.25,.3,.4,.45,.5],ISA=[412300,405800,418900,409100,401700,415200,407600,411900,403400],NZ=[.002,-.003,.004,-.006,.005,-.004,.008,-.007,.003];
+const YR=LV.map((x,i)=>3.85*x+.004+NZ[i]),EA=YR.map((y,i)=>Math.round(y*ISA[i])),YY=EA.map((e,i)=>e/ISA[i]);
+const SOR=[2,5,7];/* öğrencinin hesaplayacağı satırlar: 0,1 · 0,3 · 0,45 */
+function fit(){const n=LV.length,sx=LV.reduce((a,b)=>a+b),sy=YY.reduce((a,b)=>a+b),sxx=LV.reduce((a,x)=>a+x*x,0),sxy=LV.reduce((a,x,i)=>a+x*YY[i],0);
+ const b=(n*sxy-sx*sy)/(n*sxx-sx*sx),a=(sy-b*sx)/n,my=sy/n,sst=YY.reduce((s,y)=>s+(y-my)**2,0),sse=YY.reduce((s,y,i)=>s+(y-(a+b*LV[i]))**2,0);return {a,b,r2:1-sse/sst}}
+const F=fit();
+const KS={qc:{y:.930,nom:.25},n1:{y:1.207},n2:{y:2.461},bl:{y:.0006}};
+function kalib(a){const v=veri(a.id),s=T.oku(),d=s.mod[m];const K=d.kal||{};
+ say('Bu bir <b>alıştırma veri seti</b>: HS-GC-MS’te kendi viallerinle yapacağın değerlendirmenin aynısı. Hesap makinesi gerekirse kutulara işlem yazabilirsin (ör. <span class="mono">372150/418900</span>).');
+ const kay=()=>{const s2=T.oku();s2.mod[m].kal=K;T.yaz(s2)};
+ const xq=y=>(y-F.a)/F.b;
+ const draw=()=>{const oranOk=SOR.every(i=>K['r'+i]&&Math.abs(K['r'+i]-YY[i])/YY[i]<.005);
+  const qx=xq(KS.qc.y),qs=(qx-KS.qc.nom)/KS.qc.nom*100,n1=xq(KS.n1.y);
+  const ck=(k,dog,tol)=>K[k]==null?'':(Math.abs(K[k]-dog)<=tol?'ok':'no');
+  const p=[oranOk,K.kabul==='evet',ck('qx',qx,.003)==='ok',ck('qs',qs,.6)==='ok',K.qk==='kabul',ck('n1',n1,.003)==='ok',K.n2==='seyrelt',K.bl==='loq'];
+  const puan=Math.round(100*p.filter(Boolean).length/p.length);
+  $('#main').innerHTML=`<div class="card"><div class="sub">Adım ${M.adimlar.indexOf(a)+1} / ${M.adimlar.length} · alıştırma</div><h2>${a.ic} Kalibrasyon hesabı</h2>
+  <div class="box"><b class="k">Formül</b><p class="mono" style="font-size:15px">y = alan(EtOH) / alan(n-PrOH) · y = a + b·x · x = (y − a) / b</p></div>
+  <h3>1 · Alan oranlarını hesapla</h3>
+  <div style="overflow:auto"><table><tr><th>Kalibratör</th><th>x (g/L)</th><th>Alan EtOH</th><th>Alan n-PrOH</th><th>y = oran</th></tr>
+   ${LV.map((x,i)=>`<tr><td>KAL-${String(x).replace('.',',')}</td><td>${fmt(x,2)}</td><td class="mono">${EA[i].toLocaleString('tr-TR')}</td><td class="mono">${ISA[i].toLocaleString('tr-TR')}</td>
+    <td>${SOR.includes(i)?`<input data-k="r${i}" value="${K['r'+i]!=null?String(+K['r'+i].toFixed(4)).replace('.',','):''}" class="${K['r'+i]==null?'':(Math.abs(K['r'+i]-YY[i])/YY[i]<.005?'ok':'no')}" placeholder="?">`:`<span class="mono">${fmt(YY[i],4)}</span>`}</td></tr>`).join('')}</table></div>
+  ${oranOk?`<h3>2 · Eğriyi değerlendir</h3>
+   <div class="g2"><div class="chart">${grafik()}</div>
+    <div class="box"><p class="mono" style="font-size:15px">b (eğim) = ${fmt(F.b,4)}<br>a (kesişim) = ${fmt(F.a,4)}<br>R² = ${fmt(F.r2,5)}</p>
+     <p>Bu eğri SOP’a göre kabul edilir mi?</p><div class="sel" data-s="kabul"><button data-v="evet" class="${K.kabul==='evet'?'sec':''}">Evet, R² ≥ 0,995</button><button data-v="hayir" class="${K.kabul==='hayir'?'sec':''}">Hayır</button></div>
+     ${K.kabul?`<div class="fb ${K.kabul==='evet'?'ok':'no'}">${K.kabul==='evet'?'✓ R² = '+fmt(F.r2,4)+' ≥ 0,995: doğrusal eğri kabul.':'R² = '+fmt(F.r2,4)+'; ölçüt 0,995. Eğri kabul edilebilir.'}</div>`:''}</div></div>`
+   :'<div class="fb">Üç oranı doğru girince eğri çizilecek.</div>'}
+  ${K.kabul==='evet'?`<h3>3 · QC, numune ve blank</h3>
+   <div style="overflow:auto"><table><tr><th>Vial</th><th>y (oran)</th><th>Soru</th><th>Yanıt</th></tr>
+    <tr><td>QC-0,25</td><td class="mono">${fmt(KS.qc.y,3)}</td><td>Derişim (g/L)</td><td><input data-k="qx" class="${ck('qx',qx,.003)}" value="${K.qx!=null?String(K.qx).replace('.',','):''}"></td></tr>
+    <tr><td></td><td></td><td>Sapma (%) = (ölçülen − 0,25) / 0,25 × 100</td><td><input data-k="qs" class="${ck('qs',qs,.6)}" value="${K.qs!=null?String(K.qs).replace('.',','):''}"></td></tr>
+    <tr><td></td><td></td><td>Karar</td><td><div class="sel" data-s="qk" style="justify-content:flex-end"><button data-v="kabul" class="${K.qk==='kabul'?'sec':''}">Kabul</button><button data-v="red" class="${K.qk==='red'?'sec':''}">Red</button></div></td></tr>
+    <tr><td>NUMUNE-01</td><td class="mono">${fmt(KS.n1.y,3)}</td><td>Kan etanol (g/L)</td><td><input data-k="n1" class="${ck('n1',n1,.003)}" value="${K.n1!=null?String(K.n1).replace('.',','):''}"></td></tr>
+    <tr><td>NUMUNE-02</td><td class="mono">${fmt(KS.n2.y,3)}</td><td>Ne yaparsın?</td><td><div class="sel" data-s="n2" style="justify-content:flex-end"><button data-v="rapor" class="${K.n2==='rapor'?'sec':''}">Sonucu raporla</button><button data-v="seyrelt" class="${K.n2==='seyrelt'?'sec':''}">Seyrelt, tekrar çalış</button></div></td></tr>
+    <tr><td>BLANK</td><td class="mono">${fmt(KS.bl.y,4)}</td><td>Nasıl yorumlanır?</td><td><div class="sel" data-s="bl" style="justify-content:flex-end"><button data-v="loq" class="${K.bl==='loq'?'sec':''}">&lt; 0,01 g/L (en düşük kalibratörün altında)</button><button data-v="poz" class="${K.bl==='poz'?'sec':''}">Kontaminasyon var</button></div></td></tr></table></div>
+   <div id="fbk" style="display:grid;gap:6px">${[
+     K.qk?`<div class="fb ${K.qk==='kabul'&&ck('qx',qx,.003)==='ok'?'ok':'no'}">QC: x = (${fmt(KS.qc.y,3)} − ${fmt(F.a,4)}) / ${fmt(F.b,4)} = <b>${fmt(qx,3)} g/L</b>, sapma <b>${fmt(qs,1)} %</b> → ±%15 içinde, <b>kabul</b>.</div>`:'',
+     K.n1!=null?`<div class="fb ${ck('n1',n1,.003)}">NUMUNE-01: <b>${fmt(n1,3)} g/L</b> (≈ ${fmt(n1,2)} promil). Aralık içinde; raporlanabilir.</div>`:'',
+     K.n2?`<div class="fb ${K.n2==='seyrelt'?'ok':'no'}">NUMUNE-02: x = ${fmt(xq(KS.n2.y),3)} g/L, en yüksek kalibratör 0,5 g/L’nin üstünde. Ekstrapolasyon yapılmaz: numune boş kanla seyreltilip (ör. 1:2) yeniden çalışılır, sonuç seyreltme faktörüyle çarpılır.</div>`:'',
+     K.bl?`<div class="fb ${K.bl==='loq'?'ok':'no'}">BLANK: oran ${fmt(KS.bl.y,4)}; en düşük kalibratörün oranı ${fmt(YY[0],4)}. Bu, 0,01 g/L’nin çok altında (≈ ${fmt(Math.max(0,xq(KS.bl.y)),4)} g/L): blank temiz kabul edilir.</div>`:''].join('')}</div>`:''}
+  <div class="box" style="grid-template-columns:auto 1fr auto;align-items:center"><div class="skor">%${puan}</div><p>${p.filter(Boolean).length}/${p.length} görev doğru. Adımı tamamlamak için en az %75.</p>
+   <div class="row">${v?`<span class="st ok">✓ Tamamlandı · %${v.puan}</span><a class="bt p" href="#analiz">Sonraki: HS-GC-MS ›</a>`:`<button class="bt p" id="tam" ${puan>=75?'':'disabled'}>✓ Adımı tamamla</button>`}</div></div></div>`;
+  $('#main').querySelectorAll('input[data-k]').forEach(i=>i.onchange=()=>{const x=num(i.value);if(isNaN(x)){delete K[i.dataset.k]}else K[i.dataset.k]=+x.toFixed(5);kay();draw()});
+  $('#main').querySelectorAll('.sel').forEach(s=>s.onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;K[s.dataset.s]=b.dataset.v;kay();draw()});
+  const t=$('#tam');if(t)t.onclick=()=>{T.tamamla(m,a.id,{puan});git()}};
+ draw()}
+function grafik(){const W=460,H=280,L=46,B=34,R=12,Tp=12,xm=.55,ym=2.2,X=x=>L+(W-L-R)*x/xm,Y=y=>H-B-(H-B-Tp)*y/ym;let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Kalibrasyon eğrisi">`;
+ for(let i=0;i<=5;i++){const y=i*.4;s+=`<line x1="${L}" x2="${W-R}" y1="${Y(y)}" y2="${Y(y)}" stroke="#22323A"/><text x="${L-6}" y="${Y(y)+4}" fill="#9BB0B6" font-size="11" text-anchor="end">${fmt(y,1)}</text>`}
+ [0,.1,.2,.3,.4,.5].forEach(x=>s+=`<text x="${X(x)}" y="${H-B+16}" fill="#9BB0B6" font-size="11" text-anchor="middle">${fmt(x,1)}</text>`);
+ s+=`<text x="${(L+W)/2}" y="${H-4}" fill="#9BB0B6" font-size="11" text-anchor="middle">Etanol (g/L)</text><text x="12" y="${H/2}" fill="#9BB0B6" font-size="11" transform="rotate(-90 12 ${H/2})" text-anchor="middle">EtOH / n-PrOH</text>`;
+ s+=`<rect x="${X(.5)}" y="${Tp}" width="${X(xm)-X(.5)}" height="${H-B-Tp}" fill="#E5484D" opacity=".08"/>`;
+ s+=`<line x1="${X(0)}" y1="${Y(F.a)}" x2="${X(xm)}" y2="${Y(F.a+F.b*xm)}" stroke="#2BD9C0" stroke-width="2"/>`;
+ LV.forEach((x,i)=>s+=`<circle cx="${X(x)}" cy="${Y(YY[i])}" r="4.5" fill="#7CF2D8" stroke="#0E1518" stroke-width="1.5"/>`);
+ s+=`<text x="${L+8}" y="${Tp+14}" fill="#EAF2F3" font-size="12" font-family="IBM Plex Mono,monospace">y = ${fmt(F.b,3)}x + ${fmt(F.a,4)} · R² = ${fmt(F.r2,4)}</text></svg>`;return s}
+
+/* ---------------- final + rapor ---------------- */
+function final(a){const P=T.ilerleme(m),eksik=M.adimlar.filter(x=>x.id!=='final'&&!T.bitti(m,x.id));
+ say(eksik.length?`Final testini istediğin zaman çözebilirsin; ama eğitim raporunda <b>${eksik.length} eksik adım</b> görünecek.`:'Bütün adımları tamamladın. Final testini çöz; geçme notu <b>%70</b>. Sonra raporunu yazdır.');
+ const s=T.oku(),d=s.mod[m];
+ test(a,karis(FIN),'finTest','Final testi ve eğitim raporu',`${eksik.length?`<div class="fb no">Eksik adımlar: ${eksik.map(x=>`<a href="#${x.id}">${x.ad}</a>`).join(', ')}</div>`:''}<p>12 soru · geçme notu %70.</p>`,70);
+ rapor()}
+function rapor(){const s=T.oku(),d=s.mod[m],P=T.ilerleme(m),on=d.onTest,fi=d.finTest,ka=veri('kalib');
+ let prep=null;try{prep=JSON.parse(localStorage.getItem('toksilab_prep_v1')||'null')}catch(e){}
+ const vl=prep&&prep.t>d.bas?Object.values(prep.vials):null;
+ const gec=fi&&fi.puan>=70&&P.n===P.top;
+ $('#ek').innerHTML=`<div class="card" style="margin-top:12px"><div class="row noprint" style="justify-content:space-between"><h3>Eğitim raporu</h3><div class="row">
+   <input class="inp" id="ad" placeholder="Ad Soyad" value="${(d.ad||'').replace(/"/g,'&quot;')}" style="width:200px;text-align:left"><button class="bt p" id="yaz">🖨 Yazdır / PDF</button></div></div>
+  <div class="rapor"><div style="display:flex;justify-content:space-between;align-items:start;gap:10px"><div><div style="font:600 11px var(--f-mono);letter-spacing:.1em;color:#1F9A97">MY TOKSİLAB · EĞİTİM RAPORU</div><h2>${M.ad}</h2>
+    <div style="font-size:14px">Katılımcı: <b id="adR">${d.ad||'—'}</b> · Başlangıç: ${tarih(d.bas)} · Rapor: ${tarih(Date.now())}</div></div>
+    <div style="font:700 22px var(--f-display);${gec?'color:#1E8E4A':'color:#C62828'}">${gec?'BAŞARILI':'TAMAMLANMADI'}</div></div>
+   <div class="kv"><div>İlerleme<b>%${P.yuzde}</b></div><div>Ön test<b>${on?'%'+on.puan:'—'}</b></div><div>Final testi<b>${fi?'%'+fi.puan:'—'}</b></div><div>Kalibrasyon hesabı<b>${ka?'%'+ka.puan:'—'}</b></div></div>
+   <h3>Adımlar</h3><table><tr><th>#</th><th>Adım</th><th>Yer</th><th>Durum</th><th>Tarih</th></tr>
+    ${M.adimlar.map((x,i)=>{const v=veri(x.id);return `<tr><td>${i+1}</td><td>${x.ad}</td><td>${x.sayfa.split(/[?#]/)[0]}</td><td>${v?(v.oto?'✓ otomatik':v.puan!=null?'✓ %'+v.puan:'✓'):'—'}</td><td>${v?tarih(v.t):''}</td></tr>`}).join('')}</table>
+   ${vl?`<h3>Hazırlanan vialler (${vl.length})</h3><table><tr><th>Vial</th><th>Bulgu</th></tr>${vl.map(x=>`<tr><td>${x.id}</td><td style="text-align:left">${x.notes&&x.notes.length?'<span class="kal">'+x.notes.join(' · ')+'</span>':'<span class="gec">SOP’a uygun</span>'}</td></tr>`).join('')}</table>`:''}
+   ${on&&fi?`<p style="font-size:13.5px">Ön test → final: <b>%${on.puan} → %${fi.puan}</b> (${fi.puan-on.puan>=0?'+':''}${fi.puan-on.puan} puan).</p>`:''}
+   <div class="imza"><div>Katılımcı imza</div><div>Eğitici · Uzm. MY</div></div></div></div>`;
+ $('#ad').oninput=e=>{const s2=T.oku();s2.mod[m].ad=e.target.value;T.yaz(s2);$('#adR').textContent=e.target.value||'—'};
+ $('#yaz').onclick=()=>window.print()}
+
+git();
+</script>
+</body>
+</html>
