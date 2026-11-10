@@ -50,7 +50,7 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 .hero .k{font:600 12px var(--f-mono);letter-spacing:.24em;color:var(--mint)}
 .hero h1{font:700 clamp(38px,6vw,72px)/1 var(--f-display);letter-spacing:.01em}.hero h1 i{font-style:normal;color:var(--teal)}
 .hero p{font-size:clamp(15px,1.7vw,18px);color:#C9D7DB;max-width:720px;line-height:1.5}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .mc{position:relative;text-align:left;display:grid;gap:10px;align-content:start;padding:20px 18px 18px;border-radius:20px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);min-height:250px;overflow:hidden;
  opacity:0;transform:translateY(24px);transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s;text-decoration:none}
 #app.on .mc{animation:kart .7s cubic-bezier(.2,.8,.2,1) forwards}#app.on .mc:nth-child(2){animation-delay:.08s}#app.on .mc:nth-child(3){animation-delay:.16s}#app.on .mc:nth-child(4){animation-delay:.24s}
@@ -90,14 +90,15 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 .subs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
 .subs a,.subs span{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;font-size:13.5px;font-weight:600;text-decoration:none;background:rgba(255,255,255,.04);color:#DCE7EA;border:1px solid transparent}
 .subs a:hover{border-color:rgba(43,217,192,.5);background:rgba(43,217,192,.08)}
-.subs span{color:#7F959B}.subs i{font-style:normal;font:700 10px var(--f-mono);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#33444C;color:#EAF2F3;flex:none}
+.subs span{color:#C9D7DB;cursor:default}
+.basla{display:block;text-align:center;padding:9px 12px;border-radius:11px;font:700 14px var(--f-body);text-decoration:none;color:#062126;background:linear-gradient(90deg,var(--teal),var(--mint));transition:filter .2s}.basla:hover{filter:brightness(1.08)}.basla.yok{background:rgba(255,255,255,.05);color:#7F959B;cursor:default}.subs i{font-style:normal;font:700 10px var(--f-mono);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#33444C;color:#EAF2F3;flex:none}
 .subs a.ok i{background:var(--ok);color:#062126}
 .prog{height:6px;border-radius:9px;background:#22323A;overflow:hidden}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--mint))}
 .devs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
 .devs a{display:grid;gap:4px;padding:14px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid var(--line);text-decoration:none}
 .devs a:hover{border-color:rgba(43,217,192,.55)}.devs a b{font:700 19px var(--f-display)}.devs a small{font:600 10.5px var(--f-mono);color:var(--mint)}.devs a span{font-size:13px;color:#B7C8CD;line-height:1.4}
 .how{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.how div{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:14px;padding:14px;font-size:14.5px;line-height:1.5;color:#C9D7DB}.how b{display:block;font:700 19px var(--f-display);color:var(--mint);margin-bottom:4px}
-@media (max-width:980px){.cards{grid-template-columns:1fr 1fr}}
+@media (max-width:980px){.cards{grid-template-columns:1fr}}
 @media (max-width:700px){.top{flex-wrap:wrap;padding:12px 16px}.brand small{display:none}.brand b{font-size:22px}.brand svg{width:38px;height:38px}.tnav{width:100%;flex-wrap:nowrap;overflow-x:auto;gap:2px}.tnav button{font-size:13px;padding:7px 10px;white-space:nowrap}.cards{grid-template-columns:1fr}.mc{min-height:0}.pb{grid-template-columns:1fr}.cats{grid-auto-flow:column;grid-auto-columns:max-content;border-right:0;border-bottom:1px solid var(--line);overflow-x:auto}.how{grid-template-columns:1fr}.tnav .hm{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -124,13 +125,13 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
  <div class="top">
   <a class="brand" href="#" id="logoTop"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="none" stroke="#2BD9C0" stroke-width="10"/><text x="100" y="120" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="64" fill="#fff">MY</text></svg>
    <div><b>MY_<i>ToksiLab</i></b><small>ADLİ TOKSİKOLOJİ EĞİTİM LABORATUVARI</small></div></a>
-  <nav class="tnav"><button data-p="nasil" class="hm">Nasıl kullanılır?</button><button data-p="egitim">Eğitimler</button><button data-p="cihaz">Cihazlar</button><button id="perf" title="Zayıf ekran kartlarında akıcılık için">⚡ Performans</button></nav>
+  <nav class="tnav"><button data-p="nasil" class="hm">Nasıl kullanılır?</button><button data-p="egitim">Eğitimler</button><button id="perf" title="Zayıf ekran kartlarında akıcılık için">⚡ Performans</button></nav>
  </div>
  <div class="wrap">
   <section class="hero"><div class="k">HOŞ GELDİN</div><h1>Ne yapmak <i>istersin?</i></h1>
    <p>Laboratuvarı gezerek tanıyabilir, bir beceriyi tek başına çalışabilir ya da bir analizi numuneden rapora kadar baştan sona yürütebilirsin.</p></section>
   <div class="cards">
-   <a class="mc ana" href="lab_giris.html?mod=tani"><div class="ic">🏛️</div><h2>Laboratuvarı Tanı</h2>
+   <a class="mc ana" href="lab_giris.html?mod=tani&v=20261111"><div class="ic">🏛️</div><h2>Laboratuvarı Tanı</h2>
     <p>Koridoru ve odaları gez; cihazları, tezgâhları ve gaz hatlarını yerinde gör. Bir cihaza tıklayınca kısa bilgi kartı açılır.</p>
     <div class="chips"><span>Kromatografi</span><span>Örnek Hazırlama</span><span>İnorganik</span><span>Kimyasal depo</span><span>Gaz tüp</span><span>Yangın</span></div>
     <div class="go">Tura başla ›</div></a>
@@ -138,16 +139,12 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
     <p>Temel becerilerden (terazi, pipet) cihaz kullanımına ve kanda alkol gibi baştan sona analiz modüllerine.</p>
     <div class="chips"><span>Beceriler</span><span>Kalibrasyon</span><span>HS-GC-MS</span><span>Analiz modülleri</span></div>
     <div class="go">Eğitimi seç ›</div></button>
-   <button class="mc" data-p="cihaz" style="--c:rgba(242,182,50,.2)"><div class="ic">🔬</div><h2>Serbest Çalışma</h2>
-    <p>Bir cihazı görev sırası olmadan dilediğin gibi kullan: terazi, pipet, vorteks, santrifüj, SPE, HS-GC-MS…</p>
-    <div class="chips"><span>11 simülatör</span></div>
-    <div class="go">Cihazı seç ›</div></button>
    <a class="mc" href="vakalar.html" style="--c:rgba(229,72,77,.2)"><div class="ic">🕵️</div><h2>Adli Vakalar</h2>
     <p>Vaka dosyasını incele, doğru analizi seç, sonucu yorumla. Öğrendiklerini gerçekçi senaryolarda dene.</p>
     <div class="chips"><span>Vaka oyunu</span></div>
     <div class="go">Vakalara git ›</div></a>
   </div>
-  <div class="stats"><div><b>6</b>oda</div><div><b>11</b>cihaz simülatörü</div><div><b id="stM">1</b>tam analiz modülü</div><div><b>ALKOL2.M</b>gerçek yöntem verisi</div></div>
+  <div class="stats"><div><b>6</b>oda</div><div><b>11</b>cihaz simülatörü</div><div><b id="stM">1</b>tam analiz modülü</div></div>
   <button class="replay" id="replay">▶ Tanıtımı tekrar oynat</button>
  </div>
 </div>
@@ -179,7 +176,7 @@ const ch=$('#chrom'),cx=ch.getContext('2d');let CW,CH;
 function chSize(){CW=innerWidth;CH=innerHeight;ch.width=CW*DPR;ch.height=CH*DPR;ch.style.width=CW+'px';ch.style.height=CH+'px';cx.setTransform(DPR,0,0,DPR,0,0)}chSize();
 if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()};
 /* ---------- 4 sahne: HS-GC-MS · GC-MS · LC-MS/MS · ICP-MS ---------- */
-const SD=1900,S0=300,SAHNE=4,LOGO_T=S0+SAHNE*SD;/* her sahne 1,9 s; sonra logo */
+const SD=2700,S0=400,SAHNE=4,LOGO_T=S0+SAHNE*SD;/* her sahne 2,7 s; sonra logo */
 const MONO='600 12px "IBM Plex Mono",ui-monospace,monospace';
 const ease=x=>x<0?0:x>1?1:1-Math.pow(1-x,3);
 function etiket(txt,alt,a){cx.globalAlpha=a;cx.textAlign='center';cx.fillStyle='#7CF2D8';cx.font='600 13px "IBM Plex Mono",ui-monospace,monospace';
@@ -243,7 +240,7 @@ const HSH=location.hash.slice(1);if(HSH)history.replaceState(null,'',location.pa
 if(gecildi||RM||HSH){introOn=false;$('#intro').classList.add('bitti');$('#app').classList.add('on');bgA=1}else{introBasla()}
 function loop(now){
  if(introOn){const t=now-T0;bgA=Math.min(1,t/1800);chDraw(t);
-  if(phase<2&&t>LOGO_T)setPhase(2);if(phase<3&&t>LOGO_T+1100)setPhase(3);if(phase<4&&t>LOGO_T+1900)setPhase(4);if(t>LOGO_T+4300)introBitir()}
+  if(phase<2&&t>LOGO_T)setPhase(2);if(phase<3&&t>LOGO_T+1400)setPhase(3);if(phase<4&&t>LOGO_T+2500)setPhase(4);if(t>LOGO_T+5600)introBitir()}
  else{bgA+=(.75-bgA)*.03;cx.clearRect(0,0,CW,CH)}
  bgDraw();requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
@@ -256,7 +253,7 @@ pb_.onclick=()=>{PERF=!PERF;try{localStorage.setItem('toksilab_perf',PERF?'1':'0
 const H=(ad,url)=>({ad,url});
 const KAT=[
  {id:'beceri',ic:'🧤',ad:'Temel beceriler',acik:'Her analizin temelindeki el becerileri ve güvenlik.',it:[
-  {ic:'🥼',ad:'KKD ve laboratuvar güvenliği',d:'Önlük, nitril eldiven, gözlük; kan ve çözücülerle güvenli çalışma.',dr:'h',s:[H('KKD seçimi','egitim.html?m=etanol#kkd'),H('Laboratuvar turu','lab_giris.html')]},
+  {ic:'🥼',ad:'KKD ve laboratuvar güvenliği',d:'Önlük, nitril eldiven, gözlük; kan ve çözücülerle güvenli çalışma.',dr:'h',s:[H('Doğru KKD seçimi'),H('Kan ve çözücülerle güvenli çalışma'),H('Dökülme ve atık')]},
   {ic:'⚖️',ad:'Analitik terazi',d:'Seviye, iç kalibrasyon, dara, mg düzeyinde tartım.',dr:'h',s:[H('Parçaları tanı','terazi_pilot.html?gorev=parts'),H('Seviye ve iç kalibrasyon','terazi_pilot.html?gorev=level'),H('10,00 mg standart tartımı','terazi_pilot.html?gorev=w10'),H('Plastik kayıkla 5,00 mg','terazi_pilot.html?gorev=w5'),H('Serbest tartım','terazi_pilot.html?gorev=free')]},
   {ic:'💧',ad:'Otomatik pipet',d:'Doğru pipet seçimi, ileri ve ters pipetleme.',dr:'h',s:[H('Parçaları tanı','pipet_pilot.html?gorev=parts'),H('150 µL su aktarımı','pipet_pilot.html?gorev=su'),H('200 µL kan: ters pipetleme','pipet_pilot.html?gorev=kan'),H('5 µL ara stok','pipet_pilot.html?gorev=stok'),H('Organik çözücü (DCM)','pipet_pilot.html?gorev=dcm')]},
   {ic:'🌀',ad:'Vorteks',d:'Karıştırma modları, hız ve süre.',dr:'h',s:[H('Parçaları tanı','vorteks_pilot.html?gorev=parts'),H('HS vialini karıştır (TOUCH)','vorteks_pilot.html?gorev=hs'),H('Sıvı-sıvı ekstraksiyon','vorteks_pilot.html?gorev=lle'),H('Serbest kullanım','vorteks_pilot.html?gorev=free')]},
@@ -283,6 +280,10 @@ const KAT=[
   {ic:'💇',ad:'Saçta toksik element (ICP-MS)',d:'Asit yakma ve ICP-MS ölçümü.',dr:'y',s:[]}]}];
 const CIHAZ=[['⚖️','Analitik terazi','terazi_pilot.html','Oda 2','Mikroterazi, 1 µg okunabilirlik'],['💧','Otomatik pipet','pipet_pilot.html','Oda 2','P10 · P200 · P1000'],['🌀','Vorteks','vorteks_pilot.html','Oda 2','Orbital karıştırıcı'],['🔄','Santrifüj','santrifuj_pilot.html','Oda 2','Dengeleme ve rotor'],['🫧','Ultrasonik banyo','ultra_pilot.html','Oda 2','Çözme, gaz giderme'],['🚰','Ultra saf su','su_pilot.html','Oda 2','Tip I su sistemi'],['🧮','Kalibrasyon masası','kalibrasyon_pilot.html','Oda 2','Seyreltme hesapları'],['🧪','Örnek hazırlama','ornek_hazirlama.html','Oda 2','Kanda alkol çözeltileri, 12 vial'],['🧫','SPE · CEREX 48','spe_pilot.html','Oda 2','Basınçlı manifold, Oasis HLB'],['🔥','HS-GC-MS','hsgcms_pilot.html','Oda 1','Gerçek fotoğraflı, ALKOL2.M'],['🛢️','Gaz tüp odası','gaz_pilot.html','Oda 5','N₂, Ar, He hatları']];
 const BD={h:['HAZIR','h'],y:['YAKINDA','y'],k:['KISMEN','k']};
+/* her konunun "Başla" adresi; alt maddeler yalnızca bilgi */
+const GO={'KKD ve laboratuvar güvenliği':'egitim.html?m=etanol#kkd','Analitik terazi':'terazi_pilot.html','Otomatik pipet':'pipet_pilot.html','Vorteks':'vorteks_pilot.html','Santrifüj':'santrifuj_pilot.html','Ultrasonik banyo':'ultra_pilot.html','Ultra saf su':'su_pilot.html',
+ 'Kalibrasyon çözeltisi hazırlama':'kalibrasyon_pilot.html','Stok ve ara stok hazırlama':'ornek_hazirlama.html','Kalibrasyon eğrisi oluşturma':'egitim.html?m=etanol#kalib','Headspace vial hazırlama':'ornek_hazirlama.html','Katı faz ekstraksiyonu (SPE)':'spe_pilot.html',
+ 'HS-GC-MS':'hsgcms_pilot.html','Kanda alkol analizi (HS-GC-MS)':'egitim.html?m=etanol','Atık suda SPE':'spe_pilot.html'};
 
 function panelAc(tur,kat){const P=$('#pn');P.classList.add('on');P.setAttribute('aria-hidden','false');$('#ov').classList.add('on');
  if(tur==='egitim'){$('#pnK').textContent='EĞİTİM KATALOĞU';$('#pnT').textContent='Eğitimler';egitimCiz(kat||'beceri')}
@@ -293,7 +294,7 @@ function panelAc(tur,kat){const P=$('#pn');P.classList.add('on');P.setAttribute(
    <div><b>🏛️ Laboratuvarı Tanı</b>Önce bir tur at: hangi oda nerede, hangi cihaz hangi tezgâhta. Cihaza tıklayınca kısa bilgi kartı açılır; simülatör açılmaz.</div>
    <div><b>🎓 Eğitimler</b>Kategoriden bir konu seç. Her konunun alt basamakları var; istediğin basamaktan başlayabilirsin.</div>
    <div><b>🎯 Analiz modülleri</b>Baştan sona bir analiz: üstte ince bir eğitim çubuğu adımını ve ilerlemeni gösterir; sonunda final testi ve rapor.</div>
-   <div><b>🔬 Serbest çalışma</b>Bir cihazı görev sırası olmadan kullan. İlerleme bu tarayıcıda saklanır.</div>
+   <div><b>💾 İlerleme</b>Eğitimlerdeki ilerlemen bu tarayıcıda saklanır; aynı cihazdan kaldığın yerden devam edersin.</div>
    <div><b>⌨️ Kontroller</b>3B sahnede sürükle: bak · W A S D: yürü · tekerlek: yakınlaş. Telefonda dokun ve kaydır.</div>
    <div><b>⚡ Performans</b>Ekran takılıyorsa üstteki Performans modunu aç: gölgeler kapanır, akıcılık artar.</div></div></div>`}}
 function egitimCiz(aktif){const s=T?T.oku():{};
@@ -302,14 +303,14 @@ function egitimCiz(aktif){const s=T?T.oku():{};
  $('#L').innerHTML=`<div class="ch">${k.ic} ${k.ad}</div><div class="cd">${k.acik}</div>`+k.it.map(it=>{let pr='';
   if(it.modul&&T){const P=T.ilerleme(it.modul);pr=`<div class="prog" title="%${P.yuzde}"><i style="width:${P.yuzde}%"></i></div>`}
   return `<div class="it"><div class="h"><div class="i">${it.ic}</div><div><b>${it.ad}</b><p>${it.d}</p></div><span class="bd ${BD[it.dr][1]}">${BD[it.dr][0]}</span></div>${pr}
-   ${it.s.length?`<div class="subs">${it.s.map((x,i)=>x.url?`<a href="${x.url}"><i>${i+1}</i>${x.ad}</a>`:`<span><i>${i+1}</i>${x.ad}</span>`).join('')}</div>`:''}
-   ${it.modul?`<div><a class="bd h" style="text-decoration:none;display:inline-block;padding:8px 14px;font-size:12px" href="egitim.html?m=${it.modul}">Modülü baştan sona aç ›</a></div>`:''}</div>`}).join('');
+   ${it.s.length?`<div class="subs">${it.s.map((x,i)=>`<span><i>${i+1}</i>${x.ad}</span>`).join('')}</div>`:''}
+   ${GO[it.ad]&&it.dr!=='y'?`<a class="basla" href="${GO[it.ad]}">Başla ›</a>`:`<span class="basla yok">Hazırlanıyor</span>`}</div>`}).join('');
  $('#pb').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>egitimCiz(b.dataset.k))}
 function panelKapat(){$('#pn').classList.remove('on');$('#pn').setAttribute('aria-hidden','true');$('#ov').classList.remove('on')}
 document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>panelAc(b.dataset.p));
 $('#pnX').onclick=panelKapat;$('#ov').onclick=panelKapat;addEventListener('keydown',e=>{if(e.key==='Escape'&&!introOn)panelKapat()});
 window.__G={panelAc,introBitir,introBasla};
-if(['egitim','cihaz','nasil'].includes(HSH))setTimeout(()=>panelAc(HSH),350);
+if(['egitim','nasil'].includes(HSH))setTimeout(()=>panelAc(HSH),350);
 </script>
 </body>
 </html>

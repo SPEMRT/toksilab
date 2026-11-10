@@ -5,6 +5,8 @@
 'use strict';
 var BASE=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';
 var URL_=BASE+'index.html#menu';
+/* başlıktaki "‹ Laboratuvar" bağlantısı gizlenir (sol menüde Laboratuvar düğmesi zaten var) */
+function gizle(){var l=document.getElementById('hLab');if(l)l.style.display='none'}
 function ekle(){
  if(document.getElementById('mAnaMenu'))return;
  var home=document.getElementById('mHome');
@@ -12,11 +14,11 @@ function ekle(){
  if(home&&home.tagName==='BUTTON'&&home.parentNode&&/snav/.test(home.parentNode.className)){
   var b=document.createElement('button');b.id='mAnaMenu';b.title='Ana menüye dön (Laboratuvarı tanı · Eğitimler · Cihazlar)';
   b.innerHTML='<span>☷</span>Ana menü';b.onclick=function(){location.href=URL_};
-  home.parentNode.insertBefore(b,home);return}
+  home.parentNode.insertBefore(b,home);gizle();return}
  /* 2) başlıktaki "‹ Laboratuvar" bağlantısı (HS-GC-MS, SPE, kalibrasyon) */
  var lab=document.getElementById('hLab');
  if(lab){var a=document.createElement('a');a.id='mAnaMenu';a.href=URL_;a.className=lab.className;a.textContent='‹ Ana menü';a.title='Ana menüye dön';
-  a.style.marginRight='14px';lab.parentNode.insertBefore(a,lab);return}
+  lab.parentNode.insertBefore(a,lab);lab.style.display='none';return}
  /* 3) diğer sayfalar: küçük sabit düğme */
  var f=document.createElement('a');f.id='mAnaMenu';f.href=URL_;f.textContent='☷ Ana menü';
  f.style.cssText='position:fixed;z-index:50;left:12px;bottom:12px;padding:8px 14px;border-radius:999px;background:rgba(14,21,24,.9);color:#EAF2F3;border:1px solid rgba(43,217,192,.55);font:700 13px "Source Sans 3",system-ui,sans-serif;text-decoration:none;box-shadow:0 6px 16px rgba(0,0,0,.3)';
