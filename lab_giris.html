@@ -125,6 +125,9 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
 #wv{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(5,10,12,.45);backdrop-filter:blur(7px) saturate(.8);-webkit-backdrop-filter:blur(7px) saturate(.8);opacity:0;transition:opacity .6s ease}#wv.on{opacity:1}#wv[hidden]{display:none!important}#wv:not(.on){pointer-events:none}#wv .wvb{width:min(620px,56vw);display:grid;gap:8px;transform:translateY(-6vh)}#wv video{width:100%;aspect-ratio:16/9;border-radius:14px;background:#000;box-shadow:0 18px 50px rgba(0,0,0,.45);outline:3px solid rgba(43,217,192,.55);outline-offset:3px}#wv .wvc{display:flex;gap:8px;align-items:center;flex-wrap:wrap}#wv .wvt{font:600 11px var(--f-mono);letter-spacing:.14em;color:#9FE9DC;text-transform:uppercase}#wv .wvo{display:flex;align-items:center;gap:6px;font:600 12.5px var(--f-body);color:#C9D7DB;cursor:pointer}#wv .wvo input{accent-color:#2BD9C0}#wv video::cue{font:600 17px var(--f-body);color:#fff;background:rgba(14,21,24,.78)}.vidb{position:fixed;z-index:7;left:262px;bottom:14px;border:0;border-radius:12px;padding:11px 14px;font-weight:700;font-size:14px;color:#062126;background:linear-gradient(90deg,#2BD9C0,#7CF2D8);box-shadow:0 6px 16px rgba(0,0,0,.3)}.vidb[hidden]{display:none}@media (max-width:760px){#wv .wvb{width:92vw;transform:none}}@media (max-width:900px){.vidb{left:150px;bottom:auto;top:60px;padding:9px 12px}}#wv button{border:0;border-radius:10px;padding:9px 16px;font:700 15px var(--f-body);color:#062126;background:linear-gradient(90deg,#2BD9C0,#7CF2D8)}#wv #wvS{background:rgba(255,255,255,.12);color:#fff}
 #intro.out{opacity:0;transform:scale(1.15);pointer-events:none}
 .room .tani{background:#16302C;border:1px solid #2B6B63;border-radius:10px;padding:9px 11px;font-size:13.5px;line-height:1.45;color:#CFEDE7}.room .tani a{color:#7CF2D8;font-weight:700}
+body.odada .mentor{display:none!important}body.odada #mIntro{display:none}
+.snav2 button.dikkat{box-shadow:0 0 0 2px rgba(229,72,77,.7),0 0 14px rgba(229,72,77,.45);background:#3A2328;animation:dikkat 2.6s ease-in-out infinite}
+@keyframes dikkat{50%{box-shadow:0 0 0 2px rgba(229,72,77,.35),0 0 4px rgba(229,72,77,.2)}}
 .ihome{color:#9FE9DC;font:600 14px var(--f-body);text-decoration:underline;text-underline-offset:3px;opacity:.85}.ihome:hover{opacity:1}
 .ibox{display:grid;justify-items:center;gap:14px;text-align:center;padding:20px}
 .ilogo{width:170px;height:170px}.ilogo circle.r1{stroke-dasharray:500;stroke-dashoffset:500;animation:draw 1.6s .2s ease forwards}.ilogo circle.r2{stroke-dasharray:420;stroke-dashoffset:420;animation:draw 1.6s .6s ease forwards}
@@ -151,7 +154,7 @@ body.fps #gmode{background:rgba(14,21,24,.8);color:#EAF2F3}body.fps .moves,body.
 #joy i{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:rgba(43,217,192,.85);box-shadow:0 4px 12px rgba(0,0,0,.35)}
 @media (pointer:coarse){#gmode{display:none}#joy{display:block}.moves{display:none!important}}
 </style>
-<nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mMap" class="on"><span>▦</span>Harita</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button><button id="mEgt" title="Eğitim modülleri"><span>🎓</span>Eğitimler</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
+<nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
 <div id="wv" hidden><div class="wvb"><div class="wvt" id="wvT"></div><video id="wvV" playsinline preload="none" crossorigin="anonymous"></video><div class="wvc"><button id="wvS" aria-label="Sesi aç/kapat">🔊</button><label class="wvo"><input type="checkbox" id="wvO"> Tanıtım videolarını otomatik oynatma</label><span style="flex:1"></span><button id="wvX">Geç ›</button></div></div></div>
 <div class="hdr2"><b>MY_<i>ToksiLab</i></b><span class="pill">LABORATUVAR GİRİŞİ · 3B</span></div>
 <div id="cv3"></div>
@@ -842,8 +845,11 @@ new ResizeObserver(fit).observe(box);fit();
 $('#enter').onclick=enter;
 function enter(){if(started)return;started=true;$('#intro').classList.add('out');vidIlk('giris',enter2)}
 function enter2(){say('Ana girişin önündeyiz. Kapının üstündeki <b>sensör</b> yaklaştığımızı algılayınca kapılar kendiliğinden açılır…');goStop('door');
- const cont=()=>{if(TEAM_ON)startGreet();else{teamMode='home';say('Koridordayız. Sağ tarafta <b>1 Kromatografi</b>, <b>2 Örnek Hazırlama</b>, <b>3 İnorganik Analiz</b>, <b>4 Kimyasal Depo</b> ve en sonda <b>5 Gaz Tüp Odası</b>; sol tarafta, Örnek Hazırlama’nın karşısındaki küçük koridorun sonunda <b>6 Yangın ve Patlayıcı Analiz Laboratuvarı</b> var. Sol duvarda <b>poster sunumlarımız</b> var. Bir kapıya yaklaşıp dokunursan odanın tanıtımını görürsün.')}drawMap()};
+ const cont=()=>{if(TEAM_ON)startGreet();else{teamMode='home';say('Koridordayız. Sağ tarafta <b>1 Kromatografi</b>, <b>2 Örnek Hazırlama</b>, <b>3 İnorganik Analiz</b>, <b>4 Kimyasal Depo</b> ve en sonda <b>5 Gaz Tüp Odası</b>; sol tarafta, Örnek Hazırlama’nın karşısındaki küçük koridorun sonunda <b>6 Yangın ve Patlayıcı Analiz Laboratuvarı</b> var. Sol duvarda <b>poster sunumlarımız</b> var. Bir kapıya dokunursan içeri girersin.')}drawMap()};
  setTimeout(()=>{goStop('hall');inside=true;setTimeout(cont,1000)},4600)}
+/* sol menü vurgusu: ana kapıdan girince Karşılama, odadayken Ana Sayfa */
+function menuDurum(){const v=$('#mVid'),h=$('#mHome');if(v)v.classList.toggle('dikkat',!!inside);if(h)h.classList.toggle('dikkat',!!inRoom)}
+setInterval(()=>{try{menuDurum()}catch(e){}},600);
 /* ---- tanıtım videoları: laboratuvar girişi ve oda girişleri (dosya yoksa atlanır) ---- */
 const VID={giris:{f:'lab_giris',t:'Laboratuvar girişi · tanıtım'},oda2:{f:'oda2',t:'Örnek Hazırlama Laboratuvarı · tanıtım'}};
 const vidOto=()=>{try{return localStorage.getItem('toksilab_video_oto')!=='0'}catch(e){return true}};
@@ -876,7 +882,7 @@ function moveTo(x,z){if(inRoom){if(x<2.3&&Math.abs(z-RBD[inRoom].dz)<.45){if(x<1
  if((G.x<-1.5&&x<-1.5)||(x<-1.55&&z<SZ0-.3&&z>SZ1+.3)){G.x=Math.max(SX+.45,x);G.z=Math.max(SZ1+.3,Math.min(SZ0-.3,z));return true}
  G.x=Math.max(-1.55,Math.min(1.55,x));G.z=Math.max(-28.6,Math.min(-.8,z));return true}
 let inRoom=0;
-function roomUI(){$('#back').hidden=!inRoom;const v=$('#odaVid');if(v){v.hidden=!(inRoom&&VID['oda'+inRoom]);v.onclick=()=>playVideo('oda'+inRoom)}}
+function roomUI(){document.body.classList.toggle('odada',!!inRoom);menuDurum();$('#back').hidden=!inRoom;const v=$('#odaVid');if(v){v.hidden=!(inRoom&&VID['oda'+inRoom]);v.onclick=()=>playVideo('oda'+inRoom)}}
 function openDev(k){const d=DEVI[k];const el=$('#room');el.hidden=false;el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:${inRoom===1?'#2F7DE1':'#1F9A97'}">${inRoom===1?'KROMATOGRAFİ':'ÖRNEK HAZIRLAMA'} · CİHAZ</div><h2>${d.ic} ${d.n}</h2><p>${d.d}</p><p style="font-size:13px;color:#9BB0B6;margin-bottom:-4px">${TANI?'Bu cihazla neler yapılır:':'Bu cihazdaki görevler:'}</p><ul>${d.t.map(x=>`<li>${x}</li>`).join('')}</ul>${TANI?'<div class="tani">🏛️ <b>Tanıma turundasın.</b> Bu cihazı kullanmak için ana menüden <a href="index.html#egitim">Eğitimler</a>’e geç.</div>':`${d.f?'<button class="go" id="dgo">Cihazı kullan ›</button>':'<button class="go" disabled>Cihaz simülasyonu hazırlanıyor</button>'}<p style="font-size:12.5px;color:#9BB0B6">İşin bitince cihaz sayfasındaki <b>⌂ Laboratuvar</b> düğmesi seni tekrar bu odaya, bu cihazın önüne getirir.</p>`}`;
  $('#rx').onclick=closeRoom;if($('#dgo'))$('#dgo').onclick=()=>{location.href=BASE+d.f+'?ret=r'+(inRoom||2)+'-'+k};
  const g=DEVS.find(x=>x.k===k);if(g){G.yaw=Math.atan2(-(g.x-P.x),-(g.z-P.z));G.pitch=-.35}say(`<b>${d.n}</b>. ${d.d}`)}
@@ -911,7 +917,11 @@ const joy={on:false,x:0,y:0,id:null};{const J=$('#joy'),K=J.querySelector('i');c
 function clampG(){if(inRoom)return;if(inside){G.x=Math.max(-1.55,Math.min(1.55,G.x));G.z=Math.max(-28.6,Math.min(-.8,G.z))}}
 $('#mvF').onclick=()=>step(3);$('#mvB').onclick=()=>step(-3);$('#mvL').onclick=()=>turn(Math.PI/4);$('#mvR').onclick=()=>turn(-Math.PI/4);
 /* oda kartı */
-function openDoorCard(no){const r=ROOMS[no-1];goStop('d'+no);const el=$('#room');el.hidden=false;
+function openDoorCard(no){const r=ROOMS[no-1];closeRoom();
+ if(r.st==='open'){say(`<b>${r.n}</b>: kapı açılıyor…`);enterRoom(no);return}
+ if(no===5&&!TANI){say(`<b>${r.n}</b>: içeri giriliyor…`);setTimeout(()=>{location.href=BASE+'gaz_pilot.html?ret=r5'},500);return}
+ goStop('d'+no);openRoomDoor=0;say(`<b>${r.n}</b>${r.st==='info'?': tanıma turunda bu oda dışarıdan incelenir; tavandaki borular gazları odalara taşır.':' yakında açılacak.'}`);drawMap()}
+function openDoorCardKart(no){const r=ROOMS[no-1];goStop('d'+no);const el=$('#room');el.hidden=false;
  el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:${r.c}">ODA ${r.no}</div><h2>${r.n}</h2><p>${r.d}</p><ul>${r.l.map(x=>`<li>${x}</li>`).join('')}</ul>${r.st==='open'?`${no===2?`${TANI?'<p style="font-size:13px">Odaya gir; tezgâhlardaki cihazlara tıklayınca kısa bilgi kartı açılır.</p>':`<p style="font-size:13px">Odaya girip cihazları yerinde görebilirsin. Cihazlara doğrudan da gidebilirsin:</p><div class="devs"><a href="${BASE}terazi_pilot.html" target="_blank" rel="noopener">⚖ Analitik terazi</a><a href="${BASE}pipet_pilot.html" target="_blank" rel="noopener">💧 Pipetler</a><a href="${BASE}vorteks_pilot.html" target="_blank" rel="noopener">🌀 Vorteks</a><a href="${BASE}santrifuj_pilot.html" target="_blank" rel="noopener">◎ Santrifüj</a></div>`}`:`<p style="font-size:13px">Oda kuruluyor. İlk cihaz <b>HS-GC-MS</b>: kapıdan girince sağdaki tezgahta.</p>`}<button class="go" id="rgo">Kapıyı aç ve içeri gir ›</button>`:(r.st==='info'?`<p style="font-size:13px">Tavandaki ince borular gazları odalara taşır: <b style="color:#6FD08F">N₂</b> yeşil, <b style="color:#7FB8F0">Ar-1 / Ar-2</b> mavi, <b style="color:#C08A5A">He</b> kahverengi bantla işaretli.</p>${no===5&&!TANI?'<button class="go" id="rgo">Odaya gir ve panelleri incele ›</button>':''}`:`<button class="go" disabled>Yakında açılacak</button>`)}`;
  $('#rx').onclick=closeRoom;if($('#rgo'))$('#rgo').onclick=()=>{if(no<=2)enterRoom(no);else if(no===5)location.href=BASE+'gaz_pilot.html?ret=r5'};
  say(`<b>${r.n}</b>. ${r.st==='open'?(no===1?'İçeri girince sağdaki tezgahta HS-GC-MS seni bekliyor.':'Şu an kullandığın cihazlar bu odada.'):r.st==='info'?'Gaz tüpleri burada; tavandaki borularla N₂-1, Ar-1, Ar-2, He ve N₂-2 odalara dağıtılıyor. İçeri girip regülatörleri ve manometreleri inceleyebilirsin.':'Bu oda yakında açılacak.'} Kapının yanındaki panoda odayla ilgili bilgiler var.`);drawMap()}
@@ -980,9 +990,7 @@ say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri 
  say(`Tekrar hoş geldin! <b>${RBD[no].n}</b>’ndasın, <b>${DEVI[d.k].n}</b> önünde kaldığın yerdesin. Başka bir cihaza geçebilir ya da <b>‹ Koridora dön</b> ile koridora çıkabilirsin.`)}}
 $('#mHome').onclick=()=>{location.href=BASE+'index.html#menu'};
 if(TANI){const e=$('#enter');if(e)e.textContent='Tura başla ›';const t=document.querySelector('.it3');if(t)t.innerHTML='<b>Laboratuvarı tanıma turu.</b> Koridoru ve odaları gez; cihazlara tıklayınca kısa bilgi kartı açılır. Cihazları kullanmak için ana menüdeki <b>Eğitimler</b>’e geç.';const p=document.querySelector('.hdr2 .pill');if(p)p.textContent='LABORATUVARI TANI · TUR'}
-$('#mMap').onclick=()=>{const m=$('#map');m.hidden=!m.hidden;$('#mMap').classList.toggle('on',!m.hidden)};
-$('#mVid').onclick=()=>playWelcome(null);
-$('#mEgt').onclick=()=>{location.href=BASE+'egitimler.html'};
+$('#mVid').onclick=()=>{const k='oda'+inRoom;if(inRoom&&VID[k])playVideo(k);else playWelcome(null)};
 $('#mIntro').onclick=()=>{teamForm();inRoom=false;roomUI();openRoomDoor=0;started=false;inside=false;closeRoom();P.z=14;P.x=0;G.x=0;G.z=9.5;$('#intro').classList.remove('out');say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.')};
 document.getElementById('back').onclick=leaveRoom;
 window.__proj=(x,y,z)=>{const v=new THREE.Vector3(x,y,z).project(cam);const r=renderer.domElement.getBoundingClientRect();return [r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height]};Object.assign(window,{playWelcome,openDev,enterRoom2,enterRoom,leaveRoom,openInfo,teamDisperse,openTeam,TP,GG:G,openPoster,enter,goStop,openDoorCard,closeRoom,step,turn,__lab:1,PP:P});
