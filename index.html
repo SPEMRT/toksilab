@@ -64,6 +64,13 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 .mc.ana{--c:rgba(43,217,192,.32)}
 .stats{display:flex;gap:clamp(14px,4vw,48px);flex-wrap:wrap;padding:26px 4px 6px;color:var(--muted);font-size:13.5px}
 .stats b{display:block;font:700 34px/1 var(--f-display);color:#fff}
+.hv{display:inline-grid;grid-template-columns:132px 1fr;gap:14px;align-items:center;justify-self:start;margin-top:6px;padding:8px 18px 8px 8px;border-radius:16px;background:var(--card);border:1px solid var(--line);text-align:left;font:700 16px var(--f-body);color:#fff;transition:border-color .25s,transform .25s}
+.hv:hover{border-color:rgba(43,217,192,.6);transform:translateY(-2px)}.hv small{display:block;font:600 10.5px var(--f-mono);letter-spacing:.14em;color:var(--mint);margin-bottom:3px}
+.hvi{position:relative;width:132px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;display:block}.hvi img{width:100%;height:100%;object-fit:cover;display:block}.hvi b{position:absolute;inset:0;display:grid;place-items:center;font-size:24px;color:#fff;background:rgba(6,12,14,.35)}
+.vw{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:rgba(3,7,9,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .4s}.vw.on{opacity:1}.vw[hidden]{display:none}
+.vwb{width:min(860px,92vw);display:grid;gap:8px}.vwt{font:600 11px var(--f-mono);letter-spacing:.16em;color:var(--mint)}
+.vw video{width:100%;aspect-ratio:16/9;border-radius:14px;background:#000;outline:3px solid rgba(43,217,192,.5);outline-offset:3px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.vw video::cue{font:600 18px var(--f-body);color:#fff;background:rgba(14,21,24,.78)}.vwc{display:flex}.vwc button{border:0;border-radius:10px;padding:9px 16px;font:700 15px var(--f-body);color:#062126;background:linear-gradient(90deg,var(--teal),var(--mint))}
 .replay{font:600 12.5px var(--f-body);color:var(--muted);text-decoration:underline;text-underline-offset:3px;margin-top:10px}
 
 /* ---------- PANEL (eğitimler / cihazlar / nasıl) ---------- */
@@ -129,7 +136,8 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
  </div>
  <div class="wrap">
   <section class="hero"><div class="k">HOŞ GELDİN</div><h1>Ne yapmak <i>istersin?</i></h1>
-   <p>Laboratuvarı gezerek tanıyabilir, bir beceriyi tek başına çalışabilir ya da bir analizi numuneden rapora kadar baştan sona yürütebilirsin.</p></section>
+   <p>Laboratuvarı gezerek tanıyabilir, bir beceriyi tek başına çalışabilir ya da bir analizi numuneden rapora kadar baştan sona yürütebilirsin.</p>
+   <button class="hv" id="hvBtn"><span class="hvi"><img src="menu_karsilama.jpg" alt=""><b>▶</b></span><span><small>HOŞ GELDİNİZ VİDEOSU · 30 SN</small>Simülasyonu Uzm. MY'den dinleyin</span></button></section>
   <div class="cards">
    <a class="mc ana" href="lab_giris.html?mod=tani&v=20261111"><div class="ic">🏛️</div><h2>Laboratuvarı Tanı</h2>
     <p>Koridoru ve odaları gez; cihazları, tezgâhları ve gaz hatlarını yerinde gör. Bir cihaza tıklayınca kısa bilgi kartı açılır.</p>
@@ -148,6 +156,9 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
   <button class="replay" id="replay">▶ Tanıtımı tekrar oynat</button>
  </div>
 </div>
+
+<!-- ============ HOŞ GELDİNİZ VİDEOSU ============ -->
+<div class="vw" id="vw" hidden><div class="vwb"><div class="vwt">HOŞ GELDİNİZ</div><video id="vwV" playsinline preload="none" poster="menu_karsilama.jpg"><source src="menu_karsilama.mp4" type="video/mp4"><track kind="subtitles" srclang="tr" label="Türkçe" src="menu_karsilama.vtt" default></video><div class="vwc"><span style="flex:1"></span><button id="vwX">Kapat ›</button></div></div></div>
 
 <!-- ============ PANELLER ============ -->
 <div class="ov" id="ov"></div>
@@ -309,7 +320,13 @@ function egitimCiz(aktif){const s=T?T.oku():{};
 function panelKapat(){$('#pn').classList.remove('on');$('#pn').setAttribute('aria-hidden','true');$('#ov').classList.remove('on')}
 document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>panelAc(b.dataset.p));
 $('#pnX').onclick=panelKapat;$('#ov').onclick=panelKapat;addEventListener('keydown',e=>{if(e.key==='Escape'&&!introOn)panelKapat()});
-window.__G={panelAc,introBitir,introBasla};
+/* ---------- hoş geldiniz videosu (kendiliğinden başlamaz) ---------- */
+const VW=$('#vw'),VV=$('#vwV');
+function vwAc(){VW.hidden=false;void VW.offsetWidth;VW.classList.add('on');VV.currentTime=0;const p=VV.play();if(p&&p.catch)p.catch(()=>{})}
+function vwKapat(){VV.pause();VW.classList.remove('on');setTimeout(()=>{VW.hidden=true},400)}
+$('#hvBtn').onclick=vwAc;$('#vwX').onclick=vwKapat;VW.onclick=e=>{if(e.target===VW)vwKapat()};VV.onended=vwKapat;
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!VW.hidden)vwKapat()});
+window.__G={panelAc,introBitir,introBasla,vwAc};
 if(['egitim','nasil'].includes(HSH))setTimeout(()=>panelAc(HSH),350);
 addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(['egitim','nasil'].includes(h)){introBitir();panelAc(h)}});
 </script>
