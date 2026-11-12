@@ -1,0 +1,392 @@
+/* MY ToksiLab · Rehberli dersler: Headspace örnekleyici (Agilent 7694E)
+   hsgcms_pilot.html?ders=hs        → bölüm listesi
+   hsgcms_pilot.html?ders=hstani    → Cihazı tanıma
+   hsgcms_pilot.html?ders=hsyukle   → Numune yükleme
+   hsgcms_pilot.html?ders=hstus     → Tuş takımı parametreleri
+   hsgcms_pilot.html?ders=hsbaslat  → Analizi başlatma
+   Sayfanın kendi fotoğraflarını, tuş takımını ve yöntem değerlerini kullanır. ?ders= yoksa hiçbir şey yapmaz. */
+(function(){
+'use strict';
+var PILOT=!!window.__DERS_PILOT,D=null;
+try{D=PILOT?(sessionStorage.getItem('toksilab_ders_git')||'hs'):new URLSearchParams(location.search).get('ders')}catch(e){if(PILOT)D='hs'}
+if(!D)return;
+var BASE=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';
+var LS='toksilab_ders_v1';
+var HS,S,A,P,i=0,gecti=false,uyari='',puan=0,sn=0,cevap=null,kaydir=false,hataM='';
+function spd(v){if(A.spd)A.spd(v)}
+function ac(id){if(PILOT){try{sessionStorage.setItem('toksilab_ders_git',id)}catch(e){}location.reload()}else location.href=location.pathname+'?ders='+id}
+
+/* ---------- yardımcılar ---------- */
+var Z=function(n){return function(h){return h.mode==='zone'&&h.idx===n&&h.buf===''}};
+var E=function(n){return function(h){return h.mode==='event'&&h.idx===n}};
+var V=function(n){return function(h){return h.mode==='vial'&&h.idx===n}};
+/* bir parametreye değer yazdırırken sıradaki tuşu gösterir */
+var yaz=function(mode,key,idx,deger){return function(h){
+  if(h.mode!==mode)return [key];
+  if(h.idx!==idx)return [key,'down'];
+  if(h.buf===deger)return ['enter'];
+  if(deger.indexOf(h.buf)!==0)return ['clear'];
+  return ['d'+deger.charAt(h.buf.length)]}};
+var YUK={4:'BLANK',5:'QC-0,25',6:'NUMUNE-01'};
+function sifirla(){
+ HS.mode='idle';HS.idx=0;HS.buf='';HS.run=null;HS.msg=null;S.gc.run=false;S.gc.rt=0;S.lost=0;
+ HS.z[0][1]=80;HS.z[1][1]=120;HS.z[2][1]=120;HS.za=[80,120,120];S.gc.ovenA=S.gc.ovenSet;
+ [11,4,.2,.2,.05,.5].forEach(function(v,k){HS.e[k][1]=v});HS.v[0][1]=1;HS.v[1][1]=2;HS.v[2][1]=2;
+ Object.keys(S.slots).forEach(function(k){delete S.slots[k]});S.hand=null;S.lid=false;
+ A.PLAN.forEach(function(p){p.where=null;p.ready=false});spd(120)}
+function vialHazir(){A.PLAN.forEach(function(p){if(p.id==='BLANK'||p.id==='QC-0,25'||p.id==='NUMUNE-01')p.ready=true})}
+function vialYukle(){vialHazir();Object.keys(YUK).forEach(function(n){S.slots[n]=YUK[n];A.PLAN.forEach(function(p){if(p.id===YUK[n])p.where=+n})})}
+var yuvaHata=function(){var m='';Object.keys(S.slots).forEach(function(n){if(YUK[n]!==S.slots[n])m='<b>'+S.slots[n]+'</b> yanlış yuvada ('+n+'). Viale dokunarak geri alın ve doğru yuvaya koyun.'});return m};
+var hazirHata=function(h){return h.msg==='NOT READY'||h.msg==='GC NOT READY'?'Cihaz henüz hazır değil. Birkaç saniye bekleyip yeniden deneyin.':''};
+var fazBekle=function(ph,vial){return function(h){return !!h.run&&h.run.ph===ph&&(!vial||h.run.vial===vial)}};
+
+/* ---------- dersler ----------
+   adım alanları → ask: yapılacak iş · ok(h): tamamlandı mı · keys(h): yanacak tuşlar · hot: yanacak fotoğraf bölgesi (kes: dokunuş yalnızca derse sayılır)
+   sec(): yanacak diğer öğeler · view: izinli görünümler · gir(): adıma girerken · oto: açıklamasız, kendiliğinden ilerler · b/ne/neden/yanlis ya da html: açıklama */
+var DERS={
+hstani:{ad:'Cihazı tanıma',ic:'🔍',ozet:'Headspace örnekleyicinin parçaları: fırın, karusel, tuş takımı, transfer hattı, gaz.',baslik:'HEADSPACE · CİHAZI TANIMA',view:['main'],yukGizle:1,
+ adim:[
+ {bolum:'Giriş',b:'Üç cihaz, tek sistem',
+  html:'<p>Fotoğraftaki sistem üç cihazdan oluşur:</p><ul><li><b>Solda: headspace örnekleyici (7694E).</b> Viali ısıtır, üstündeki gazdan örnek alır.</li><li><b>Sağda: gaz kromatografi (6890N).</b> Bileşikleri birbirinden ayırır.</li><li><b>Ortada: kütle dedektörü (5975B).</b> Ayrılan bileşikleri tanır ve ölçer.</li></ul><p>Bu derste yalnızca soldaki cihazı, headspace örnekleyiciyi tanıyacaksınız.</p>'},
+ {bolum:'Dış görünüm',ask:'Headspace örnekleyicinin <b>fırın kapağına</b> dokunun.',hot:'HS fırın kapağı',kes:1,
+  b:'Fırın ve kapak',ne:'Kapağın altında ısıtılan bir fırın ve 12 yuvalı döner tabla (karusel) vardır. Vialler buraya yerleştirilir.',
+  neden:'Fırın, vialleri yöntemdeki sıcaklıkta (80 °C) tutar. Böylece etanol sıvıdan gaz boşluğuna geçer.',yanlis:'Kapak açıkken cihaz çalışmaz; çalışırken de kapak açılmaz, çünkü vialler sıcak ve basınçlıdır.',son:'DİKKAT'},
+ {bolum:'Dış görünüm',ask:'Şimdi <b>tuş takımına</b> dokunun.',hot:'HS tuş takımı',kes:1,
+  b:'Ekran ve tuş takımı',ne:'Cihazın bütün ayarları buradan yapılır: sıcaklıklar, süreler, hangi viallerin analiz edileceği.',
+  neden:'Ekran her parametrenin gerçek (Actual) ve ayarlanan (Setpoint) değerini gösterir. Altındaki iki ışık cihazın durumunu bildirir: Not Ready ve Run.',yanlis:'Tuş takımını “Tuş takımı parametreleri” bölümünde tek tek kullanacaksınız.',son:'SONRA'},
+ {bolum:'Dış görünüm',ask:'Tezgâhtaki <b>headspace viallerine</b> dokunun.',hot:'HS vialleri',kes:1,
+  b:'Headspace vialleri',ne:'20 mL’lik cam şişelerdir. Alüminyum kapak ve altındaki septum (lastik conta) viali gaz sızdırmaz biçimde kapatır.',
+  neden:'Örnek vialin yalnızca alt kısmını doldurur. Üstte kalan boşluk, etanolün toplanacağı gaz fazıdır: “headspace” adı buradan gelir.',yanlis:'Kapak iyi sıkılmamışsa (crimp) gaz kaçar ve sonuç düşük çıkar.',son:'DİKKAT'},
+ {bolum:'Dış görünüm',ask:'Cihazdan çıkan gri hortuma, <b>transfer hattına</b> dokunun.',hot:'HS transfer hattı',kes:1,
+  b:'Transfer hattı',ne:'Vialden alınan gaz örneğini GC’nin girişine (inlet) taşıyan ısıtılmış hattır.',
+  neden:'120 °C’de tutulur. Örnek yol boyunca soğursa yoğunlaşır ve GC’ye ulaşmaz.',yanlis:'Hat sıcaktır; çıplak elle tutulmaz, bükülmez.',son:'DİKKAT'},
+ {bolum:'Dış görünüm',ask:'Duvardaki <b>helyum regülatörlerine</b> dokunun.',hot:'Helyum regülatörleri',kes:1,
+  b:'Helyum (taşıyıcı gaz)',ne:'Gaz Tüp Odası’ndan gelen helyumun basıncı burada ayarlanır. Soldaki regülatör HS-GC-MS’i besler.',
+  neden:'Helyum iki iş yapar: viali basınçlandırır ve örneği transfer hattından GC’ye taşır.',yanlis:'Gaz biterse ya da basınç düşerse cihaz örnek alamaz. Analizden önce manometreye bakılır.',son:'DİKKAT'},
+ {bolum:'İç görünüm',ask:'Şimdi içine bakalım: <b>fırın kapağına</b> yeniden dokunarak kapağı açın.',hot:'HS fırın kapağı',view:['main','hslid'],ok:function(){return S.view==='hslid'},
+  b:'Karusel',html:'<p>Yuvarlak tabla <b>karusel</b>dir. 12 yuvası vardır ve her yuvanın yanında numarası yazar. Cihaz vialleri bu numaralara göre sırayla işler.</p><p>Analiz sırasında karusel döner; sırası gelen vial iğnenin altına gelir, iğne septumu delerek gaz örneğini alır.</p>'},
+ {bolum:'İç görünüm',ask:'<b>Kapak dayama koluna</b> dokunun.',hot:'Kapak dayama kolu',kes:1,view:['hslid'],
+  b:'Kapak dayama kolu',ne:'Fırın kapağını açık tutan metal koldur.',neden:'Vialleri yerleştirirken iki elinizin de serbest kalmasını sağlar.',yanlis:'Kapak tam kapatılmadan analiz başlatılamaz; ekranda OVEN LID OPEN yazar.',son:'DİKKAT'},
+ {bolum:'İç görünüm',ask:'Karuselin yanındaki <b>sıcak yüzey uyarısına</b> dokunun.',hot:'Sıcak yüzey',kes:1,view:['hslid'],
+  b:'Sıcak yüzey',ne:'Fırın 80 °C’dedir; karusel ve çevresindeki metal yüzeyler sıcaktır.',neden:'Bu işaret yanık tehlikesini gösterir.',yanlis:'Vial yerleştirirken eldiven kullanın, metal yüzeylere dokunmayın.',son:'DİKKAT'},
+ {bolum:'İç görünüm',ask:'Sol üstteki <b>‹ Kapağı kapat</b> düğmesiyle kapağı kapatın.',sec:function(){return ['#st .back']},geri:1,view:['hslid','main'],ok:function(){return S.view==='main'},
+  b:'Özet',html:'<p>Headspace örnekleyicinin yolu şöyledir:</p><ul><li>Vial karuselde <b>ısıtılır</b>.</li><li>Helyum viali <b>basınçlandırır</b>.</li><li>Gaz örneği <b>loop</b> adlı halkaya dolar.</li><li><b>Transfer hattı</b> örneği GC’ye taşır.</li></ul>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['“Headspace” neyi ifade eder?',['Vialdeki sıvının üstünde kalan gaz boşluğunu','Cihazın üst kapağını','Kolonun giriş ucunu'],0,'Cihaz sıvıdan değil, bu gaz boşluğundan örnek alır.'],
+ ['Helyumun headspace örnekleyicideki görevi nedir?',['Vialleri soğutmak','Viali basınçlandırmak ve örneği GC’ye taşımak','Kanı seyreltmek'],1,'Taşıyıcı gaz hem basıncı sağlar hem örneği taşır.'],
+ ['Cihaz çalışırken fırın kapağı neden açılmaz?',['Ekran kapanır','Karusel durmaz','Vialler sıcak ve basınçlıdır'],2,'Sıcak ve basınçlı vial yaralanmaya yol açabilir.']]},
+
+hsyukle:{ad:'Numune yükleme',ic:'🧪',ozet:'Vialleri karusele doğru sırayla yerleştirme; FIRST VIAL ve LAST VIAL ayarı.',baslik:'HEADSPACE · NUMUNE YÜKLEME',view:['main'],kur:vialHazir,
+ adim:[
+ {bolum:'Hazırlık',b:'Yüklemeden önce',
+  html:'<p>Bu derste üç vial yükleyeceksiniz: <b>BLANK</b> (boş kan), <b>QC</b> (kontrol) ve <b>NUMUNE</b>. Gerçek analizde bunların arasına kalibratörler de girer.</p><p>Her vialde şunlara bakın:</p><ul><li>Kapak sıkı mı? Elle çevirdiğinizde dönmemelidir.</li><li>Etiket okunuyor mu?</li><li>Camda çatlak var mı?</li></ul>'},
+ {bolum:'Yükleme',ask:'Headspace <b>fırın kapağına</b> dokunarak kapağı açın.',hot:'HS fırın kapağı',view:['main','hslid'],ok:function(){return S.view==='hslid'},
+  b:'Kapak açık',html:'<p>Kapak yalnızca cihaz çalışmıyorken açılır. Fırın 80 °C’dedir: eldivenle çalışın.</p><p>Fotoğrafta karuselin <b>4–10</b> numaralı yuvaları görünüyor. Sağdaki şema karuselin tamamını üstten gösterir.</p>'},
+ {bolum:'Yükleme',ask:'Alttaki listeden <b>BLANK</b> vialine dokunun.',oto:1,view:['hslid'],sec:function(){return ['#chips .chip[data-id="BLANK"]']},ok:function(){return S.hand==='BLANK'||S.slots[4]==='BLANK'}},
+ {bolum:'Yükleme',ask:'Viali <b>4</b> numaralı yuvaya koyun.',view:['hslid'],hot:'Yuva 4',sec:function(){return S.hand==='BLANK'?['#car g[data-n="4"]']:['#chips .chip[data-id="BLANK"]']},ok:function(){return S.slots[4]==='BLANK'},hata:yuvaHata,
+  b:'Yuva numarası',html:'<p>Vialin konduğu <b>yuva numarası</b> önemlidir: cihaz vialleri adlarıyla değil, yuva numaralarıyla tanır.</p><p>Bu numara, bilgisayardaki sekans tablosunun <b>Vial</b> sütununa da yazılır. İkisi uyuşmazsa sonuçlar yanlış örnek adıyla kaydedilir.</p>'},
+ {bolum:'Yükleme',ask:'Şimdi <b>QC-0,25</b> vialini <b>5</b>, <b>NUMUNE-01</b> vialini <b>6</b> numaralı yuvaya koyun.',view:['hslid'],hata:yuvaHata,
+  sec:function(){var q=S.slots[5]==='QC-0,25',id=q?'NUMUNE-01':'QC-0,25',n=q?6:5;return S.hand===id?['#car g[data-n="'+n+'"]','#st .hs[data-t="Yuva '+n+'"]']:['#chips .chip[data-id="'+id+'"]']},
+  ok:function(){return S.slots[5]==='QC-0,25'&&S.slots[6]==='NUMUNE-01'},
+  b:'Sıranın anlamı',html:'<ul><li><b>BLANK</b> önce gelir: sistemin temiz olduğunu gösterir.</li><li><b>QC</b> ikinci gelir: derişimi bilinen kontrol örneğidir, cihazın doğru ölçtüğünü kanıtlar.</li><li><b>NUMUNE</b> bunlardan sonra analiz edilir.</li></ul><p>Viallerin arasında <b>boş yuva bırakılmaz</b>; cihaz boş yuvaya gelince durur.</p>'},
+ {bolum:'Yükleme',ask:'Sol üstteki <b>‹ Kapağı kapat</b> düğmesiyle kapağı kapatın.',sec:function(){return ['#st .back']},geri:1,view:['hslid','main'],ok:function(){return S.view==='main'},
+  b:'Kapak kapalı',html:'<p>Kapak açık unutulursa cihaz başlamaz ve ekranda <b>OVEN LID OPEN</b> yazar. Fotoğrafta cihazın üstünde “3 vial yüklü” notu görünüyor.</p><p>Şimdi cihaza hangi yuvaların dolu olduğunu bildireceksiniz.</p>'},
+ {bolum:'Vial aralığı',ask:'<b>Tuş takımına</b> dokunun.',oto:1,hot:'HS tuş takımı',view:['main','hskey'],ok:function(){return S.view==='hskey'}},
+ {bolum:'Vial aralığı',ask:'İlk viali bildirin: <b>Vial Parameters</b> → <b>4</b> → <b>Enter</b>.',view:['hskey'],keys:yaz('vial','vial',0,'4'),ok:function(h){return h.v[0][1]===4},
+  b:'FIRST VIAL = 4',html:'<p>Cihaz analize 4 numaralı yuvadan başlayacak. FIRST VIAL her zaman 1 olmak zorunda değildir; ilk vialinizi hangi yuvaya koyduysanız o numara girilir.</p>'},
+ {bolum:'Vial aralığı',ask:'Son viali bildirin: <b>Vial Parameters</b> (ya da <b>▼</b>) → <b>6</b> → <b>Enter</b>.',view:['hskey'],keys:yaz('vial','vial',1,'6'),ok:function(h){return h.v[1][1]===6},
+  b:'LAST VIAL = 6',html:'<p>Cihaz artık 4, 5 ve 6 numaralı yuvaları sırayla işleyecek: BLANK → QC → NUMUNE.</p><p>Bilgisayardaki sekans tablosunda da <b>Vial</b> sütunu aynı sırayla 4, 5, 6 olmalıdır.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Cihaz vialleri neye göre tanır?',['Etiketteki ada göre','Karuseldeki yuva numarasına göre','Vialin rengine göre'],1,'Bu yüzden yuva numarası sekans tablosuyla aynı olmalıdır.'],
+ ['Vialler 3, 4, 5 ve 6 numaralı yuvalarda. FIRST VIAL ve LAST VIAL ne olmalı?',['1 ve 4','3 ve 6','1 ve 6'],1,'İlk ve son dolu yuvanın numarası girilir.'],
+ ['BLANK, QC ve NUMUNE hangi sırayla yüklenir?',['NUMUNE → QC → BLANK','QC → NUMUNE → BLANK','BLANK → QC → NUMUNE'],2,'Önce sistemin temiz ve doğru olduğu gösterilir, sonra numune ölçülür.']]},
+
+hstus:{ad:'Tuş takımı parametreleri',ic:'🎛',ozet:'Sıcaklıklar, süreler ve vial parametreleri; değer değiştirme ve yöntem yükleme.',baslik:'HEADSPACE · TUŞ TAKIMI',view:['hskey'],
+ adim:[
+ {bolum:'Giriş',b:'Headspace örnekleyici ne yapar?',
+  html:'<p>Kan örneği cihaza <b>sıvı olarak verilmez</b>. Kapalı vial ısıtılır; etanol sıvıdan, vialin üst kısmındaki gaz boşluğuna (<b>headspace</b>) geçer. Cihaz bu gazdan belirli bir hacim alıp GC’ye gönderir.</p><p>Tuş takımındaki parametreler bu işin <b>hangi sıcaklıkta</b> ve <b>ne kadar sürede</b> yapılacağını belirler. Her birine tek tek bakacağız.</p>'},
+ {bolum:'Giriş',b:'Ekranı tanıyın',ekran:1,
+  html:'<p>Ekranda üç bilgi vardır:</p><ul><li><b>Sol:</b> parametrenin adı</li><li><b>Actual:</b> o an ölçülen gerçek değer</li><li><b>Setpoint:</b> sizin ayarladığınız hedef değer</li></ul><p>Actual, Setpoint’e ulaşana kadar kırmızı <b>Not Ready</b> ışığı yanar ve cihaz analiz başlatmaz. Şu an ekranda <b>READY</b> yazıyor: cihaz hazır.</p>'},
+
+ {bolum:'Sıcaklıklar',ask:'<b>Zone Temps</b> tuşuna basın.',ok:Z(0),keys:function(){return ['zone']},
+  b:'VIAL · fırın sıcaklığı',deger:'80 °C',
+  ne:'Vialin ısıtıldığı fırının sıcaklığıdır.',
+  neden:'Vial ısındıkça etanol sıvıdan gaz boşluğuna geçer. 80 °C, yeterli sinyali verir; kanı ve vial içi basıncı da zorlamaz.',
+  yanlis:'Düşük olursa sinyal zayıflar. Çok yüksek olursa su buharı ve basınç artar, septum kaçırabilir. Bütün vialler aynı sıcaklıkta ısıtılmalıdır.'},
+ {bolum:'Sıcaklıklar',ask:'<b>Zone Temps</b> tuşuna bir kez daha basın (ya da <b>▼</b>).',ok:Z(1),keys:function(){return ['zone','down']},
+  b:'LOOP · örnek halkası sıcaklığı',deger:'120 °C',
+  ne:'Loop, vialden alınan gazın ölçüldüğü sabit hacimli halkadır.',
+  neden:'Vialden (80 °C) daha sıcak tutulur. Böylece buhar loop içinde yoğunlaşmaz.',
+  yanlis:'Vialden soğuk olursa buhar sıvılaşır: sonuç düşük çıkar ve bir sonraki örneğe bulaşma (taşınma) olur.'},
+ {bolum:'Sıcaklıklar',ask:'<b>Zone Temps</b> tuşuna bir kez daha basın.',ok:Z(2),keys:function(){return ['zone','down']},
+  b:'TR.LINE · transfer hattı sıcaklığı',deger:'120 °C',
+  ne:'Loop’taki gazı GC’nin girişine (inlet) taşıyan ısıtılmış hattır.',
+  neden:'Loop ile aynı ya da biraz daha yüksek sıcaklıkta tutulur; gaz yol boyunca soğumamalıdır.',
+  yanlis:'Hat soğuk kalırsa örnek yolda yoğunlaşır; pikler küçülür ve kuyruklanır.'},
+
+ {bolum:'Süreler',b:'Bir vialin çevrimi',cevrim:1,
+  html:'<p>Cihaz her vial için aynı sırayı izler. Aşağıdaki şerit bu sırayı gösterir; <b>Event Times</b> tuşundaki her parametre şeridin bir bölümünün süresidir.</p><p>Süreler <b>dakika</b> cinsindendir: 0,20 dk = 12 saniye.</p>'},
+ {bolum:'Süreler',ask:'<b>Event Times</b> tuşuna basın.',ok:E(0),keys:function(){return ['event']},faz:'c',
+  b:'GC CYCLE TIME · GC çevrim süresi',deger:'11,0 dk',
+  ne:'Art arda iki enjeksiyon arasındaki süredir.',
+  neden:'GC’nin bir analizi bitirmesi ve fırının yeniden başlangıç sıcaklığına soğuması için gereken süreden uzun olmalıdır.',
+  yanlis:'Kısa tutulursa GC hazır olmadan yeni örnek gelir; o örneğin verisi kaybolur.'},
+ {bolum:'Süreler',ask:'<b>Event Times</b> tuşuna yeniden basın (ya da <b>▼</b>).',ok:E(1),keys:function(){return ['event','down']},faz:0,
+  b:'VIAL EQ. TIME · vial dengeleme süresi',deger:'4,0 dk',
+  ne:'Vialin, delinmeden önce fırında beklediği süredir.',
+  neden:'Etanolün sıvı ile gaz arasında dengeye gelmesi zaman alır. Çalkalama (SHAKE) bu süreyi kısaltır.',
+  yanlis:'Kısa olursa gaz fazına yeterince etanol geçmez; sonuç düşük ve tekrarlanamaz olur.'},
+ {bolum:'Süreler',ask:'<b>Event Times</b> tuşuna yeniden basın.',ok:E(2),keys:function(){return ['event','down']},faz:1,
+  b:'PRESSURIZ. TIME · basınçlandırma süresi',deger:'0,20 dk (12 sn)',
+  ne:'İğne septumu deler ve taşıyıcı gaz vialin içine dolar.',
+  neden:'Vialde oluşan basınç, bir sonraki adımda gazı loop’a itecek güçtür.',
+  yanlis:'Yetersiz basınçta loop tam dolmaz; alanlar küçülür.'},
+ {bolum:'Süreler',ask:'<b>Event Times</b> tuşuna yeniden basın.',ok:E(3),keys:function(){return ['event','down']},faz:2,
+  b:'LOOP FILL TIME · loop doldurma süresi',deger:'0,20 dk (12 sn)',
+  ne:'Çıkış valfi açılır; basınçlı gaz vialden loop’a akar ve halkayı doldurur.',
+  neden:'Loop’un tamamen örnek gazıyla dolması için yeterli olmalıdır.',
+  yanlis:'Çok kısa olursa loop yarım dolar; çok uzun olursa vialdeki basınç boşalır, örnek kaybedilir.'},
+ {bolum:'Süreler',ask:'<b>Event Times</b> tuşuna yeniden basın.',ok:E(4),keys:function(){return ['event','down']},faz:3,
+  b:'LOOP EQ. TIME · loop dengeleme süresi',deger:'0,05 dk (3 sn)',
+  ne:'Valf kapanır; loop içindeki gazın basıncı ve sıcaklığı sabitlenir.',
+  neden:'Her enjeksiyonda loop’ta aynı miktarda gaz bulunmasını sağlar.',
+  yanlis:'Atlanırsa enjeksiyonlar arasındaki fark (tekrarlanabilirlik) kötüleşir.'},
+ {bolum:'Süreler',ask:'<b>Event Times</b> tuşuna yeniden basın.',ok:E(5),keys:function(){return ['event','down']},faz:4,
+  b:'INJECT TIME · enjeksiyon süresi',deger:'0,50 dk (30 sn)',
+  ne:'Valf döner; taşıyıcı gaz loop’taki örneği transfer hattından GC’ye süpürür. GC analizi bu anda başlar.',
+  neden:'Loop’un tamamen boşalması için yeterli olmalıdır.',
+  yanlis:'Kısa olursa örneğin bir kısmı loop’ta kalır ve sonraki enjeksiyona taşınır.'},
+
+ {bolum:'Vialler',ask:'<b>Vial Parameters</b> tuşuna basın.',ok:V(0),keys:function(){return ['vial']},
+  b:'FIRST VIAL · ilk vial',deger:'yuva no',
+  ne:'Analizin başlayacağı karusel yuvasının numarasıdır.',
+  neden:'Cihaz vialleri FIRST VIAL’dan LAST VIAL’a kadar sırayla işler. Bu sıra, bilgisayardaki sekans tablosuyla aynı olmalıdır.',
+  yanlis:'Yanlış girilirse sonuçlar yanlış örnek adıyla kaydedilir.'},
+ {bolum:'Vialler',ask:'<b>Vial Parameters</b> tuşuna yeniden basın (ya da <b>▼</b>).',ok:V(1),keys:function(){return ['vial','down']},
+  b:'LAST VIAL · son vial',deger:'yuva no',
+  ne:'Analiz edilecek son vialin yuva numarasıdır.',
+  neden:'Karusele kaç vial yüklediyseniz ona göre ayarlanır. Örnek: 1–6 yuvalar doluysa FIRST 1, LAST 6.',
+  yanlis:'Aralıkta boş yuva varsa cihaz <b>VIAL NOT FOUND</b> uyarısı verir ve başlamaz.'},
+ {bolum:'Vialler',ask:'<b>Vial Parameters</b> tuşuna yeniden basın.',ok:V(2),keys:function(){return ['vial','down']},
+  b:'SHAKE · çalkalama',deger:'HIGH (2)',
+  ne:'Dengeleme sırasında vialin çalkalanmasıdır: 0 = kapalı, 1 = düşük, 2 = yüksek.',
+  neden:'Çalkalama, etanolün gaz fazına geçişini hızlandırır; kısa dengeleme süresinde bile kararlı sonuç verir.',
+  yanlis:'Kapalıyken aynı süre yetmeyebilir; sonuçlar düşük çıkar.'},
+
+ {bolum:'Uygulama',ask:'Şimdi bir değeri siz değiştirin: VIAL sıcaklığını <b>85</b> yapın. Sırayla <b>Zone Temps</b> → <b>8</b> → <b>5</b> → <b>Enter</b>.',
+  ok:function(h){return h.z[0][1]===85},keys:yaz('zone','zone',0,'85'),
+  b:'Değer değiştirme',deger:'sayı + Enter',
+  html:'<p>Yeni değer <b>Enter</b>’a basınca geçerli olur. Ekrana bakın: Setpoint 85 oldu, Actual yavaş yavaş yükseliyor. İkisi eşitlenene kadar kırmızı <b>Not Ready</b> ışığı yanar.</p><p>Yanlış rakam yazarsanız <b>Clear</b> ile silebilirsiniz.</p>'},
+ {bolum:'Uygulama',ask:'Sınırın dışında bir değer deneyin: <b>3</b> → <b>0</b> → <b>0</b> → <b>Enter</b>.',
+  ok:function(h){return h.msg==='INVALID ENTRY'},keys:yaz('zone','zone',0,'300'),
+  b:'Geçersiz değer',deger:'INVALID ENTRY',
+  html:'<p>Cihaz her parametre için bir aralık tanır; VIAL sıcaklığı 40–200 °C arasında olabilir. Aralık dışındaki değer kabul edilmez ve eski değer korunur.</p>'},
+ {bolum:'Uygulama',ask:'Yöntemin değerine dönün: <b>8</b> → <b>0</b> → <b>Enter</b>.',
+  ok:function(h){return h.z[0][1]===80},keys:yaz('zone','zone',0,'80'),
+  b:'Yöntem değerine dönüş',deger:'80 °C',
+  html:'<p>Doğrulanmış bir yöntemin değerleri keyfî olarak değiştirilmez. Bir değeri değiştirdiyseniz analizden önce mutlaka yöntemdeki değere geri alın.</p>'},
+ {bolum:'Uygulama',ask:'Kayıtlı yöntemi yükleyin: <b>Load Method</b> → <b>Enter</b>.',
+  ok:function(h){return h.msg==='METHOD 2 LOADED'},keys:function(h){return h.mode==='load'?['enter']:['load']},
+  b:'Load Method · yöntem yükleme',deger:'yöntem 2',
+  html:'<p>Cihazın belleğinde 5 yöntem saklanabilir. Kanda alkol yöntemi <b>2</b> numaradadır. Yöntemi yüklemek, bütün sıcaklık ve süreleri tek adımda doğru değerlere getirir; en güvenli yol budur.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Loop ve transfer hattı neden vialden daha sıcak tutulur?',['Analizi hızlandırmak için','Buhar yolda yoğunlaşmasın diye','Etanolü parçalamak için'],1,'Gaz soğuk bir yüzeye değerse sıvılaşır; sonuç düşer ve taşınma olur.'],
+ ['Ekranda Actual 62, Setpoint 80 görünüyor ve Not Ready ışığı yanıyor. Ne yaparsınız?',['Hemen Start’a basarım','Setpoint’i 62 yaparım','Sıcaklık 80’e ulaşana kadar beklerim'],2,'Cihaz, Actual değeri Setpoint’e ulaşmadan hazır olmaz.'],
+ ['Karuselde 1–6 numaralı yuvalar dolu. FIRST VIAL ve LAST VIAL ne olmalı?',['1 ve 6','1 ve 12','6 ve 1'],0,'Aralıkta boş yuva kalırsa cihaz VIAL NOT FOUND uyarısı verir.'],
+ ['Vial dengeleme süresi çok kısa tutulursa ne olur?',['Sonuç düşük ve tekrarlanamaz çıkar','Kolon zarar görür','Hiçbir şey değişmez'],0,'Etanol gaz fazına yeterince geçemeden örnek alınmış olur.']]},
+
+hsbaslat:{ad:'Analizi başlatma',ic:'▶️',ozet:'Start öncesi kontrol, sık yapılan hata, vialin cihazdaki yolculuğu, Stop.',baslik:'HEADSPACE · ANALİZİ BAŞLATMA',view:['hskey'],
+ kur:function(){vialYukle();HS.v[0][1]=4;HS.v[1][1]=6},
+ adim:[
+ {bolum:'Kontrol listesi',b:'Start’a basmadan önce',
+  html:'<p>Bu derste vialler yüklü: 4, 5 ve 6 numaralı yuvalarda BLANK, QC ve NUMUNE var. Start’tan önce beş şeye bakılır:</p><ul><li>Fırın kapağı <b>kapalı</b> mı?</li><li>Vialler doğru yuvalarda mı?</li><li>FIRST VIAL ve LAST VIAL doğru mu?</li><li>Ekranda <b>READY</b> yazıyor mu?</li><li>Bilgisayarda sekans başlatıldı mı?</li></ul>'},
+ {bolum:'Kontrol listesi',b:'Hazır mı?',ekran:1,
+  html:'<p>Ekrana bakın: <b>READY</b> yazıyor ve kırmızı <b>Not Ready</b> ışığı sönük. Bütün sıcaklıklar ayar değerine ulaşmış demektir.</p><p>Not Ready yanıyorsa Start’a basılmaz; sıcaklıkların oturması beklenir.</p>'},
+ {bolum:'Sık yapılan hata',ask:'Bir hatayı bilerek yapalım. LAST VIAL’ı <b>7</b> yapın: <b>Vial Parameters</b> → <b>▼</b> → <b>7</b> → <b>Enter</b>.',oto:1,keys:yaz('vial','vial',1,'7'),ok:function(h){return h.v[1][1]===7}},
+ {bolum:'Sık yapılan hata',ask:'Şimdi <b>Start</b>’a basın.',keys:function(){return ['start']},ok:function(h){return /^VIAL 7 NOT/.test(h.msg||'')},hata:hazirHata,
+  b:'VIAL 7 NOT FOUND',html:'<p>Cihaz başlamadı: 7 numaralı yuva boş. Cihaz, FIRST VIAL ile LAST VIAL arasındaki her yuvada vial arar; biri eksikse çalışmaz.</p><p>Bu uyarıyı görürseniz karuseli ve vial aralığını yeniden kontrol edin.</p>'},
+ {bolum:'Sık yapılan hata',ask:'Düzeltin: LAST VIAL’ı yeniden <b>6</b> yapın. Yanıp sönen tuşları izleyin: <b>6</b> → <b>Enter</b>.',oto:1,keys:yaz('vial','vial',1,'6'),ok:function(h){return h.v[1][1]===6}},
+ {bolum:'Başlatma',b:'Önce bilgisayar, sonra Start',
+  html:'<p>Sıra önemlidir:</p><ul><li><b>1.</b> Bilgisayarda sekans başlatılır (Run Sequence). Program “Pre-Run” durumunda bekler.</li><li><b>2.</b> Headspace’te <b>Start</b>’a basılır.</li></ul><p>Sıra tersine çevrilirse cihaz örneği GC’ye gönderir ama bilgisayar veriyi <b>kaydetmez</b>. İğneyle delinmiş vial yeniden kullanılamaz; örnek baştan hazırlanmak zorunda kalır.</p><p>Bu derste bilgisayardaki adım yapılmış sayılır.</p>'},
+ {bolum:'Başlatma',ask:'<b>Start</b>’a basın.',geriYok:1,keys:function(){return ['start']},ok:function(h){return !!h.run},hata:hazirHata,bitince:function(){spd(0)},faz:0,
+  b:'Dengeleme başladı',html:'<p>Yeşil <b>Run</b> ışığı yandı. Ekranda <b>VIAL 4 EQUIB</b> yazıyor: 4 numaralı vial fırında dengeleniyor. Sağdaki sayı kalan süredir (dakika).</p><p>Bu sırada etanol sıvıdan gaz boşluğuna geçer; vial çalkalanır.</p>'},
+ {bolum:'Vialin yolculuğu',ask:'Dengeleme süresi doluyor. Ekranı izleyin…',bekle:1,geriYok:1,gir:function(){spd(40)},ok:fazBekle('PRESS'),bitince:function(){spd(0)},faz:1,
+  b:'Basınçlandırma',html:'<p>Ekranda <b>PRESS</b> yazıyor. İğne septumu deldi ve helyum vialin içine doluyor.</p><p>Oluşan basınç, bir sonraki adımda gazı loop’a itecek.</p>'},
+ {bolum:'Vialin yolculuğu',ask:'Ekranı izleyin…',bekle:1,geriYok:1,gir:function(){spd(40)},ok:fazBekle('LOOP FILL'),bitince:function(){spd(0)},faz:2,
+  b:'Loop doluyor',html:'<p>Ekranda <b>LOOP FILL</b> yazıyor. Çıkış valfi açıldı; basınçlı gaz vialden loop’a akıyor ve halkayı dolduruyor.</p><p>Ardından valf kapanır ve loop içindeki gaz kısa bir süre dengelenir.</p>'},
+ {bolum:'Vialin yolculuğu',ask:'Ekranı izleyin…',bekle:1,geriYok:1,gir:function(){spd(40)},ok:fazBekle('INJECT'),bitince:function(){spd(0)},faz:4,
+  b:'Enjeksiyon',html:'<p>Ekranda <b>INJECT</b> yazıyor. Taşıyıcı gaz, loop’taki örneği transfer hattından GC’ye süpürüyor.</p><p>Headspace aynı anda GC’ye “başla” sinyali gönderir: <b>GC analizi ve veri kaydı bu anda başlar.</b></p>'},
+ {bolum:'Vialin yolculuğu',ask:'GC çevrim süresi doluyor. Sıradaki viali bekleyin…',bekle:1,geriYok:1,gir:function(){spd(120)},ok:fazBekle('PRESS',5),bitince:function(){spd(0)},faz:'c',
+  b:'Sıradaki vial',html:'<p>Ekranda <b>VIAL 5</b> yazıyor. GC çevrim süresi (11 dk) doldu ve cihaz kendiliğinden bir sonraki viale geçti.</p><p>Bu döngü LAST VIAL’a kadar sürer. Başında beklemeniz gerekmez; ama ilk enjeksiyonun sorunsuz geçtiğini görmeden cihazın başından ayrılmayın.</p>'},
+ {bolum:'Durdurma',ask:'Dersi bitirmek için <b>Stop/Reset</b>’e basın.',geriYok:1,keys:function(){return ['stop']},ok:function(h){return !h.run},bitince:function(){spd(120)},
+  b:'Stop/Reset',html:'<p>Analiz durdu. Gerçek çalışmada Stop’a yalnızca <b>zorunlu durumlarda</b> basılır (yanlış vial, gaz kaçağı, yanlış yöntem).</p><p>Durdurulan analizde iğneyle delinmiş vialler yeniden kullanılamaz; o örnekler baştan hazırlanır.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Doğru başlatma sırası hangisidir?',['Önce headspace’te Start, sonra bilgisayarda sekans','Önce bilgisayarda sekans, sonra headspace’te Start','Sıra önemli değildir'],1,'Bilgisayar hazır beklemiyorsa veri kaydedilmez.'],
+ ['Ekranda VIAL 7 NOT FOUND yazıyor. En olası neden nedir?',['Helyum bitmiştir','Fırın soğuktur','LAST VIAL 7 girilmiş ama 7. yuva boştur'],2,'Cihaz, girilen aralıktaki her yuvada vial arar.'],
+ ['GC analizi ve veri kaydı hangi anda başlar?',['Enjeksiyon (INJECT) anında','Dengeleme başlarken','Start’a basıldığı anda'],0,'Headspace, enjeksiyonla birlikte GC’ye başla sinyali gönderir.'],
+ ['Analiz yarıda durdurulursa delinmiş viallere ne yapılır?',['Aynı vialler yeniden analiz edilir','Kapakları değiştirilir','Örnekler baştan hazırlanır'],2,'Septum delinince gaz kaçar; vial artık güvenilir değildir.']]}
+};
+var SIRA=['hstani','hsyukle','hstus','hsbaslat'];
+var FAZ=[['Dengeleme','4,0'],['Basınç','0,20'],['Loop dolar','0,20'],['Loop denge','0,05'],['Enjeksiyon','0,50']];
+var L=DERS[D],ADIM=L?L.adim:[],SORU=L?L.soru:[];
+
+/* ---------- görünüm ---------- */
+var css=document.createElement('style');
+css.textContent=
+'body.ders #nav,body.ders .mentor,body.ders .side>*:not(#dersP),body.ders #egCubuk{display:none!important}'+
+'body.ders:not(.dersGeri) .stage .back{display:none!important}body.ders.dersYuk #loadP{display:none!important}'+
+'body.ders .main{grid-template-columns:minmax(0,1fr) minmax(340px,440px)}'+
+'body.ders .side{padding:14px;gap:10px}'+
+'@media (max-width:1000px){body.ders .main{grid-template-columns:1fr}}'+
+'#dersM{display:none;position:fixed;z-index:60;left:8px;right:8px;bottom:8px;background:#F1F6F7;color:#16242A;border-left:5px solid #F2B632;border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.5)}'+
+'@media (max-width:1000px){#dersM.on{display:block}}'+
+'#dersP{display:grid;gap:10px;min-width:0;grid-template-columns:minmax(0,1fr);font-size:15px;line-height:1.45;color:#D7E4E7}'+
+'#dersP .ust{display:flex;justify-content:space-between;align-items:baseline;gap:8px}'+
+'#dersP .ust b{font:700 19px "Barlow Condensed",sans-serif;color:#EAF2F3;letter-spacing:.02em}'+
+'#dersP .ust span{font:600 11px "IBM Plex Mono",monospace;color:#9BB0B6;white-space:nowrap}'+
+'#dersP .bol{display:flex;gap:4px}#dersP .bol i{flex:1 1 0;min-width:0;font:600 10px "IBM Plex Mono",monospace;font-style:normal;text-align:center;color:#6F858C;border-top:3px solid #33444C;padding-top:4px;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+'#dersP .bol i.g{border-color:#2DBE5B;color:#8FE0A8}#dersP .bol i.s{border-color:#2BD9C0;color:#EAF2F3}'+
+'#dersP .ask{background:#F1F6F7;color:#16242A;border-radius:12px;padding:11px 13px;border-left:5px solid #F2B632;font-size:16px}'+
+'#dersP .ask.tamam{border-left-color:#2DBE5B;background:#E6F6EB}'+
+'#dersP .ask small{display:block;margin-top:5px;color:#B3261E;font-weight:600;font-size:13.5px}'+
+'#dersP .kart{background:#25333A;border-radius:12px;padding:12px 13px;display:grid;gap:8px}'+
+'#dersP .kart h4{font:700 18px "Barlow Condensed",sans-serif;color:#2BD9C0;letter-spacing:.02em;margin:0}'+
+'#dersP .kart .dg{font:600 13px "IBM Plex Mono",monospace;color:#F2B632}'+
+'#dersP .kart dl{display:grid;gap:7px;margin:0}#dersP .kart dt{font:600 10.5px "IBM Plex Mono",monospace;letter-spacing:.08em;color:#9BB0B6}#dersP .kart dd{margin:0}'+
+'#dersP .kart ul{margin:0 0 0 18px;display:grid;gap:3px}#dersP .kart p+p,#dersP .kart p+ul,#dersP .kart ul+p{margin-top:7px}'+
+'#dersP .cev{display:grid;gap:4px}#dersP .cev .ser{display:flex;gap:3px}'+
+'#dersP .cev .ser div{flex:1;background:#33444C;border-radius:6px;padding:5px 2px;text-align:center;font-size:11px;line-height:1.2;color:#C9D8DC;min-width:0}'+
+'#dersP .cev .ser div b{display:block;font:600 11px "IBM Plex Mono",monospace;color:#9BB0B6}'+
+'#dersP .cev .ser div.on{background:#2BD9C0;color:#062126}#dersP .cev .ser div.on b{color:#062126}'+
+'#dersP .cev .cy{font:600 11px "IBM Plex Mono",monospace;color:#9BB0B6;text-align:center;border:1px dashed #4A5F68;border-top:0;border-radius:0 0 8px 8px;padding:3px}'+
+'#dersP .cev .cy.on{color:#062126;background:#2BD9C0;border-color:#2BD9C0}'+
+'#dersP .alt{display:flex;gap:8px;flex-wrap:wrap}'+
+'#dersP button{border:0;border-radius:10px;padding:10px 14px;font:700 14.5px "Source Sans 3",system-ui,sans-serif;background:#33444C;color:#EAF2F3;cursor:pointer}'+
+'#dersP button.p{background:#2F7DE1;flex:1}#dersP button:disabled{opacity:.4;cursor:default}'+
+'#dersP button.ince{flex:1;background:none;color:#9BB0B6;font-weight:600;font-size:13px;padding:4px}'+
+'#dersP .sec{display:grid;gap:6px}#dersP .sec button{text-align:left;font-weight:600;background:#33444C}'+
+'#dersP .sec button.d{background:#1F7A3D}#dersP .sec button.y{background:#8E2A2E}'+
+'#dersP .acl{font-size:13.5px;color:#B9CBD0}'+
+'#dersP .liste{display:grid;gap:8px}'+
+'#dersP .liste button{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;text-align:left;background:#25333A;padding:12px}'+
+'#dersP .liste button:hover{background:#2D3E46}#dersP .liste .no{width:30px;height:30px;border-radius:50%;background:#33444C;display:grid;place-items:center;font:700 13px "IBM Plex Mono",monospace}'+
+'#dersP .liste button.bitti .no{background:#2DBE5B;color:#062126}'+
+'#dersP .liste b{display:block;font:700 17px "Barlow Condensed",sans-serif;letter-spacing:.02em}#dersP .liste small{display:block;font-weight:400;font-size:13px;color:#B9CBD0;line-height:1.35}'+
+'#dersP .liste em{font:600 11px "IBM Plex Mono",monospace;font-style:normal;color:#7FDCD0;white-space:nowrap}'+
+'.hs.dersK{animation:dersK 1.1s infinite;z-index:3}@keyframes dersK{0%,100%{box-shadow:0 0 0 2px rgba(242,182,50,.35) inset}50%{box-shadow:0 0 0 4px #F2B632 inset,0 0 14px rgba(242,182,50,.9);background:rgba(242,182,50,.22)}}'+
+'.dersH{outline:3px solid #F2B632!important;outline-offset:2px;animation:dersD 1.1s infinite}'+
+'body.ders .hs.pulse:not(.dersK){animation:none}'+
+'body.ders #car g:not(.dersH) circle{stroke:#55666E;stroke-width:1.5}#car g.dersH{outline:none!important;animation:none}#car g.dersH circle{stroke:#F2B632;stroke-width:5}'+
+'.disp.dersD{outline:3px solid #F2B632;outline-offset:2px;animation:dersD 1.1s infinite}@keyframes dersD{50%{outline-color:rgba(242,182,50,.25)}}'+
+'@media (prefers-reduced-motion:reduce){.hs.dersK,.dersH,.disp.dersD{animation:none}.hs.dersK{box-shadow:0 0 0 4px #F2B632 inset}}';
+document.head.appendChild(css);
+
+function oku(){try{return JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){return {}}}
+function kayit(){try{var o=oku();o[D]={bitti:1,puan:puan,soru:SORU.length,t:Date.now()};localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
+var bolumler=[];ADIM.forEach(function(a){if(bolumler.indexOf(a.bolum)<0)bolumler.push(a.bolum)});
+var cikis='<div class="alt">'+(D!=='hs'?'<button class="ince" id="dListe">☰ Bölümler</button>':'')+(PILOT?'':'<button class="ince" id="dSerbest">Dersten çık · serbest kullanım</button>')+'</div>';
+function cikisBagla(){var l=P.querySelector('#dListe'),s=P.querySelector('#dSerbest');if(l)l.onclick=function(){ac('hs')};if(s)s.onclick=function(){location.href=location.pathname}}
+
+/* ---------- bölüm listesi ---------- */
+function liste(){
+ var o=oku(),h='<div class="ust"><b>HEADSPACE ÖRNEKLEYİCİ</b><span>Agilent 7694E</span></div>';
+ h+='<div class="acl">Cihazı dört kısa bölümde öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 5–10 dakika sürer.</div><div class="liste">';
+ SIRA.forEach(function(id,k){var d=DERS[id],b=o[id]&&o[id].bitti;
+  h+='<button data-d="'+id+'" class="'+(b?'bitti':'')+'"><span class="no">'+(b?'✓':k+1)+'</span><span><b>'+d.ad+'</b><small>'+d.ozet+'</small></span><em>'+(b?'Tekrarla':'Başla ›')+'</em></button>'});
+ P.innerHTML=h+'</div>'+cikis;cikisBagla();
+ P.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){ac(b.dataset.d)}})}
+
+/* ---------- ders ---------- */
+function serit(faz){
+ return '<div class="cev"><div class="ser">'+FAZ.map(function(f,k){return '<div class="'+(faz===k?'on':'')+'">'+f[0]+'<b>'+f[1]+'</b></div>'}).join('')+'</div><div class="cy'+(faz==='c'?' on':'')+'">GC CYCLE TIME · iki enjeksiyon arası 11,0 dk</div></div>'}
+function aciklama(a){
+ var h='<div class="kart"><h4>'+a.b+'</h4>'+(a.deger?'<div class="dg">ALKOL2.M: '+a.deger+'</div>':'');
+ if(a.html)h+='<div>'+a.html+'</div>';
+ else h+='<dl><div><dt>NEDİR?</dt><dd>'+a.ne+'</dd></div><div><dt>'+(a.son?'NE İŞE YARAR?':'NEDEN BU DEĞER?')+'</dt><dd>'+a.neden+'</dd></div><div><dt>'+(a.son||'YANLIŞ AYARLANIRSA')+'</dt><dd>'+a.yanlis+'</dd></div></dl>';
+ if(a.cevrim||a.faz!==undefined)h+=serit(a.faz);
+ return h+'</div>'}
+function ciz(){
+ var a=ADIM[i],bi=bolumler.indexOf(a.bolum),h='';
+ h+='<div class="ust"><b>'+L.baslik+'</b><span>'+(i+1)+' / '+ADIM.length+'</span></div>';
+ h+='<div class="bol">'+bolumler.map(function(b,k){return '<i class="'+(k<bi?'g':k===bi?'s':'')+'">'+b+'</i>'}).join('')+'</div>';
+ if(a.test){h+=test()}
+ else{
+  if(a.ask)h+='<div class="ask'+(gecti?' tamam':'')+'">'+(gecti?(a.bekle?'✓ Açıklamayı okuyun, sonra devam edin.':'✓ Doğru. Açıklamayı okuyun, sonra devam edin.'):a.ask)+(uyari&&!gecti?'<small>'+uyari+'</small>':'')+'</div>';
+  if(!a.ask||gecti)h+=aciklama(a);
+  else if(a.faz!==undefined)h+=serit(a.faz);
+  h+='<div class="alt"><button id="dGeri"'+(i&&!a.geriYok?'':' disabled')+'>‹ Geri</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
+ h+=cikis;P.innerHTML=h;cikisBagla();
+ var m=document.getElementById('dersM'),dar=matchMedia('(max-width:1000px)').matches,bekle=!!a.ask&&!gecti;
+ if(m){m.className=bekle?'on':'';m.innerHTML=bekle?a.ask+(uyari?'<br><b style="color:#B3261E">'+uyari+'</b>':''):''}
+ if(dar&&kaydir){kaydir=false;(bekle?document.getElementById(S.view==='hslid'&&!a.hot&&a.sec?'loadP':'stageW'):P).scrollIntoView({block:'start',behavior:'smooth'})}
+ var g=P.querySelector('#dGeri'),n=P.querySelector('#dIleri');
+ if(g)g.onclick=function(){git(i-1)};if(n)n.onclick=function(){git(i+1)};
+ P.querySelectorAll('[data-c]').forEach(function(b){b.onclick=function(){if(cevap!==null)return;cevap=+b.dataset.c;if(cevap===SORU[sn][2])puan++;ciz()}});
+ var sd=P.querySelector('#dSoru');if(sd)sd.onclick=function(){sn++;cevap=null;if(sn>=SORU.length)kayit();ciz()};
+ var tk=P.querySelector('#dTekrar');if(tk)tk.onclick=function(){ac(D)};
+ var sr=P.querySelector('#dSonraki');if(sr)sr.onclick=function(){ac(sr.dataset.d)};
+ var eg=P.querySelector('#dEgitim');if(eg)eg.onclick=function(){location.href=BASE+'index.html#egitim'}}
+function test(){
+ if(sn>=SORU.length){var k=SIRA.indexOf(D),sonra=SIRA[k+1];
+  return '<div class="kart"><h4>Bölüm tamamlandı</h4><div class="dg">'+puan+' / '+SORU.length+' doğru</div><div><p><b>'+L.ad+'</b> bölümünü bitirdiniz.</p>'+(puan<SORU.length?'<p>Yanlış yanıtladığınız konular için bölümü yeniden izleyebilirsiniz.</p>':'')+(sonra?'<p>Sıradaki bölüm: <b>'+DERS[sonra].ad+'</b>.</p>':'<p>Headspace örnekleyicinin dört bölümünü de tamamladınız.</p>')+'</div></div><div class="alt"><button id="dTekrar">↺ Baştan</button>'+(sonra?'<button class="p" id="dSonraki" data-d="'+sonra+'">Sonraki bölüm ›</button>':PILOT?'<button class="p" id="dSonraki" data-d="hs">Bölümler ›</button>':'<button class="p" id="dEgitim">Eğitimlere dön ›</button>')+'</div>'}
+ var s=SORU[sn],h='<div class="kart"><h4>Soru '+(sn+1)+' / '+SORU.length+'</h4><div>'+s[0]+'</div><div class="sec">';
+ s[1].forEach(function(c,k){h+='<button data-c="'+k+'" class="'+(cevap===null?'':k===s[2]?'d':k===cevap?'y':'')+'">'+c+'</button>'});
+ h+='</div>'+(cevap!==null?'<div class="acl">'+(cevap===s[2]?'✓ Doğru. ':'✗ Doğru yanıt işaretlendi. ')+s[3]+'</div>':'')+'</div>';
+ if(cevap!==null)h+='<div class="alt"><button class="p" id="dSoru">'+(sn+1<SORU.length?'Sonraki soru ›':'Sonucu gör ›')+'</button></div>';
+ return h}
+function izinli(a){return a.view||L.view}
+function git(n){if(n<0||n>=ADIM.length)return;var geri=n<i;i=n;gecti=false;uyari='';hataM='';var a=ADIM[i];
+ /* ileri giderken ekran olduğu gibi kalır (aynı tuşa yeniden basılır); geri dönüşte temiz ekrandan başlanır */
+ HS.buf='';if(geri||!n){HS.mode='idle';HS.idx=0}
+ var v=izinli(a);if(v.indexOf(S.view)<0||geri)A.show(v[0]);
+ document.body.classList.toggle('dersGeri',!!a.geri);
+ var tp=document.getElementById('tip');if(tp)tp.style.display='none';
+ if(a.gir)a.gir();kaydir=true;ciz();isaret()}
+function isaret(){
+ var a=ADIM[i],bek=!!a.ask&&!gecti,ks=(bek&&a.keys)?a.keys(HS):[],ss=(bek&&a.sec)?a.sec():[];
+ document.querySelectorAll('#st .hs').forEach(function(d){var k=d.classList.contains('key')?ks.indexOf(d.dataset.k)>=0:(bek&&!!a.hot&&d.dataset.t===a.hot);d.classList.toggle('dersK',k)});
+ document.querySelectorAll('.dersH').forEach(function(d){d.classList.remove('dersH')});
+ ss.forEach(function(q){document.querySelectorAll(q).forEach(function(d){d.classList.add(d.classList.contains('hs')?'dersK':'dersH')})});
+ var e=document.querySelector('#st .disp.hsd');if(e)e.classList.toggle('dersD',!!a.ekran||(!!a.ask&&gecti&&S.view==='hskey'))}
+function tamam(){var a=ADIM[i];if(a.bitince)a.bitince();if(a.oto){git(i+1);return}gecti=true;uyari='';kaydir=true;ciz()}
+function tik(){
+ var a=ADIM[i];if(a.test)return;
+ var v=izinli(a);if(v.indexOf(S.view)<0)A.show(v[0]);
+ if(a.ask&&!gecti){
+  if(a.ok&&a.ok(HS))tamam();
+  else if(a.hata){var m=a.hata(HS);if(m!==hataM){hataM=m;uyari=m;ciz()}}}
+ isaret()}
+function dokunus(e){
+ var a=ADIM[i],d=e.target.closest&&e.target.closest('.hs');if(!d||a.test)return;
+ if(d.classList.contains('key')){
+  if(!a.ask||gecti||!a.keys){e.stopPropagation();e.preventDefault();return}
+  var ks=a.keys(HS),k=d.dataset.k;
+  if(ks.indexOf(k)<0&&k!=='clear'){e.stopPropagation();e.preventDefault();uyari='Bu adımda yanıp sönen tuşu kullanın.';setTimeout(ciz,60)}
+  else if(uyari){uyari='';setTimeout(ciz,60)}
+  return}
+ /* fotoğraf bölgeleri */
+ var ad=d.dataset.t||'';
+ if(/^Yuva /.test(ad))return;
+ if(!a.ask||gecti){if(L.yukGizle||!a.ask){e.stopPropagation();e.preventDefault()}return}
+ if(!a.hot)return;
+ if(ad===a.hot){if(a.kes){e.stopPropagation();e.preventDefault();tamam()}return}
+ e.stopPropagation();e.preventDefault();uyari='Burası: <b>'+ad+'</b>. Yanıp sönen bölgeye dokunun.';ciz()}
+function basla(){
+ if(!window.__hs||!document.querySelector('.side')){setTimeout(basla,150);return}
+ A=window.__hs;S=A.S;HS=S.hs;document.body.classList.add('ders');
+ P=document.createElement('div');P.id='dersP';document.querySelector('.side').appendChild(P);
+ var M=document.createElement('div');M.id='dersM';document.body.appendChild(M);
+ var st=document.getElementById('st');
+ if(!L){D='hs';A.show('main');liste();st.addEventListener('click',function(e){if(e.target.closest('.hs')){e.stopPropagation();e.preventDefault()}},true);
+  setInterval(function(){if(S.view!=='main')A.show('main')},300);return}
+ sifirla();if(L.kur)L.kur();if(L.yukGizle)document.body.classList.add('dersYuk');
+ A.show(L.view[0]);
+ st.addEventListener('pointerdown',function(e){if(e.target.closest('.hs.key'))dokunus(e)},true);
+ st.addEventListener('click',function(e){if(!e.target.closest('.hs.key'))dokunus(e)},true);
+ git(0);setInterval(tik,150);setTimeout(function(){dispatchEvent(new Event('resize'))},60)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',basla);else basla();
+})();

@@ -143,7 +143,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
 const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const IMG={main:MEDIA+'hsgcms_main.jpg',gckey:MEDIA+'hsgcms_gckey.jpg',hskey:MEDIA+'hsgcms_hskey.jpg',oven:MEDIA+'hsgcms_oven.jpg',hslid:MEDIA+'hsgcms_hslid.jpg',vial:MEDIA+'hsgcms_vial.png'};
 const AR={main:1700/1275,gckey:975/1300,hskey:975/1300,oven:1050/1400,hslid:1050/1400};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];$('#av').src=MEDIA+'avatar.jpg';const say=t=>$('#say').innerHTML=t;
-const st=$('#st'),bg=$('#bg');const SPD=120;/* 1 s gerçek = 2 dk */
+const st=$('#st'),bg=$('#bg');let SPD=120;/* 1 s gerçek = 2 dk */
 let AC=null;const beep=(f=2400,d=.05,v=.05)=>{try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;o.type='square';g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}};
 /* ---------- SOP: vial planı (ALKOL2.M kalibrasyon seviyeleri, g/L) ---------- */
 const CALS=[[9,.01],[2,.05],[1,.1],[3,.2],[4,.25],[5,.3],[6,.4],[7,.45],[8,.5]];
@@ -217,7 +217,7 @@ function build(){st.querySelectorAll('.hs,.disp,.led,.vial,.slotn,.badge,.back')
  hotspots(v).forEach(([act,x,y,w,h,t])=>{const d=el('hs'+(act.startsWith('go:')&&act!=='go:main'&&!S.seen[act]?' pulse':''),x,y,w,h);d.dataset.t=t;d.tabIndex=0;d.onclick=()=>hsAct(act,[x,y,w,h]);tipOn(d)});
  if(v==='gckey'){GCK.forEach(([k,...b])=>{const [x,y,w,h]=PB(...b);const d=el('hs key',x,y,w,h);d.dataset.t=NAMES[k]||'';d.onpointerdown=e=>{e.preventDefault();press(d);gcKey(k)}});
   const [x,y,w,h]=PB(252,594,95,221);S.gcD=el('disp gc',x,y,w,h);S.gcL=[el('led',474/8.25,393/11),el('led',555/8.25,396/11),el('led',474/8.25,433/11)];gcDraw()}
- if(v==='hskey'){HSK.forEach(([k,...b])=>{const [x,y,w,h]=PB(...b);const d=el('hs key',x,y,w,h);d.dataset.t=NAMES[k]||'';d.onpointerdown=e=>{e.preventDefault();press(d);hsKey(k)}});
+ if(v==='hskey'){HSK.forEach(([k,...b])=>{const [x,y,w,h]=PB(...b);const d=el('hs key',x,y,w,h);d.dataset.t=NAMES[k]||'';d.dataset.k=k;d.onpointerdown=e=>{e.preventDefault();press(d);hsKey(k)}});
   const [x,y,w,h]=PB(196,625,355,418);S.hsD=el('disp hsd',x,y,w,h);S.hsL=[el('led',447/8.25,458/11),el('led',542/8.25,458/11)];hsDraw()}
  if(v==='hslid'){S.lid=true;Object.entries(SLOT).forEach(([n,[x,y]])=>{const id=S.slots[n];if(id){const i=document.createElement('img');i.className='vial';i.src=IMG.vial;i.style.left=x+'%';i.style.top=y+'%';st.appendChild(i);el('slotn',x,y-5.4).textContent=n}
    const d=el('hs'+(S.hand&&!id?' pulse':''),x-4.2,y-3.2,8.4,6.4);d.dataset.t=id?`Yuva ${n}: ${id} (geri al)`:`Yuva ${n}`;d.onclick=()=>slotAct(+n);tipOn(d)});renderLoad()}
@@ -1365,12 +1365,13 @@ $$('#nav button').forEach(b=>b.onclick=()=>{const v=b.dataset.v;if(v==='hslid'&&
 $('#hLab').onclick=e=>{e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'#r1-hsgc')};
 renderTasks();show('main');
 say('Kanda <b>metanol ve etanol</b> analizi, doğrulanmış yöntem <b>ALKOL2.M</b> ile. Sağdaki SOP adımlarını sırayla izle: önce cihazı tanı (fırın kapağı, tuş takımları), sonra vialleri hazırla, HS’e yükle, ChemStation’da sekansı kur ve başlat; en sonda veriyi değerlendir.');
-window.__hs={S,PLAN,IC,DA,DATA,gcKey,hsKey,show,slotAct,hsAct,prepStep,pcApp,daLoad,calGlobals,qsIon,calUpdate,quantCalc,quantReport,quantCalcUI,fit:calFit,allFiles,daLib,daOverlay,seqTable,startSeqDlg,seqCheck,gcEditDlg,METH,applyMeth,methRT,runLen,loadMethDlg,saveAsDlg,libDlg,calEdit,setDAMethod,CAL,inletAnim,qsOpen,DA2:()=>DA};
+window.__hs={spd:v=>{SPD=v},S,PLAN,IC,DA,DATA,gcKey,hsKey,show,slotAct,hsAct,prepStep,pcApp,daLoad,calGlobals,qsIon,calUpdate,quantCalc,quantReport,quantCalcUI,fit:calFit,allFiles,daLib,daOverlay,seqTable,startSeqDlg,seqCheck,gcEditDlg,METH,applyMeth,methRT,runLen,loadMethDlg,saveAsDlg,libDlg,calEdit,setDAMethod,CAL,inletAnim,qsOpen,DA2:()=>DA};
 if(location.hash==='#prep')setTimeout(()=>show('prep'),400);
 
 </script>
 
 <script src="egitim_cubugu.js" charset="utf-8" defer></script>
 <script src="anamenu.js" charset="utf-8" defer></script>
+<script src="hs_ders.js" charset="utf-8" defer></script>
 </body>
 </html>
