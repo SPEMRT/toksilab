@@ -4,6 +4,7 @@
    hsgcms_pilot.html?ders=hsyukle   → Numune yükleme
    hsgcms_pilot.html?ders=hstus     → Tuş takımı parametreleri
    hsgcms_pilot.html?ders=hsbaslat  → Analizi başlatma
+   hsgcms_pilot.html?ders=da        → Veri analizi bölüm listesi (datani · dakrom · dasonuc)
    hsgcms_pilot.html?ders=gc        → GC-MS bölüm listesi (gctani · gctus · pctani: Yazılımı tanıma ve menüler · pcsekans: Sekans)
    Sayfanın kendi fotoğraflarını, tuş takımını ve yöntem değerlerini kullanır. ?ders= yoksa hiçbir şey yapmaz. */
 (function(){
@@ -40,7 +41,18 @@ function vialHazir(){A.PLAN.forEach(function(p){if(p.id==='BLANK'||p.id==='QC-0,
 function vialYukle(){vialHazir();Object.keys(YUK).forEach(function(n){S.slots[n]=YUK[n];A.PLAN.forEach(function(p){if(p.id===YUK[n])p.where=+n})})}
 var yuvaHata=function(){var m='';Object.keys(S.slots).forEach(function(n){if(YUK[n]!==S.slots[n])m='<b>'+S.slots[n]+'</b> yanlış yuvada ('+n+'). Viale dokunarak geri alın ve doğru yuvaya koyun.'});return m};
 var hazirHata=function(h){return h.msg==='NOT READY'||h.msg==='GC NOT READY'?'Cihaz henüz hazır değil. Birkaç saniye bekleyip yeniden deneyin.':''};
-var menuAcik=function(m){var e=document.querySelector('#icMB>div[data-m="'+m+'"]');return !!e&&e.classList.contains('open')};
+var menuAcik=function(m,bar){var e=document.querySelector((bar||'#icMB')+'>div[data-m="'+m+'"]');return !!e&&e.classList.contains('open')};
+/* menü: kapalıyken menü adını, açıkken (komut verilmişse) o komutu etkin kılar */
+var MENU=function(bar,m,komut){var d=document.querySelector(bar+'>div[data-m="'+m+'"]');if(!d)return [];if(!komut||!d.classList.contains('open'))return [d];
+ var r=[];d.querySelectorAll('.dd>div').forEach(function(x){if(x.textContent===komut)r.push(x)});return r};
+var DOSYA=function(ad){var r=null;A.DATA.forEach(function(f){f.files.forEach(function(x){if(x.name===ad)r=x})});return r};
+var QRES=function(k){var F=A.DA.F,q=F&&F.quant;if(!q)return null;var r=null;q.res.forEach(function(x){if(x.c.name===k)r=x});return r};
+var ETOH=function(){var r=QRES('etanol');return r&&!r.miss?r:null};
+var METOH=function(){var t=document.querySelector('#desk .dlg .rep'),m=t&&t.textContent.match(/metanol.*$/m);if(!m)return '';var x=m[0];return /N\.D\./.test(x)?'tespit edilmedi (N.D.)':/<LOQ/.test(x)?'pik var ama ölçüm sınırının altında (&lt;LOQ); sayısal değer verilmez':/N\.A\./.test(x)?'uygun pik bulunamadı (N.A.)':'sayısal sonuç raporda'};
+/* veri dosyası açma adımı: sol tıkla seç, sağ tıkla Load Data File */
+var YUKLE=function(bolum,ad,b,html){var q='#daTree [data-f="ORNEK_SET|'+ad+'"]';return {bolum:bolum,ask:'Soldaki listede <b>'+ad+'</b> dosyasına <b>sağ tıklayın</b> ve açılan menüden <b>Load Data File</b> komutunu seçin.',
+ izin:function(){return document.querySelector('#desk .ctxm')?['#desk .ctxm [data-i="0"]']:[q]},ok:function(){return !!A.DA.F&&A.DA.F.name===ad&&!document.querySelector('#desk .ctxm')},
+ hata:function(){return A.DA.open['d:ORNEK_SET']?'':'ORNEK_SET klasörü kapalı.'},gir:function(){A.DA.open['d:ORNEK_SET']=true;if(A.daTree)A.daTree()},b:b,html:html}};
 var dlgAcik=function(t){var r=false;document.querySelectorAll('#desk .dlg .dt b').forEach(function(b){if(b.textContent.indexOf(t)===0)r=true});return r};
 var fazBekle=function(ph,vial){return function(h){return !!h.run&&h.run.ph===ph&&(!vial||h.run.vial===vial)}};
 
@@ -403,10 +415,127 @@ pcsekans:{grup:'gc',ad:'Sekans oluşturma ve başlatma',ic:'📋',ozet:'Sekans t
  ['Sekans tablosunda Vial sütununa ne yazılır?',['Örneğin hacmi','Vialin karuseldeki yuva numarası','Analiz süresi'],1,'Tablodaki numara karuseldeki yuvayla aynı olmalıdır.'],
  ['“Overwrite Existing Data Files” kutusu neden işaretlenmez?',['Aynı adlı eski verinin üzerine yazar; eski veri kaybolur','Analizi yavaşlatır','Raporu kapatır'],0,'Silinen veri geri getirilemez.'],
  ['Run Sequence’a bastınız; Run Status “Pre-Run” oldu. Sıradaki adım nedir?',['Beklemek, analiz kendiliğinden başlar','GC tuş takımında Start’a basmak','Headspace tuş takımında Start’a basmak'],2,'Bilgisayar headspace’in başla sinyalini bekler.'],
- ['BLANK kromatogramında hangi pik görülmelidir?',['Yalnızca iç standart (n-propanol)','Etanol ve metanol','Hiç pik olmamalıdır'],0,'İç standart her viale eklenir; BLANK’te etanol görülmesi bulaşma işaretidir.']]}
+ ['BLANK kromatogramında hangi pik görülmelidir?',['Yalnızca iç standart (n-propanol)','Etanol ve metanol','Hiç pik olmamalıdır'],0,'İç standart her viale eklenir; BLANK’te etanol görülmesi bulaşma işaretidir.']]},
+datani:{grup:'da',ad:'Programı tanıma ve menüler',ic:'🖥',ozet:'Dosya ağacı, veri açma, SCAN / SIM / spektrum pencereleri, araç çubuğu ve menüler.',baslik:'VERİ ANALİZİ · PROGRAMI TANIMA',view:['pc'],app:'da',
+ pcKur:function(){A.setDAMethod('ALKOL1.M')},
+ adim:[
+ {bolum:'Giriş',b:'Enhanced Data Analysis',
+  html:'<p>Bu program, toplanmış veriyi değerlendirir. Cihaza hiçbir komut göndermez; yalnızca kaydedilmiş dosyalarla çalışır. Bu yüzden burada yapacağınız hiçbir işlem analizi bozmaz.</p><p>Ekran üç kısımdır: <b>solda</b> dosya ağacı, <b>sağda</b> üç pencere, <b>üstte</b> menüler ve araç çubuğu.</p>'},
+ {bolum:'Dosyalar',ask:'En üstteki <b>başlık satırına</b> tıklayın.',dok:'#appDA .ttl',
+  b:'Başlık satırı',html:'<p>Başlıkta sırasıyla şunlar yazar:</p><ul><li>Yüklü <b>yöntem</b> (ALKOL1.M): hesaplamada bu yöntemin kalibrasyonu kullanılır.</li><li>Açık olan <b>veri dosyası</b>.</li><li>Dosyanın durumu: <b>Not Quantitated</b> (henüz hesaplanmadı) ya da <b>Quantitated</b>.</li></ul>'},
+ {bolum:'Dosyalar',ask:'Soldaki <b>dosya ağacına</b> tıklayın.',dok:'#daTree',
+  b:'Dosya ağacı',html:'<ul><li><b>methods:</b> kayıtlı yöntemler. Kalın yazılı olan, yüklü yöntemdir.</li><li><b>data:</b> veri klasörleri. Her analiz, adı <b>.D</b> ile biten ayrı bir dosyadır.</li></ul><p>Klasör adının yanındaki sayı, içindeki dosya sayısını gösterir.</p>'},
+ {bolum:'Dosyalar',ask:'<b>ORNEK_SET</b> klasörüne tıklayarak klasörü açın.',izin:function(){return ['#daTree [data-fo="d:ORNEK_SET"]']},ok:function(){return !!A.DA.open['d:ORNEK_SET']},
+  b:'ORNEK_SET klasörü',html:'<p>Bu klasörde tam bir analiz serisi var; derslerde bunu kullanacaksınız:</p><ul><li><b>ORN_BLANK:</b> boş kan</li><li><b>ORN_KAL_…:</b> dokuz kalibratör (0,01–0,5 g/L)</li><li><b>ORN_QC_0,25:</b> kontrol örneği</li><li><b>ORN_NUMUNE_A:</b> numune</li></ul>'},
+ YUKLE('Dosyalar','ORN_KAL_0,2.D',
+  'Veri açıldı','<p>Dosya adına sol tık yalnızca seçer; veriyi açmak için <b>sağ tık ▸ Load Data File</b> gerekir. Gerçek programda da böyledir.</p><p>Sağda üç pencere doldu; kromatogramda üç pik var:</p><ul><li><b>2,91 dk:</b> metanol</li><li><b>3,17 dk:</b> etanol</li><li><b>3,79 dk:</b> iç standart (n-propanol)</li></ul>'),
+ {bolum:'Pencereler',ask:'Üstteki pencereye, <b>[3] TIC (data.ms)</b> kromatogramına tıklayın.',dok:'#cvC',
+  b:'SCAN kromatogramı',html:'<p><b>SCAN</b> verisidir: dedektör bütün iyonları tarar. Her pikin tam kütle spektrumu buradan alınır; bu yüzden <b>tanımlama</b> (bu pik hangi madde?) için kullanılır.</p><p>Bütün iyonlar ölçüldüğü için taban çizgisi daha gürültülüdür.</p>'},
+ {bolum:'Pencereler',ask:'Ortadaki pencereye, <b>[4] TIC (datasim.ms)</b> kromatogramına tıklayın.',dok:'#cvC2',
+  b:'SIM kromatogramı',html:'<p><b>SIM</b> verisidir: dedektör yalnızca seçilmiş birkaç iyonu izler (metanol 31/32, etanol 29/45, n-propanol 31/41/59).</p><p>Daha az iyon ölçüldüğü için sinyal temiz ve duyarlıdır; düşük derişimler burada daha iyi görülür.</p><p>Yöntem aynı enjeksiyonda iki veriyi birden toplar.</p>'},
+ {bolum:'Pencereler',ask:'Alttaki <b>[1] Spectrum</b> penceresine tıklayın.',dok:'#cvS',
+  b:'Spektrum penceresi',html:'<p>Şimdilik boş. Kromatogramda bir pike <b>sağ tuşla çift tıkladığınızda</b> o pikin kütle spektrumu burada açılır.</p><p>Bunu bir sonraki bölümde yapacaksınız.</p>'},
+ {bolum:'Araç çubuğu',ask:'Menülerin altındaki <b>araç çubuğuna</b> tıklayın.',dok:'#daTB',
+  b:'Araç çubuğu',html:'<p>En sık kullanılan komutların kısayollarıdır. Soldan sağa:</p><ul><li>📂 veri açma · 🔁 kromatogramı yeniden çiz</li><li><b>∫</b> pikleri integre et (alan hesapla)</li><li>⧉ kromatogramları üst üste bindir</li><li>🔎 kütüphane araması</li><li>⚖ 📊 ↻ kalibrasyon kurulumu, bileşikler, güncelleme</li><li><b>Σ</b> hesapla · 📄 rapor</li></ul>'},
+ {bolum:'Menüler',ask:'Menü çubuğunda <b>File</b> menüsüne tıklayın.',izin:function(){return MENU('#daMB','File')},ok:function(){return menuAcik('File','#daMB')},
+  b:'File menüsü',html:'<ul><li><b>Load Data File…</b> Veri dosyası açar (ağaçtaki sağ tıkla aynı iş).</li><li><b>Print…</b> Açık pencereyi yazdırır.</li><li><b>Exit</b> Programı kapatır.</li></ul>'},
+ {bolum:'Menüler',ask:'<b>Method</b> menüsüne tıklayın.',izin:function(){return MENU('#daMB','Method')},ok:function(){return menuAcik('Method','#daMB')},
+  b:'Method menüsü',html:'<ul><li><b>Load Method…</b> Değerlendirmede kullanılacak yöntemi yükler. Kalibrasyon yöntemin içindedir; yanlış yöntem yüklüyse sonuç yanlış eğriyle hesaplanır.</li><li><b>Save Method</b> ve <b>Edit Method…</b> Yöntemi kaydeder ve düzenler.</li></ul>'},
+ {bolum:'Menüler',ask:'<b>Chromatogram</b> menüsüne tıklayın.',izin:function(){return MENU('#daMB','Chromatogram')},ok:function(){return menuAcik('Chromatogram','#daMB')},
+  b:'Chromatogram menüsü',html:'<p>Uzun bir menüdür; günlük işte şu komutlar kullanılır:</p><ul><li><b>Redraw TIC:</b> kromatogramı ilk hâline döndürür.</li><li><b>Extract Ion Chromatograms…</b> Seçtiğiniz iyonların kromatogramını ayrı ayrı çizer.</li><li><b>Integrate:</b> piklerin alanını hesaplar.</li><li><b>Integration Results…</b> Alanları tablo olarak gösterir.</li></ul>'},
+ {bolum:'Menüler',ask:'<b>Spectrum</b> menüsüne tıklayın.',izin:function(){return MENU('#daMB','Spectrum')},ok:function(){return menuAcik('Spectrum','#daMB')},
+  b:'Spectrum menüsü',html:'<ul><li><b>Subtract:</b> arka plan spektrumunu çıkarır.</li><li><b>Tabulate:</b> spektrumdaki iyonları ve şiddetlerini tablo olarak verir.</li><li><b>Select Library…</b> Aramada kullanılacak kütüphaneyi seçer.</li><li><b>Library Search Report…</b> Açık spektrumu kütüphanede arar ve en iyi eşleşmeleri listeler.</li></ul>'},
+ {bolum:'Menüler',ask:'<b>Calibrate</b> menüsüne tıklayın.',izin:function(){return MENU('#daMB','Calibrate')},ok:function(){return menuAcik('Calibrate','#daMB')},
+  b:'Calibrate menüsü',html:'<ul><li><b>Set Up Quantitation…</b> Yeni bir kalibrasyonun genel ayarları.</li><li><b>Edit Compounds…</b> Bileşikler, iyonları ve kalibrasyon eğrileri.</li><li><b>List…</b> Kalibrasyonun özeti.</li><li><b>Update…</b> Kalibratör verileriyle eğriyi günceller.</li><li><b>Clear…</b> Kalibrasyonu siler.</li></ul><p>ALKOL1.M’in kalibrasyonu doğrulanmıştır ve kilitlidir; yapısı değiştirilemez.</p>'},
+ {bolum:'Menüler',ask:'<b>Quantitate</b> menüsüne tıklayın.',izin:function(){return MENU('#daMB','Quantitate')},ok:function(){return menuAcik('Quantitate','#daMB')},
+  b:'Quantitate menüsü',html:'<ul><li><b>Calculate:</b> açık dosyadaki bileşiklerin derişimini kalibrasyon eğrisinden hesaplar.</li><li><b>Generate Report…</b> Sonuç raporunu açar.</li></ul><p>Sonuç almak için kullanacağınız menü budur.</p>'},
+ {bolum:'Menüler',ask:'<b>Tools</b> menüsüne tıklayın.',izin:function(){return MENU('#daMB','Tools')},ok:function(){return menuAcik('Tools','#daMB')},
+  b:'Tools menüsü',html:'<ul><li><b>Overlay Chromatograms…</b> Birden çok dosyanın kromatogramını üst üste çizer.</li><li><b>Reset Windows:</b> pencereleri ilk hâline döndürür.</li></ul><p>Kalan menüler: <b>Export Reports</b> sonuçları dosyaya aktarır, <b>View ▸ Instrument Control</b> veri toplama programına döner, <b>Options</b> ve <b>Help</b> ayarlar ve yardım içindir.</p>'},
+ {bolum:'Menüler',ask:'En alttaki <b>durum satırına</b> tıklayın.',dok:'#daSB',
+  b:'Durum satırı',html:'<p>Son yapılan işlemi yazar: “Loaded …”, “Integration complete: 3 peaks”, “Quantitation complete”.</p><p>Bir komut çalışmadıysa nedeni çoğu zaman burada görünür.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Bir veri dosyası nasıl açılır?',['Dosya adına sol tıklanır','Dosya adına sağ tıklanır ve Load Data File seçilir','Dosya sürüklenip pencereye bırakılır'],1,'Sol tık yalnızca seçer.'],
+ ['SCAN ve SIM verisi arasındaki fark nedir?',['SCAN bütün iyonları tarar, SIM yalnızca seçili iyonları izler','SCAN daha duyarlıdır','İkisi aynı veridir'],0,'SCAN tanımlama, SIM duyarlı ölçüm içindir.'],
+ ['Derişim hesabı hangi menüden yapılır?',['Chromatogram','Spectrum','Quantitate'],2,'Quantitate ▸ Calculate, sonra Generate Report.'],
+ ['Data Analysis’te yanlış yöntem yüklüyse ne olur?',['Cihaz durur','Sonuç yanlış kalibrasyon eğrisiyle hesaplanır','Veri silinir'],1,'Kalibrasyon yöntemin içinde saklanır.']]},
+
+dakrom:{grup:'da',ad:'Kromatogram ve spektrum',ic:'📈',ozet:'Yakınlaştırma, pik alanı, kütle spektrumu, kütüphane araması, iyon kromatogramı, üst üste bindirme.',baslik:'VERİ ANALİZİ · KROMATOGRAM',view:['pc'],app:'da',
+ pcKur:function(){A.DA.open['d:ORNEK_SET']=true;A.daLoad(DOSYA('ORN_KAL_0,2.D'))},
+ adim:[
+ {bolum:'Giriş',b:'Kromatogram nasıl okunur?',
+  html:'<p>Ekranda 0,2 g/L kalibratörün verisi açık. Kromatogramda:</p><ul><li><b>Yatay eksen</b> zamandır (dakika). Bir pikin çıktığı zamana <b>tutunma süresi</b> (R.T.) denir; aynı madde her analizde aynı zamanda çıkar.</li><li><b>Dikey eksen</b> sinyal şiddetidir.</li><li>Pikin <b>alanı</b> maddenin miktarıyla orantılıdır.</li></ul><p>Tutunma süresi “hangi madde?”, alan “ne kadar?” sorusunu yanıtlar.</p>'},
+ {bolum:'Kromatogram',ask:'Yakınlaştırın: üstteki kromatogramda farenin <b>sol tuşunu basılı tutarak</b> ilk iki piki içine alacak şekilde (yaklaşık <b>2,8</b>’den <b>3,4</b>’e) sürükleyin.',izin:function(){return ['#cvC']},
+  ok:function(){var r=A.DA.range;return r[0]>=2.5&&r[0]<2.9&&r[1]>3.2&&r[1]<=3.7},
+  hata:function(){var r=A.DA.range;return (r[1]-r[0]<2.5)?'Aralık uygun olmadı. Kromatograma <b>sol çift tıklayarak</b> geri dönün ve 2,8 ile 3,4 arasını yeniden seçin.':''},
+  b:'Yakınlaştırma',html:'<p>Seçtiğiniz aralık pencereyi doldurdu: solda metanol (2,91 dk), sağda etanol (3,17 dk). İki pik birbirinden tamamen ayrılmış; aralarında sinyal taban çizgisine iniyor.</p><p>Geri dönmek için kromatograma <b>sol çift tıklanır</b>.</p>'},
+ {bolum:'Kromatogram',ask:'Araç çubuğundaki <b>∫</b> (Integrate) simgesine tıklayın.',izin:function(){return ['#daTB span[data-i="2"]']},ok:function(){return A.DA.integ},
+  b:'İntegrasyon',html:'<p>Program her pikin altındaki alanı hesapladı:</p><ul><li>Pik tepesindeki sayı <b>tutunma süresi</b>dir.</li><li>Pikin altındaki kırmızı çizgi <b>taban çizgisi</b>dir; alan, pik ile bu çizgi arasında kalan bölgedir.</li></ul><p>Taban çizgisi yanlış çizilirse alan, dolayısıyla sonuç da yanlış olur. Bu yüzden integrasyon her zaman gözle kontrol edilir.</p>'},
+ {bolum:'Kromatogram',ask:'Alanları tablo olarak görün: <b>Chromatogram</b> menüsünü açın ve <b>Integration Results…</b> komutuna tıklayın.',izin:function(){return MENU('#daMB','Chromatogram','Integration Results...')},ok:function(){return dlgAcik('Integration Results')},
+  b:'Integration Results',html:'<p>Her satır bir piktir. Önemli sütunlar:</p><ul><li><b>R.T.:</b> tutunma süresi</li><li><b>peak height:</b> pik yüksekliği</li><li><b>corr. area:</b> düzeltilmiş alan (hesaplamada kullanılan değer)</li><li><b>% of total:</b> pikin toplam alandaki payı</li></ul>'},
+ {bolum:'Kromatogram',ask:'Tabloyu <b>Close</b> ile kapatın.',oto:1,izin:function(){return ['#desk .dlg .bts button']},ok:function(){return !dlgAcik('Integration Results')}},
+ {bolum:'Spektrum',ask:'Etanol pikinin (<b>3,170</b>) tepesine, üstteki kromatogramda <b>sağ tuşla çift tıklayın</b>.',izin:function(){return ['#cvC']},
+  ok:function(){var D=A.DA;return !!D.spec&&D.specSrc==='scan'&&Math.abs(D.scanT-3.17)<.04},
+  hata:function(){var D=A.DA,r=D.range;if(r[1]-r[0]>2||r[0]>3.1||r[1]<3.25)return 'Etanol piki görünmüyor. Sol çift tıklayıp 2,8–3,4 aralığını yeniden seçin.';return D.spec&&D.specSrc==='scan'&&Math.abs(D.scanT-3.17)>=.04?'Bu, '+D.scanT.toFixed(2).replace('.',',')+' dakikadaki spektrum. Etanol piki 3,17 dakikada; tepesine sağ çift tıklayın.':''},
+  b:'Kütle spektrumu',html:'<p>Alttaki pencerede etanolün kütle spektrumu açıldı. Her çizgi bir iyondur; yatay eksen iyonun kütlesi (m/z), dikey eksen şiddetidir.</p><ul><li><b>m/z 31:</b> en yüksek iyon (hedef iyon)</li><li><b>m/z 45</b> ve <b>46:</b> etanole özgü iyonlar (niteleyiciler)</li></ul><p>Bu desen etanolün parmak izidir. Metanolde 45 ve 46 yoktur; iki madde böyle ayırt edilir.</p>'},
+ {bolum:'Kütüphane',ask:'Kütüphaneyi seçin: <b>Spectrum</b> menüsünü açın ve <b>Select Library…</b> komutuna tıklayın.',oto:1,izin:function(){return MENU('#daMB','Spectrum','Select Library...')},ok:function(){return dlgAcik('Library Search Parameters')}},
+ {bolum:'Kütüphane',ask:'1. satırdaki <b>Browse…</b> düğmesine tıklayın.',oto:1,izin:function(){return ['#desk .dlg [data-b="0"]']},ok:function(){return dlgAcik('Select Library')}},
+ {bolum:'Kütüphane',ask:'Listeden <b>W9N11.L</b> kütüphanesini seçin ve <b>Open</b> düğmesine tıklayın.',oto:1,izin:function(){return ['#slS','#slO']},ok:function(){var e=document.getElementById('lb0');return !dlgAcik('Select Library')&&!!e&&/W9N11\.L$/i.test(e.value)},
+  hata:function(){var e=document.getElementById('lb0');return !dlgAcik('Select Library')&&e&&e.value&&!/W9N11\.L$/i.test(e.value)?'Başka bir kütüphane seçildi. Browse… ile yeniden açıp W9N11.L seçin.':''}},
+ {bolum:'Kütüphane',ask:'Pencereyi <b>OK</b> ile kapatın.',izin:function(){var e=document.getElementById('lb0');return e&&!/W9N11\.L$/i.test(e.value)?['#desk .dlg [data-b="0"]','#slS','#slO']:['#lbOK']},ok:function(){return /W9N11/i.test(A.DA.lib[0]||'')&&!dlgAcik('Library Search Parameters')},
+  b:'Kütüphane seçildi',html:'<p><b>W9N11.L</b>, Wiley ve NIST kütüphanelerinin birleşimidir; yüz binlerce maddenin kütle spektrumunu içerir.</p><p>Program, açık spektrumu bu kayıtlarla karşılaştırıp en çok benzeyenleri listeler.</p>'},
+ {bolum:'Kütüphane',ask:'Aramayı yapın: <b>Spectrum</b> menüsünü açın ve <b>Library Search Report…</b> komutuna tıklayın.',izin:function(){return MENU('#daMB','Spectrum','Library Search Report...')},ok:function(){return dlgAcik('Library Search Report')},
+  b:'Kütüphane sonucu',html:'<p>İlk sırada <b>Ethanol</b> var. <b>Qual</b> sütunu eşleşme kalitesidir (en çok 99); 80 ve üstü iyi bir eşleşmedir.</p><p>Kütüphane eşleşmesi tek başına kanıt sayılmaz. Bir pikin kimliği üç şeyle birlikte doğrulanır: <b>tutunma süresi</b>, <b>kütle spektrumu</b> ve aynı koşulda çalışılmış <b>standart</b>.</p>'},
+ {bolum:'Kütüphane',ask:'Raporu <b>Close</b> ile kapatın.',oto:1,izin:function(){return ['#desk .dlg .bts button']},ok:function(){return !dlgAcik('Library Search Report')}},
+ {bolum:'İyonlar',ask:'Kromatograma <b>sol çift tıklayarak</b> tam görünüme dönün.',oto:1,izin:function(){return ['#cvC']},ok:function(){var r=A.DA.range;return r[1]-r[0]>2}},
+ {bolum:'İyonlar',ask:'<b>Chromatogram</b> menüsünü açın ve <b>Extract Ion Chromatograms…</b> komutuna tıklayın.',oto:1,izin:function(){return MENU('#daMB','Chromatogram','Extract Ion Chromatograms...')},ok:function(){return dlgAcik('Extract Ion Chromatograms')}},
+ {bolum:'İyonlar',ask:'Kutularda 31, 45 ve 59 yazıyor. <b>OK</b> düğmesine tıklayın.',izin:function(){return ['#eOK']},ok:function(){return !!A.DA.eic&&!dlgAcik('Extract Ion Chromatograms')},
+  b:'İyon kromatogramları',html:'<p>Her renk tek bir iyonun kromatogramıdır:</p><ul><li><b>m/z 31:</b> üç pikte de var (üç alkolün ortak iyonu).</li><li><b>m/z 45:</b> yalnızca etanolde güçlü.</li><li><b>m/z 59:</b> yalnızca n-propanolde.</li></ul><p>Niteleyici iyonların mantığı budur: doğru zamanda çıkan pikte, doğru iyonlar doğru oranda bulunmalıdır.</p>'},
+ {bolum:'Karşılaştırma',ask:'Araç çubuğundaki <b>⧉</b> (Overlay) simgesine tıklayın.',oto:1,izin:function(){return ['#daTB span[data-i="3"]']},ok:function(){return dlgAcik('Overlay Chromatograms')}},
+ {bolum:'Karşılaştırma',ask:'<b>Kalibratörleri seç</b> düğmesine, ardından <b>OK</b> düğmesine tıklayın.',
+  izin:function(){return document.querySelectorAll('#desk .dlg [data-f]:checked').length>=5?['#oOK']:['#oCal']},ok:function(){return !!A.DA.overlay&&A.DA.overlay.length>=5},
+  b:'Kalibratörler üst üste',html:'<p>Dokuz kalibratörün kromatogramı aynı pencerede:</p><ul><li><b>Metanol ve etanol pikleri</b> derişim arttıkça büyüyor.</li><li><b>İç standart piki</b> (3,79 dk) hepsinde aynı boyda.</li></ul><p>İç standardın görevi budur: her viale aynı miktarda eklenir. Enjeksiyonlar arasında küçük farklar olsa bile etanol alanının iç standart alanına <b>oranı</b> değişmez; hesaplama bu oranla yapılır.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Tutunma süresi (R.T.) neyi gösterir?',['Maddenin miktarını','Pikin kolondan çıktığı zamanı; maddenin kimliği için ipucudur','Analizin toplam süresini'],1,'Miktarı pikin alanı gösterir.'],
+ ['Bir pikin kütle spektrumu nasıl açılır?',['Pike sol tıklanır','Menüden Integrate seçilir','Pike sağ tuşla çift tıklanır'],2,'Spektrum alttaki pencerede açılır.'],
+ ['Kütüphane araması “Ethanol, Qual 95” verdi. Bu tek başına yeterli midir?',['Evet, kimlik kesinleşmiştir','Hayır; tutunma süresi ve standartla birlikte değerlendirilir','Hayır, kalite 100 olmalıdır'],1,'Kütüphane eşleşmesi destekleyici kanıttır.'],
+ ['Kalibratörler üst üste bindirildiğinde iç standart piki neden hep aynı boydadır?',['Her viale aynı miktarda eklendiği için','Dedektör onu ölçmediği için','Kolonda tutunmadığı için'],0,'Hesaplama etanol/iç standart alan oranıyla yapılır.']]},
+
+dasonuc:{grup:'da',ad:'Kalibrasyon ve sonuç',ic:'📄',ozet:'Kalibrasyon eğrisi, QC kontrolü, numunenin hesaplanması ve sonuç raporunun okunması.',baslik:'VERİ ANALİZİ · SONUÇ',view:['pc'],app:'da',
+ pcKur:function(){A.DA.open['d:ORNEK_SET']=true;A.DA._ecTab='id';A.daLoad(DOSYA('ORN_KAL_0,2.D'))},
+ adim:[
+ {bolum:'Giriş',b:'Derişim nasıl hesaplanır?',
+  html:'<p>Cihaz doğrudan “g/L” ölçmez; pik alanı ölçer. Alanı derişime çeviren şey <b>kalibrasyon eğrisi</b>dir:</p><ul><li>Derişimi bilinen kalibratörler analiz edilir.</li><li>Her birinde <b>etanol alanı / iç standart alanı</b> oranı hesaplanır.</li><li>Bu oranlar derişime karşı çizilir: bir doğru elde edilir.</li><li>Numunenin oranı bu doğruya yerleştirilir ve derişimi okunur.</li></ul><p>ALKOL1.M yönteminde dokuz seviyeli (0,01–0,5 g/L), doğrulanmış bir kalibrasyon hazırdır.</p>'},
+ {bolum:'Kalibrasyon',ask:'<b>Calibrate</b> menüsünü açın ve <b>Edit Compounds…</b> komutuna tıklayın.',izin:function(){return MENU('#daMB','Calibrate','Edit Compounds...')},ok:function(){return dlgAcik('Edit Compounds --')},
+  b:'Edit Compounds',html:'<p>Solda yöntemdeki üç bileşik listelenir:</p><ul><li>🟨 <b>n-propanol:</b> iç standart (ISTD)</li><li>🟦 <b>metanol</b> ve <b>etanol:</b> hedef bileşikler</li></ul><p>Sağda seçili bileşiğin tanımı yer alır. Şu an iç standart seçili.</p>'},
+ {bolum:'Kalibrasyon',ask:'Soldaki listeden <b>etanol</b> satırına tıklayın.',izin:function(){return ['#ecT [data-i="2"]']},ok:function(){return dlgAcik('Edit Compounds -- Compound #3')},
+  b:'Etanolün tanımı',html:'<p>Program bir piki şu ölçütlerle “etanol” olarak tanır:</p><ul><li><b>Ret Time 3,170</b> ve <b>± 0,5 dk</b> pencere: pik bu aralıkta çıkmalı.</li><li><b>Target 31:</b> alanı ölçülen iyon.</li><li><b>Q1 45</b> ve <b>Q2 46:</b> niteleyici iyonlar. Hedef iyona oranları beklenen değerin ± %20’si içinde olmalı.</li></ul><p>Bu ölçütlerden biri tutmazsa sonuç raporda işaretlenir.</p>'},
+ {bolum:'Kalibrasyon',ask:'Üstteki sekmelerden <b>Calibration</b> sekmesine tıklayın.',izin:function(){return ['#desk .dlg [data-tab="cal"]']},ok:function(){return A.DA._ecTab==='cal'&&dlgAcik('Edit Compounds -- Compound #3')},
+  b:'Kalibrasyon eğrisi',html:function(){var c=A.DA.cal.cmp[2],f=A.fit?A.fit(c):null;return '<p>Solda seviyeler, altta eğri görünüyor. Her nokta bir kalibratördür; doğru bu noktalardan geçer.</p><ul><li><b>Linear term:</b> doğrunun eğimi</li><li><b>Coef of Det (r²):</b> noktaların doğruya uyumu'+(f?': <b>'+f.r2.toFixed(4).replace('.',',')+'</b>':'')+'</li></ul><p>Kabul ölçütü <b>r² ≥ 0,995</b>. Bu değer sağlanmıyorsa kalibrasyon kabul edilmez ve numune sonucu verilmez.</p>'}},
+ {bolum:'Kalibrasyon',ask:'Pencereyi <b>Cancel</b> ile kapatın.',oto:1,izin:function(){return ['#ecC']},ok:function(){return !dlgAcik('Edit Compounds')},bitince:function(){A.DA._ecTab='id'}},
+ YUKLE('Kontrol örneği','ORN_QC_0,25.D',
+  'Önce kontrol örneği','<p>Numuneden önce <b>QC</b> (kontrol) örneğine bakılır. QC’nin derişimi bilinir: <b>0,25 g/L</b>.</p><p>Program bu örnek için doğru değeri buluyorsa kalibrasyona güvenilir; bulamıyorsa numune sonuçları da verilmez.</p>'),
+ {bolum:'Kontrol örneği',ask:'Hesaplayın: <b>Quantitate</b> menüsünü açın ve <b>Calculate</b> komutuna tıklayın.',izin:function(){return MENU('#daMB','Quantitate','Calculate')},ok:function(){return dlgAcik('Quantitation Report')},
+  b:'QC raporu',html:function(){var e=ETOH(),c=e&&e.conc!=null?e.conc:null,ok=c!=null&&Math.abs(c-.25)<=.0375;return '<p>Rapor açıldı. <b>Target Compounds</b> bölümünde etanol satırına bakın:</p><ul><li><b>R.T.:</b> pikin çıktığı zaman</li><li><b>QIon:</b> hedef iyon (31)</li><li><b>Response:</b> pik alanı</li><li><b>Conc:</b> hesaplanan derişim'+(c!=null?': <b>'+c.toFixed(3).replace('.',',')+' g/L</b>':'')+'</li></ul><p>Kabul aralığı nominal değerin ± %15’idir: 0,2125–0,2875 g/L. '+(c!=null?(ok?'Sonuç aralığın içinde: <b>QC geçti</b>, numuneye geçilebilir.':'Sonuç aralığın dışında: QC kaldı.'):'')+'</p>'}},
+ {bolum:'Kontrol örneği',ask:'Raporu <b>Close</b> ile kapatın.',oto:1,izin:function(){return ['#desk .dlg .bts button']},ok:function(){return !dlgAcik('Quantitation Report')}},
+ YUKLE('Numune','ORN_NUMUNE_A.D',
+  'Numune açıldı','<p>Kromatogramda etanol piki (3,17 dk) ve iç standart (3,79 dk) belirgin. Öncesinde çok küçük pikler de var; rapor bunların ne olduğunu gösterecek.</p>'),
+ {bolum:'Numune',ask:'Araç çubuğundaki <b>Σ</b> (Calculate) simgesine tıklayın.',izin:function(){return ['#daTB span[data-i="8"]']},ok:function(){return dlgAcik('Quantitation Report')},
+  b:'Numune raporu',html:function(){var e=ETOH(),m=METOH();return '<p>Etanol sonucu: <b>'+(e&&e.conc!=null?e.conc.toFixed(3).replace('.',',')+' g/L':'hesaplanamadı')+'</b>. Adli raporda kan alkolü g/L olarak verilir (yaklaşık promil).</p><p>Raporu okurken şunlara bakın:</p><ul><li><b>Qvalue:</b> niteleyici iyon oranlarının uyumu (en çok 100). Yanında <b>#</b> varsa oran tutmamıştır; sonuç kontrol edilmeden raporlanmaz.</li><li><b>Dev(Min):</b> iç standardın beklenen zamandan sapması.</li>'+(m?'<li>Metanol satırı: <b>'+m+'</b></li>':'')+'</ul><p>Kısaltmalar: <b>&lt;LOQ</b> pik var ama en düşük kalibratörün altında; <b>N.D.</b> tespit edilmedi; <b>N.A.</b> beklenen zamanda uygun pik bulunamadı.</p>'}},
+ {bolum:'Numune',ask:'Raporu <b>Close</b> ile kapatın.',oto:1,izin:function(){return ['#desk .dlg .bts button']},ok:function(){return !dlgAcik('Quantitation Report')}},
+ {bolum:'Kabul ölçütleri',b:'Sonuç ne zaman raporlanır?',
+  html:'<p>Bir numune sonucu ancak şunların hepsi sağlanıyorsa raporlanır:</p><ul><li><b>BLANK temiz:</b> boş kanda etanol yok.</li><li><b>Kalibrasyon:</b> r² ≥ 0,995.</li><li><b>QC:</b> nominal değerin ± %15’i içinde.</li><li><b>Tanımlama:</b> tutunma süresi pencerenin içinde, niteleyici oranları uygun (# yok).</li><li><b>Aralık:</b> sonuç kalibrasyon aralığının içinde. Üstündeyse numune seyreltilip yeniden çalışılır.</li></ul><p>Bunlardan biri sağlanmıyorsa sonuç verilmez; neden araştırılır ve analiz tekrarlanır.</p>'},
+ {bolum:'Sınama',test:1}],
+ soru:[
+ ['Hesaplamada etanol alanı neye oranlanır?',['Metanol alanına','İç standart (n-propanol) alanına','Toplam alana'],1,'Oran, enjeksiyon farklarını dengeler.'],
+ ['Kalibrasyon eğrisi için kabul ölçütü hangisidir?',['r² ≥ 0,995','r² ≥ 0,90','Eğim = 1'],0,'Ölçüt sağlanmıyorsa numune sonucu verilmez.'],
+ ['0,25 g/L’lik QC için hangi sonuç kabul edilir?',['0,20 g/L','0,31 g/L','0,26 g/L'],2,'Kabul aralığı 0,2125–0,2875 g/L (± %15).'],
+ ['Raporda etanolün Qvalue değerinin yanında # işareti var. Ne yapılır?',['Sonuç olduğu gibi raporlanır','Sonuç kontrol edilmeden raporlanmaz; spektrum incelenir','İşaret silinir'],1,'# işareti, niteleyici iyon oranının tutmadığını gösterir.']]}
 };
 var GRUP={hs:{ad:'HEADSPACE ÖRNEKLEYİCİ',alt:'Agilent 7694E',son:'Headspace örnekleyicinin bütün bölümlerini tamamladınız.',sira:['hstani','hsyukle','hstus','hsbaslat']},
- gc:{ad:'GC-MS',alt:'Agilent 6890N · 5975B',son:'GC-MS’in bütün bölümlerini tamamladınız.',sira:['gctani','gctus','pctani','pcsekans']}};
+ gc:{ad:'GC-MS',alt:'Agilent 6890N · 5975B',son:'GC-MS’in bütün bölümlerini tamamladınız.',sira:['gctani','gctus','pctani','pcsekans']},
+ da:{ad:'VERİ ANALİZİ',alt:'Enhanced Data Analysis',son:'Veri analizinin bütün bölümlerini tamamladınız.',sira:['datani','dakrom','dasonuc']}};
 var FAZ=[['Dengeleme','4,0'],['Basınç','0,20'],['Loop dolar','0,20'],['Loop denge','0,05'],['Enjeksiyon','0,50']];
 var L=DERS[D],ADIM=L?L.adim:[],SORU=L?L.soru:[],GR=GRUP[L?(L.grup||'hs'):(GRUP[D]?D:'hs')],SIRA=GR.sira,GID=L?(L.grup||'hs'):(GRUP[D]?D:'hs');
 
@@ -418,7 +547,7 @@ css.textContent=
 'body.ders .main{grid-template-columns:minmax(0,1fr) minmax(340px,440px)}'+
 'body.ders .side{padding:14px;gap:10px}'+
 'body.ders.dersPC .main{grid-template-columns:minmax(0,1fr) 350px}'+
-'body.dersPC .mbar>div:not(.dersH){pointer-events:none}body.dersPC .mbar>div.dersH .dd{pointer-events:none}'+
+'body.dersPC .mbar>div:not(.dersH){pointer-events:none}body.dersPC .mbar>div.dersH .dd{pointer-events:none}body.dersPC .mbar .dd>div.dersH{pointer-events:auto;background:#FFE9A8}'+
 'body.dersPC #desk .dersH{outline-width:4px!important;outline-offset:1px;position:relative;z-index:45}body.dersPC #desk .mbar>div.dersH{position:relative;z-index:auto}'+
 '@media (max-width:1000px){body.ders .main,body.ders.dersPC .main{grid-template-columns:1fr}}'+
 '#dersM{display:none;position:fixed;z-index:60;left:8px;right:8px;bottom:8px;background:#F1F6F7;color:#16242A;border-left:5px solid #F2B632;border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.5)}'+
@@ -476,7 +605,7 @@ function liste(){
  h+='<div class="acl">Cihazı kısa bölümler hâlinde öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 5–10 dakika sürer.</div><div class="liste">';
  SIRA.forEach(function(id,k){var d=DERS[id],b=o[id]&&o[id].bitti;
   h+='<button data-d="'+id+'" class="'+(b?'bitti':'')+'"><span class="no">'+(b?'✓':k+1)+'</span><span><b>'+d.ad+'</b><small>'+d.ozet+'</small></span><em>'+(b?'Tekrarla':'Başla ›')+'</em></button>'});
- if(PILOT){var dg=GID==='hs'?'gc':'hs';h+='<button data-d="'+dg+'"><span class="no">⇄</span><span><b>'+GRUP[dg].ad+' dersleri</b><small>Diğer cihazın bölümlerine geçin.</small></span><em>Aç ›</em></button>'}
+ if(PILOT)['hs','gc','da'].forEach(function(dg){if(dg!==GID)h+='<button data-d="'+dg+'"><span class="no">⇄</span><span><b>'+GRUP[dg].ad+' dersleri</b><small>Bu grubun bölümlerine geçin.</small></span><em>Aç ›</em></button>'});
  P.innerHTML=h+'</div>'+cikis;cikisBagla();
  P.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){ac(b.dataset.d)}})}
 
@@ -493,7 +622,7 @@ function program(seg){
  return '<div class="cev">'+h+'</svg></div>'}
 function aciklama(a){
  var h='<div class="kart"><h4>'+a.b+'</h4>'+(a.deger?'<div class="dg">'+(L.etiket||'ALKOL2.M')+': '+a.deger+'</div>':'');
- if(a.html)h+='<div>'+a.html+'</div>';
+ if(a.html)h+='<div>'+(typeof a.html==='function'?a.html():a.html)+'</div>';
  else h+='<dl><div><dt>NEDİR?</dt><dd>'+a.ne+'</dd></div><div><dt>'+(a.son?'NE İŞE YARAR?':'NEDEN BU DEĞER?')+'</dt><dd>'+a.neden+'</dd></div><div><dt>'+(a.son||'YANLIŞ AYARLANIRSA')+'</dt><dd>'+a.yanlis+'</dd></div></dl>';
  if(a.cevrim||a.faz!==undefined)h+=serit(a.faz);
  if(a.prog!==undefined)h+=program(a.prog);
@@ -533,7 +662,7 @@ function git(n){if(n<0||n>=ADIM.length)return;var geri=n<i;i=n;gecti=false;uyari
  /* ileri giderken ekran olduğu gibi kalır (aynı tuşa yeniden basılır); geri dönüşte temiz ekrandan başlanır */
  HS.buf='';G.buf='';if(geri||!n){HS.mode='idle';HS.idx=0}
  var v=izinli(a);if(v.indexOf(S.view)<0||geri)A.show(v[0]);
- document.body.classList.toggle('dersGeri',!!a.geri);document.body.classList.toggle('dersPC',v[0]==='pc');if(v[0]==='pc'){if(A.pcApp&&document.getElementById('appIC'))A.pcApp('ic');dispatchEvent(new Event('resize'))}
+ document.body.classList.toggle('dersGeri',!!a.geri);document.body.classList.toggle('dersPC',v[0]==='pc');if(v[0]==='pc'){var ap=L.app||'ic',el=document.getElementById(ap==='da'?'appDA':'appIC');if(A.pcApp&&el&&!el.classList.contains('on'))A.pcApp(ap);dispatchEvent(new Event('resize'));if(L.pcKur&&!L._kuruldu){L._kuruldu=1;L.pcKur()}}
  var tp=document.getElementById('tip');if(tp)tp.style.display='none';
  if(a.gir)a.gir();kaydir=true;ciz();isaret()}
 function isaret(){
@@ -546,14 +675,15 @@ function isaret(){
 /* bilgisayar ekranı: yanacak ve tıklanabilecek öğeler (dok: tıklama yalnızca derse sayılır · izin: öğe gerçekten çalışır) */
 function hedef(a){var r=[];
  if(a.dok){if(typeof a.dok==='function')r=r.concat(a.dok());else document.querySelectorAll(a.dok).forEach(function(d){r.push(d)})}
- if(a.izin)a.izin().forEach(function(q){document.querySelectorAll(q).forEach(function(d){r.push(d)})});
+ if(a.izin)r=r.concat(izinEl(a));
  return r}
+function izinEl(a){var r=[];a.izin().forEach(function(q){if(typeof q==='string')document.querySelectorAll(q).forEach(function(d){r.push(d)});else if(q)r.push(q)});return r}
 function icinde(L,t){for(var k=0;k<L.length;k++)if(L[k]===t||L[k].contains(t))return true;return false}
 function pcKoruma(e){
  if(!L||S.view!=='pc')return;var a=ADIM[i],t=e.target;
  if(t.closest&&t.closest('.dlg .bts [data-b]'))return; /* programın kendi uyarı kutuları her zaman kapatılabilir */
  var bek=!a.test&&!!a.ask&&!gecti;
- if(bek&&a.izin){var I=[];a.izin().forEach(function(q){document.querySelectorAll(q).forEach(function(d){I.push(d)})});if(icinde(I,t))return}
+ if(bek&&a.izin&&icinde(izinEl(a),t))return;
  e.stopPropagation();e.preventDefault();
  if(!bek||e.type!=='click')return;
  if(a.dok){var Dk=typeof a.dok==='function'?a.dok():[].slice.call(document.querySelectorAll(a.dok));if(icinde(Dk,t)){tamam();return}}
