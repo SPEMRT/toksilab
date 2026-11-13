@@ -454,5 +454,7 @@ window.TL_GOREV=()=>S&&S.done; /* eğitim çubuğu için (salt okunur) */
 
 <script src="egitim_cubugu.js" charset="utf-8" defer></script>
 <script src="anamenu.js" charset="utf-8" defer></script>
+<script>/* rehberli ders: tarayıcı önbelleğinde eski sürüm kalmasın diye 5 dakikada bir yenilenen adresle yüklenir */
+(function(){var s=document.createElement('script');s.charset='utf-8';s.src='cihaz_ders.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})();</script>
 </body>
 </html>
