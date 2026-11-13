@@ -69,7 +69,7 @@ function animAc(){var a=ADIM[i];if(!a.anim||document.querySelector('.ianim'))ret
  ['#iaD','#caD','#iaP','#caS'].forEach(function(q){var e=W.querySelector(q);if(e)e.style.display='none'});
  var ms=W.querySelector('[data-ms]');if(ms)ms.parentNode.style.display='none';
  if(!a.gorev)['#iaN'].forEach(function(q){var e=W.querySelector(q);if(e)e.style.display=''});
- W.addEventListener('click',function(e){var id=e.target.id;if(id==='iaI'||id==='caI')gorevOlay('enj');if(id==='caM2')gorevOlay('iso');if(id==='caM1')gorevOlay('prog')},true);
+ W.addEventListener('click',function(e){var id=e.target.id;if(id==='iaI'||id==='caI')gorevOlay('enj');if(id==='caM2')gorevOlay('iso');if(id==='iaN')gorevOlay('splitless');if(id==='caM1')gorevOlay('prog')},true);
  W.addEventListener('input',function(e){if(e.target.id==='iaR'&&+e.target.value<=5)gorevOlay('oran')},true);
  if(!AN||!a.gorev)AN={n:0,t0:0};AN.acik=1;if(a.gorev&&AN.n===0)AN.n=1;
  setTimeout(function(){dispatchEvent(new Event('resize'))},40);
@@ -79,7 +79,7 @@ function animTik(){var a=ADIM[i];if(!AN)return;
   if(a.gorev&&!gecti){var g=a.gorev[AN.n];if(g&&g[0]==='kapat'){AN.n++}else if(AN.n<a.gorev.length){AN={n:0,t0:0}}}ciz();return}
  if(AN.acik&&a.gorev&&!gecti){var g2=a.gorev[AN.n];if(g2&&g2[0]==='bekle'){var now=Date.now();if(!AN.t0)AN.t0=now;else if(now-AN.t0>g2[2]*1000){AN.n++;AN.t0=0;ciz()}}}}
 function gorevHtml(a){var n=AN?AN.n:0,acik=!!document.querySelector('.ianim'),h='<ol class="gorev">';
- a.gorev.forEach(function(g,k){h+='<li class="'+(k<n?'ok':k===n?'sim':'')+'"><span>'+g[1]+'</span></li>'});
+ a.gorev.forEach(function(g,k){h+='<li class="'+(k<n?'ok':k===n?'sim':'')+'"><span>'+g[1]+(k<n&&g[3]?'<em>'+g[3]+'</em>':'')+'</span></li>'});
  return h+'</ol>'+(acik?'':'<div class="alt"><button class="p" id="dAnim">▶ Animasyonu aç</button></div>')}
 var fazBekle=function(ph,vial){return function(h){return !!h.run&&h.run.ph===ph&&(!vial||h.run.vial===vial)}};
 
@@ -326,9 +326,14 @@ gctus:{grup:'gc',ad:'Tuş takımı parametreleri',ic:'🎛',ozet:'Fırın progra
   b:'Final time 1 · sonda bekleme',deger:'0,50 dk',
   ne:'Fırının son sıcaklıkta beklediği süredir.',neden:'Kolon temizlenir. Toplam analiz yaklaşık 4,8 dakika sürer; sonra fırın yeniden 35 °C’ye soğur.',yanlis:'Fırın soğumadan yeni enjeksiyon yapılamaz. Headspace’teki GC çevrim süresi (11 dk) bu yüzden analizden uzundur.'},
  {bolum:'Fırın',ask:'Fırın programının işe yaradığını kolonun içinde görün.',anim:'col',
-  gorev:[['ac','Aşağıdaki düğmeyle animasyonu açın.'],['bekle','Renkli noktalar moleküllerdir: <b style="color:#FF6B6B">metanol</b>, <b style="color:#4DA3FF">etanol</b>, <b style="color:#2DBE5B">n-propanol</b>. Kolonda birbirinden uzaklaşmalarını izleyin.',9],['iso','<b>Sabit sıcaklık</b> düğmesine basın: fırın baştan sona 90 °C’de kalsın.'],['bekle','Aynı üç maddeyi yeniden izleyin ve alttaki tabloda süreleri karşılaştırın.',7],['prog','<b>SOP programı</b> düğmesine basarak yöntemin programına dönün.'],['kapat','Pencereyi <b>✕</b> ile kapatın.']],
+  gorev:[['ac','Aşağıdaki düğmeyle animasyonu açın.'],
+   ['bekle','Renkli noktalar moleküllerdir: <b style="color:#FF6B6B">metanol</b>, <b style="color:#4DA3FF">etanol</b>, <b style="color:#2DBE5B">n-propanol</b>. Kolonda ilerlemelerini izleyin.',9,'Önce kırmızı (metanol), sonra mavi (etanol), en son yeşil (n-propanol) çıkıyor. Aralarında boşluk var: alttaki grafikte üç ayrı pik oluşuyor.'],
+   ['iso','Şimdi fırını hiç programlamadan deneyin: <b>Sabit sıcaklık</b> düğmesine basın (baştan sona 90 °C).'],
+   ['bekle','Aynı üç maddeyi yeniden izleyin.',8,'Üçü de çok daha erken çıkıyor, ama kırmızı ile mavi iç içe geçiyor. Tabloya bakın: metanol 1,79 dk, etanol 1,83 dk. Bu kadar yakın iki pik ayrı ayrı ölçülemez.'],
+   ['prog','<b>SOP programı</b> düğmesine basarak yöntemin programına dönün.',0,'Karar: <b>SOP programı daha iyi.</b> Analiz biraz daha uzun sürer (4,8 dk), ama metanol ve etanol birbirinden ayrı ölçülür.'],
+   ['kapat','Pencereyi <b>✕</b> ile kapatın.']],
   ok:function(){return gorevBitti()},
-  b:'Neden programlı ısıtma?',html:'<p>Animasyonda iki şey gördünüz:</p><ul><li><b>Düşük sıcaklıkta</b> moleküller kolonun iç kaplamasına daha uzun tutunur; üç madde birbirinden iyice ayrılır.</li><li><b>Sabit yüksek sıcaklıkta</b> hepsi daha erken çıkar, ama aralarındaki mesafe kısalır. Tabloda görülür: metanol ile etanol arasındaki fark programda <b>0,26 dk</b>, sabit 90 °C’de yalnızca <b>0,04 dk</b>; iki pik üst üste biner.</li></ul><p>Yöntemin programı ikisini birleştirir: önce 35 °C’de bekleyerek <b>ayırır</b>, sonra hızla ısıtarak geride kalanı <b>çabuk çıkarır</b>.</p>'},
+  b:'Hangisi daha iyi: program mı, sabit sıcaklık mı?',html:'<p><b>Program daha iyi.</b> Animasyonda iki şey gördünüz:</p><ul><li><b>Düşük sıcaklıkta</b> moleküller kolonun iç kaplamasına daha uzun tutunur; üç madde birbirinden iyice ayrılır.</li><li><b>Sabit yüksek sıcaklıkta</b> hepsi daha erken çıkar, ama aralarındaki mesafe kısalır. Tabloda görülür: metanol ile etanol arasındaki fark programda <b>0,26 dk</b>, sabit 90 °C’de yalnızca <b>0,04 dk</b>; iki pik üst üste biner.</li></ul><p>Yöntemin programı ikisini birleştirir: önce 35 °C’de bekleyerek <b>ayırır</b>, sonra hızla ısıtarak geride kalanı <b>çabuk çıkarır</b>.</p>'},
  {bolum:'Inlet',ask:'<b>Front Inlet</b> tuşuna basın.',keys:function(){return ['finlet']},ok:function(){return G.sec==='finlet'&&G.cur===0},
   b:'Mode · inlet modu',deger:'Split',
   ne:'Örneğin kolona nasıl verileceğini belirler.',neden:'Split modunda gelen gazın yalnızca bir kısmı kolona girer, kalanı dışarı atılır. Headspace örneği derişik olduğu için bu mod kullanılır.',yanlis:'Splitless modunda örneğin tamamı kolona girer; kolon aşırı yüklenir, pikler bozulur.'},
@@ -342,9 +347,15 @@ gctus:{grup:'gc',ad:'Tuş takımı parametreleri',ic:'🎛',ozet:'Fırın progra
   b:'Split ratio · bölme oranı',deger:'20 : 1',
   ne:'Dışarı atılan gazın kolona giren gaza oranıdır. 20:1, örneğin yaklaşık yirmide birinin kolona girdiğini gösterir.',neden:'Kolonu aşırı yüklemeden yeterli sinyal verir.',yanlis:'Oran büyürse pikler küçülür (duyarlılık düşer); küçülürse pikler genişler ve tepeleri düzleşir.'},
  {bolum:'Inlet',ask:'Split oranının ne yaptığını inletin içinde görün.',anim:'inlet',
-  gorev:[['ac','Aşağıdaki düğmeyle animasyonu açın.'],['enj','<b>💉 Enjeksiyon</b> düğmesine basın. Gaz aşağıda ikiye ayrılıyor: az bir kısmı kolona, çoğu yandaki split çıkışına.'],['oran','<b>Split oranı</b> kaydırıcısını sola çekin: <b>5:1</b> ya da daha düşük.'],['enj','Yeniden <b>💉 Enjeksiyon</b> düğmesine basın. Kolona giden miktar nasıl değişti?'],['kapat','Pencereyi <b>✕</b> ile kapatın.']],
+  gorev:[['ac','Aşağıdaki düğmeyle animasyonu açın.'],
+   ['enj','<b>💉 Enjeksiyon</b> düğmesine basın ve turuncu örnek bulutunu izleyin (oran 20:1).',0,'Bulutun çoğu sağ alttaki <b>split çıkışından</b> dışarı atılıyor; kolona yalnızca ince bir kısmı iniyor (yaklaşık %5).'],
+   ['oran','<b>Split oranı</b> kaydırıcısını sola çekin: <b>5:1</b> ya da daha düşük.'],
+   ['enj','Yeniden <b>💉 Enjeksiyon</b> düğmesine basın.',0,'Kolona inen miktar belirgin biçimde arttı (yaklaşık %17–20). Kromatogramda pik büyür.'],
+   ['splitless','Şimdi <b>Splitless</b> düğmesine basın: split çıkışı tamamen kapanır.'],
+   ['enj','Son kez <b>💉 Enjeksiyon</b> düğmesine basın.',0,'Örneğin <b>tamamı</b> kolona gidiyor. Çok az madde içeren örneklerde işe yarar; ama headspace örneği derişiktir, kolon taşar ve pikler bozulur.'],
+   ['kapat','Pencereyi <b>✕</b> ile kapatın.']],
   ok:function(){return gorevBitti()},
-  b:'Split oranı ne yapar?',html:'<p>Oran, örneğin ne kadarının kolona gireceğini belirler:</p><ul><li><b>20:1</b> (yöntem): örneğin yaklaşık <b>%5</b>’i kolona girer.</li><li><b>5:1:</b> yaklaşık <b>%17</b>’si kolona girer.</li></ul><p>Oran küçüldükçe pikler büyür; ama fazlası kolonu aşırı yükler, pikler genişler ve tepeleri düzleşir. Oran büyüdükçe pikler küçülür ve düşük derişimler görülmez olur. Yöntemdeki 20:1 bu ikisinin dengesidir.</p>'},
+  b:'Hangisi daha iyi: split mi, splitless mi?',html:'<p><b>Örneğe göre değişir; kanda alkol için split.</b></p><ul><li><b>Split</b> (örneğin bir kısmı kolona girer): derişik örnekler içindir. Kolon taşmaz, pikler dar ve keskin olur. Headspace örneği böyledir.</li><li><b>Splitless</b> (tamamı kolona girer): çok az madde içeren örnekler içindir; duyarlılığı artırır. Derişik örnekte pikler genişler ve tepeleri düzleşir.</li></ul><p>Split oranı da bir dengedir: <b>20:1</b>’de örneğin yaklaşık %5’i, <b>5:1</b>’de %17’si kolona girer. Oran küçülürse pik büyür ama kolon zorlanır; büyürse düşük derişimler görülmez olur.</p>'},
  {bolum:'Kolon',ask:'<b>Col 1</b> tuşuna basın.',keys:function(){return ['col1']},ok:function(){return G.sec==='col1'&&G.cur===2},
   b:'Flow · kolon akışı',deger:'1,1 mL/dk',
   ne:'Helyumun kolon içindeki akış hızıdır. Kolon: DB-WAX, 30 m × 250 µm.',neden:'Sabit akış (Const flow) modunda çalışır: fırın ısınsa da akış aynı kalır, bileşiklerin çıkış zamanı değişmez.',yanlis:'Akış değişirse bütün pikler kayar; bileşikler beklenen zamanda çıkmaz ve yazılım onları tanıyamaz.'},
@@ -611,6 +622,7 @@ css.textContent=
 '#dersP ol.gorev{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:g}'+
 '#dersP ol.gorev li{counter-increment:g;display:grid;grid-template-columns:24px 1fr;gap:8px;background:#25333A;border-radius:10px;padding:8px 10px;font-size:14.5px;line-height:1.4;color:#9BB0B6}'+
 '#dersP ol.gorev li::before{content:counter(g);width:22px;height:22px;border-radius:50%;background:#33444C;display:grid;place-items:center;font:700 12px "IBM Plex Mono",monospace;color:#C9D8DC}'+
+'#dersP ol.gorev li em{display:block;font-style:normal;margin-top:5px;padding:6px 8px;border-radius:8px;background:#16242A;color:#EAF2F3;font-size:14px;border-left:3px solid #2BD9C0}#dersP ol.gorev li em::before{content:"GÖRDÜĞÜNÜZ ";font:600 10px "IBM Plex Mono",monospace;letter-spacing:.08em;color:#2BD9C0;display:block;margin-bottom:2px}'+
 '#dersP ol.gorev li.sim{color:#EAF2F3;outline:2px solid #F2B632}#dersP ol.gorev li.sim::before{background:#F2B632;color:#2A2000}'+
 '#dersP ol.gorev li.ok{color:#8FE0A8}#dersP ol.gorev li.ok::before{content:"✓";background:#2DBE5B;color:#062126}'+
 '#dersP button.anim{background:#25333A;border:1px solid #2BD9C0;color:#7FDCD0;width:100%}'+
