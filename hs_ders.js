@@ -4,7 +4,7 @@
    hsgcms_pilot.html?ders=hsyukle   → Numune yükleme
    hsgcms_pilot.html?ders=hstus     → Tuş takımı parametreleri
    hsgcms_pilot.html?ders=hsbaslat  → Analizi başlatma
-   hsgcms_pilot.html?ders=gc        → GC-MS bölüm listesi (gctani: Cihazı tanıma · gctus: Tuş takımı parametreleri)
+   hsgcms_pilot.html?ders=gc        → GC-MS bölüm listesi (gctani · gctus · pctani: Yazılımı tanıma ve menüler · pcsekans: Sekans)
    Sayfanın kendi fotoğraflarını, tuş takımını ve yöntem değerlerini kullanır. ?ders= yoksa hiçbir şey yapmaz. */
 (function(){
 'use strict';
@@ -40,6 +40,8 @@ function vialHazir(){A.PLAN.forEach(function(p){if(p.id==='BLANK'||p.id==='QC-0,
 function vialYukle(){vialHazir();Object.keys(YUK).forEach(function(n){S.slots[n]=YUK[n];A.PLAN.forEach(function(p){if(p.id===YUK[n])p.where=+n})})}
 var yuvaHata=function(){var m='';Object.keys(S.slots).forEach(function(n){if(YUK[n]!==S.slots[n])m='<b>'+S.slots[n]+'</b> yanlış yuvada ('+n+'). Viale dokunarak geri alın ve doğru yuvaya koyun.'});return m};
 var hazirHata=function(h){return h.msg==='NOT READY'||h.msg==='GC NOT READY'?'Cihaz henüz hazır değil. Birkaç saniye bekleyip yeniden deneyin.':''};
+var menuAcik=function(m){var e=document.querySelector('#icMB>div[data-m="'+m+'"]');return !!e&&e.classList.contains('open')};
+var dlgAcik=function(t){var r=false;document.querySelectorAll('#desk .dlg .dt b').forEach(function(b){if(b.textContent.indexOf(t)===0)r=true});return r};
 var fazBekle=function(ph,vial){return function(h){return !!h.run&&h.run.ph===ph&&(!vial||h.run.vial===vial)}};
 
 /* ---------- dersler ----------
@@ -315,10 +317,96 @@ gctus:{grup:'gc',ad:'Tuş takımı parametreleri',ic:'🎛',ozet:'Fırın progra
  ['Fırın neden düşük sıcaklıkta (35 °C) başlar?',['Elektrik tasarrufu için','Metanol ve etanolün birbirinden ayrılması için','Kolonu soğutmak için'],1,'Uçucu bileşikler düşük sıcaklıkta daha iyi ayrılır.'],
  ['Split ratio 20:1 ne anlama gelir?',['Örneğin yaklaşık yirmide biri kolona girer','Analiz 20 dakika sürer','Fırın 20 °C/dk ısınır'],0,'Kalan kısım dışarı atılır; kolon aşırı yüklenmez.'],
  ['Kırmızı Not Ready ışığı yanıyor. Nedenini nereden öğrenirsiniz?',['Oven tuşundan','Start tuşuna basarak','Status tuşundan'],2,'Status ekranı cihazın neden hazır olmadığını yazar.'],
- ['Bu sistemde analizi hangi cihaz başlatır?',['Headspace örnekleyici','GC’nin Start tuşu','Kütle dedektörü'],0,'Headspace, enjeksiyon anında GC’ye başla sinyali gönderir.']]}
+ ['Bu sistemde analizi hangi cihaz başlatır?',['Headspace örnekleyici','GC’nin Start tuşu','Kütle dedektörü'],0,'Headspace, enjeksiyon anında GC’ye başla sinyali gönderir.']]},
+pctani:{grup:'gc',ad:'Yazılımı tanıma ve menüler',ic:'🖥',ozet:'Veri toplama programının ekranı: durum kutuları, simgeler, canlı değerler ve üstteki menüler.',baslik:'BİLGİSAYAR · YAZILIMI TANIMA',view:['pc'],
+ adim:[
+ {bolum:'Giriş',b:'İki program',
+  html:'<p>Bilgisayarda iki program çalışır; alttaki görev çubuğundan birinden diğerine geçilir:</p><ul><li><b>GCMS/Enhanced MassHunter:</b> cihazı yönetir ve veriyi <b>toplar</b>. Sekans burada hazırlanır ve başlatılır.</li><li><b>Enhanced Data Analysis:</b> toplanan veriyi <b>değerlendirir</b>: kromatogram, kalibrasyon, sonuç raporu.</li></ul><p>Bu bölümde birinci programı, yani şu an açık olan ekranı tanıyacaksınız.</p>'},
+ {bolum:'Ekran',ask:'En üstteki <b>başlık satırına</b> tıklayın.',dok:'#appIC .ttl',
+  b:'Başlık satırı',html:'<p>Başlıkta üç dosya adı yazar:</p><ul><li><b>ALKOL1.M</b>: yüklü yöntem (sıcaklıklar, akış, izlenecek iyonlar).</li><li><b>ATUNE.U</b>: kütle dedektörünün ayar (tune) dosyası.</li><li><b>default.sequence.xml</b>: açık olan sekans dosyası.</li></ul><p>Analizden önce buraya bakın: doğru yöntem yüklü mü?</p>'},
+ {bolum:'Ekran',ask:'Sol üstteki <b>Run Status</b> kutusuna tıklayın.',dok:'#rsB',
+  b:'Run Status · çalışma durumu',html:'<ul><li><b>Idle:</b> boşta, sekans çalışmıyor.</li><li><b>Pre-Run:</b> sekans başlatıldı, program headspace’in enjeksiyonunu bekliyor.</li><li><b>Run:</b> analiz sürüyor, veri kaydediliyor.</li><li><b>Paused:</b> sekans duraklatıldı.</li></ul>'},
+ {bolum:'Ekran',ask:'Altındaki <b>Instrument Status</b> kutusuna tıklayın.',dok:'#isB',
+  b:'Instrument Status · cihaz durumu',html:'<p><b>Ready</b> (yeşil): bütün sıcaklıklar ve basınçlar yerinde, cihaz enjeksiyona hazır.</p><p><b>Not Ready</b> (sarı): bir değer henüz hedefe ulaşmadı. Nedeni GC tuş takımındaki <b>Status</b> ekranında yazar.</p>'},
+ {bolum:'Ekran',ask:'Mavi vial resminin bulunduğu <b>örnek kutusuna</b> tıklayın.',dok:function(){var e=document.getElementById('snm');return e?[e.parentNode.parentNode]:[]},
+  b:'Örnek bilgisi',html:'<p>O an analiz edilen (ya da sıradaki) örneği gösterir:</p><ul><li><b>Vial numarası</b> (vialin üstünde)</li><li><b>Sample Name:</b> örneğin adı</li><li><b>Data File:</b> verinin kaydedileceği dosya</li></ul><p>Yanındaki büyük yeşil ok tek bir analiz başlatır; kanda alkol analizinde kullanılmaz, çünkü analizi headspace başlatır.</p>'},
+ {bolum:'Ekran',ask:'Siyah zeminli <b>Run Time</b> sayacına tıklayın.',dok:'#rtD',
+  b:'Run Time · analiz süresi',html:'<p>Sayaç, süren analizin kaçıncı dakikasında olduğunu gösterir. Altında yöntemin toplam süresi yazar: <b>4,80 dk</b>.</p>'},
+ {bolum:'Ekran',ask:'Sekizgen <b>STOP</b> düğmesine tıklayın (derste bir şey durdurmaz).',dok:'#stopB',
+  b:'STOP',html:'<p>Çalışan sekansı iptal eder. Sekans çalışırken kırmızı olur.</p><p>Yalnızca zorunlu durumlarda kullanılır. Bilgisayarda sekansı durdurmak headspace’i durdurmaz; headspace’te de <b>Stop/Reset</b>’e basmak gerekir.</p>'},
+ {bolum:'Simgeler',ask:'<b>Sequence</b> başlığının altındaki simge grubuna tıklayın.',dok:'#icSeq',
+  b:'Sequence simgeleri',html:'<p>Soldan sağa:</p><ul><li>📂 <b>Load Sequence:</b> kayıtlı sekansı açar.</li><li>💾 <b>Save Sequence:</b> sekansı kaydeder.</li><li>🏃 <b>Run Sequence</b> (koşan adam): sekansı başlatır.</li><li>✏️ <b>Edit Sequence</b> (kalem): sekans tablosunu açar.</li><li>✔️ <b>Sequence Check:</b> başlatmadan önce tabloyu denetler.</li></ul><p>Günlük işte en çok kullanılan üçü: kalem, ✓ ve koşan adam.</p>'},
+ {bolum:'Simgeler',ask:'<b>Method (External Device)</b> başlığının altındaki gri simgelere tıklayın.',dok:'#icMet',
+  b:'Method simgeleri (pasif)',html:'<p>Bu simgeler gridir, çünkü örneği veren cihaz (headspace) bilgisayara bağlı değildir: yazılım onu “dış cihaz” (External Device) olarak görür.</p><p>Bu yüzden tek analiz buradan başlatılmaz; her zaman sekans kullanılır.</p>'},
+ {bolum:'Simgeler',ask:'<b>Instrument</b> başlığının altındaki simge grubuna tıklayın.',dok:'#icIns',
+  b:'Instrument simgeleri',html:'<ul><li>💉 <b>ALS</b> ve 🧫 <b>Sample Tray:</b> otomatik enjektör; bu analizde kullanılmaz.</li><li>🌡 <b>GC Parameters:</b> fırın, inlet ve dedektör hattı ayarları.</li><li>📯 <b>MS Source:</b> kütle dedektörü ayarları (SIM/Scan, iyonlar).</li><li>🔧 <b>MS Tune:</b> dedektörün ayar testi.</li><li>⏲ <b>Vacuum:</b> vakum durumu.</li></ul>'},
+ {bolum:'Canlı değerler',ask:'Siyah zeminli <b>sıcaklık göstergelerine</b> tıklayın.',dok:'#icTiles',
+  b:'Canlı değerler',html:'<p>Cihazdan o an okunan değerlerdir:</p><ul><li><b>Oven:</b> fırın (35 °C)</li><li><b>Inlet-F:</b> ön inlet (210 °C)</li><li><b>Column-1 Flow:</b> kolon akışı (1,1 mL/dk)</li><li><b>Aux-2:</b> MSD transfer hattı (260 °C)</li><li><b>MS Source:</b> iyon kaynağı (230 °C)</li><li><b>MS Quad:</b> kuadrupol (150 °C)</li></ul><p>GC tuş takımında gördüğünüz değerlerin aynısıdır.</p>'},
+ {bolum:'Canlı değerler',ask:'Altındaki dört küçük <b>izleme penceresine</b> tıklayın.',dok:'#icMon',
+  b:'İzleme pencereleri',html:'<p>Analiz sürerken dedektörün o an ne gördüğünü gösterir: anlık kütle spektrumu, toplam iyon akımı (TIC), tarama (Scan) ve seçili iyon (SIM 31) sinyali.</p><p>Analiz yokken boştur.</p>'},
+ {bolum:'Canlı değerler',ask:'Büyük <b>Chromatogram</b> penceresine tıklayın.',dok:'#icCv',
+  b:'Canlı kromatogram',html:'<p>Analiz sırasında kromatogram burada canlı çizilir: yatay eksen zaman (dakika), dikey eksen sinyal şiddetidir. Her pik bir bileşiktir.</p><p>Bu pencere yalnızca izlemek içindir; değerlendirme Data Analysis programında yapılır.</p>'},
+ {bolum:'Canlı değerler',ask:'En alttaki <b>durum satırına</b> tıklayın.',dok:'#icSB',
+  b:'Durum satırı',html:'<p>Programın o an ne yaptığını tek cümleyle yazar: “Ready”, “Waiting for start signal from external device (7694E)…”, “Acquiring …”.</p><p>Bir şey beklediğiniz gibi gitmiyorsa önce buraya bakın.</p>'},
+ {bolum:'Menüler',ask:'Menü çubuğunda <b>Method</b> menüsüne tıklayın.',izin:function(){return ['#icMB>div[data-m="Method"]']},ok:function(){return menuAcik('Method')},
+  b:'Method menüsü',html:'<ul><li><b>Load Method…</b> Kayıtlı bir yöntemi yükler.</li><li><b>Save Method</b> Değişiklikleri kaydeder. Doğrulanmış yöntem kilitlidir, üzerine kaydedilemez.</li><li><b>Save Method As…</b> Yöntemi yeni bir adla kaydeder; değişiklik gerekirse yol budur.</li><li><b>Edit Entire Method…</b> Fırın, inlet ve dedektör hattı ayarlarının penceresini açar.</li><li><b>Run Method</b> Tek analiz başlatır; bu sistemde kullanılmaz.</li></ul>'},
+ {bolum:'Menüler',ask:'<b>Instrument</b> menüsüne tıklayın.',izin:function(){return ['#icMB>div[data-m="Instrument"]']},ok:function(){return menuAcik('Instrument')},
+  b:'Instrument menüsü',html:'<ul><li><b>GC Parameters…</b> GC ayarları: fırın programı, inlet, akış.</li><li><b>MS Parameters…</b> Kütle dedektörü ayarları.</li><li><b>MS Tune…</b> Dedektörün ayar testi. Düzenli yapılır; sonucu kayda geçer.</li></ul>'},
+ {bolum:'Menüler',ask:'<b>Sequence</b> menüsüne tıklayın.',izin:function(){return ['#icMB>div[data-m="Sequence"]']},ok:function(){return menuAcik('Sequence')},
+  b:'Sequence menüsü',html:'<p>En çok kullanacağınız menüdür; simgelerle aynı işleri yapar:</p><ul><li><b>Load / Save / Save As:</b> sekans dosyasını açar ve kaydeder.</li><li><b>Edit Sequence…</b> Sekans tablosu (kalem simgesi).</li><li><b>Sequence Check…</b> Tabloyu denetler (✓ simgesi).</li><li><b>Run Sequence…</b> Sekansı başlatır (koşan adam).</li><li><b>Pause / Resume Sequence:</b> duraklatır ve sürdürür.</li></ul>'},
+ {bolum:'Menüler',ask:'<b>View</b> menüsüne tıklayın.',izin:function(){return ['#icMB>div[data-m="View"]']},ok:function(){return menuAcik('View')},
+  b:'View menüsü',html:'<p><b>Data Analysis:</b> değerlendirme programına geçer. Aynı geçiş alttaki görev çubuğundan da yapılır.</p>'},
+ {bolum:'Menüler',ask:'<b>Abort</b> menüsüne tıklayın.',izin:function(){return ['#icMB>div[data-m="Abort"]']},ok:function(){return menuAcik('Abort')},
+  b:'Abort menüsü',html:'<p><b>Abort Sequence:</b> çalışan sekansı iptal eder; STOP düğmesiyle aynıdır. Program önce onay ister.</p><p>Kalan menüler (<b>Checkout, Window, Graphics, Help</b>) pencere düzeni ve yardım içindir; günlük analizde kullanılmaz.</p>'},
+ {bolum:'Menüler',ask:'En alttaki görev çubuğunda <b>Enhanced Data Analysis</b> düğmesine tıklayın (derste program değişmez).',dok:'#tbDA',
+  b:'Görev çubuğu',html:'<p>İki program arasında buradan geçilir. Analiz bittikten sonra sonuçları değerlendirmek için <b>Enhanced Data Analysis</b> açılır.</p><p>Veri toplanırken de Data Analysis’e geçebilirsiniz; toplama arka planda sürer.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Run Status kutusunda “Pre-Run” yazıyor. Bu ne demektir?',['Analiz bitti','Sekans başlatıldı, program headspace’in enjeksiyonunu bekliyor','Cihaz arızalı'],1,'Headspace’te Start’a basılınca durum Run olur.'],
+ ['Method (External Device) simgeleri neden gridir?',['Yöntem silinmiştir','Bilgisayar kilitlidir','Örneği veren headspace, yazılıma bağlı olmayan bir dış cihazdır'],2,'Bu yüzden analiz her zaman sekansla yürütülür.'],
+ ['Sekans tablosunu açmanın iki yolu hangisidir?',['Kalem simgesi ya da Sequence ▸ Edit Sequence…','STOP düğmesi ya da Abort menüsü','Yeşil ok ya da Method ▸ Run Method'],0,'Simgeler, menüdeki komutların kısayoludur.'],
+ ['Doğrulanmış yöntemde bir değeri değiştirmek gerekirse ne yapılır?',['Save Method ile üzerine kaydedilir','Save Method As… ile yeni bir adla kaydedilir','GC tuş takımından değiştirilir'],1,'Doğrulanmış yöntem kilitlidir; değişiklik yeni yöntem olarak kaydedilir.']]},
+
+pcsekans:{grup:'gc',ad:'Sekans oluşturma ve başlatma',ic:'📋',ozet:'Sekans tablosu, kontrol raporu, Run Sequence ve ilk verinin kaydedilmesi.',baslik:'BİLGİSAYAR · SEKANS',view:['pc'],
+ kur:function(){vialYukle();HS.v[0][1]=4;HS.v[1][1]=6},
+ adim:[
+ {bolum:'Giriş',b:'Sekans nedir?',
+  html:'<p>Sekans, cihaza verilen iş listesidir. Her satırı bir vialdir ve şunları söyler: örneğin adı, hangi yuvada olduğu, hangi yöntemle analiz edileceği ve verinin nereye, hangi adla kaydedileceği.</p><p>Bu derste karuselde üç vial hazır: <b>4</b> numarada BLANK, <b>5</b> numarada QC-0,25, <b>6</b> numarada NUMUNE-01.</p>'},
+ {bolum:'Tablo',ask:'Sequence bölümündeki <b>kalem</b> simgesine (Edit Sequence) tıklayın.',izin:function(){return ['#icSeq .ib[data-i="3"]']},ok:function(){return dlgAcik('Sequence Table')},
+  b:'Sequence Table',html:'<p>Sekans tablosu açıldı. Önemli sütunlar:</p><ul><li><b>Name:</b> örneğin adı</li><li><b>Vial:</b> karuseldeki yuva numarası</li><li><b>Method File:</b> kullanılacak yöntem</li><li><b>Data Path:</b> verinin kaydedileceği klasör</li><li><b>Data File:</b> veri dosyasının adı</li><li><b>Type:</b> örneğin türü (Blank, Calibration, QC, Sample)</li></ul><p>Tabloda önceki çalışmadan kalma satırlar var; şimdi kendi listenizi oluşturacaksınız.</p>'},
+ {bolum:'Tablo',ask:'Tabloyu doldurun: <b>Tools ▾</b> düğmesine, ardından <b>Karusele göre doldur</b> seçeneğine tıklayın.',
+  izin:function(){var m=document.getElementById('stTM');return m&&m.style.display==='block'?['#stFill']:['#stTo']},
+  ok:function(){var r=document.querySelectorAll('#stG tr[data-i]'),v=document.querySelector('#stG tr[data-i="0"] [data-k="vial"]');return r.length===3&&!!v&&v.value==='4'},
+  b:'Tablo dolduruldu',html:'<p>Üç satır oluştu; karuseldeki dizilişle aynı sırada: BLANK (4), QC-0,25 (5), NUMUNE-01 (6).</p><p>Bu düğme bir eğitim kolaylığıdır. Gerçek programda her hücre elle yazılır; aşağı doğru kopyalamak için <b>⬇</b> (Fill Down) ve sayıyı artırarak kopyalamak için <b>⇊</b> düğmeleri kullanılır.</p><p><b>Data File</b> sütununa dikkat edin: her satırın dosya adı farklıdır. Aynı ad iki kez kullanılamaz.</p>'},
+ {bolum:'Tablo',ask:'Bir hücreyi elle değiştirin: 3. satırın <b>Name</b> hücresine tıklayın, içindekini silin ve <b>2026-123</b> yazın.',
+  izin:function(){return ['#stG tr[data-i="2"] [data-k="name"]']},ok:function(){var e=document.querySelector('#stG tr[data-i="2"] [data-k="name"]');return !!e&&e.value.trim()==='2026-123'},
+  b:'Örnek adı',html:'<p>Name sütununa gerçek çalışmada vaka ya da kayıt numarası yazılır. Bu ad rapora aynen çıkar; yanlış yazılırsa sonuç yanlış kişiye ait görünür.</p>'},
+ {bolum:'Tablo',ask:'Tabloyu kaydetmek için alttaki <b>OK</b> düğmesine tıklayın.',izin:function(){return ['#stOK']},ok:function(){return !dlgAcik('Sequence Table')&&A.IC.rows.length===3},
+  b:'Tablo kaydedildi',html:'<p>Program tabloyu kaydederken basit hataları yakalar: boş dosya adı, seçilmemiş yöntem, aynı dosya adının iki kez kullanılması.</p><p>Asıl denetim bir sonraki adımdadır.</p>'},
+ {bolum:'Kontrol',ask:'Sequence bölümündeki <b>✔️</b> simgesine (Sequence Check) tıklayın.',izin:function(){return ['#icSeq .ib[data-i="4"]']},ok:function(){return dlgAcik('Start Sequence')},
+  b:'Start Sequence penceresi',html:'<p>Kontrol de başlatma da bu pencereden yapılır. Önemli alanlar:</p><ul><li><b>Overwrite Existing Data Files:</b> işaretlenirse aynı adlı eski verinin üzerine yazar. <b>İşaretlemeyin</b>; eski veri geri gelmez.</li><li><b>Operator Name:</b> analizi yapanın adı; kayda geçer.</li><li><b>Sequence Comment:</b> isteğe bağlı açıklama.</li></ul>'},
+ {bolum:'Kontrol',ask:'<b>Operator Name</b> kutusuna tıklayın ve adınızı yazın.',oto:1,izin:function(){return ['#ssN']},ok:function(){var e=document.getElementById('ssN');return !!e&&e.value.trim().length>=3}},
+ {bolum:'Kontrol',ask:'Alttaki büyük <b>Run Sequence</b> düğmesine tıklayın. (Bu pencereyi ✔️ ile açtığınız için yalnızca kontrol yapılır.)',izin:function(){return ['#ssRun']},ok:function(){return dlgAcik('SequenceCheck.txt')},
+  b:'Kontrol raporu',html:'<p>Program her satırı denetledi ve sonucu bir metin dosyasında gösterdi. Üç satırın karşısında da <b>OK</b> ve altta <b>“No errors found”</b> yazıyor.</p><p>Görebileceğiniz hatalar:</p><ul><li><b>data file already exists:</b> o klasörde aynı adlı veri var.</li><li><b>duplicate data file:</b> iki satırda aynı dosya adı.</li><li><b>HS position ≠ vial</b> (uyarı): tablodaki yuva numarası karuseldekiyle uyuşmuyor.</li></ul>'},
+ {bolum:'Kontrol',ask:'Raporu <b>Close</b> düğmesiyle kapatın.',oto:1,izin:function(){return ['#desk .dlg .bts button']},ok:function(){return !dlgAcik('SequenceCheck.txt')}},
+ {bolum:'Başlatma',ask:'Şimdi sekansı başlatın: <b>koşan adam</b> simgesine (Run Sequence) tıklayın.',oto:1,izin:function(){return ['#icSeq .ib[data-i="2"]']},ok:function(){return dlgAcik('Start Sequence')}},
+ {bolum:'Başlatma',ask:'Açılan pencerede <b>Run Sequence</b> düğmesine tıklayın.',geriYok:1,izin:function(){return ['#ssRun']},ok:function(){return A.IC.running},
+  b:'Sekans başladı',html:'<p>Ekranda üç şey değişti:</p><ul><li>Menülerin üstünde sarı şerit: <b>Sequence running … waiting for 7694E start signal</b></li><li><b>Run Status: Pre-Run</b></li><li>STOP düğmesi kırmızı</li></ul><p>Bilgisayar hazır bekliyor. Henüz hiçbir vial analiz edilmedi; analizi headspace başlatacak.</p>'},
+ {bolum:'Başlatma',ask:'Headspace’in tuş takımındasınız. <b>Start</b>’a basın.',geriYok:1,view:['hskey'],keys:function(){return ['start']},ok:function(h){return !!h.run},hata:hazirHata,
+  b:'Headspace başladı',html:'<p>Headspace 4 numaralı viali dengeliyor. Dengeleme bitince örneği GC’ye verecek ve aynı anda bilgisayara “başla” sinyali gönderecek.</p><p>Şimdi bilgisayara dönüp ekranı izleyeceksiniz.</p>'},
+ {bolum:'Veri toplama',ask:'Enjeksiyon yapıldı; kromatogram çiziliyor. Ekranı izleyin…',bekle:1,geriYok:1,gir:function(){spd(120)},ok:function(){if(A.IC.acq&&G.run)spd(40);return !!A.IC.acq&&G.run&&G.rt>=4.2},bitince:function(){spd(0)},
+  b:'Veri toplanıyor',html:'<p>Ekrana bakın:</p><ul><li><b>Run Status: Run</b>; sayaç analizin kaçıncı dakikasında olduğunu gösteriyor.</li><li>Örnek kutusunda <b>BLANK</b>, vial 4 ve veri dosyasının adı yazıyor.</li><li>Kromatogramda yaklaşık 3,8 dakikada belirgin tek bir pik var: <b>iç standart</b> (n-propanol).</li></ul><p>BLANK’te etanol piki olmamalıdır; olsaydı sistemde bulaşma var demekti.</p>'},
+ {bolum:'Veri toplama',ask:'Kalan iki vial sırayla analiz ediliyor. Sekansın bitmesini bekleyin…',bekle:1,geriYok:1,gir:function(){spd(240)},ok:function(){return !A.IC.running&&A.IC.done>=3},bitince:function(){spd(120)},
+  b:'Sekans tamamlandı',html:'<p>Üç vialin verisi de kaydedildi. Sarı şerit kapandı, Run Status yeniden <b>Idle</b>.</p><p>Veriler, tabloda seçilen klasörde (<b>ALKOL_DENEME</b> altında bugünün tarihi) duruyor. Sıradaki iş, bu verileri <b>Enhanced Data Analysis</b> programında değerlendirmektir.</p>'},
+ {bolum:'Sınama',test:1}],
+ soru:[
+ ['Sekans tablosunda Vial sütununa ne yazılır?',['Örneğin hacmi','Vialin karuseldeki yuva numarası','Analiz süresi'],1,'Tablodaki numara karuseldeki yuvayla aynı olmalıdır.'],
+ ['“Overwrite Existing Data Files” kutusu neden işaretlenmez?',['Aynı adlı eski verinin üzerine yazar; eski veri kaybolur','Analizi yavaşlatır','Raporu kapatır'],0,'Silinen veri geri getirilemez.'],
+ ['Run Sequence’a bastınız; Run Status “Pre-Run” oldu. Sıradaki adım nedir?',['Beklemek, analiz kendiliğinden başlar','GC tuş takımında Start’a basmak','Headspace tuş takımında Start’a basmak'],2,'Bilgisayar headspace’in başla sinyalini bekler.'],
+ ['BLANK kromatogramında hangi pik görülmelidir?',['Yalnızca iç standart (n-propanol)','Etanol ve metanol','Hiç pik olmamalıdır'],0,'İç standart her viale eklenir; BLANK’te etanol görülmesi bulaşma işaretidir.']]}
 };
 var GRUP={hs:{ad:'HEADSPACE ÖRNEKLEYİCİ',alt:'Agilent 7694E',son:'Headspace örnekleyicinin bütün bölümlerini tamamladınız.',sira:['hstani','hsyukle','hstus','hsbaslat']},
- gc:{ad:'GC-MS',alt:'Agilent 6890N · 5975B',son:'GC-MS’in bütün bölümlerini tamamladınız.',sira:['gctani','gctus']}};
+ gc:{ad:'GC-MS',alt:'Agilent 6890N · 5975B',son:'GC-MS’in bütün bölümlerini tamamladınız.',sira:['gctani','gctus','pctani','pcsekans']}};
 var FAZ=[['Dengeleme','4,0'],['Basınç','0,20'],['Loop dolar','0,20'],['Loop denge','0,05'],['Enjeksiyon','0,50']];
 var L=DERS[D],ADIM=L?L.adim:[],SORU=L?L.soru:[],GR=GRUP[L?(L.grup||'hs'):(GRUP[D]?D:'hs')],SIRA=GR.sira,GID=L?(L.grup||'hs'):(GRUP[D]?D:'hs');
 
@@ -329,7 +417,10 @@ css.textContent=
 'body.ders:not(.dersGeri) .stage .back{display:none!important}body.ders.dersYuk #loadP{display:none!important}'+
 'body.ders .main{grid-template-columns:minmax(0,1fr) minmax(340px,440px)}'+
 'body.ders .side{padding:14px;gap:10px}'+
-'@media (max-width:1000px){body.ders .main{grid-template-columns:1fr}}'+
+'body.ders.dersPC .main{grid-template-columns:minmax(0,1fr) 350px}'+
+'body.dersPC .mbar>div:not(.dersH){pointer-events:none}body.dersPC .mbar>div.dersH .dd{pointer-events:none}'+
+'body.dersPC #desk .dersH{outline-width:4px!important;outline-offset:1px;position:relative;z-index:45}body.dersPC #desk .mbar>div.dersH{position:relative;z-index:auto}'+
+'@media (max-width:1000px){body.ders .main,body.ders.dersPC .main{grid-template-columns:1fr}}'+
 '#dersM{display:none;position:fixed;z-index:60;left:8px;right:8px;bottom:8px;background:#F1F6F7;color:#16242A;border-left:5px solid #F2B632;border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.5)}'+
 '@media (max-width:1000px){#dersM.on{display:block}}'+
 '#dersP{display:grid;gap:10px;min-width:0;grid-template-columns:minmax(0,1fr);font-size:15px;line-height:1.45;color:#D7E4E7}'+
@@ -421,7 +512,7 @@ function ciz(){
  h+=cikis;P.innerHTML=h;cikisBagla();
  var m=document.getElementById('dersM'),dar=matchMedia('(max-width:1000px)').matches,bekle=!!a.ask&&!gecti;
  if(m){m.className=bekle?'on':'';m.innerHTML=bekle?a.ask+(uyari?'<br><b style="color:#B3261E">'+uyari+'</b>':''):''}
- if(dar&&kaydir){kaydir=false;(bekle?document.getElementById(S.view==='hslid'&&!a.hot&&a.sec?'loadP':'stageW'):P).scrollIntoView({block:'start',behavior:'smooth'})}
+ if(dar&&kaydir){kaydir=false;(bekle?document.getElementById(S.view==='pc'?'pcW':S.view==='hslid'&&!a.hot&&a.sec?'loadP':'stageW'):P).scrollIntoView({block:'start',behavior:'smooth'})}
  var g=P.querySelector('#dGeri'),n=P.querySelector('#dIleri');
  if(g)g.onclick=function(){git(i-1)};if(n)n.onclick=function(){git(i+1)};
  P.querySelectorAll('[data-c]').forEach(function(b){b.onclick=function(){if(cevap!==null)return;cevap=+b.dataset.c;if(cevap===SORU[sn][2])puan++;ciz()}});
@@ -442,7 +533,7 @@ function git(n){if(n<0||n>=ADIM.length)return;var geri=n<i;i=n;gecti=false;uyari
  /* ileri giderken ekran olduğu gibi kalır (aynı tuşa yeniden basılır); geri dönüşte temiz ekrandan başlanır */
  HS.buf='';G.buf='';if(geri||!n){HS.mode='idle';HS.idx=0}
  var v=izinli(a);if(v.indexOf(S.view)<0||geri)A.show(v[0]);
- document.body.classList.toggle('dersGeri',!!a.geri);
+ document.body.classList.toggle('dersGeri',!!a.geri);document.body.classList.toggle('dersPC',v[0]==='pc');if(v[0]==='pc'){if(A.pcApp&&document.getElementById('appIC'))A.pcApp('ic');dispatchEvent(new Event('resize'))}
  var tp=document.getElementById('tip');if(tp)tp.style.display='none';
  if(a.gir)a.gir();kaydir=true;ciz();isaret()}
 function isaret(){
@@ -450,7 +541,23 @@ function isaret(){
  document.querySelectorAll('#st .hs').forEach(function(d){var k=d.classList.contains('key')?ks.indexOf(d.dataset.k)>=0:(bek&&!!a.hot&&d.dataset.t===a.hot);d.classList.toggle('dersK',k)});
  document.querySelectorAll('.dersH').forEach(function(d){d.classList.remove('dersH')});
  ss.forEach(function(q){document.querySelectorAll(q).forEach(function(d){d.classList.add(d.classList.contains('hs')?'dersK':'dersH')})});
+ if(bek)hedef(a).forEach(function(d){d.classList.add('dersH')});
  var e=document.querySelector('#st .disp');if(e)e.classList.toggle('dersD',!!a.ekran||(!!a.ask&&gecti&&(S.view==='hskey'||S.view==='gckey')))}
+/* bilgisayar ekranı: yanacak ve tıklanabilecek öğeler (dok: tıklama yalnızca derse sayılır · izin: öğe gerçekten çalışır) */
+function hedef(a){var r=[];
+ if(a.dok){if(typeof a.dok==='function')r=r.concat(a.dok());else document.querySelectorAll(a.dok).forEach(function(d){r.push(d)})}
+ if(a.izin)a.izin().forEach(function(q){document.querySelectorAll(q).forEach(function(d){r.push(d)})});
+ return r}
+function icinde(L,t){for(var k=0;k<L.length;k++)if(L[k]===t||L[k].contains(t))return true;return false}
+function pcKoruma(e){
+ if(!L||S.view!=='pc')return;var a=ADIM[i],t=e.target;
+ if(t.closest&&t.closest('.dlg .bts [data-b]'))return; /* programın kendi uyarı kutuları her zaman kapatılabilir */
+ var bek=!a.test&&!!a.ask&&!gecti;
+ if(bek&&a.izin){var I=[];a.izin().forEach(function(q){document.querySelectorAll(q).forEach(function(d){I.push(d)})});if(icinde(I,t))return}
+ e.stopPropagation();e.preventDefault();
+ if(!bek||e.type!=='click')return;
+ if(a.dok){var Dk=typeof a.dok==='function'?a.dok():[].slice.call(document.querySelectorAll(a.dok));if(icinde(Dk,t)){tamam();return}}
+ if(!a.bekle){uyari='Yanıp sönen yere tıklayın.';ciz()}}
 function tamam(){var a=ADIM[i];if(a.bitince)a.bitince();if(a.oto){git(i+1);return}gecti=true;uyari='';kaydir=true;ciz()}
 function tik(){
  var a=ADIM[i];if(a.test)return;
@@ -484,6 +591,7 @@ function basla(){
   setInterval(function(){if(S.view!=='main')A.show('main')},300);return}
  sifirla();if(L.kur)L.kur();if(L.yukGizle)document.body.classList.add('dersYuk');
  A.show(L.view[0]);
+ var dk=document.getElementById('desk');if(dk)['mousedown','click','dblclick','contextmenu','pointerdown'].forEach(function(n){dk.addEventListener(n,pcKoruma,true)});
  st.addEventListener('pointerdown',function(e){if(e.target.closest('.hs.key'))dokunus(e)},true);
  st.addEventListener('click',function(e){if(!e.target.closest('.hs.key'))dokunus(e)},true);
  git(0);setInterval(tik,150);setTimeout(function(){dispatchEvent(new Event('resize'))},60)}
