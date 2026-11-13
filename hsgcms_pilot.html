@@ -215,7 +215,7 @@ function el(cls,x,y,w,h,par=st){const d=document.createElement('div');d.classNam
 function build(){st.querySelectorAll('.hs,.disp,.led,.vial,.slotn,.badge,.back').forEach(e=>e.remove());closeCard();const v=S.view;
  if(v!=='main'){const b=document.createElement('button');b.className='back';b.textContent=v==='oven'||v==='hslid'?'‹ Kapağı kapat':'‹ Genel görünüm';b.onclick=()=>{if(v==='hslid'){S.lid=false;say('HS fırın kapağını kapattın.')}if(v==='oven')say('GC fırın kapağını kapattın.');show('main')};st.appendChild(b)}
  hotspots(v).forEach(([act,x,y,w,h,t])=>{const d=el('hs'+(act.startsWith('go:')&&act!=='go:main'&&!S.seen[act]?' pulse':''),x,y,w,h);d.dataset.t=t;d.tabIndex=0;d.onclick=()=>hsAct(act,[x,y,w,h]);tipOn(d)});
- if(v==='gckey'){GCK.forEach(([k,...b])=>{const [x,y,w,h]=PB(...b);const d=el('hs key',x,y,w,h);d.dataset.t=NAMES[k]||'';d.onpointerdown=e=>{e.preventDefault();press(d);gcKey(k)}});
+ if(v==='gckey'){GCK.forEach(([k,...b])=>{const [x,y,w,h]=PB(...b);const d=el('hs key',x,y,w,h);d.dataset.t=NAMES[k]||'';d.dataset.k=k;d.onpointerdown=e=>{e.preventDefault();press(d);gcKey(k)}});
   const [x,y,w,h]=PB(252,594,95,221);S.gcD=el('disp gc',x,y,w,h);S.gcL=[el('led',474/8.25,393/11),el('led',555/8.25,396/11),el('led',474/8.25,433/11)];gcDraw()}
  if(v==='hskey'){HSK.forEach(([k,...b])=>{const [x,y,w,h]=PB(...b);const d=el('hs key',x,y,w,h);d.dataset.t=NAMES[k]||'';d.dataset.k=k;d.onpointerdown=e=>{e.preventDefault();press(d);hsKey(k)}});
   const [x,y,w,h]=PB(196,625,355,418);S.hsD=el('disp hsd',x,y,w,h);S.hsL=[el('led',447/8.25,458/11),el('led',542/8.25,458/11)];hsDraw()}

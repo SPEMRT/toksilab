@@ -4,6 +4,7 @@
    hsgcms_pilot.html?ders=hsyukle   → Numune yükleme
    hsgcms_pilot.html?ders=hstus     → Tuş takımı parametreleri
    hsgcms_pilot.html?ders=hsbaslat  → Analizi başlatma
+   hsgcms_pilot.html?ders=gc        → GC-MS bölüm listesi (gctani: Cihazı tanıma · gctus: Tuş takımı parametreleri)
    Sayfanın kendi fotoğraflarını, tuş takımını ve yöntem değerlerini kullanır. ?ders= yoksa hiçbir şey yapmaz. */
 (function(){
 'use strict';
@@ -12,7 +13,7 @@ try{D=PILOT?(sessionStorage.getItem('toksilab_ders_git')||'hs'):new URLSearchPar
 if(!D)return;
 var BASE=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';
 var LS='toksilab_ders_v1';
-var HS,S,A,P,i=0,gecti=false,uyari='',puan=0,sn=0,cevap=null,kaydir=false,hataM='';
+var HS,S,A,P,G,SON=null,i=0,gecti=false,uyari='',puan=0,sn=0,cevap=null,kaydir=false,hataM='';
 function spd(v){if(A.spd)A.spd(v)}
 function ac(id){if(PILOT){try{sessionStorage.setItem('toksilab_ders_git',id)}catch(e){}location.reload()}else location.href=location.pathname+'?ders='+id}
 
@@ -33,7 +34,8 @@ function sifirla(){
  HS.z[0][1]=80;HS.z[1][1]=120;HS.z[2][1]=120;HS.za=[80,120,120];S.gc.ovenA=S.gc.ovenSet;
  [11,4,.2,.2,.05,.5].forEach(function(v,k){HS.e[k][1]=v});HS.v[0][1]=1;HS.v[1][1]=2;HS.v[2][1]=2;
  Object.keys(S.slots).forEach(function(k){delete S.slots[k]});S.hand=null;S.lid=false;
- A.PLAN.forEach(function(p){p.where=null;p.ready=false});spd(120)}
+ A.PLAN.forEach(function(p){p.where=null;p.ready=false});
+ G.sec='status';G.cur=0;G.top=0;G.buf='';G.p.oven[0][1]=35;G.ovenSet=35;G.p.finlet[0][1]='Split';spd(120)}
 function vialHazir(){A.PLAN.forEach(function(p){if(p.id==='BLANK'||p.id==='QC-0,25'||p.id==='NUMUNE-01')p.ready=true})}
 function vialYukle(){vialHazir();Object.keys(YUK).forEach(function(n){S.slots[n]=YUK[n];A.PLAN.forEach(function(p){if(p.id===YUK[n])p.where=+n})})}
 var yuvaHata=function(){var m='';Object.keys(S.slots).forEach(function(n){if(YUK[n]!==S.slots[n])m='<b>'+S.slots[n]+'</b> yanlış yuvada ('+n+'). Viale dokunarak geri alın ve doğru yuvaya koyun.'});return m};
@@ -229,10 +231,96 @@ hsbaslat:{ad:'Analizi başlatma',ic:'▶️',ozet:'Start öncesi kontrol, sık y
  ['Ekranda VIAL 7 NOT FOUND yazıyor. En olası neden nedir?',['Helyum bitmiştir','Fırın soğuktur','LAST VIAL 7 girilmiş ama 7. yuva boştur'],2,'Cihaz, girilen aralıktaki her yuvada vial arar.'],
  ['GC analizi ve veri kaydı hangi anda başlar?',['Enjeksiyon (INJECT) anında','Dengeleme başlarken','Start’a basıldığı anda'],0,'Headspace, enjeksiyonla birlikte GC’ye başla sinyali gönderir.'],
  ['Analiz yarıda durdurulursa delinmiş viallere ne yapılır?',['Aynı vialler yeniden analiz edilir','Kapakları değiştirilir','Örnekler baştan hazırlanır'],2,'Septum delinince gaz kaçar; vial artık güvenilir değildir.']]}
+,
+gctani:{grup:'gc',ad:'Cihazı tanıma',ic:'🔍',ozet:'GC fırını, kolon, inlet, kütle dedektörü ve bilgisayar: örneğin izlediği yol.',baslik:'GC-MS · CİHAZI TANIMA',view:['main'],yukGizle:1,
+ adim:[
+ {bolum:'Giriş',b:'GC-MS ne yapar?',
+  html:'<p>Headspace’ten gelen gaz örneği bir karışımdır: içinde etanol, metanol, iç standart ve başka uçucular bulunur. GC-MS bu karışımı iki adımda çözer:</p><ul><li><b>GC (gaz kromatografi, 6890N):</b> bileşikleri birbirinden <b>ayırır</b>. Her bileşik kolondan farklı zamanda çıkar.</li><li><b>MS (kütle dedektörü, 5975B):</b> kolondan çıkan her bileşiği <b>tanır</b> ve miktarını ölçer.</li></ul><p>Örneğin yolu: inlet → kolon → kütle dedektörü → bilgisayar.</p>'},
+ {bolum:'Dış görünüm',ask:'Sağdaki büyük kapağa, <b>GC fırın kapağına</b> dokunun.',hot:'GC fırın kapağı',kes:1,
+  b:'GC fırını',ne:'Kapağın arkasında, içinde kolonun durduğu bir fırın vardır.',neden:'Fırın kolonu bir programa göre ısıtır. Sıcaklık arttıkça bileşikler kolonda daha hızlı ilerler; böylece hepsi sırayla ve ayrı ayrı çıkar.',yanlis:'Analiz sırasında kapak açılmaz: fırın soğur, analiz bozulur.',son:'DİKKAT'},
+ {bolum:'Dış görünüm',ask:'En sağdaki <b>GC tuş takımına</b> dokunun.',hot:'GC tuş takımı',kes:1,
+  b:'Ekran ve tuş takımı',ne:'Fırın, inlet, kolon ve dedektör hattının sıcaklık, basınç ve akış değerleri buradan izlenir.',neden:'Ekran her değerin gerçek (Actual) ve ayarlanan (Setpoint) hâlini gösterir. Not Ready ışığı, cihazın analize hazır olup olmadığını bildirir.',yanlis:'Tuş takımını “Tuş takımı parametreleri” bölümünde kullanacaksınız.',son:'SONRA'},
+ {bolum:'Dış görünüm',ask:'Ortadaki cihaza, <b>kütle dedektörüne (5975B MSD)</b> dokunun.',hot:'5975B MSD',kes:1,
+  b:'Kütle dedektörü (MSD)',ne:'Kolondan çıkan bileşikleri elektronlarla parçalar ve oluşan iyonları kütlelerine göre ayırır.',neden:'Her bileşiğin parçalanma deseni (kütle spektrumu) parmak izi gibidir. Etanol m/z 45 ve 31, metanol m/z 31 ve 32 iyonlarıyla tanınır.',yanlis:'Dedektör yüksek vakum altında çalışır. Vakum bozulursa (kaçak, kapak açılması) ölçüm yapılamaz.',son:'DİKKAT'},
+ {bolum:'Dış görünüm',ask:'Üstteki kuleye, <b>otomatik enjektöre</b> dokunun.',hot:'7683B otomatik enjektör',kes:1,
+  b:'Otomatik enjektör (7683B)',ne:'Sıvı örnekleri şırıngayla inlete veren robottur.',neden:'Sıvı enjeksiyonlu GC-MS analizlerinde (örneğin ilaç taraması) kullanılır.',yanlis:'Kanda alkol analizinde örnek headspace’ten gaz olarak gelir; bu enjektör kullanılmaz.',son:'BU ANALİZDE'},
+ {bolum:'Dış görünüm',ask:'En sağdaki <b>bilgisayara</b> dokunun.',hot:'Bilgisayar',kes:1,
+  b:'Bilgisayar',ne:'Cihazı yöneten yazılım burada çalışır.',neden:'Yöntem (hangi sıcaklık, hangi iyonlar), sekans (hangi vial, hangi sırayla) ve sonuçların değerlendirilmesi bilgisayardan yapılır.',yanlis:'Bilgisayarda sekans başlatılmadan yapılan enjeksiyonun verisi kaydedilmez.',son:'DİKKAT'},
+ {bolum:'Fırının içi',ask:'Şimdi fırının içine bakalım: <b>GC fırın kapağına</b> yeniden dokunarak kapağı açın.',hot:'GC fırın kapağı',view:['main','oven'],ok:function(){return S.view==='oven'},
+  b:'Fırının içi',html:'<p>Ortadaki halka biçiminde sarılı ince boru <b>kolon</b>dur. Arkadaki ızgaranın gerisinde, sıcak havayı fırının her yerine eşit dağıtan bir fan vardır.</p><p>Kapak açıkken fırın soğur ve cihaz “hazır değil” durumuna geçer.</p>'},
+ {bolum:'Fırının içi',ask:'Ortadaki sarılı <b>kolona</b> dokunun.',hot:'Kolon (DB-WAX)',kes:1,view:['oven'],
+  b:'Kolon: DB-WAX, 30 m',ne:'30 metre uzunluğunda, saç teli kadar ince bir cam borudur. İç yüzeyi ince bir sıvı tabakayla (sabit faz) kaplıdır.',neden:'Bileşikler bu tabakaya farklı ölçüde tutunur. Az tutunan önce, çok tutunan sonra çıkar: metanol yaklaşık 2,9, etanol 3,2, iç standart (n-propanol) 3,8 dakikada.',yanlis:'Kolon kırılgandır ve sıcaklık sınırı vardır. Sınır aşılırsa kaplama bozulur.',son:'DİKKAT'},
+ {bolum:'Fırının içi',ask:'Sol üstteki <b>ön inlete</b> dokunun.',hot:'Ön inlet',kes:1,view:['oven'],
+  b:'Ön inlet (giriş)',ne:'Örneğin kolona girdiği yerdir. Headspace’in transfer hattı buraya bağlıdır; kolonun bir ucu da buraya takılır.',neden:'210 °C’de tutulur. “Split” modunda çalışır: gelen gazın küçük bir kısmı kolona girer, kalanı dışarı atılır. Böylece kolon aşırı yüklenmez ve pikler keskin olur.',yanlis:'Bağlantı gevşekse gaz kaçar; alanlar küçülür ve tekrarlanabilirlik bozulur.',son:'DİKKAT'},
+ {bolum:'Fırının içi',ask:'Soldaki <b>MSD transfer hattına</b> dokunun.',hot:'MSD transfer hattı',kes:1,view:['oven'],
+  b:'MSD transfer hattı',ne:'Kolonun çıkış ucu fırın duvarındaki bu hattan geçerek kütle dedektörüne ulaşır.',neden:'260 °C’de tutulur. Kolondan çıkan bileşikler dedektöre varmadan yoğunlaşmamalıdır.',yanlis:'Buradaki bir sızıntı dedektöre hava sokar; ekranda hava iyonları (m/z 28 ve 32) yükselir.',son:'DİKKAT'},
+ {bolum:'Fırının içi',ask:'Fırın tabanındaki küçük parçalara, <b>ferrule ve somunlara</b> dokunun.',hot:'Ferrule ve somunlar',kes:1,view:['oven'],
+  b:'Ferrule ve somunlar',ne:'Kolonu inlete ve dedektöre sızdırmaz biçimde bağlayan küçük conta (ferrule) ve somunlardır.',neden:'Kolon her takıldığında yeni ferrule kullanılır.',yanlis:'Eski ya da ezilmiş ferrule sızdırır. Kolon değişiminden sonra sızıntı kontrolü yapılır.',son:'DİKKAT'},
+ {bolum:'Fırının içi',ask:'Sol üstteki <b>‹ Kapağı kapat</b> düğmesiyle kapağı kapatın.',sec:function(){return ['#st .back']},geri:1,view:['oven','main'],ok:function(){return S.view==='main'},
+  b:'Özet',html:'<p>Örneğin GC-MS’teki yolu:</p><ul><li><b>İnlet:</b> örnek kolona girer.</li><li><b>Kolon:</b> bileşikler birbirinden ayrılır.</li><li><b>MSD transfer hattı:</b> bileşikler dedektöre taşınır.</li><li><b>Kütle dedektörü:</b> her bileşik tanınır ve ölçülür.</li><li><b>Bilgisayar:</b> sonuç kromatogram olarak kaydedilir.</li></ul>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['GC ve MS’in görevleri hangisinde doğru verilmiştir?',['GC tanır, MS ayırır','GC ayırır, MS tanır ve ölçer','İkisi de yalnızca ısıtır'],1,'Kolon bileşikleri ayırır; kütle dedektörü her birini tanır.'],
+ ['Bileşikler kolondan neden farklı zamanlarda çıkar?',['Kolonun iç kaplamasına farklı ölçüde tutundukları için','Fan onları sırayla ittiği için','Renkleri farklı olduğu için'],0,'Az tutunan önce, çok tutunan sonra çıkar.'],
+ ['Kanda alkol analizinde otomatik enjektör (7683B) neden kullanılmaz?',['Arızalı olduğu için','Örnek headspace’ten gaz olarak geldiği için','Kolon çok kısa olduğu için'],1,'Otomatik enjektör sıvı örnekler içindir.'],
+ ['MSD transfer hattında sızıntı olursa ne görülür?',['Fırın ısınmaz','Tuş takımı kilitlenir','Hava iyonları (m/z 28 ve 32) yükselir'],2,'Dedektöre hava girdiğinin işaretidir.']]},
+
+gctus:{grup:'gc',ad:'Tuş takımı parametreleri',ic:'🎛',ozet:'Fırın programı, inlet, kolon akışı, dedektör hattı ve Status ekranı.',baslik:'GC-MS · TUŞ TAKIMI',view:['gckey'],etiket:'Yöntem',
+ adim:[
+ {bolum:'Giriş',b:'Ekranı tanıyın',ekran:1,
+  html:'<p>GC ekranı dört satırdır. En üstte hangi bölümde olduğunuz yazar; altında o bölümün parametreleri sıralanır.</p><ul><li><b>Actual:</b> o an ölçülen değer</li><li><b>Setpoint:</b> yöntemdeki hedef değer</li><li><b>&lt;</b> işareti: seçili satır. <b>▲ ▼</b> tuşlarıyla satırlar arasında gezilir.</li></ul><p>Şu an <b>STATUS</b> ekranındasınız: “Ready for injection”, cihazın enjeksiyona hazır olduğunu gösterir.</p>'},
+ {bolum:'Fırın',ask:'<b>Oven</b> tuşuna basın.',keys:function(){return ['oven']},ok:function(){return G.sec==='oven'&&G.cur===0},prog:0,
+  b:'Temp · başlangıç sıcaklığı',deger:'35 °C',
+  ne:'Analiz başlarken fırının (ve kolonun) sıcaklığıdır.',neden:'Alkoller çok uçucudur. Düşük sıcaklıkta başlamak, metanol ile etanolün kolonda birbirinden ayrılmasına zaman tanır.',yanlis:'Yüksek başlanırsa pikler üst üste biner; iki bileşik ayırt edilemez.'},
+ {bolum:'Fırın',ask:'<b>▼</b> tuşuna basın.',keys:function(){return ['down']},ok:function(){return G.sec==='oven'&&G.cur===1},prog:0,
+  b:'Init time · başlangıçta bekleme',deger:'2,00 dk',
+  ne:'Fırının başlangıç sıcaklığında beklediği süredir.',neden:'Bu iki dakikada bileşikler kolonda yavaşça ilerler ve birbirinden uzaklaşır.',yanlis:'Kısa tutulursa ayrım kötüleşir; uzun tutulursa analiz gereksiz yere uzar.'},
+ {bolum:'Fırın',ask:'<b>▼</b> tuşuna basın.',keys:function(){return ['down']},ok:function(){return G.sec==='oven'&&G.cur===2},prog:1,
+  b:'Rate 1 · ısıtma hızı',deger:'50 °C/dk',
+  ne:'Bekleme bittikten sonra fırının dakikada kaç derece ısınacağıdır.',neden:'Hızlı ısıtma, geride kalan bileşikleri (n-propanol ve daha ağır olanlar) kolondan çabuk çıkarır.',yanlis:'Çok yavaş olursa pikler genişler ve analiz uzar.'},
+ {bolum:'Fırın',ask:'<b>▼</b> tuşuna basın.',keys:function(){return ['down']},ok:function(){return G.sec==='oven'&&G.cur===3},prog:2,
+  b:'Final temp 1 · son sıcaklık',deger:'150 °C',
+  ne:'Isıtmanın duracağı sıcaklıktır.',neden:'Kolonda kalan her şeyi dışarı atacak kadar yüksek, kolonun sınırını aşmayacak kadar düşüktür.',yanlis:'Düşük kalırsa kolonda kalıntı birikir ve sonraki analize taşınır. Kolonun sınırı aşılırsa kaplaması bozulur.'},
+ {bolum:'Fırın',ask:'<b>▼</b> tuşuna basın.',keys:function(){return ['down']},ok:function(){return G.sec==='oven'&&G.cur===4},prog:2,
+  b:'Final time 1 · sonda bekleme',deger:'0,50 dk',
+  ne:'Fırının son sıcaklıkta beklediği süredir.',neden:'Kolon temizlenir. Toplam analiz yaklaşık 4,8 dakika sürer; sonra fırın yeniden 35 °C’ye soğur.',yanlis:'Fırın soğumadan yeni enjeksiyon yapılamaz. Headspace’teki GC çevrim süresi (11 dk) bu yüzden analizden uzundur.'},
+ {bolum:'Inlet',ask:'<b>Front Inlet</b> tuşuna basın.',keys:function(){return ['finlet']},ok:function(){return G.sec==='finlet'&&G.cur===0},
+  b:'Mode · inlet modu',deger:'Split',
+  ne:'Örneğin kolona nasıl verileceğini belirler.',neden:'Split modunda gelen gazın yalnızca bir kısmı kolona girer, kalanı dışarı atılır. Headspace örneği derişik olduğu için bu mod kullanılır.',yanlis:'Splitless modunda örneğin tamamı kolona girer; kolon aşırı yüklenir, pikler bozulur.'},
+ {bolum:'Inlet',ask:'<b>▼</b> tuşuna basın.',keys:function(){return ['down']},ok:function(){return G.sec==='finlet'&&G.cur===1},
+  b:'Temp · inlet sıcaklığı',deger:'210 °C',
+  ne:'Örneğin kolona girdiği bölgenin sıcaklığıdır.',neden:'Headspace’ten gelen gazın yoğunlaşmadan, bir bütün hâlinde kolona girmesini sağlar.',yanlis:'Düşük olursa örnek inlette takılır; pikler küçülür ve kuyruklanır.'},
+ {bolum:'Inlet',ask:'<b>▼</b> tuşuna basın.',keys:function(){return ['down']},ok:function(){return G.sec==='finlet'&&G.cur===2},
+  b:'Pressure · inlet basıncı',deger:'7,07 psi',
+  ne:'Taşıyıcı gazın (helyum) kolonun girişindeki basıncıdır.',neden:'Bu basınç helyumu kolon boyunca iter. Cihaz, istenen akışı sağlayacak basıncı kendisi hesaplar.',yanlis:'Actual değeri Setpoint’e ulaşamıyorsa gaz bitmiş ya da bir yerde kaçak vardır.'},
+ {bolum:'Inlet',ask:'<b>▼</b> tuşuna basın.',keys:function(){return ['down']},ok:function(){return G.sec==='finlet'&&G.cur===3},
+  b:'Split ratio · bölme oranı',deger:'20 : 1',
+  ne:'Dışarı atılan gazın kolona giren gaza oranıdır. 20:1, örneğin yaklaşık yirmide birinin kolona girdiğini gösterir.',neden:'Kolonu aşırı yüklemeden yeterli sinyal verir.',yanlis:'Oran büyürse pikler küçülür (duyarlılık düşer); küçülürse pikler genişler ve tepeleri düzleşir.'},
+ {bolum:'Kolon',ask:'<b>Col 1</b> tuşuna basın.',keys:function(){return ['col1']},ok:function(){return G.sec==='col1'&&G.cur===2},
+  b:'Flow · kolon akışı',deger:'1,1 mL/dk',
+  ne:'Helyumun kolon içindeki akış hızıdır. Kolon: DB-WAX, 30 m × 250 µm.',neden:'Sabit akış (Const flow) modunda çalışır: fırın ısınsa da akış aynı kalır, bileşiklerin çıkış zamanı değişmez.',yanlis:'Akış değişirse bütün pikler kayar; bileşikler beklenen zamanda çıkmaz ve yazılım onları tanıyamaz.'},
+ {bolum:'Dedektör hattı',ask:'<b>Aux #</b> tuşuna basın.',keys:function(){return ['aux']},ok:function(){return G.sec==='aux'&&G.cur===0},
+  b:'Aux 2 Temp · MSD transfer hattı',deger:'260 °C',
+  ne:'Kolonun kütle dedektörüne geçtiği hattın sıcaklığıdır.',neden:'Fırının son sıcaklığından (150 °C) yüksektir; hiçbir bileşik bu hatta yoğunlaşmaz.',yanlis:'Soğuk kalırsa bileşikler hatta tutunur; pikler kuyruklanır ve küçülür.'},
+ {bolum:'Durum',ask:'<b>Status</b> tuşuna basın.',keys:function(){return ['status']},ok:function(){return G.sec==='status'},
+  b:'Status · cihaz durumu',html:'<p>“<b>Ready for injection</b>” yazıyorsa bütün sıcaklık ve basınçlar yerindedir.</p><p>Cihaz hazır değilse neden hazır olmadığı burada satır satır yazar; örneğin “Oven temp not ready” ya da “Oven door open”. Kırmızı <b>Not Ready</b> ışığı yandığında ilk bakılacak yer bu ekrandır.</p>'},
+ {bolum:'Uygulama',ask:'Fırın sıcaklığını değiştirmeyi deneyin: <b>Oven</b> → <b>4</b> → <b>0</b> → <b>Enter</b>.',
+  keys:function(){if(G.sec!=='oven'||G.cur!==0)return ['oven'];if(G.buf==='40')return ['enter'];if('40'.indexOf(G.buf)!==0)return ['clear'];return ['d'+'40'.charAt(G.buf.length)]},
+  ok:function(){return !!SON&&SON.k==='enter'&&SON.buf==='40'},bitince:function(){G.p.oven[0][1]=35;G.ovenSet=35;G.buf=''},
+  b:'Yöntem kilitli',html:'<p>Değer değişmedi: ekranda hâlâ <b>35</b> yazıyor. Cihazda doğrulanmış bir yöntem yüklüdür ve tuş takımından değiştirilemez.</p><p>Bir parametreyi değiştirmek gerekirse bu, bilgisayarda <b>yeni bir yöntem</b> olarak kaydedilerek yapılır. Doğrulanmış yöntemin değerleri keyfî olarak değiştirilmez.</p>'},
+ {bolum:'Uygulama',ask:'Şimdi GC’nin kendi <b>Start</b> tuşuna basın.',keys:function(){return ['start']},ok:function(){return !!SON&&SON.k==='start'},
+  b:'GC’de Start’a basılmaz',html:'<p>Hiçbir şey olmadı. Bu sistemde analizi <b>headspace başlatır</b>: enjeksiyon anında GC’ye ve bilgisayara kendiliğinden “başla” sinyali gönderir.</p><p>Sizin Start’a bastığınız yer headspace’in tuş takımıdır. GC’de elle Start’a basılırsa fırın programı örnek olmadan çalışır.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Fırın neden düşük sıcaklıkta (35 °C) başlar?',['Elektrik tasarrufu için','Metanol ve etanolün birbirinden ayrılması için','Kolonu soğutmak için'],1,'Uçucu bileşikler düşük sıcaklıkta daha iyi ayrılır.'],
+ ['Split ratio 20:1 ne anlama gelir?',['Örneğin yaklaşık yirmide biri kolona girer','Analiz 20 dakika sürer','Fırın 20 °C/dk ısınır'],0,'Kalan kısım dışarı atılır; kolon aşırı yüklenmez.'],
+ ['Kırmızı Not Ready ışığı yanıyor. Nedenini nereden öğrenirsiniz?',['Oven tuşundan','Start tuşuna basarak','Status tuşundan'],2,'Status ekranı cihazın neden hazır olmadığını yazar.'],
+ ['Bu sistemde analizi hangi cihaz başlatır?',['Headspace örnekleyici','GC’nin Start tuşu','Kütle dedektörü'],0,'Headspace, enjeksiyon anında GC’ye başla sinyali gönderir.']]}
 };
-var SIRA=['hstani','hsyukle','hstus','hsbaslat'];
+var GRUP={hs:{ad:'HEADSPACE ÖRNEKLEYİCİ',alt:'Agilent 7694E',son:'Headspace örnekleyicinin bütün bölümlerini tamamladınız.',sira:['hstani','hsyukle','hstus','hsbaslat']},
+ gc:{ad:'GC-MS',alt:'Agilent 6890N · 5975B',son:'GC-MS’in bütün bölümlerini tamamladınız.',sira:['gctani','gctus']}};
 var FAZ=[['Dengeleme','4,0'],['Basınç','0,20'],['Loop dolar','0,20'],['Loop denge','0,05'],['Enjeksiyon','0,50']];
-var L=DERS[D],ADIM=L?L.adim:[],SORU=L?L.soru:[];
+var L=DERS[D],ADIM=L?L.adim:[],SORU=L?L.soru:[],GR=GRUP[L?(L.grup||'hs'):(GRUP[D]?D:'hs')],SIRA=GR.sira,GID=L?(L.grup||'hs'):(GRUP[D]?D:'hs');
 
 /* ---------- görünüm ---------- */
 var css=document.createElement('style');
@@ -281,33 +369,43 @@ css.textContent=
 '.dersH{outline:3px solid #F2B632!important;outline-offset:2px;animation:dersD 1.1s infinite}'+
 'body.ders .hs.pulse:not(.dersK){animation:none}'+
 'body.ders #car g:not(.dersH) circle{stroke:#55666E;stroke-width:1.5}#car g.dersH{outline:none!important;animation:none}#car g.dersH circle{stroke:#F2B632;stroke-width:5}'+
-'.disp.dersD{outline:3px solid #F2B632;outline-offset:2px;animation:dersD 1.1s infinite}@keyframes dersD{50%{outline-color:rgba(242,182,50,.25)}}'+
+'.disp.dersD{outline:3px solid #F2B632;z-index:2;outline-offset:2px;animation:dersD 1.1s infinite}@keyframes dersD{50%{outline-color:rgba(242,182,50,.25)}}'+
 '@media (prefers-reduced-motion:reduce){.hs.dersK,.dersH,.disp.dersD{animation:none}.hs.dersK{box-shadow:0 0 0 4px #F2B632 inset}}';
 document.head.appendChild(css);
 
 function oku(){try{return JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){return {}}}
 function kayit(){try{var o=oku();o[D]={bitti:1,puan:puan,soru:SORU.length,t:Date.now()};localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
 var bolumler=[];ADIM.forEach(function(a){if(bolumler.indexOf(a.bolum)<0)bolumler.push(a.bolum)});
-var cikis='<div class="alt">'+(D!=='hs'?'<button class="ince" id="dListe">☰ Bölümler</button>':'')+(PILOT?'':'<button class="ince" id="dSerbest">Dersten çık · serbest kullanım</button>')+'</div>';
-function cikisBagla(){var l=P.querySelector('#dListe'),s=P.querySelector('#dSerbest');if(l)l.onclick=function(){ac('hs')};if(s)s.onclick=function(){location.href=location.pathname}}
+var cikis='<div class="alt">'+(L?'<button class="ince" id="dListe">☰ Bölümler</button>':'')+(PILOT?'':'<button class="ince" id="dSerbest">Dersten çık · serbest kullanım</button>')+'</div>';
+function cikisBagla(){var l=P.querySelector('#dListe'),s=P.querySelector('#dSerbest');if(l)l.onclick=function(){ac(GID)};if(s)s.onclick=function(){location.href=location.pathname}}
 
 /* ---------- bölüm listesi ---------- */
 function liste(){
- var o=oku(),h='<div class="ust"><b>HEADSPACE ÖRNEKLEYİCİ</b><span>Agilent 7694E</span></div>';
- h+='<div class="acl">Cihazı dört kısa bölümde öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 5–10 dakika sürer.</div><div class="liste">';
+ var o=oku(),h='<div class="ust"><b>'+GR.ad+'</b><span>'+GR.alt+'</span></div>';
+ h+='<div class="acl">Cihazı kısa bölümler hâlinde öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 5–10 dakika sürer.</div><div class="liste">';
  SIRA.forEach(function(id,k){var d=DERS[id],b=o[id]&&o[id].bitti;
   h+='<button data-d="'+id+'" class="'+(b?'bitti':'')+'"><span class="no">'+(b?'✓':k+1)+'</span><span><b>'+d.ad+'</b><small>'+d.ozet+'</small></span><em>'+(b?'Tekrarla':'Başla ›')+'</em></button>'});
+ if(PILOT){var dg=GID==='hs'?'gc':'hs';h+='<button data-d="'+dg+'"><span class="no">⇄</span><span><b>'+GRUP[dg].ad+' dersleri</b><small>Diğer cihazın bölümlerine geçin.</small></span><em>Aç ›</em></button>'}
  P.innerHTML=h+'</div>'+cikis;cikisBagla();
  P.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){ac(b.dataset.d)}})}
 
 /* ---------- ders ---------- */
 function serit(faz){
  return '<div class="cev"><div class="ser">'+FAZ.map(function(f,k){return '<div class="'+(faz===k?'on':'')+'">'+f[0]+'<b>'+f[1]+'</b></div>'}).join('')+'</div><div class="cy'+(faz==='c'?' on':'')+'">GC CYCLE TIME · iki enjeksiyon arası 11,0 dk</div></div>'}
+function program(seg){
+ /* fırın programı: 35 °C 2 dk → 50 °C/dk → 150 °C 0,5 dk (toplam 4,8 dk) */
+ var X=function(t){return 34+t/4.8*222},Y=function(T){return 92-(T-35)/115*66},p=[[0,35],[2,35],[4.3,150],[4.8,150]],h='<svg viewBox="0 0 300 118" style="width:100%;height:auto;display:block" role="img" aria-label="Fırın sıcaklık programı">';
+ h+='<line x1="34" y1="92" x2="290" y2="92" stroke="#4A5F68"/><line x1="34" y1="16" x2="34" y2="92" stroke="#4A5F68"/>';
+ for(var k=0;k<3;k++)h+='<line x1="'+X(p[k][0])+'" y1="'+Y(p[k][1])+'" x2="'+X(p[k+1][0])+'" y2="'+Y(p[k+1][1])+'" stroke="'+(seg===k?'#2BD9C0':'#6F858C')+'" stroke-width="'+(seg===k?5:2.5)+'" stroke-linecap="round"/>';
+ var T=function(x,y,t,a){return '<text x="'+x+'" y="'+y+'" font-size="10.5" fill="#C9D8DC" font-family="IBM Plex Mono,monospace" text-anchor="'+(a||'middle')+'">'+t+'</text>'};
+ h+=T(30,Y(35)+4,'35','end')+T(30,Y(150)+4,'150','end')+T(34,10,'°C','middle')+T(X(0),106,'0')+T(X(2),106,'2,0')+T(X(4.3),106,'4,3')+T(X(4.8),106,'4,8')+T(X(4.8)+14,106,'dk','start')+T(X(1),Y(35)-8,'bekleme')+T(X(3.15)-30,Y(92),'50 °C/dk')+T(X(4.55)-6,Y(150)-8,'son');
+ return '<div class="cev">'+h+'</svg></div>'}
 function aciklama(a){
- var h='<div class="kart"><h4>'+a.b+'</h4>'+(a.deger?'<div class="dg">ALKOL2.M: '+a.deger+'</div>':'');
+ var h='<div class="kart"><h4>'+a.b+'</h4>'+(a.deger?'<div class="dg">'+(L.etiket||'ALKOL2.M')+': '+a.deger+'</div>':'');
  if(a.html)h+='<div>'+a.html+'</div>';
  else h+='<dl><div><dt>NEDİR?</dt><dd>'+a.ne+'</dd></div><div><dt>'+(a.son?'NE İŞE YARAR?':'NEDEN BU DEĞER?')+'</dt><dd>'+a.neden+'</dd></div><div><dt>'+(a.son||'YANLIŞ AYARLANIRSA')+'</dt><dd>'+a.yanlis+'</dd></div></dl>';
  if(a.cevrim||a.faz!==undefined)h+=serit(a.faz);
+ if(a.prog!==undefined)h+=program(a.prog);
  return h+'</div>'}
 function ciz(){
  var a=ADIM[i],bi=bolumler.indexOf(a.bolum),h='';
@@ -318,6 +416,7 @@ function ciz(){
   if(a.ask)h+='<div class="ask'+(gecti?' tamam':'')+'">'+(gecti?(a.bekle?'✓ Açıklamayı okuyun, sonra devam edin.':'✓ Doğru. Açıklamayı okuyun, sonra devam edin.'):a.ask)+(uyari&&!gecti?'<small>'+uyari+'</small>':'')+'</div>';
   if(!a.ask||gecti)h+=aciklama(a);
   else if(a.faz!==undefined)h+=serit(a.faz);
+  else if(a.prog!==undefined)h+=program(a.prog);
   h+='<div class="alt"><button id="dGeri"'+(i&&!a.geriYok?'':' disabled')+'>‹ Geri</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
  h+=cikis;P.innerHTML=h;cikisBagla();
  var m=document.getElementById('dersM'),dar=matchMedia('(max-width:1000px)').matches,bekle=!!a.ask&&!gecti;
@@ -332,16 +431,16 @@ function ciz(){
  var eg=P.querySelector('#dEgitim');if(eg)eg.onclick=function(){location.href=BASE+'index.html#egitim'}}
 function test(){
  if(sn>=SORU.length){var k=SIRA.indexOf(D),sonra=SIRA[k+1];
-  return '<div class="kart"><h4>Bölüm tamamlandı</h4><div class="dg">'+puan+' / '+SORU.length+' doğru</div><div><p><b>'+L.ad+'</b> bölümünü bitirdiniz.</p>'+(puan<SORU.length?'<p>Yanlış yanıtladığınız konular için bölümü yeniden izleyebilirsiniz.</p>':'')+(sonra?'<p>Sıradaki bölüm: <b>'+DERS[sonra].ad+'</b>.</p>':'<p>Headspace örnekleyicinin dört bölümünü de tamamladınız.</p>')+'</div></div><div class="alt"><button id="dTekrar">↺ Baştan</button>'+(sonra?'<button class="p" id="dSonraki" data-d="'+sonra+'">Sonraki bölüm ›</button>':PILOT?'<button class="p" id="dSonraki" data-d="hs">Bölümler ›</button>':'<button class="p" id="dEgitim">Eğitimlere dön ›</button>')+'</div>'}
+  return '<div class="kart"><h4>Bölüm tamamlandı</h4><div class="dg">'+puan+' / '+SORU.length+' doğru</div><div><p><b>'+L.ad+'</b> bölümünü bitirdiniz.</p>'+(puan<SORU.length?'<p>Yanlış yanıtladığınız konular için bölümü yeniden izleyebilirsiniz.</p>':'')+(sonra?'<p>Sıradaki bölüm: <b>'+DERS[sonra].ad+'</b>.</p>':'<p>'+GR.son+'</p>')+'</div></div><div class="alt"><button id="dTekrar">↺ Baştan</button>'+(sonra?'<button class="p" id="dSonraki" data-d="'+sonra+'">Sonraki bölüm ›</button>':PILOT?'<button class="p" id="dSonraki" data-d="'+GID+'">Bölümler ›</button>':'<button class="p" id="dEgitim">Eğitimlere dön ›</button>')+'</div>'}
  var s=SORU[sn],h='<div class="kart"><h4>Soru '+(sn+1)+' / '+SORU.length+'</h4><div>'+s[0]+'</div><div class="sec">';
  s[1].forEach(function(c,k){h+='<button data-c="'+k+'" class="'+(cevap===null?'':k===s[2]?'d':k===cevap?'y':'')+'">'+c+'</button>'});
  h+='</div>'+(cevap!==null?'<div class="acl">'+(cevap===s[2]?'✓ Doğru. ':'✗ Doğru yanıt işaretlendi. ')+s[3]+'</div>':'')+'</div>';
  if(cevap!==null)h+='<div class="alt"><button class="p" id="dSoru">'+(sn+1<SORU.length?'Sonraki soru ›':'Sonucu gör ›')+'</button></div>';
  return h}
 function izinli(a){return a.view||L.view}
-function git(n){if(n<0||n>=ADIM.length)return;var geri=n<i;i=n;gecti=false;uyari='';hataM='';var a=ADIM[i];
+function git(n){if(n<0||n>=ADIM.length)return;var geri=n<i;i=n;gecti=false;uyari='';hataM='';SON=null;var a=ADIM[i];
  /* ileri giderken ekran olduğu gibi kalır (aynı tuşa yeniden basılır); geri dönüşte temiz ekrandan başlanır */
- HS.buf='';if(geri||!n){HS.mode='idle';HS.idx=0}
+ HS.buf='';G.buf='';if(geri||!n){HS.mode='idle';HS.idx=0}
  var v=izinli(a);if(v.indexOf(S.view)<0||geri)A.show(v[0]);
  document.body.classList.toggle('dersGeri',!!a.geri);
  var tp=document.getElementById('tip');if(tp)tp.style.display='none';
@@ -351,7 +450,7 @@ function isaret(){
  document.querySelectorAll('#st .hs').forEach(function(d){var k=d.classList.contains('key')?ks.indexOf(d.dataset.k)>=0:(bek&&!!a.hot&&d.dataset.t===a.hot);d.classList.toggle('dersK',k)});
  document.querySelectorAll('.dersH').forEach(function(d){d.classList.remove('dersH')});
  ss.forEach(function(q){document.querySelectorAll(q).forEach(function(d){d.classList.add(d.classList.contains('hs')?'dersK':'dersH')})});
- var e=document.querySelector('#st .disp.hsd');if(e)e.classList.toggle('dersD',!!a.ekran||(!!a.ask&&gecti&&S.view==='hskey'))}
+ var e=document.querySelector('#st .disp');if(e)e.classList.toggle('dersD',!!a.ekran||(!!a.ask&&gecti&&(S.view==='hskey'||S.view==='gckey')))}
 function tamam(){var a=ADIM[i];if(a.bitince)a.bitince();if(a.oto){git(i+1);return}gecti=true;uyari='';kaydir=true;ciz()}
 function tik(){
  var a=ADIM[i];if(a.test)return;
@@ -366,7 +465,7 @@ function dokunus(e){
   if(!a.ask||gecti||!a.keys){e.stopPropagation();e.preventDefault();return}
   var ks=a.keys(HS),k=d.dataset.k;
   if(ks.indexOf(k)<0&&k!=='clear'){e.stopPropagation();e.preventDefault();uyari='Bu adımda yanıp sönen tuşu kullanın.';setTimeout(ciz,60)}
-  else if(uyari){uyari='';setTimeout(ciz,60)}
+  else{SON={k:k,buf:S.view==='gckey'?G.buf:HS.buf};if(uyari){uyari='';setTimeout(ciz,60)}}
   return}
  /* fotoğraf bölgeleri */
  var ad=d.dataset.t||'';
@@ -377,11 +476,11 @@ function dokunus(e){
  e.stopPropagation();e.preventDefault();uyari='Burası: <b>'+ad+'</b>. Yanıp sönen bölgeye dokunun.';ciz()}
 function basla(){
  if(!window.__hs||!document.querySelector('.side')){setTimeout(basla,150);return}
- A=window.__hs;S=A.S;HS=S.hs;document.body.classList.add('ders');
+ A=window.__hs;S=A.S;HS=S.hs;G=S.gc;document.body.classList.add('ders');
  P=document.createElement('div');P.id='dersP';document.querySelector('.side').appendChild(P);
  var M=document.createElement('div');M.id='dersM';document.body.appendChild(M);
  var st=document.getElementById('st');
- if(!L){D='hs';A.show('main');liste();st.addEventListener('click',function(e){if(e.target.closest('.hs')){e.stopPropagation();e.preventDefault()}},true);
+ if(!L){A.show('main');liste();st.addEventListener('click',function(e){if(e.target.closest('.hs')){e.stopPropagation();e.preventDefault()}},true);
   setInterval(function(){if(S.view!=='main')A.show('main')},300);return}
  sifirla();if(L.kur)L.kur();if(L.yukGizle)document.body.classList.add('dersYuk');
  A.show(L.view[0]);
