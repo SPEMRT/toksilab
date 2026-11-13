@@ -1365,7 +1365,7 @@ $$('#nav button').forEach(b=>b.onclick=()=>{const v=b.dataset.v;if(v==='hslid'&&
 $('#hLab').onclick=e=>{e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'#r1-hsgc')};
 renderTasks();show('main');
 say('Kanda <b>metanol ve etanol</b> analizi, doğrulanmış yöntem <b>ALKOL2.M</b> ile. Sağdaki SOP adımlarını sırayla izle: önce cihazı tanı (fırın kapağı, tuş takımları), sonra vialleri hazırla, HS’e yükle, ChemStation’da sekansı kur ve başlat; en sonda veriyi değerlendir.');
-window.__hs={spd:v=>{SPD=v},S,PLAN,IC,DA,DATA,gcKey,hsKey,show,slotAct,hsAct,prepStep,pcApp,daLoad,calGlobals,qsIon,calUpdate,quantCalc,quantReport,quantCalcUI,fit:calFit,allFiles,daLib,daOverlay,seqTable,startSeqDlg,seqCheck,gcEditDlg,METH,applyMeth,methRT,runLen,loadMethDlg,saveAsDlg,libDlg,calEdit,setDAMethod,CAL,inletAnim,qsOpen,DA2:()=>DA};
+window.__hs={spd:v=>{SPD=v},S,PLAN,IC,DA,DATA,gcKey,hsKey,show,slotAct,hsAct,prepStep,pcApp,daLoad,calGlobals,qsIon,calUpdate,quantCalc,quantReport,quantCalcUI,fit:calFit,allFiles,daLib,daOverlay,seqTable,startSeqDlg,seqCheck,gcEditDlg,METH,applyMeth,methRT,runLen,loadMethDlg,saveAsDlg,libDlg,calEdit,setDAMethod,CAL,inletAnim,colAnim,qsOpen,DA2:()=>DA};
 if(location.hash==='#prep')setTimeout(()=>show('prep'),400);
 
 </script>

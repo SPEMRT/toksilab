@@ -54,6 +54,33 @@ var YUKLE=function(bolum,ad,b,html){var q='#daTree [data-f="ORNEK_SET|'+ad+'"]';
  izin:function(){return document.querySelector('#desk .ctxm')?['#desk .ctxm [data-i="0"]']:[q]},ok:function(){return !!A.DA.F&&A.DA.F.name===ad&&!document.querySelector('#desk .ctxm')},
  hata:function(){return A.DA.open['d:ORNEK_SET']?'':'ORNEK_SET klasörü kapalı.'},gir:function(){A.DA.open['d:ORNEK_SET']=true;if(A.daTree)A.daTree()},b:b,html:html}};
 var dlgAcik=function(t){var r=false;document.querySelectorAll('#desk .dlg .dt b').forEach(function(b){if(b.textContent.indexOf(t)===0)r=true});return r};
+/* ---------- animasyonlar (inlet, kolon): fotoğrafın üstünde, ders paneli açık kalır ---------- */
+var AN=null;
+function animKapat(){document.querySelectorAll('.ianim').forEach(function(x){x.remove()});AN=null}
+function gorevBitti(){var a=ADIM[i];return !!AN&&!!a.gorev&&AN.n>=a.gorev.length}
+function gorevOlay(tur){var a=ADIM[i];if(!AN||!a.gorev||gecti)return;var g=a.gorev[AN.n];if(g&&g[0]===tur){AN.n++;AN.t0=0;ciz()}}
+function animAc(){var a=ADIM[i];if(!a.anim||document.querySelector('.ianim'))return;var f=a.anim==='inlet'?A.inletAnim:A.colAnim;if(!f)return;f();
+ var W=document.querySelector('.ianim'),sw=document.getElementById('stageW');if(!W||!sw)return;
+ sw.style.position='relative';sw.appendChild(W);
+ W.style.position='absolute';W.style.zIndex='20';W.style.padding='8px';W.style.overflow='auto';W.style.background='rgba(5,10,12,.92)';W.style.borderRadius='14px';W.style.placeItems='start center';
+ var kutu=W.firstElementChild,H=sw.clientHeight-16,or=a.anim==='inlet'?16/11:16/15,pay=a.anim==='inlet'?130:285;
+ if(kutu){kutu.style.maxWidth=Math.max(a.anim==='inlet'?300:380,Math.min(a.anim==='inlet'?540:620,(H-pay)*or))+'px';kutu.style.gridTemplateColumns='minmax(0,1fr)';kutu.style.boxSizing='border-box'}
+ var tb=W.querySelector('#caCmp');if(tb){tb.style.overflowX='auto';tb.style.fontSize='11.5px'}
+ ['#iaD','#caD','#iaP','#caS'].forEach(function(q){var e=W.querySelector(q);if(e)e.style.display='none'});
+ var ms=W.querySelector('[data-ms]');if(ms)ms.parentNode.style.display='none';
+ if(!a.gorev)['#iaN'].forEach(function(q){var e=W.querySelector(q);if(e)e.style.display=''});
+ W.addEventListener('click',function(e){var id=e.target.id;if(id==='iaI'||id==='caI')gorevOlay('enj');if(id==='caM2')gorevOlay('iso');if(id==='caM1')gorevOlay('prog')},true);
+ W.addEventListener('input',function(e){if(e.target.id==='iaR'&&+e.target.value<=5)gorevOlay('oran')},true);
+ if(!AN||!a.gorev)AN={n:0,t0:0};AN.acik=1;if(a.gorev&&AN.n===0)AN.n=1;
+ setTimeout(function(){dispatchEvent(new Event('resize'))},40);
+ if(matchMedia('(max-width:1000px)').matches)sw.scrollIntoView({block:'start',behavior:'smooth'});ciz()}
+function animTik(){var a=ADIM[i];if(!AN)return;
+ if(AN.acik&&!document.querySelector('.ianim')){AN.acik=0;
+  if(a.gorev&&!gecti){var g=a.gorev[AN.n];if(g&&g[0]==='kapat'){AN.n++}else if(AN.n<a.gorev.length){AN={n:0,t0:0}}}ciz();return}
+ if(AN.acik&&a.gorev&&!gecti){var g2=a.gorev[AN.n];if(g2&&g2[0]==='bekle'){var now=Date.now();if(!AN.t0)AN.t0=now;else if(now-AN.t0>g2[2]*1000){AN.n++;AN.t0=0;ciz()}}}}
+function gorevHtml(a){var n=AN?AN.n:0,acik=!!document.querySelector('.ianim'),h='<ol class="gorev">';
+ a.gorev.forEach(function(g,k){h+='<li class="'+(k<n?'ok':k===n?'sim':'')+'"><span>'+g[1]+'</span></li>'});
+ return h+'</ol>'+(acik?'':'<div class="alt"><button class="p" id="dAnim">▶ Animasyonu aç</button></div>')}
 var fazBekle=function(ph,vial){return function(h){return !!h.run&&h.run.ph===ph&&(!vial||h.run.vial===vial)}};
 
 /* ---------- dersler ----------
@@ -262,9 +289,9 @@ gctani:{grup:'gc',ad:'Cihazı tanıma',ic:'🔍',ozet:'GC fırını, kolon, inle
   b:'Bilgisayar',ne:'Cihazı yöneten yazılım burada çalışır.',neden:'Yöntem (hangi sıcaklık, hangi iyonlar), sekans (hangi vial, hangi sırayla) ve sonuçların değerlendirilmesi bilgisayardan yapılır.',yanlis:'Bilgisayarda sekans başlatılmadan yapılan enjeksiyonun verisi kaydedilmez.',son:'DİKKAT'},
  {bolum:'Fırının içi',ask:'Şimdi fırının içine bakalım: <b>GC fırın kapağına</b> yeniden dokunarak kapağı açın.',hot:'GC fırın kapağı',view:['main','oven'],ok:function(){return S.view==='oven'},
   b:'Fırının içi',html:'<p>Ortadaki halka biçiminde sarılı ince boru <b>kolon</b>dur. Arkadaki ızgaranın gerisinde, sıcak havayı fırının her yerine eşit dağıtan bir fan vardır.</p><p>Kapak açıkken fırın soğur ve cihaz “hazır değil” durumuna geçer.</p>'},
- {bolum:'Fırının içi',ask:'Ortadaki sarılı <b>kolona</b> dokunun.',hot:'Kolon (DB-WAX)',kes:1,view:['oven'],
+ {bolum:'Fırının içi',ask:'Ortadaki sarılı <b>kolona</b> dokunun.',hot:'Kolon (DB-WAX)',kes:1,view:['oven'],anim:'col',animYazi:'Kolonda ayrılmayı izleyin',
   b:'Kolon: DB-WAX, 30 m',ne:'30 metre uzunluğunda, saç teli kadar ince bir cam borudur. İç yüzeyi ince bir sıvı tabakayla (sabit faz) kaplıdır.',neden:'Bileşikler bu tabakaya farklı ölçüde tutunur. Az tutunan önce, çok tutunan sonra çıkar: metanol yaklaşık 2,9, etanol 3,2, iç standart (n-propanol) 3,8 dakikada.',yanlis:'Kolon kırılgandır ve sıcaklık sınırı vardır. Sınır aşılırsa kaplama bozulur.',son:'DİKKAT'},
- {bolum:'Fırının içi',ask:'Sol üstteki <b>ön inlete</b> dokunun.',hot:'Ön inlet',kes:1,view:['oven'],
+ {bolum:'Fırının içi',ask:'Sol üstteki <b>ön inlete</b> dokunun.',hot:'Ön inlet',kes:1,view:['oven'],anim:'inlet',animYazi:'Inletin çalışmasını izleyin',
   b:'Ön inlet (giriş)',ne:'Örneğin kolona girdiği yerdir. Headspace’in transfer hattı buraya bağlıdır; kolonun bir ucu da buraya takılır.',neden:'210 °C’de tutulur. “Split” modunda çalışır: gelen gazın küçük bir kısmı kolona girer, kalanı dışarı atılır. Böylece kolon aşırı yüklenmez ve pikler keskin olur.',yanlis:'Bağlantı gevşekse gaz kaçar; alanlar küçülür ve tekrarlanabilirlik bozulur.',son:'DİKKAT'},
  {bolum:'Fırının içi',ask:'Soldaki <b>MSD transfer hattına</b> dokunun.',hot:'MSD transfer hattı',kes:1,view:['oven'],
   b:'MSD transfer hattı',ne:'Kolonun çıkış ucu fırın duvarındaki bu hattan geçerek kütle dedektörüne ulaşır.',neden:'260 °C’de tutulur. Kolondan çıkan bileşikler dedektöre varmadan yoğunlaşmamalıdır.',yanlis:'Buradaki bir sızıntı dedektöre hava sokar; ekranda hava iyonları (m/z 28 ve 32) yükselir.',son:'DİKKAT'},
@@ -298,6 +325,10 @@ gctus:{grup:'gc',ad:'Tuş takımı parametreleri',ic:'🎛',ozet:'Fırın progra
  {bolum:'Fırın',ask:'<b>▼</b> tuşuna basın.',keys:function(){return ['down']},ok:function(){return G.sec==='oven'&&G.cur===4},prog:2,
   b:'Final time 1 · sonda bekleme',deger:'0,50 dk',
   ne:'Fırının son sıcaklıkta beklediği süredir.',neden:'Kolon temizlenir. Toplam analiz yaklaşık 4,8 dakika sürer; sonra fırın yeniden 35 °C’ye soğur.',yanlis:'Fırın soğumadan yeni enjeksiyon yapılamaz. Headspace’teki GC çevrim süresi (11 dk) bu yüzden analizden uzundur.'},
+ {bolum:'Fırın',ask:'Fırın programının işe yaradığını kolonun içinde görün.',anim:'col',
+  gorev:[['ac','Aşağıdaki düğmeyle animasyonu açın.'],['bekle','Renkli noktalar moleküllerdir: <b style="color:#FF6B6B">metanol</b>, <b style="color:#4DA3FF">etanol</b>, <b style="color:#2DBE5B">n-propanol</b>. Kolonda birbirinden uzaklaşmalarını izleyin.',9],['iso','<b>Sabit sıcaklık</b> düğmesine basın: fırın baştan sona 90 °C’de kalsın.'],['bekle','Aynı üç maddeyi yeniden izleyin ve alttaki tabloda süreleri karşılaştırın.',7],['prog','<b>SOP programı</b> düğmesine basarak yöntemin programına dönün.'],['kapat','Pencereyi <b>✕</b> ile kapatın.']],
+  ok:function(){return gorevBitti()},
+  b:'Neden programlı ısıtma?',html:'<p>Animasyonda iki şey gördünüz:</p><ul><li><b>Düşük sıcaklıkta</b> moleküller kolonun iç kaplamasına daha uzun tutunur; üç madde birbirinden iyice ayrılır.</li><li><b>Sabit yüksek sıcaklıkta</b> hepsi daha erken çıkar, ama aralarındaki mesafe kısalır. Tabloda görülür: metanol ile etanol arasındaki fark programda <b>0,26 dk</b>, sabit 90 °C’de yalnızca <b>0,04 dk</b>; iki pik üst üste biner.</li></ul><p>Yöntemin programı ikisini birleştirir: önce 35 °C’de bekleyerek <b>ayırır</b>, sonra hızla ısıtarak geride kalanı <b>çabuk çıkarır</b>.</p>'},
  {bolum:'Inlet',ask:'<b>Front Inlet</b> tuşuna basın.',keys:function(){return ['finlet']},ok:function(){return G.sec==='finlet'&&G.cur===0},
   b:'Mode · inlet modu',deger:'Split',
   ne:'Örneğin kolona nasıl verileceğini belirler.',neden:'Split modunda gelen gazın yalnızca bir kısmı kolona girer, kalanı dışarı atılır. Headspace örneği derişik olduğu için bu mod kullanılır.',yanlis:'Splitless modunda örneğin tamamı kolona girer; kolon aşırı yüklenir, pikler bozulur.'},
@@ -310,6 +341,10 @@ gctus:{grup:'gc',ad:'Tuş takımı parametreleri',ic:'🎛',ozet:'Fırın progra
  {bolum:'Inlet',ask:'<b>▼</b> tuşuna basın.',keys:function(){return ['down']},ok:function(){return G.sec==='finlet'&&G.cur===3},
   b:'Split ratio · bölme oranı',deger:'20 : 1',
   ne:'Dışarı atılan gazın kolona giren gaza oranıdır. 20:1, örneğin yaklaşık yirmide birinin kolona girdiğini gösterir.',neden:'Kolonu aşırı yüklemeden yeterli sinyal verir.',yanlis:'Oran büyürse pikler küçülür (duyarlılık düşer); küçülürse pikler genişler ve tepeleri düzleşir.'},
+ {bolum:'Inlet',ask:'Split oranının ne yaptığını inletin içinde görün.',anim:'inlet',
+  gorev:[['ac','Aşağıdaki düğmeyle animasyonu açın.'],['enj','<b>💉 Enjeksiyon</b> düğmesine basın. Gaz aşağıda ikiye ayrılıyor: az bir kısmı kolona, çoğu yandaki split çıkışına.'],['oran','<b>Split oranı</b> kaydırıcısını sola çekin: <b>5:1</b> ya da daha düşük.'],['enj','Yeniden <b>💉 Enjeksiyon</b> düğmesine basın. Kolona giden miktar nasıl değişti?'],['kapat','Pencereyi <b>✕</b> ile kapatın.']],
+  ok:function(){return gorevBitti()},
+  b:'Split oranı ne yapar?',html:'<p>Oran, örneğin ne kadarının kolona gireceğini belirler:</p><ul><li><b>20:1</b> (yöntem): örneğin yaklaşık <b>%5</b>’i kolona girer.</li><li><b>5:1:</b> yaklaşık <b>%17</b>’si kolona girer.</li></ul><p>Oran küçüldükçe pikler büyür; ama fazlası kolonu aşırı yükler, pikler genişler ve tepeleri düzleşir. Oran büyüdükçe pikler küçülür ve düşük derişimler görülmez olur. Yöntemdeki 20:1 bu ikisinin dengesidir.</p>'},
  {bolum:'Kolon',ask:'<b>Col 1</b> tuşuna basın.',keys:function(){return ['col1']},ok:function(){return G.sec==='col1'&&G.cur===2},
   b:'Flow · kolon akışı',deger:'1,1 mL/dk',
   ne:'Helyumun kolon içindeki akış hızıdır. Kolon: DB-WAX, 30 m × 250 µm.',neden:'Sabit akış (Const flow) modunda çalışır: fırın ısınsa da akış aynı kalır, bileşiklerin çıkış zamanı değişmez.',yanlis:'Akış değişirse bütün pikler kayar; bileşikler beklenen zamanda çıkmaz ve yazılım onları tanıyamaz.'},
@@ -573,6 +608,12 @@ css.textContent=
 '#dersP .cev .cy{font:600 11px "IBM Plex Mono",monospace;color:#9BB0B6;text-align:center;border:1px dashed #4A5F68;border-top:0;border-radius:0 0 8px 8px;padding:3px}'+
 '#dersP .cev .cy.on{color:#062126;background:#2BD9C0;border-color:#2BD9C0}'+
 '#dersP .alt{display:flex;gap:8px;flex-wrap:wrap}'+
+'#dersP ol.gorev{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:g}'+
+'#dersP ol.gorev li{counter-increment:g;display:grid;grid-template-columns:24px 1fr;gap:8px;background:#25333A;border-radius:10px;padding:8px 10px;font-size:14.5px;line-height:1.4;color:#9BB0B6}'+
+'#dersP ol.gorev li::before{content:counter(g);width:22px;height:22px;border-radius:50%;background:#33444C;display:grid;place-items:center;font:700 12px "IBM Plex Mono",monospace;color:#C9D8DC}'+
+'#dersP ol.gorev li.sim{color:#EAF2F3;outline:2px solid #F2B632}#dersP ol.gorev li.sim::before{background:#F2B632;color:#2A2000}'+
+'#dersP ol.gorev li.ok{color:#8FE0A8}#dersP ol.gorev li.ok::before{content:"✓";background:#2DBE5B;color:#062126}'+
+'#dersP button.anim{background:#25333A;border:1px solid #2BD9C0;color:#7FDCD0;width:100%}'+
 '#dersP button{border:0;border-radius:10px;padding:10px 14px;font:700 14.5px "Source Sans 3",system-ui,sans-serif;background:#33444C;color:#EAF2F3;cursor:pointer}'+
 '#dersP button.p{background:#2F7DE1;flex:1}#dersP button:disabled{opacity:.4;cursor:default}'+
 '#dersP button.ince{flex:1;background:none;color:#9BB0B6;font-weight:600;font-size:13px;padding:4px}'+
@@ -634,14 +675,17 @@ function ciz(){
  if(a.test){h+=test()}
  else{
   if(a.ask)h+='<div class="ask'+(gecti?' tamam':'')+'">'+(gecti?(a.bekle?'✓ Açıklamayı okuyun, sonra devam edin.':'✓ Doğru. Açıklamayı okuyun, sonra devam edin.'):a.ask)+(uyari&&!gecti?'<small>'+uyari+'</small>':'')+'</div>';
+  if(a.gorev&&!gecti)h+=gorevHtml(a);
   if(!a.ask||gecti)h+=aciklama(a);
+  if(a.anim&&!a.gorev&&gecti&&!document.querySelector('.ianim'))h+='<div class="alt"><button class="anim" id="dAnim">▶ '+a.animYazi+' (isteğe bağlı)</button></div>';
   else if(a.faz!==undefined)h+=serit(a.faz);
   else if(a.prog!==undefined)h+=program(a.prog);
   h+='<div class="alt"><button id="dGeri"'+(i&&!a.geriYok?'':' disabled')+'>‹ Geri</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
  h+=cikis;P.innerHTML=h;cikisBagla();
  var m=document.getElementById('dersM'),dar=matchMedia('(max-width:1000px)').matches,bekle=!!a.ask&&!gecti;
- if(m){m.className=bekle?'on':'';m.innerHTML=bekle?a.ask+(uyari?'<br><b style="color:#B3261E">'+uyari+'</b>':''):''}
+ if(m){var gm=bekle&&a.gorev&&AN&&AN.acik&&a.gorev[AN.n]?a.gorev[AN.n][1]:'';m.className=bekle?'on':'';m.innerHTML=bekle?(gm||a.ask)+(uyari?'<br><b style="color:#B3261E">'+uyari+'</b>':''):''}
  if(dar&&kaydir){kaydir=false;(bekle?document.getElementById(S.view==='pc'?'pcW':S.view==='hslid'&&!a.hot&&a.sec?'loadP':'stageW'):P).scrollIntoView({block:'start',behavior:'smooth'})}
+ var da=P.querySelector('#dAnim');if(da)da.onclick=animAc;
  var g=P.querySelector('#dGeri'),n=P.querySelector('#dIleri');
  if(g)g.onclick=function(){git(i-1)};if(n)n.onclick=function(){git(i+1)};
  P.querySelectorAll('[data-c]').forEach(function(b){b.onclick=function(){if(cevap!==null)return;cevap=+b.dataset.c;if(cevap===SORU[sn][2])puan++;ciz()}});
@@ -658,7 +702,7 @@ function test(){
  if(cevap!==null)h+='<div class="alt"><button class="p" id="dSoru">'+(sn+1<SORU.length?'Sonraki soru ›':'Sonucu gör ›')+'</button></div>';
  return h}
 function izinli(a){return a.view||L.view}
-function git(n){if(n<0||n>=ADIM.length)return;var geri=n<i;i=n;gecti=false;uyari='';hataM='';SON=null;var a=ADIM[i];
+function git(n){if(n<0||n>=ADIM.length)return;var geri=n<i;animKapat();i=n;gecti=false;uyari='';hataM='';SON=null;var a=ADIM[i];
  /* ileri giderken ekran olduğu gibi kalır (aynı tuşa yeniden basılır); geri dönüşte temiz ekrandan başlanır */
  HS.buf='';G.buf='';if(geri||!n){HS.mode='idle';HS.idx=0}
  var v=izinli(a);if(v.indexOf(S.view)<0||geri)A.show(v[0]);
@@ -690,7 +734,7 @@ function pcKoruma(e){
  if(!a.bekle){uyari='Yanıp sönen yere tıklayın.';ciz()}}
 function tamam(){var a=ADIM[i];if(a.bitince)a.bitince();if(a.oto){git(i+1);return}gecti=true;uyari='';kaydir=true;ciz()}
 function tik(){
- var a=ADIM[i];if(a.test)return;
+ var a=ADIM[i];if(a.test)return;animTik();
  var v=izinli(a);if(v.indexOf(S.view)<0)A.show(v[0]);
  if(a.ask&&!gecti){
   if(a.ok&&a.ok(HS))tamam();
