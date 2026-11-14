@@ -464,6 +464,8 @@ reset('parts');
 try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 render();
 Object.assign(window,{reset,render,power,setTime,setTemp,startPause,water,onHot,dropAt,bottleOkIn});Object.defineProperty(window,'S',{get:()=>S});window.__ult=1;
+/* rehberli ders için: tıklanabilir parçanın (hot kimliği) ekrandaki yeri */
+window.scrOf=n=>{const b=new THREE.Box3();HOT.forEach(o=>{if(o.userData.hot===n){o.updateWorldMatrix(true,false);b.expandByObject(o,true)}});const v=(b.isEmpty()?K[n].getWorldPosition(new THREE.Vector3()):b.getCenter(new THREE.Vector3())).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};
 window.__tick=(sec)=>{const n=Math.ceil(sec/.1);for(let i=0;i<n;i++){lastF=performance.now()-100;step(performance.now())}};
 
 /* tam sayfa yardımcıları */
@@ -476,5 +478,7 @@ new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.
 </script>
 
 <script src="anamenu.js" charset="utf-8" defer></script>
+<script>/* rehberli ders: tarayıcı önbelleğinde eski sürüm kalmasın diye 5 dakikada bir yenilenen adresle yüklenir */
+(function(){var s=document.createElement('script');s.charset='utf-8';s.src='cihaz_ders.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})();</script>
 </body>
 </html>

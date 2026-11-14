@@ -2,6 +2,7 @@
    Sayfa doğrudan rehberli açılır; ?serbest=1 ile eski serbest kullanım açılır. ?ders= yoksa bölüm listesi gösterilir.
    vorteks_pilot.html?ders=vortani | vorkul | vorlle   (tanıma · HS viali · ekstraksiyon)
    terazi_pilot.html?ders=terani | terkal | ter10      (tanıma · seviye ve kalibrasyon · 10 mg tartım)
+   ultra_pilot.html?ders=ulttani | ultdeg              (tanıma · mobil faz degazlama)
    Sayfanın 3B sahnesini ve kendi işlevlerini kullanır; sahneye ve fiziğe dokunmaz. */
 (function(){
 'use strict';
@@ -215,9 +216,75 @@ return {sayfa:'terazi_pilot.html',hazir:'__bal',ad:'ANALİTİK TERAZİ',model:'M
  /* fareyle sensörün üstünde durmak kapıyı kendiliğinden açar; derste tıklamayla çakışmasın diye kullanım kipinde fare gezinmesi sahneye iletilmez (sürükleme etkilenmez) */
  kur:function(){addEventListener('pointermove',function(e){if(e.pointerType==='mouse'&&!e.buttons&&e.target.tagName==='CANVAS'&&S()&&S().mode==='use')e.stopPropagation()},true)}};
 }
+/* ---------- ultrasonik banyo ---------- */
+function ultra(){
+var AD={'Paslanmaz çelik hazne (3 L)':'tank','Su seviyesi işareti (2/3)':'mark','“Kuru çalıştırma” uyarısı':'dry','Süre göstergesi (Min · Sec)':'tmin','Sıcaklık göstergesi (Set · Actual °C)':'ttmp','Tuşlar':'bt','Ultrasonic ve Heating ışıkları':'led','Tutamaklar':'hdl','Paslanmaz sepet':'basket','Su kabı':'jug','Mobil faz şişesi (1 L)':'bottle','Kuru ekstrakt tüpleri (yüzer spor)':'rack'};
+var ADI={tank:'hazne',mark:'su seviyesi işareti',dry:'kuru çalıştırma uyarısı',tmin:'süre göstergesi',ttmp:'sıcaklık göstergesi',bt:'tuşlar',led:'ışıklar',hdl:'tutamaklar',basket:'sepet',jug:'su kabı',bottle:'mobil faz şişesi',rack:'tüp sporu'};
+function L1(v){return v.toFixed(1).replace('.',',')+' L'}
+function popAcik(){var b=document.getElementById('bpop');return b&&!b.hidden}
+function pop(sec,yedek){return function(){return popAcik()&&document.querySelector(sec)?[sec,0,0]:yedek}}
+var DERS={
+ulttani:{ad:'Cihazı tanıma',ozet:'Ultrason nasıl çalışır; hazne, 2/3 çizgisi, panel, sepet ve su kabı.',baslik:'ULTRASONİK BANYO · TANIMA',mod:'parts',gorev:'parts',
+ adim:[
+ {bolum:'Giriş',b:'Ultrasonik banyo ne işe yarar?',
+  html:'<p>Ultrasonik banyo, su dolu çelik bir haznedir. Tabanındaki parçalar suya insan kulağının duyamayacağı kadar yüksek frekansta (40 kHz) <b>ses dalgası</b> verir.</p><p>Bu dalgalar suda milyonlarca minik kabarcık oluşturur ve bu kabarcıklar hemen patlar. Buna <b>kavitasyon</b> denir.</p><p>Laboratuvarda iki iş için kullanılır:</p><ul><li><b>Degazlama:</b> LC-MS/MS mobil fazındaki çözünmüş havayı çıkarmak.</li><li><b>Çözme:</b> tüp duvarına yapışmış kuru kalıntıyı çözücüde çözmek.</li></ul><p>Sahneyi sürükleyerek döndürebilir, tekerlekle yakınlaştırabilirsiniz.</p>'},
+ {bolum:'Parçalar',ask:'Çelik <b>hazneye</b> tıklayın.',parca:['tank'],halka:['part:tank',0,80],
+  b:'Hazne',ne:'Yaklaşık 3 litrelik paslanmaz çelik kaptır. Ses dalgasını veren parçalar tabanına yapıştırılmıştır.',neden:'Ses dalgası suyla numuneye geçer. Numune doğrudan değil, <b>suyun içinden</b> etkilenir.',yanlis:'Hazneye numune çözeltisi dökülmez; içinde yalnızca su olur. Numune kendi kabında suya konur.'},
+ {bolum:'Parçalar',ask:'Haznenin iç duvarındaki <b>su seviyesi işaretine</b> tıklayın.',parca:['mark','tank'],halka:['part:mark',0,56],
+  b:'2/3 çizgisi',ne:'Haznenin yaklaşık üçte ikisini gösteren çizgidir.',neden:'Numune kabı içindeyken su bu çizgide olmalıdır. Ses dalgası en iyi bu seviyede iletilir.',yanlis:'Az su: ses enerjisi metalde kalır, parçalar ısınıp bozulur. Fazla su: numune konunca taşar.'},
+ {bolum:'Parçalar',ask:'Ön paneldeki çarpı işaretli <b>“kuru çalıştırma” uyarısına</b> tıklayın.',parca:['dry'],halka:['part:dry',0,44],
+  b:'Kuru çalıştırma uyarısı',ne:'“Susuz çalıştırmayın” anlamına gelen simgedir.',neden:'Susuz çalışan banyo birkaç saniyede bozulur.',yanlis:'Banyo <b>hiçbir zaman</b> boşken açılıp çalıştırılmaz.'},
+ {bolum:'Parçalar',ask:'Paneldeki <b>süre göstergesine</b>, sıcaklık göstergesine ya da tuşlardan birine tıklayın.',parca:['tmin','ttmp','bt','led'],halka:['part:tmin',0,56],
+  b:'Kontrol paneli',html:'<ul><li><b>Süre (Min):</b> 1–99 dakika ayarlanır. Süre bitince cihaz durur ve öter.</li><li><b>Sıcaklık (°C):</b> solda ayar, sağda suyun gerçek sıcaklığı.</li><li><b>Tuşlar:</b> süre ▲▼, sıcaklık ▲▼, ortada sarı <b>▶❚❚</b> (başlat / duraklat), altta kırmızı <b>⏻</b> (aç / kapat).</li><li><b>Işıklar:</b> Ultrasonic = ultrason çalışıyor; Heating = ısıtıcı çalışıyor.</li></ul><p>Ultrason suyu kendiliğinden de yavaşça ısıtır.</p>'},
+ {bolum:'Parçalar',ask:'Haznenin içindeki <b>paslanmaz sepete</b> tıklayın.',parca:['basket','tank'],halka:['part:basket',0,64],
+  b:'Sepet',ne:'Haznenin içine oturan delikli çelik sepettir.',neden:'Numune kabı sepete konur. Sepet titreşimi eşit dağıtır ve cam şişeyi tabana çarpmaktan korur.',yanlis:'Şişe haznenin tabanına doğrudan konmaz.'},
+ {bolum:'Malzemeler',ask:'Tezgâhtaki <b>su kabına</b> ya da <b>mobil faz şişesine</b> tıklayın.',parca:['jug','bottle','rack'],halka:['part:jug',0,60],
+  b:'Su kabı ve mobil faz şişesi',html:'<ul><li><b>Su kabı:</b> hazne bununla doldurulur. Su kirlenince değiştirilir.</li><li><b>Mobil faz şişesi (1 L):</b> LC-MS/MS’in kullandığı sıvı (su + %0,1 formik asit). Bir sonraki bölümde bunu degaze edeceksiniz.</li></ul>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Ultrasonik banyoda numuneyi etkileyen nedir?',['Sıcak hava','Sudaki ses dalgalarının oluşturduğu minik kabarcıklar (kavitasyon)','Mıknatıs'],1,'Ses dalgası suyun içinden numune kabına geçer.'],
+ ['Hazne ne kadar doldurulur?',['Yaklaşık 2/3’üne kadar','Ağzına kadar','Birkaç santim, az su yeter'],0,'Az su cihazı bozar, fazla su taşar.'],
+ ['Banyo susuz çalıştırılırsa ne olur?',['Hiçbir şey olmaz','Daha hızlı çalışır','Ses dalgasını veren parçalar ısınıp bozulur'],2,'Paneldeki çarpı işaretli simge bunu hatırlatır.']],
+ bitti:function(){S().done.parts=1}},
+
+ultdeg:{ad:'Mobil fazı degaze etme',ozet:'Hazneyi doldurma, kapağı gevşetme, 10 dakika ısıtmasız ultrason ve kapatma.',baslik:'ULTRASONİK BANYO · DEGAZLAMA',mod:'use',gorev:'degas',
+ adim:[
+ {bolum:'Giriş',b:'Ne yapacaksınız?',
+  html:'<p>LC-MS/MS’in <b>mobil fazı</b> (1 L su + %0,1 formik asit) içinde çözünmüş hava vardır. Bu hava cihazın pompasında kabarcık yapar:</p><ul><li>Basınç dalgalanır,</li><li>Maddelerin çıkış zamanı kayar,</li><li>Sonuçlar tutarsız olur.</li></ul><p>Bu yüzden şişe kullanılmadan önce ultrasonik banyoda <b>degaze edilir</b>: çözünmüş hava kabarcık hâlinde dışarı atılır.</p>'},
+ {bolum:'Hazırlık',ask:'Tezgâhtaki <b>su kabına</b> tıklayın; açılan kutudan <b>+0,5 L</b> ile hazneye su ekleyin. Haznede 1,5–2,0 L olunca durun.',canli:function(s){return 'Haznedeki su: '+L1(s.water)+' · hedef 1,5–2,0 L (şişe konunca +0,45 L)'},
+  halka:pop('#w1',['part:jug',0,60]),ok:function(s){return s.water>=1.5&&s.water<=2.05},hata:function(){return S().water>2.05?'Su fazla. Kutudaki <b>Banyoyu boşalt</b> ile boşaltıp yeniden doldurun.':''},
+  b:'Su hazır',html:'<p>Haznede yeterince su var. Şişe konunca su yükselecek ve <b>2/3 çizgisine</b> gelecek.</p><p>Su seviyesi şişeyle birlikte hesaplanır: önce boş haznede çizgiye kadar doldurursanız, şişeyi koyunca taşar.</p>'},
+ {bolum:'Hazırlık',ask:'Cihazı açın: paneldeki kırmızı <b>⏻</b> tuşuna tıklayın.',halka:['key:pw',0,40],ok:function(s){return s.pow},
+  b:'Cihaz açık',html:'<p>Ekranda ayarlı süre (dakika) ve sıcaklık görünüyor.</p><p>Degazlamada <b>ısıtma yapılmaz</b>. Isınan mobil fazdan çözücü buharlaşır ve bileşimi değişir. Sıcaklık ayarı oda sıcaklığında kalır.</p>'},
+ {bolum:'Şişe',ask:'<b>Mobil faz şişesine</b> tıklayın ve açılan kutudan <b>Kapağı yarım tur gevşet</b>’i seçin.',halka:pop('#b1',['bottle',0,64]),ok:function(s){return s.bot.cap==='loose'},
+  b:'Kapak gevşek',html:'<p>Kapak yarım tur gevşetildi, ama şişenin üstünde duruyor.</p><ul><li>Kapak <b>sıkı</b> kalırsa çıkan gaz kaçamaz; degazlama olmaz, şişede basınç birikir.</li><li>Kapak <b>tamamen açılırsa</b> şişeye toz ve banyo suyu girebilir.</li></ul>'},
+ {bolum:'Şişe',ask:'Şişeye yeniden tıklayın ve <b>Şişeyi banyoya (sepete) koy</b>’u seçin.',halka:pop('#b2',['bottle',0,64]),ok:function(s){return s.bot.in},
+  b:'Şişe sepette',html:function(){var s=S(),lv=s.water+.45;return '<p>Şişe sepete kondu; su yükseldi: haznede şimdi <b>'+L1(lv)+'</b>.</p><p>Su seviyesi şişedeki sıvının seviyesine yakın olmalı. Böylece ses dalgası şişedeki sıvının tamamına ulaşır.</p>'}},
+ {bolum:'Çalıştırma',ask:'Süreyi <b>10 dakikaya</b> getirin: süre göstergesinin altındaki <b>▲</b> tuşuna tıklayın.',canli:function(s){return 'Ayarlı süre: '+s.tmin+' dk · hedef 10 dk'},halka:function(s){return [s.tmin>10?'key:tDn':'key:tUp',0,36]},ok:function(s){return s.tmin===10},
+  hata:function(){return S().tmin>10?'Süre 10 dakikayı geçti. <b>▼</b> ile azaltın.':''},
+  b:'Süre: 10 dakika',html:'<p>Mobil faz degazlaması için <b>10–15 dakika</b> yeterlidir. Daha uzun süre bir yarar sağlamaz; su ısınır ve çözücü buharlaşır.</p>'},
+ {bolum:'Çalıştırma',ask:'Ortadaki sarı <b>▶❚❚</b> tuşuna tıklayarak ultrasonu başlatın.',oto:1,halka:['key:go',0,40],ok:function(s){return s.ev.start}},
+ {bolum:'Çalıştırma',ask:'Ultrason çalışıyor. Şişeyi izleyin… (Simülasyonda 1 saniye = 1 dakika.)',bekle:1,canli:function(s){var r=Math.max(0,Math.ceil(s.rem));return (s.ev.fin?'Süre bitti ✓':'Kalan: '+Math.floor(r/60)+' dk '+(r%60)+' sn')+' · çözünmüş gaz %'+Math.round(s.bot.gas)},ok:function(s){return s.ev.fin},
+  b:'Degazlama tamam',html:function(){return '<p>Çalışırken şişenin içinden <b>kabarcıklar</b> yükseldi: bu, sıvıdan çıkan çözünmüş havadır. Çözünmüş gaz %100’den <b>%'+Math.round(S().bot.gas)+'</b>’e indi.</p><p>Süre bitince cihaz öttü ve kendiliğinden durdu.</p>'}},
+ {bolum:'Bitirme',ask:'Şişeye tıklayın ve <b>Şişeyi banyodan çıkar</b>’ı seçin.',oto:1,halka:pop('#b2',['bottle',0,64]),ok:function(s){return !s.bot.in}},
+ {bolum:'Bitirme',ask:'Şişeye yeniden tıklayın ve <b>Kapağı sıkıca kapat</b>’ı seçin.',oto:1,halka:pop('#b1',['bottle',0,64]),ok:function(s){return s.bot.cap==='tight'}},
+ {bolum:'Bitirme',ask:'Cihazı kapatın: kırmızı <b>⏻</b> tuşuna tıklayın.',halka:['key:pw',0,40],ok:function(s){return !s.pow},
+  b:'Mobil faz hazır',html:'<p>Şişenin dışı kuru bir kâğıtla silinir, üzerine tarih ve hazırlayanın adı yazılır, sonra LC-MS/MS’e bağlanır. Cihazda pompa bir süre yeni sıvıyla yıkanır (<b>purge</b>).</p><p>Aklınızda kalsın:</p><ul><li>Su <b>2/3</b> çizgisine (şişeyle birlikte).</li><li>Kapak <b>gevşek</b>, ısıtma <b>yok</b>.</li><li><b>10 dakika</b> ultrason.</li><li>Şişeyi çıkar, kapağı <b>sık</b>, cihazı <b>kapat</b>.</li></ul>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Mobil faz neden degaze edilir?',['Rengi açılsın diye','Çözünmüş hava pompada kabarcık yapıp basıncı dalgalandırmasın diye','Soğusun diye'],1,'Kabarcıklar çıkış zamanlarını kaydırır, sonuçlar tutarsız olur.'],
+ ['Degazlamada şişenin kapağı nasıl olmalıdır?',['Sıkıca kapalı','Tamamen açık','Yarım tur gevşek'],2,'Gaz kaçabilir, ama toz ve su girmez.'],
+ ['Degazlama sırasında banyo ısıtılır mı?',['Hayır; ısınan mobil fazın bileşimi buharlaşmayla değişir','Evet, 60 °C’ye','Evet, kaynayana kadar'],0,'Ultrason suyu zaten biraz ısıtır.']],
+ bitti:function(){S().done.degas=1}}
+};
+return {sayfa:'ultra_pilot.html',hazir:'__ult',ad:'ULTRASONİK BANYO',model:'3 L · 40 kHz',adTam:'Ultrasonik banyonun',
+ acl:'Cihazı iki kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 3–5 dakika sürer.',
+ GM:{parts:'ulttani',degas:'ultdeg'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['ulttani','ultdeg'],
+ senkron:function(s,o){if(o.ulttani&&o.ulttani.bitti)s.done.parts=1;if(o.ultdeg&&o.ultdeg.bitti)s.done.degas=1}};
+}
 
 /* ---------- sayfaya göre cihaz ---------- */
-var C=null;[vorteks,terazi].some(function(f){var c=f();if(c.sayfa===SAYFA){C=c;return true}});
+var C=null;[vorteks,terazi,ultra].some(function(f){var c=f();if(c.sayfa===SAYFA){C=c;return true}});
 if(!C)return;
 /* eski ?gorev= bağlantıları ilgili bölüme yönlendirilir */
 if(Q.get('gorev')&&C.GM[Q.get('gorev')]){Q.set('ders',C.GM[Q.get('gorev')]);Q.delete('gorev');location.replace(location.pathname+'?'+Q.toString());return}
