@@ -436,7 +436,7 @@ function steps(){const e=S.ev;let L;
  else if(S.task==='free')L=[['Kayık al ve kefeye koy',e.place],['Dara al (→T←)',e.tare],['Spatulayla standart ekle',e.add],['Kararlı değeri kaydet',e.saved],['Erlene ya da balon jojeye boşalt',e.transfer]];
  else{const t=T();L=[['Seviye ve kalibrasyon tamam',e.lev],...(t.unit?[['Ayarlar → birimi mg yap',S.unit==='mg']]:[]),['Yan kapıyı sensörle aç',e.open],[t.boat==='pl'?'Plastik kayığı al':'Alüminyum kayığı al',e.boat],['Kayığı kefeye koy',e.place],['Kapıyı kapat, kararlı değeri bekle',e.stab1],['Dara al (→T←)',e.tare],['Temiz spatulayı al, standarttan doldur',e.load],['Kapıyı aç, kayığa standart ekle',e.add],[`Kapıyı kapat, ${fmt(t.target,2)} ± ${fmt(t.tol,2)} mg’a ulaş`,e.inRange],['Kararlı değeri kaydet',e.saved],['Kayığı al, balon jojeye boşalt',e.transfer]]}
  let cur=false;return L.map(([t,d])=>{let st=d?'done':'todo';if(!d&&!cur){st='cur';cur=true}return {t,st}})}
-function hint(){if(S.mode!=='use'||S.menu)return null;const e=S.ev,t=T();
+function hint(){if(document.body.classList.contains('cders'))return null;/* rehberli derste sarı halka yeterli */ if(S.mode!=='use'||S.menu)return null;const e=S.ev,t=T();
  if(S.task==='level'){if(!levelOk()){const g=sugg();return g?'feet'+g[0]:'feet'}if(S.tL||S.tR)return S.tL?'sensL':'sensR';if(!S.cal)return 'cal';return null}
  if(S.task==='w10'||S.task==='w5'){const open=S.tL||S.tR;
   if(S.res){if(!S.res.ok||e.transfer)return null;if(S.held==='sp')return 'sh';if(S.held==='al'||S.held==='pl')return 'vol';if(!open)return 'sensR';return 'pan'}

@@ -383,7 +383,7 @@ function steps(){const e=S.ev;let L;
  else if(S.task==='lle')L=[['Falkon tüpünü raftan al',e.took_fal],['Kapağı sıkıca kapat',S.caps.fal],['Hızı düşük ayarla (≤ 4)',e.lowStart],['Anahtarı ON yap',e.onUsed],['Tüpü başlığa bastır',e.cup_fal],['Hızı ≥ 7 kademeye çıkar',e.high],['30 s yüksek hızda karıştır',S.mix.fal>=1],['Tüpü başlıktan kaldır',S.mix.fal>=1&&S.cupT!=='fal'],['Anahtarı kapat (O)',S.mix.fal>=1&&S.cupT!=='fal'&&S.sw==='off']];
  else L=[['Tüp al',e.took_hs||e.took_fal||e.took_ep],['Başlığa koy',e.cup_hs||e.cup_fal||e.cup_ep],['Karıştır',e.started],['Anahtarı kapat',e.started&&S.sw==='off']];
  let cur=false;return L.map(([t,d])=>{let st=d?'done':'todo';if(!d&&!cur){st='cur';cur=true}return {t,st}})}
-function hint(){if(S.mode!=='use'||S.res)return null;const e=S.ev;
+function hint(){if(document.body.classList.contains('cders'))return null;/* rehberli derste sarı halka yeterli */ if(S.mode!=='use'||S.res)return null;const e=S.ev;
  if(S.task==='hs'){if(S.mix.hs<1){if(S.sw!=='touch')return 'sw';if(S.lvl<4||S.lvl>7)return 'knob';if(S.cupT==='hs')return 'cup';if(S.held==='hs')return 'cup';if(S.held||S.cupT)return 'rack';return 'hs'}
   if(S.cupT||S.held)return S.cupT?'cup':'rack';if(S.sw!=='off')return 'sw';return null}
  if(S.task==='lle'){if(S.mix.fal<1){if(S.held&&S.held!=='fal')return 'rack';if(S.cupT&&S.cupT!=='fal')return 'cup';if(!S.held&&!S.cupT)return 'fal';if(S.held==='fal'&&!S.caps.fal)return 'cap';

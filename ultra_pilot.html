@@ -313,7 +313,7 @@ function keyPos(k){const [u,v]=BTN[k];return V3(K.px(u),K.py(v),8.7)}
 function hints(){if(!R3)return;const h=hint()||'';if(h===lastHint)return;lastHint=h;curWarn.forEach(o=>R3.scene.remove(o));curWarn=[];if(!h)return;
  const W={jug:()=>warnBox(null,V3(-34,8,6),V3(13,17,11)),bath:()=>warnBox(null,V3(0,13,0),V3(25,6,15)),bottle:()=>warnBox(K.B),rack:()=>warnBox(K.Rk),temp:()=>warnBox(null,V3(K.px(.66),K.py(.25),8.7),V3(6,2.6,1))}[h];
  if(W){curWarn=[W()];return}if(h.startsWith('key:')){curWarn=[warnBox(null,keyPos(h.slice(4)),V3(2.3,1.8,1))]}}
-function hint(){if(S.mode!=='use'||S.res||S.task==='free')return null;const e=S.ev,b=S.bot,r=S.rack;
+function hint(){if(document.body.classList.contains('cders'))return null;/* rehberli derste sarı halka yeterli */ if(S.mode!=='use'||S.res||S.task==='free')return null;const e=S.ev,b=S.bot,r=S.rack;
  if(S.task==='degas'){if(e.fin){if(b.in)return 'bottle';if(b.cap!=='tight')return 'bottle';if(S.pow)return 'key:pw';return null}
   if(level()<LMIN&&!b.in)return 'jug';if(!S.pow)return 'key:pw';if(!b.in){if(b.cap==='tight')return 'bottle';return 'bottle'}if(level()<LMIN)return 'jug';
   if(S.tmin!==10&&!S.run)return S.tmin<10?'key:tUp':'key:tDn';if(!S.run)return 'key:go';return null}

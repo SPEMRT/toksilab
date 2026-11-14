@@ -295,7 +295,7 @@ var L=DERS[D],ADIM=L?L.adim:[],SORU=L?L.soru:[];
 /* ---------- görünüm ---------- */
 var css=document.createElement('style');
 css.textContent=
-'body.cders .mentor,body.cders #stepc,body.cders #tband,body.cders #side,body.cders #res,body.cders .rot,body.cders #mTasks,body.cders #mParts,body.cders #mUse,body.cders #mPanel,body.cders #mReset,body.cders #egCubuk{display:none!important}'+
+'body.cders .mentor,body.cders #stepc,body.cders #tband,body.cders #side,body.cders #res,body.cders .rot,body.cders #mTasks,body.cders #mParts,body.cders #mUse,body.cders #mPanel,body.cders #mReset,body.cders #egCubuk,body.cders #mHome,body.cders #hLab{display:none!important}'+
 'body.cders #tip{visibility:hidden!important}'+
 'body.cders .stage{right:390px}body.cders #cv3{width:calc(100vw - 390px)!important}'+
 '#dersK{position:fixed;z-index:20;top:0;right:0;bottom:0;width:390px;overflow:auto;padding:14px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}'+
