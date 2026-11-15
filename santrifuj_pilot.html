@@ -320,7 +320,7 @@ function hints(){if(!R3)return;const h=hint()||'';const key=h+'|'+S.lidA.toFixed
  document.querySelectorAll('.hw').forEach(b=>b.classList.remove('hw'));if(!h)return;const [a,b]=h.split(':');
  if(a==='lid')curWarn=[warnBox(S.lid==='open'?K.lidH:K.lid,S.lid==='open'?4:0)];else if(a==='key')curWarn=[warnBox(K.keys[b],b==='knob'?3.2:1.8)];else if(a==='slot'){const s=K.slotHot[S.rotor][+b];curWarn=[warnBox(s.hs,S.rotor==='ang'?2.2:1.6)]}
  else if(a==='tube'){const o=K.tubes[b];if(o)curWarn=[warnBox(o)]}else if(a==='rot')$('#bRot').classList.add('hw');else if(a==='vent'){const v=$(`[data-v="${b}"]`);if(v)v.classList.add('hw')}else if(a==='bal')$('#balp').classList.add('hw');else if(a==='set'){$('#setCard').classList.add('hw');curWarn=[warnBox(K.lcd)]}}
-function hint(){if(S.mode!=='use')return null;const f=S.f;if(S.phase!=='idle')return null;
+function hint(){if(S.mode!=='use'||window.__serbest)return null;const f=S.f;if(S.phase!=='idle')return null;
  if(S.result&&!f.done)return 'lid';
  if(S.lid!=='open'){if(!f.placed)return 'lid';if(!f.set)return 'set';return 'key:start'}
  if(S.rotor!==SETS[S.set].rotor)return nPlaced()?null:'rot';
@@ -477,6 +477,7 @@ try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 setInterval(loop,50);
 window.scrOf=n=>{const o=n.split('.').reduce((a,k)=>a[k],K);const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};
 Object.assign(window,{reset,render,toggleLid,changeRotor,pickTube,vent,slot,makeBalance,spinStep,devBtn,start,stop,setRpm,onHot,imb});Object.defineProperty(window,'S',{get:()=>S});window.__cen=1;
+window.TL_GOREV=()=>S&&S.done; /* eğitim çubuğu için (salt okunur) */
 
 /* tam sayfa yardımcıları */
 $('#mPanel').onclick=()=>{document.body.classList.toggle('panel');$('#mPanel').classList.toggle('on',document.body.classList.contains('panel'))};
@@ -488,5 +489,7 @@ new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.
 </script>
 
 <script src="anamenu.js" charset="utf-8" defer></script>
+<script>/* rehberli ders betiği: tarayıcı önbelleğinde eski sürüm kalmasın diye 5 dakikada bir yenilenen adresle yüklenir */
+(function(){var s=document.createElement('script');s.charset='utf-8';s.src='cihaz_ders.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})();</script>
 </body>
 </html>
