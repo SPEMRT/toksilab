@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HS-GC-MS Veri Formu</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16242A;--mut:#4A5B62;--line:#D5DEE2;--hd:#EEF4F6;--acc:#1F6F8B;--ok:#1F7A3A;--warn:#B85C00;--bg:#F6F9FA;--card:#fff;--ch:#FFF6D8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#EAF2F3;--mut:#9BB0B6;--line:#34454D;--hd:#1E2A30;--acc:#2BD9C0;--ok:#8FE0A8;--warn:#F2B632;--bg:#0E1518;--card:#18232A;--ch:#3A3112}}
+:root[data-theme="dark"]{--ink:#EAF2F3;--mut:#9BB0B6;--line:#34454D;--hd:#1E2A30;--acc:#2BD9C0;--ok:#8FE0A8;--warn:#F2B632;--bg:#0E1518;--card:#18232A;--ch:#3A3112}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 'Source Sans 3',system-ui,sans-serif;padding:16px}
+.w{max-width:1100px;margin:0 auto;display:grid;gap:14px}
+h1{font:700 28px/1.1 'Barlow Condensed',sans-serif}h2{font:700 19px 'Barlow Condensed',sans-serif;letter-spacing:.03em;color:var(--acc);text-transform:uppercase}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:10px}
+.mut{color:var(--mut);font-size:13.5px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button,.btn{font:700 14px 'Source Sans 3',sans-serif;border:0;border-radius:9px;padding:8px 13px;background:var(--acc);color:#fff;cursor:pointer;text-decoration:none;display:inline-block}
+button.g,.btn.g{background:var(--hd);color:var(--ink);border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:middle}th{background:var(--hd);font-weight:700}
+.tw{overflow-x:auto}
+input[type=text],input:not([type]){width:100%;min-width:64px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font:inherit;font-variant-numeric:tabular-nums}
+.sop input{max-width:90px}
+.run{border-left:5px solid var(--line)}.run.ok{border-left-color:var(--ok)}
+.run h3{font:700 18px 'Barlow Condensed',sans-serif;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.chg{background:var(--ch);border-radius:8px;padding:6px 9px;font-size:14px}
+.pill{font:600 11px 'IBM Plex Mono',monospace;border-radius:999px;padding:3px 8px;background:var(--hd);color:var(--mut)}
+.pill.ok{background:var(--ok);color:#fff}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row label{font-size:13.5px;color:var(--mut)}
+@media print{body{background:#fff;color:#000;padding:0;font-size:12px}.np{display:none!important}.card{border:0;padding:4px 0;break-inside:avoid}.run{border-left:0;break-inside:avoid;page-break-inside:avoid}
+ input{border:0;border-bottom:1px solid #999;border-radius:0;background:transparent;color:#000}th{background:#eee}.chg{background:#f3f3f3}}
+@media (max-width:600px){body{padding:10px}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="w">
+ <div class="bar np" style="justify-content:space-between"><a class="btn g" href="hsgcms_pilot.html?mod=metot">‹ Metot geliştirme</a><div class="bar"><button id="bP">🖨 Yazdır / PDF</button><button class="g" id="bC">CSV indir</button><button class="g" id="bJ">Yedekle (JSON)</button><label class="btn g" style="cursor:pointer">Yedeği yükle<input type="file" id="fJ" accept=".json" hidden></label></div></div>
+ <div class="card"><h1>HS-GC-MS · Gerçek cihaz veri toplama formu</h1>
+  <p class="mut">Amaç: kromatografi motorunu gerçek cihaza karşı test etmek ve uydurmak. Her run’da <b>yalnızca bir şey</b> değişir; geri kalan her şey senin SOP’undur. Bütün run’larda aynı vial içeriğini kullan: <b>KAL 0,25 g/L</b> (metanol + etanol, iç standart n-propanol). Aseton ya da izopropanol eklersen tabloya yaz; daha çok madde = daha iyi doğrulama.</p>
+  <p class="mut">Değerleri cihaz başında buraya yazabilirsin (bu tarayıcıda otomatik kaydedilir) ya da formu yazdırıp elle doldurabilirsin. Bitince <b>Metot geliştirme ▸ 🔬 Gerçek cihazla karşılaştır ▸ Veri formundan aktar</b>.</p>
+  <p class="mut">Her run’dan gereken: ChemStation integration raporundan her maddenin <b>RT</b>, <b>alan</b> ve <b>FWHM</b>’i (yarı yükseklikteki genişlik, saniye; raporda dakika ise × 60). Mümkünse hava piki zamanı (tM): solvent delay’i kısa tuttuğun run’larda m/z 32/40/44’te çıkan ilk pik.</p></div>
+ <div class="card sop"><h2>1 · Senin SOP’un</h2><p class="mut">Cihazındaki gerçek değerlerle düzelt; run’lardaki değişiklikler bu değerlere göre hesaplanır.</p><div class="tw"><table id="sopT"></table></div></div>
+ <div class="card"><h2>2 · Run planı</h2><p class="mut">Önerilen sıra aşağıdaki gibi. A bölümü kolon/fırın (tutunma), B bölümü headspace (alan) içindir. HS run’larında her koşulu <b>2 tekrar</b> koşarsan tekrarlanabilirlik de görünür. Her yöntem değişikliğinden sonra 1 boş (blank) run önerilir.</p><div id="runs" style="display:grid;gap:12px"></div></div>
+ <div class="card"><h2>3 · Notlar</h2><textarea id="gn" rows="4" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit" placeholder="Kolon değişimi/kısaltma, liner değişimi, tune tarihi, gözlemler…"></textarea>
+  <p class="mut">Cihaz: Agilent 7694E · 6890N · 5975B · DB-WAX 30 m × 0,25 mm × 0,25 µm (farklıysa notlara yaz). Bu formdaki veriler yalnızca bu tarayıcıda tutulur.</p></div>
+</div>
+<script>
+(function(){'use strict';
+var LS='toksilab_hs_veri_v1';
+var CMP=[['meoh','metanol'],['etoh','etanol'],['npr','n-propanol (ISTD)'],['acet','aseton (varsa)'],['ipa','izopropanol (varsa)']];
+/* SOP alanları: [anahtar, etiket, birim, varsayılan] — kromatografi motorundaki SOP ile aynı */
+var SOPF=[['init','Fırın başlangıç','°C',35],['hold','Başlangıç bekleme','dk',2],['r1','Rampa','°C/dk',50],['f1','Son sıcaklık','°C',150],['h1','Son bekleme','dk',.5],['ratio','Split oranı',':1',30],['col','Kolon akışı (He)','mL/dk',1.1],['itemp','Inlet sıcaklığı','°C',210],['aux','MSD hattı (Aux 2)','°C',260],['sd','Solvent delay','dk',2.2],
+ ['vial','HS vial','°C',80],['loop','HS loop','°C',120],['tl','HS transfer hattı','°C',120],['eq','HS vial dengelenme','dk',4],['shake','HS çalkalama (0/1/2)','',2],['cycle','HS GC cycle time','dk',11]];
+/* run'lar: SOP'a göre değişiklik */
+var RUNS=[
+ {id:'R1',bol:'A',ad:'SOP (referans)',ref:1,mod:function(s){return {}},acik:'Hiçbir şey değiştirme. Bugünkü RT’lerin ve alanların referansı. Önce 1 blank, sonra KAL 0,25.'},
+ {id:'R2',bol:'A',ad:'Başlangıç +10 °C',mod:function(s){return {init:s.init+10,sd:Math.min(s.sd,1.5)}},acik:'Fırın başlangıcını 10 °C artır. Pikler erken çıkacak: solvent delay’i 1,5 dk’ya indir (hava piki tM’yi de gör).'},
+ {id:'R3',bol:'A',ad:'Rampa yarıya',mod:function(s){return {r1:s.r1/2}},acik:'Rampa hızını yarıya indir. Run uzar: GC cycle time yetmiyorsa artır.'},
+ {id:'R4',bol:'A',ad:'Akış ×1,4',mod:function(s){return {col:Math.round(s.col*1.4*10)/10,sd:Math.min(s.sd,1.5)}},acik:'Kolon akışını yaklaşık 1,4 katına çıkar (sabit akış modu). Solvent delay 1,5 dk.'},
+ {id:'R5',bol:'A',ad:'Split yarıya',mod:function(s){return {ratio:Math.round(s.ratio/2)}},acik:'Split oranını yarıya indir. Alan ~2 kat artmalı, pik biraz genişlemeli. Doygunluk uyarısı varsa not et.'},
+ {id:'R6',bol:'B',ad:'Vial −10 °C',mod:function(s){return {vial:s.vial-10}},acik:'HS vial sıcaklığını 10 °C düşür. Fırının yeni sıcaklığa inmesini bekle (READY). 2 tekrar.'},
+ {id:'R7',bol:'B',ad:'Vial +10 °C',mod:function(s){return {vial:s.vial+10,loop:Math.max(s.loop,s.vial+25),tl:Math.max(s.tl,s.vial+25)}},acik:'HS vial sıcaklığını 10 °C artır. Loop ve hat vialden en az 15–20 °C sıcak kalmalı (gerekirse onları da artır). 2 tekrar.'},
+ {id:'R8',bol:'B',ad:'Dengelenme 1 dk',mod:function(s){return {eq:1}},acik:'VIAL EQ.TIME = 1 dk. Denge eksik kalacak: alan düşmeli. 2 tekrar.'},
+ {id:'R9',bol:'B',ad:'Dengelenme 2 dk',mod:function(s){return {eq:2}},acik:'VIAL EQ.TIME = 2 dk. 2 tekrar.'}];
+var D=null;try{D=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
+if(!D||!D.sop){D={sop:{},runs:{},not:''};SOPF.forEach(function(f){D.sop[f[0]]=f[3]})}
+var save=function(){D.t=Date.now();D.def=RUNS.map(function(r){return {id:r.id,ad:r.ad,ref:!!r.ref,bol:r.bol,mod:r.mod(D.sop)}});try{localStorage.setItem(LS,JSON.stringify(D))}catch(e){}};
+var num=function(v){var x=parseFloat(String(v==null?'':v).replace(',','.'));return isNaN(x)?null:x};
+var fmt=function(v){return v==null||v===''?'':String(v).replace('.',',')};
+var LAB={};SOPF.forEach(function(f){LAB[f[0]]=f});
+function sopT(){var h='<tr><th>Parametre</th><th>Değer</th><th>Parametre</th><th>Değer</th></tr>';for(var i=0;i<SOPF.length;i+=2){h+='<tr>'+[SOPF[i],SOPF[i+1]].map(function(f){return f?'<td>'+f[1]+(f[2]?' ('+f[2]+')':'')+'</td><td><input data-s="'+f[0]+'" value="'+fmt(D.sop[f[0]])+'" inputmode="decimal"></td>':'<td></td><td></td>'}).join('')+'</tr>'}
+ document.getElementById('sopT').innerHTML=h;document.querySelectorAll('[data-s]').forEach(function(x){x.onchange=function(){var v=num(x.value);if(v!=null){D.sop[x.dataset.s]=v;save();runs()}}})}
+function degisim(r){var m=r.mod(D.sop),k=Object.keys(m).filter(function(k){return m[k]!==D.sop[k]});if(!k.length)return 'SOP’un aynısı';return k.map(function(k){var f=LAB[k];return f[1]+': '+fmt(D.sop[k])+' → <b>'+fmt(Math.round(m[k]*100)/100)+'</b> '+f[2]}).join(' · ')}
+function runs(){var el=document.getElementById('runs'),h='',bol='';
+ RUNS.forEach(function(r){var R=D.runs[r.id]||{c:{}},full=CMP.slice(0,3).every(function(c){return num((R.c[c[0]]||{}).rt)!=null});
+  if(r.bol!==bol){bol=r.bol;h+='<h3 style="font:700 16px \'Barlow Condensed\',sans-serif;margin-top:4px">'+(bol==='A'?'A · Kolon / fırın (tutunma) — HS ayarları SOP’ta':'B · Headspace (alan) — GC ayarları SOP’ta')+'</h3>'}
+  h+='<div class="card run'+(full?' ok':'')+'"><h3>'+r.id+' · '+r.ad+' <span class="pill'+(full?' ok':'')+'">'+(full?'✓ veri var':'bekliyor')+'</span></h3><div class="chg">'+degisim(r)+'</div><p class="mut">'+r.acik+'</p>'+
+   '<div class="tw"><table><tr><th>Madde</th><th>RT (dk)</th><th>FWHM (s)</th><th>Alan · tekrar 1</th><th>Alan · tekrar 2</th></tr>'+
+   CMP.map(function(c){var v=R.c[c[0]]||{};return '<tr><td>'+c[1]+'</td>'+['rt','w','a1','a2'].map(function(f){return '<td><input data-r="'+r.id+'" data-c="'+c[0]+'" data-f="'+f+'" value="'+fmt(v[f])+'" inputmode="decimal"></td>'}).join('')+'</tr>'}).join('')+
+   '</table></div><div class="g2"><div class="row"><label>Hava piki tM (dk)</label><input data-r="'+r.id+'" data-f="tm" value="'+fmt(R.tm)+'" style="max-width:90px" inputmode="decimal"></div><div class="row"><label>Tarih / not</label><input data-r="'+r.id+'" data-f="not" value="'+(R.not||'').replace(/"/g,'&quot;')+'"></div></div></div>'});
+ el.innerHTML=h;
+ el.querySelectorAll('[data-r]').forEach(function(x){x.onchange=function(){var R=D.runs[x.dataset.r]=D.runs[x.dataset.r]||{c:{}},f=x.dataset.f;
+  if(x.dataset.c){var c=R.c[x.dataset.c]=R.c[x.dataset.c]||{};c[f]=num(x.value)}else R[f]=f==='not'?x.value:num(x.value);save();var card=x.closest('.run'),full=CMP.slice(0,3).every(function(c){return num((R.c[c[0]]||{}).rt)!=null});card.classList.toggle('ok',full);var p=card.querySelector('.pill');p.className='pill'+(full?' ok':'');p.textContent=full?'✓ veri var':'bekliyor'}})}
+document.getElementById('gn').value=D.not||'';document.getElementById('gn').onchange=function(e){D.not=e.target.value;save()};
+document.getElementById('bP').onclick=function(){window.print()};
+var dl=function(name,txt,type){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)};
+document.getElementById('bC').onclick=function(){var L=[['run','degisiklik','madde','rt_dk','fwhm_s','alan1','alan2','tm_dk','not']];RUNS.forEach(function(r){var R=D.runs[r.id]||{c:{}};CMP.forEach(function(c){var v=R.c[c[0]]||{};L.push([r.id+' '+r.ad,degisim(r).replace(/<[^>]+>/g,''),c[1],v.rt,v.w,v.a1,v.a2,R.tm,R.not])})});
+ dl('hs_veri_formu.csv','﻿'+L.map(function(r){return r.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(';')}).join('\n'),'text/csv')};
+document.getElementById('bJ').onclick=function(){save();dl('hs_veri_formu.json',JSON.stringify(D,null,1),'application/json')};
+document.getElementById('fJ').onchange=function(e){var f=e.target.files[0];if(!f)return;f.text().then(function(t){try{var o=JSON.parse(t);if(!o.sop||!o.runs)throw 0;D=o;save();sopT();runs();document.getElementById('gn').value=D.not||''}catch(_){alert('Bu dosya bir veri formu yedeği değil.')}})};
+sopT();runs();save();
+})();
+</script>
+</body>
+</html>

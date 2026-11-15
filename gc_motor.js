@@ -36,7 +36,8 @@ var maxRate=function(T){return T<70?120:T<115?95:T<175?65:45};
 var COOL=40; /* ortalama soğuma hızı, °C/dk (simülasyon döngüsüyle aynı) */
 /* HS: tuzlu (%20 NaCl) kan matriksinde 80 °C'de etkin dağılım katsayısı K, sıcaklık katsayısı B (K),
    dengeye yaklaşım zaman sabiti τ (dk, HIGH çalkalama) */
-var HSP={acet:{K:18,B:4300,tau:.8},meoh:{K:96,B:4900,tau:.95},etoh:{K:86,B:5077,tau:1},npr:{K:60,B:5400,tau:1.15}};
+var HSP0={acet:{K:18,B:4300,tau:.8},meoh:{K:96,B:4900,tau:.95},etoh:{K:86,B:5077,tau:1},npr:{K:60,B:5400,tau:1.15}},HSP={};
+function hspApply(){for(var k in HSP0)HSP[k]=Object.assign({},HSP0[k],(P.hsp||{})[k]||{})}
 var SHAKE=[4,1.8,1];
 var AIR={name:'hava (N2/O2/Ar/CO2)',spec:{28:100,32:28,40:1.3,44:.2},base:28};
 var BLEED={44:35,45:100};
@@ -51,7 +52,7 @@ G.hsNow=hsNow;G.HS0=HS0;G.SOPM=SOPM;G.NM=NM;G.K=K;G.SAT=SAT;G.AMB=AMB;G.COL=COL;
 
 /* ---------- ayarlanabilir model parametreleri (gerçek cihaz verisiyle uydurulur) ---------- */
 var LSK='toksilab_gcmotor_v1';
-var P={tm0:30*100/36/60,par:{},ck:{},obs:[],wsc:{}};
+var P={tm0:30*100/36/60,par:{},ck:{},obs:[],wsc:{},hsp:{}};
 function kOf(ab,T){return Math.exp(ab[0]+ab[1]/(T+T0K))}
 function tMat(m,T){return P.tm0*Math.sqrt(SOPM.col/Math.max(.05,m.col))*Math.pow((T+T0K)/308.15,-.15)}
 function uAvg(m,T){return COL.L*100/(tMat(m,T)*60)}
@@ -75,8 +76,8 @@ function calibrate(){var TA=ovenAct(SOPM,.002),b0=injBand(SOPM,HS0);
  K.forEach(function(k){if(!P.par[k])P.par[k]=[anchorA(k,KP[k],RT[k]),KP[k]];
   var r=el2(SOPM,k,P.par[k],0,TA),u=COL.L*100/(r.tmE*60),inj=b0.band/Math.sqrt(12)*(1+r.kE)/(1+r.k0),col=Math.sqrt(Math.max(1e-8,SIG0*SIG0-inj*inj));
   P.ck[k]=col/(r.tmE*(1+r.kE)*Math.sqrt(Hrel(u)))*(P.wsc[k]||1)});G.ver++;MC={}}
-function load(){try{var o=JSON.parse(localStorage.getItem(LSK)||'null');if(o&&o.par){P.par=o.par;P.tm0=o.tm0||P.tm0;P.obs=o.obs||[];P.wsc=o.wsc||{}}}catch(e){}}
-function save(){try{localStorage.setItem(LSK,JSON.stringify({par:P.par,tm0:P.tm0,obs:P.obs,wsc:P.wsc}))}catch(e){}}
+function load(){try{var o=JSON.parse(localStorage.getItem(LSK)||'null');if(o&&o.par){P.par=o.par;P.tm0=o.tm0||P.tm0;P.obs=o.obs||[];P.wsc=o.wsc||{};P.hsp=o.hsp||{}}}catch(e){}}
+function save(){try{localStorage.setItem(LSK,JSON.stringify({par:P.par,tm0:P.tm0,obs:P.obs,wsc:P.wsc,hsp:P.hsp}))}catch(e){}}
 G.P=P;
 
 /* ---------- HS ---------- */
@@ -254,10 +255,33 @@ G.kalibreEt=function(){var obs=P.obs.slice();
  calibrate();K.forEach(function(k){var w=P.obs.filter(function(o){return o.w&&o.w[k]>0});if(!w.length){return}var s=0;w.forEach(function(o){var F=G.predict(METHlike(o.m),HS0,{c:.25,type:'cal'});s+=o.w[k]/(F.sg[k]*1.1774*(F.lf[k]+F.tf[k])*60)});P.wsc[k]=(P.wsc[k]||1)*s/w.length});
  calibrate();save();return rep};
 function METHlike(m){var b=clone(SOPM);b.oven=clone(m.oven);b.col=m.col;if(m.inlet)b.inlet=clone(m.inlet);if(m.aux2)b.aux2=m.aux2;if(m.ms)b.ms=clone(m.ms);return b}
-G.gozlemEkle=function(meth,rt,w,tm,hs){P.obs.push({m:{oven:clone(meth.oven),col:meth.col,inlet:clone(meth.inlet),aux2:meth.aux2,name:meth.name},rt:rt,w:w||null,tm:tm||null,hs:hs||null,t:Date.now()});save()};
+G.gozlemEkle=function(meth,rt,w,tm,hs,area,ek){P.obs.push(Object.assign({m:{oven:clone(meth.oven),col:meth.col,inlet:clone(meth.inlet),aux2:meth.aux2,name:meth.name},rt:rt,w:w||null,tm:tm||null,hs:hs||null,a:area||null,t:Date.now()},ek||{}));save()};
+G.gozlemSilKaynak=function(src){P.obs=P.obs.filter(function(o){return o.src!==src});save()};
 G.gozlemSil=function(i){P.obs.splice(i,1);save()};
-G.sifirla=function(){P.par={};P.obs=[];P.wsc={};P.tm0=30*100/36/60;try{localStorage.removeItem(LSK)}catch(e){}calibrate()};
+G.sifirla=function(){P.par={};P.obs=[];P.wsc={};P.hsp={};hspApply();P.tm0=30*100/36/60;try{localStorage.removeItem(LSK)}catch(e){}calibrate()};
 G.METHlike=METHlike;
+/* HS katmanı: alan gözlemlerinden B (K'nın sıcaklık duyarlılığı) ve τ (dengelenme hızı) uydurulur.
+   Referans: ref işaretli gözlem (yoksa GC ve HS'i SOP olan). Yalnız GC ayarları referansla aynı olan run'lar kullanılır;
+   her run'da tek bir HS parametresi değişmiş olmalı (vial sıcaklığı ya da dengelenme). Ölçüt: ln(alan / referans alan). */
+G.kalibreHS=function(){var sigGC=function(o){return JSON.stringify([o.m.oven,o.m.col,o.m.inlet&&o.m.inlet.ratio,o.m.inlet&&o.m.inlet.mode])};
+ var hsOf=function(o){return Object.assign({},HS0,o.hs||{})};
+ var ref=P.obs.filter(function(o){return o.ref&&o.a})[0]||P.obs.filter(function(o){return o.a&&sigGC(o)===JSON.stringify([SOPM.oven,SOPM.col,SOPM.inlet.ratio,SOPM.inlet.mode])&&['vial','eq','shake'].every(function(f){return hsOf(o)[f]===HS0[f]})})[0];
+ if(!ref)return {hata:'Referans run (SOP, alan girilmiş) yok.'};var H0=hsOf(ref),rep=[];
+ var same=P.obs.filter(function(o){return o!==ref&&o.a&&sigGC(o)===sigGC(ref)});
+ var vT=same.filter(function(o){var h=hsOf(o);return h.vial!==H0.vial&&h.eq===H0.eq&&h.shake===H0.shake});
+ var vE=same.filter(function(o){var h=hsOf(o);return h.vial===H0.vial&&(h.eq!==H0.eq||h.shake!==H0.shake)});
+ P.hsp=P.hsp||{};
+ K.forEach(function(k){if(!(ref.a[k]>0))return;var cur=Object.assign({},HSP[k]);
+  var pred=function(o,B,tau){var h=hsOf(o),p={K:cur.K,B:B,tau:tau};var c=function(T){return 1/(p.K*Math.exp(p.B*(1/(T+T0K)-1/353.15))+BETA)};var e=function(hh){var t=p.tau*SHAKE[cl(hh.shake|0,0,2)]*Math.exp(1800*(1/(hh.vial+T0K)-1/353.15));return 1-Math.exp(-Math.max(0,hh.eq)/t)};
+   return c(h.vial)/c(H0.vial)*e(h)/e(H0)};
+  var err=function(L,B,tau){var s=0,n=0;L.forEach(function(o){if(!(o.a[k]>0))return;var d=Math.log(pred(o,B,tau))-Math.log(o.a[k]/ref.a[k]);s+=d*d;n++});return n?s/n:null};
+  var r={k:k};
+  if(vE.some(function(o){return o.a[k]>0})){cur.tau=golden(function(t){return err(vE,cur.B,t)},.05,8,40);r.tau=cur.tau;r.eqRms=Math.sqrt(err(vE,cur.B,cur.tau))}
+  if(vT.some(function(o){return o.a[k]>0})){cur.B=golden(function(B){return err(vT,B,cur.tau)},800,12000,40);r.B=cur.B;r.TRms=Math.sqrt(err(vT,cur.B,cur.tau))}
+  if(r.tau!=null||r.B!=null){P.hsp[k]={B:cur.B,tau:cur.tau};rep.push(r)}});
+ /* split: yalnız kontrol (model fiziksel: alan ∝ 1/(1+oran)) */
+ var sp=P.obs.filter(function(o){return o!==ref&&o.a&&o.m.inlet&&ref.m.inlet&&o.m.inlet.ratio!==ref.m.inlet.ratio&&JSON.stringify([o.m.oven,o.m.col])===JSON.stringify([ref.m.oven,ref.m.col])}).map(function(o){var e=(1+ref.m.inlet.ratio)/(1+o.m.inlet.ratio);var ob=K.filter(function(k){return o.a[k]>0&&ref.a[k]>0}).map(function(k){return o.a[k]/ref.a[k]});return {oran:o.m.inlet.ratio,beklenen:e,gozlenen:ob.length?ob.reduce(function(a,b){return a+b})/ob.length:null}});
+ hspApply();G.ver++;MC={};save();return {rep:rep,split:sp,nT:vT.length,nE:vE.length}};
 
 /* ---------- cihaz bağlantıları ---------- */
 /* GC tuş takımı → yüklü (kilitsiz) yöntem */
@@ -293,5 +317,5 @@ G.persist=persist;
 (function(){try{var o=JSON.parse(localStorage.getItem(MLS)||'{}');for(var n in o){if(METH[n]&&METH[n].locked)continue;METH[n]=o[n];METH[n].locked=false;if(!METH[n].ms)METH[n].ms=defMS();if(METHODS.indexOf(n)<0)METHODS.push(n)}lastP=JSON.stringify(o)}catch(e){}})();
 G.silYontem=function(n){if(!METH[n]||METH[n].locked)return;delete METH[n];var i=METHODS.indexOf(n);if(i>=0)METHODS.splice(i,1);persist()};
 
-load();calibrate();syncKeys();
+load();hspApply();calibrate();syncKeys();
 })();
