@@ -101,6 +101,14 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
  .held{top:auto;bottom:calc(28vh + 20px);left:50%}.dsp{width:175px}
 }
 </style>
+<style id="dersOnCss">/* rehberli ders / serbest kullanım düzeni sayfa açılır açılmaz uygulanır: eski pilot arayüzü bir an bile görünmez (cihaz_ders.js yüklenince kendi stiline devreder) */
+html.dersOn .mentor,html.dersOn #stepc,html.dersOn #tband,html.dersOn #side,html.dersOn #res,html.dersOn .rot,html.dersOn #mTasks,html.dersOn #mParts,html.dersOn #mUse,html.dersOn #mPanel,html.dersOn #mReset,html.dersOn #egCubuk,html.dersOn #mHome,html.dersOn #hLab{display:none!important}
+html.dersOn #tip{visibility:hidden!important}
+html.dersOn .stage{right:390px}html.dersOn #cv3{width:calc(100vw - 390px)!important}
+html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;bottom:0;width:390px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
+@media (max-width:900px){html.dersOn .stage{right:0;bottom:46dvh}html.dersOn #cv3{width:100vw!important;height:54dvh!important}html.dersOn body::after{top:auto;left:0;width:auto;height:46dvh;border-radius:16px 16px 0 0}}
+</style>
+<script>document.documentElement.classList.add('dersOn');setTimeout(function(){if(!document.body||!document.body.classList.contains('cders'))document.documentElement.classList.remove('dersOn')},12000)</script>
 </head>
 <body>
 <style>
@@ -134,7 +142,7 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
     <div class="lvl" style="grid-template-columns:1fr auto"><span class="sub">≈ hedef hız</span><b id="lvV">0 rpm</b></div>
     <div class="sub">Tüp</div>
     <div class="acts acts3"><button class="bt" id="tHs">HS viali</button><button class="bt" id="tFal">Falkon (LLE)</button><button class="bt" id="tEp">Eppendorf</button></div>
-    <div class="acts"><button class="bt" id="aCup">Başlığa koy / kaldır</button><button class="bt" id="aCap">Kapağı kapat / aç</button><button class="bt" id="aPress">Bastır (basılı tut)</button><button class="bt" id="aRack">Rafa koy</button></div>
+    <div class="acts"><button class="bt" id="aCup">Başlığa koy / kaldır</button><button class="bt" id="aCap">Kapağı kapat / aç</button><button class="bt" id="aPress">Bastır (basılı tut)</button><button class="bt" id="aHold">✋ Tüpü bastırarak tut</button><button class="bt" id="aRack">Rafa koy</button></div>
    </div>
   </div>
  </div>
@@ -167,7 +175,7 @@ const INFO=Object.fromEntries(PARTS.map(p=>[p[0],[p[1],p[2]]]));Object.assign(IN
  ep:['Eppendorf tüpü 1,5 mL','Küçük hacimli karıştırmalar için. Geçme (snap) kapağı tam kapanmalı.'],rack:['Tüp rafı','Tüpler kullanılmadığında rafta dik durur.']});
 let S;
 function reset(task){const t=TASKS.find(x=>x.id===(task||'parts'));const keep=S&&S.done||{},seen=S?S.seen:{};
- S={task:t.id,mode:S?S.mode:'parts',sw:'off',lvl:0,rpm:0,held:null,cupT:null,press:false,pressT0:0,caps:{hs:true,fal:t.id!=='lle',ep:true},mix:{hs:0,fal:0,ep:0},vol:{hs:1,fal:1,ep:1},tRun:0,tHigh:0,tTouch:0,spills:[],flags:[],ev:{},res:null,done:keep,seen};
+ S={task:t.id,mode:S?S.mode:'parts',sw:'off',lvl:0,rpm:0,held:null,cupT:null,press:false,hold:false,tFree:0,pressT0:0,caps:{hs:true,fal:t.id!=='lle',ep:true},mix:{hs:0,fal:0,ep:0},vol:{hs:1,fal:1,ep:1},tRun:0,tHigh:0,tTouch:0,spills:[],flags:[],ev:{},res:null,done:keep,seen};
  $('#res').innerHTML='';
  say(t.id==='parts'?'Merhaba! Bu bizim vorteks karıştırıcımız. Fareyi merak ettiğin parçanın üzerine getir, açıklaması çıksın (telefonda dokun). Sahneyi sürükleyerek döndürebilirsin.':
   t.id==='hs'?'Görev: <b>HS vialini karıştır</b>. Alkol için hazırladığın vialde kan dipte, su ve İS üstte duruyor. Anahtarı <b>TOUCH</b> yap, hızı <b>4–7</b> kademeye getir, viali başlığa <b>bastırarak</b> homojen olana kadar karıştır.':
@@ -175,12 +183,19 @@ function reset(task){const t=TASKS.find(x=>x.id===(task||'parts'));const keep=S&
   '<b>Serbest kullanım:</b> istediğin tüpü al, anahtarı ve hızı ayarla, karıştır.');render()}
 const say=t=>$('#say').innerHTML=t;
 const T=()=>TASKS.find(x=>x.id===S.task);
-const running=()=>S.sw==='on'||(S.sw==='touch'&&S.press&&!!S.cupT);
+/* tüp elle bastırılarak tutuluyor mu: basılı tutma (press) ya da “tüpü bastırarak tut” (hold) */
+const tutuyor=()=>S.press||S.hold;
+const running=()=>S.sw==='on'||(S.sw==='touch'&&tutuyor()&&!!S.cupT);
 /* ---------- fizik ---------- */
 let lastT=performance.now();
 function tick(){const now=performance.now(),dt=Math.min(.3,(now-lastT)/1000);lastT=now;
  const tgt=running()?S.lvl*300:0;S.rpm+=(tgt-S.rpm)*Math.min(1,dt*(tgt>S.rpm?2.5:3.5));if(S.rpm<5)S.rpm=0;
- const k=S.cupT;if(k&&S.rpm>150){const f=Math.max(0,(S.rpm-300)/2700);S.tRun+=dt;S.ev.started=true;if(S.sw==='touch')S.tTouch+=dt;
+ const k=S.cupT;
+ /* gerçekte tüp başlığa elle bastırılmadan karışmaz; hızlı dönen başlıkta tutulmayan tüp fırlar */
+ if(k&&S.rpm>150&&!tutuyor()){S.tFree+=dt;if(!S.ev.freeW&&S.tFree>.4){S.ev.freeW=1;say('<b style="color:#C62828">⚠ Tüpü bastırarak tutmuyorsun!</b> Başlık dönüyor ama tüp elle başlığa bastırılmadan karışmaz; hız artınca tüp başlıktan <b>fırlar</b>. Tüpü bastırarak tut (“✋ Tüpü bastırarak tut” ya da tüpe basılı tut).');render()}
+  if(S.rpm>1400&&S.tFree>1.2){const kk=k;S.cupT=null;S.held=null;S.hold=false;S.press=false;S.tFree=0;S.ev.freeW=0;S.flags.push('Tüp bastırılmadan çalıştırıldı: başlıktan fırladı.');if(!S.caps[kk]&&S.spills.length<10)for(let i=0;i<4;i++)S.spills.push([(Math.random()-.5)*14,(Math.random()-.5)*12+3]);say('<b style="color:#C62828">⚠ Tüp başlıktan fırladı!</b> Elle bastırılmadan çalışan vortekste tüp tutunamaz, tezgâha düşer'+(S.caps[kk]?'':' ve kapağı açık olduğu için içindekiler döküldü')+'. Tüp rafa geri kondu. Her zaman tüpü başlığa <b>bastırarak tut</b>, sonra çalıştır.');render()}}
+ else S.tFree=0;
+ if(k&&S.rpm>150&&tutuyor()){const f=Math.max(0,(S.rpm-300)/2700);S.tRun+=dt;S.ev.started=true;if(S.sw==='touch')S.tTouch+=dt;
   if(k==='hs')S.mix.hs=Math.min(1,S.mix.hs+dt*.24*f);
   else if(k==='fal'){if(S.rpm>=1950){S.tHigh+=dt;S.mix.fal=Math.min(1,S.mix.fal+dt/30)}else S.mix.fal=Math.min(1,S.mix.fal+dt*.012*f)}
   else S.mix.ep=Math.min(1,S.mix.ep+dt*.3*f);
@@ -367,7 +382,8 @@ function renderLive(){$('#dsp').hidden=S.mode!=='use';$('#dRpm').textContent=`${
  $('#dMode').textContent=`${S.sw==='off'?'O · kapalı':S.sw==='on'?'ON · sürekli':'TOUCH'} · kademe ${S.lvl}`;
  const k=S.cupT||S.held;$('#dT').textContent=S.cupT?(S.cupT==='fal'?`≥2000 rpm: ${fmt(S.tHigh,1)} s`:`Süre ${fmt(S.tRun,1)} s`):'Başlıkta tüp yok';
  $('#dMixT').textContent=k?`${k==='fal'?'Ekstr.':'Homojen'} %${Math.round(S.mix[k]*100)}`:'';$('#dBar').style.width=(k?S.mix[k]*100:0)+'%';
- const hd=$('#held');hd.hidden=!(S.mode==='use'&&(S.held||S.cupT));if(S.held)hd.textContent='Elinde: '+TUBE[S.held].n+(S.caps[S.held]?'':' — KAPAK AÇIK');else if(S.cupT)hd.textContent=(S.press?'Bastırıyorsun: ':'Başlıkta: ')+TUBE[S.cupT].n;
+ const hd=$('#held');hd.hidden=!(S.mode==='use'&&(S.held||S.cupT));if(S.held)hd.textContent='Elinde: '+TUBE[S.held].n+(S.caps[S.held]?'':' — KAPAK AÇIK');else if(S.cupT)hd.textContent=(tutuyor()?'Bastırıyorsun: ':'Başlıkta (tutulmuyor): ')+TUBE[S.cupT].n;
+ {const h=$('#aHold');if(h){h.textContent=S.hold?'✋ Tüpü bırak':'✋ Tüpü bastırarak tut';h.classList.toggle('on',S.hold)}}
  if(!kOpen)return;$('#kpV').textContent=S.lvl;hints()}
 function panel(){const use=S.mode==='use';$('#mParts').classList.toggle('on',!use);$('#mUse').classList.toggle('on',use);$('#tName').textContent=T().t;
  $('#tasks').innerHTML=TASKS.map((x,i)=>`<button class="task${S.task===x.id?' on':''}${S.done[x.id]?' done':''}" data-t="${x.id}"><span>${S.done[x.id]?'✓':i+1}</span><div>${x.t}<small>${x.d}</small></div></button>`).join('');
@@ -393,7 +409,7 @@ function hint(){if(document.body.classList.contains('cders'))return null;/* rehb
  return null}
 /* ---------- eylemler ---------- */
 function setSw(m){if(S.mode!=='use')return;S.sw=m;if(m==='off')S.press=false;if(m==='on'){S.ev.onUsed=true;if(S.cupT&&S.lvl>=8&&S.rpm<300)fastStart()}
- say(m==='off'?'Anahtar <b>O</b>: cihaz kapalı.':m==='on'?'Anahtar <b>ON</b>: başlık sürekli dönüyor. Tüpü sıkıca tut.':'Anahtar <b>TOUCH</b>: başlık yalnız tüpü bastırdığında döner. Tüpü başlığa koy ve <b>basılı tut</b>.');render()}
+ say(m==='off'?'Anahtar <b>O</b>: cihaz kapalı.':m==='on'?'Anahtar <b>ON</b>: başlık sürekli dönüyor. Tüp başlığa <b>bastırılarak tutulmadan</b> karışmaz; tutulmayan tüp fırlar.':'Anahtar <b>TOUCH</b>: başlık yalnız tüpü bastırdığında döner. Tüpü başlığa koy ve <b>basılı tut</b>.');render()}
 function cycleSw(){setSw(S.sw==='off'?'on':S.sw==='on'?'touch':'off')}
 function setLvl(n){if(S.mode!=='use')return;n=Math.max(0,Math.min(10,n));S.lvl=n;if(S.cupT==='fal'&&n>=7)S.ev.high=true;if(!S.cupT&&n<=4&&n>0)S.ev.lowStart=true;
  if(S.task==='lle'&&n>=8&&S.cupT==='fal'&&S.rpm<400&&S.sw==='on')fastStart();render()}
@@ -407,7 +423,7 @@ function cupTap(){if(S.mode!=='use')return;
  if(S.held){if(S.cupT){say('Başlıkta zaten bir tüp var.');return}const k=S.held;S.cupT=k;S.held=null;S.tRun=0;S.ev['cup_'+k]=true;
   if(S.sw==='on'&&S.lvl>=8)fastStart();
   say(S.sw==='touch'?'Tüp başlıkta. Şimdi başlığa ya da tüpe <b>basılı tut</b> (ya da “Bastır” düğmesini basılı tut): TOUCH modunda yalnız bastırınca döner.':S.sw==='on'?(S.caps[k]?'Tüp başlıkta ve dönüyor. Tüpü sıkıca tut.':'<b>Kapak açık!</b> Sıvı sıçrayacak!'):'Tüp başlıkta. Anahtar kapalı; çalıştırmak için <b>ON</b> ya da <b>TOUCH</b> seç.');render();return}
- if(S.cupT){S.held=S.cupT;S.cupT=null;S.press=false;say(`Tüpü başlıktan kaldırdın (${fmt(S.tRun,1)} s karıştırıldı).`+(S.sw==='on'?' Anahtarı kapatmayı unutma.':''));render();return}
+  if(S.cupT){S.held=S.cupT;S.cupT=null;S.press=false;S.hold=false;say(`Tüpü başlıktan kaldırdın (${fmt(S.tRun,1)} s karıştırıldı).`+(S.sw==='on'?' Anahtarı kapatmayı unutma.':''));render();return}
  say('Başlıkta tüp yok. Raftan bir tüp al.')}
 function toRack(){if(S.mode!=='use')return;if(S.cupT&&!S.held){say('Önce tüpü başlıktan kaldır.');return}if(!S.held){say('Elinde tüp yok.');return}const k=S.held;S.held=null;say(`${TUBE[k].n} rafa geri kondu.`);render()}
 function capToggle(){if(S.mode!=='use')return;const k=S.held;if(!k){say(S.cupT?'Kapağı açıp kapatmak için önce tüpü başlıktan kaldır.':'Elinde tüp yok.');return}
@@ -415,6 +431,9 @@ function capToggle(){if(S.mode!=='use')return;const k=S.held;if(!k){say(S.cupT?'
  S.caps[k]=!S.caps[k];say(S.caps[k]?'Kapağı sıkıca kapattın ✓. Artık güvenle vortekslenebilir.':'Kapağı açtın. Açık kapakla vorteksleme yapılmaz!');render()}
 function startPress(){if(!S.cupT||S.mode!=='use')return;S.press=true;S.pressT0=performance.now();if(S.sw==='touch'){if(S.lvl>=9&&S.task!=='free')fastStart();}else if(S.sw==='off')say('Anahtar kapalı (O); bastırsan da dönmez. <b>TOUCH</b> ya da <b>ON</b> seç.');render()}
 function endPress(){if(!S.press)return;S.press=false;render()}
+/* tüpü bastırarak tutmayı aç/kapat (fareyle hem tutup hem düğme çevirmek mümkün olmadığı için) */
+function holdToggle(){if(S.mode!=='use')return;if(!S.cupT){say('Önce tüpü başlığa koy.');return}S.hold=!S.hold;S.ev.freeW=0;
+ say(S.hold?'Tüpü başlığa <b>bastırarak tutuyorsun</b> ✋.'+(S.sw==='touch'?' TOUCH modunda başlık şimdi dönüyor.':S.sw==='on'?' Başlık dönüyor; tüp karışıyor.':' Anahtar kapalı; çalıştırmak için ON ya da TOUCH seç.'):'Tüpü bıraktın.'+(S.sw==='on'&&S.rpm>150?' <b>Dikkat:</b> başlık dönmeye devam ediyor!':''));render()}
 function checkDone(){const t=S.task;
  if(t==='hs'&&S.mix.hs>=1&&!S.held&&!S.cupT&&S.sw==='off')evaluate();
  if(t==='lle'&&S.mix.fal>=1&&S.cupT!=='fal'&&S.sw==='off')evaluate()}
@@ -434,13 +453,14 @@ $('#lvM').onclick=()=>setLvl(S.lvl-1);$('#lvP').onclick=()=>setLvl(S.lvl+1);$('#
 $('#kpM').onclick=()=>setLvl(S.lvl-1);$('#kpP').onclick=()=>setLvl(S.lvl+1);
 $('#tHs').onclick=()=>tubeTap('hs');$('#tFal').onclick=()=>tubeTap('fal');$('#tEp').onclick=()=>tubeTap('ep');
 $('#aCup').onclick=cupTap;$('#aCap').onclick=capToggle;$('#aRack').onclick=toRack;
+$('#aHold').onclick=()=>holdToggle();
 {const b=$('#aPress');b.addEventListener('pointerdown',e=>{e.preventDefault();startPress()});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,endPress))}
 document.addEventListener('pointerdown',e=>{if(kOpen&&!e.target.closest('#kpop')&&e.target.tagName!=='CANVAS')kOpen=false});
 reset('parts');
 try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 setInterval(tick,100);
 window.scrOf=n=>{const o=n.split('.').reduce((a,k)=>a[k],K);const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};
-Object.assign(window,{reset,render,setSw,setLvl,tubeTap,cupTap,toRack,capToggle,startPress,endPress,onHot});Object.defineProperty(window,'S',{get:()=>S});window.__vor=1;
+Object.assign(window,{reset,render,setSw,setLvl,tubeTap,cupTap,toRack,capToggle,startPress,endPress,holdToggle,onHot});Object.defineProperty(window,'S',{get:()=>S});window.__vor=1;
 
 /* tam sayfa yardımcıları */
 $('#mPanel').onclick=()=>{document.body.classList.toggle('panel');$('#mPanel').classList.toggle('on',document.body.classList.contains('panel'))};

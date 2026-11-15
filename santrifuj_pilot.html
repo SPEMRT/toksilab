@@ -101,6 +101,14 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
  .held{top:auto;bottom:calc(28vh + 20px);left:50%}.dsp{width:175px}
 }
 </style>
+<style id="dersOnCss">/* rehberli ders / serbest kullanım düzeni sayfa açılır açılmaz uygulanır: eski pilot arayüzü bir an bile görünmez (cihaz_ders.js yüklenince kendi stiline devreder) */
+html.dersOn .mentor,html.dersOn #stepc,html.dersOn #tband,html.dersOn #side,html.dersOn #res,html.dersOn .rot,html.dersOn #mTasks,html.dersOn #mParts,html.dersOn #mUse,html.dersOn #mPanel,html.dersOn #mReset,html.dersOn #egCubuk,html.dersOn #mHome,html.dersOn #hLab{display:none!important}
+html.dersOn #tip{visibility:hidden!important}
+html.dersOn .stage{right:390px}html.dersOn #cv3{width:calc(100vw - 390px)!important}
+html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;bottom:0;width:390px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
+@media (max-width:900px){html.dersOn .stage{right:0;bottom:46dvh}html.dersOn #cv3{width:100vw!important;height:54dvh!important}html.dersOn body::after{top:auto;left:0;width:auto;height:46dvh;border-radius:16px 16px 0 0}}
+</style>
+<script>document.documentElement.classList.add('dersOn');setTimeout(function(){if(!document.body||!document.body.classList.contains('cders'))document.documentElement.classList.remove('dersOn')},12000)</script>
 </head>
 <body>
 <style>
@@ -156,7 +164,8 @@ const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/t
 const fmt=(n,d=0)=>Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const mmss=s=>{s=Math.max(0,Math.round(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
 const SPEED=20,DEV_MAX=15000;
-const ROTORS={ang:{n:'Açılı rotor · 12 × 5 mL',max:5000,N:12,tol:.5},mic:{n:'Mikrotüp rotoru · 24 × 1,5/2 mL',max:14000,N:24,tol:.15}};
+const ROTORS={ang:{n:'Açılı rotor · 12 × 5 mL',max:5000,N:12,tol:.5},mic:{n:'Mikrotüp rotoru · 24 × 1,5/2 mL',max:14000,N:24,tol:.15},buc:{n:'Kovalı rotor · 4 kova × 4 × 15 mL',max:4500,N:16,tol:.5}};
+const ROTSIRA=['ang','mic','buc'];
 const PROGS=[{rpm:3000,sec:300},{rpm:13000,sec:600},{rpm:1500,sec:900}];
 const SETS={
  kan:{n:'Kan: plazma ayırma',rotor:'ang',intro:'Bu görevde <b>5 kan tüpü</b> var (4,0 mL). Plazmayı hücrelerden ayıracağız.',
@@ -164,18 +173,20 @@ const SETS={
  lle:{n:'Sıvı-sıvı ekstraksiyon: faz ayırma',rotor:'ang',intro:'Bu görevde <b>4 ekstraksiyon tüpü</b> var: 2 <b>etil asetat</b> (organik faz üstte), 2 <b>diklorometan</b> (organik faz altta). Her tüpte 1 mL sulu numune + 3 mL çözücü.',
   tubes:()=>[['E1','etil asetat','ea',.90],['E2','etil asetat','ea',.90],['D1','DCM','dcm',1.33],['D2','DCM','dcm',1.33]].map(([id,s,k,d])=>({id,lab:id,n:id+' · '+s,kind:k,m:6.5+1+3*d,vent:false,info:'1 + 3 mL'})),bal:[3,3.5,4,4.5]},
  epp:{n:'Eppendorf: protein çöktürme',rotor:'mic',intro:'Bu görevde <b>7 Eppendorf mikrotüpü</b> var (0,3 mL kan + 0,7 mL asetonitril). Proteinleri dibe çöktüreceğiz.',
-  tubes:()=>[1,2,3,4,5,6,7].map(i=>({id:'M'+i,lab:String(i),n:'Mikrotüp '+i,kind:'epp',m:1.0+.88,info:'1,0 mL'})),bal:[.8,1,1.2]}};
-const TASKS=[{id:'parts',t:'Parçaları tanı',d:'Fareyi parçaların üzerine getir (7 parça).'},...Object.entries(SETS).map(([id,s])=>({id,t:s.n,d:id==='epp'?'Rotor değişimi · 14000 rpm’e kadar':id==='lle'?'Gaz alma · farklı yoğunluk · denge':'Denge tüpü · doğru hız ve süre'}))];
+  tubes:()=>[1,2,3,4,5,6,7].map(i=>({id:'M'+i,lab:String(i),n:'Mikrotüp '+i,kind:'epp',m:1.0+.88,info:'1,0 mL'})),bal:[.8,1,1.2]},
+ fal:{n:'Falkon 15 mL: idrar çöktürme',rotor:'buc',intro:'Bu görevde <b>6 Falkon tüpü</b> var (10 mL idrar). Büyük tüpler <b>kovalı rotora</b> konur: karşılıklı kovalar eşit yüklenmeli.',
+  tubes:()=>[1,2,3,4,5,6].map(i=>({id:'F'+i,lab:String(i),n:'Falkon '+i,kind:'fal',m:6.8+10*1.02,info:'10 mL'})),bal:[9,10,11]}};
+const TASKS=[{id:'parts',t:'Parçaları tanı',d:'Fareyi parçaların üzerine getir (7 parça).'},...Object.entries(SETS).map(([id,s])=>({id,t:s.n,d:id==='epp'?'Rotor değişimi · 14000 rpm’e kadar':id==='lle'?'Gaz alma · farklı yoğunluk · denge':id==='fal'?'Kovalı rotor · karşılıklı kovalar eşit':'Denge tüpü · doğru hız ve süre'}))];
 const PARTS=[['lid','Kapak (kilitli)','Rotor dönerken kilitlenir; rotor tamamen durmadan açılmaz. Kapak açıkken santrifüj çalışmaz.'],
  ['lcd','Ekran','P: program numarası · rpm: hız · dk:sn: süre. Çalışırken anlık hız ve kalan süre görünür.'],
  ['keys','Tuşlar','— azaltır · PROG hazır programı seçer · RCF (bu laboratuvarda kullanmıyoruz) · SELECT hız/süre alanını seçer · START/STOP başlatır ya da durdurur.'],
  ['knob','Ayar düğmesi','SELECT ile seçili alanı (hız ya da süre) artırır.'],
- ['rotor','Rotor','Açılı rotor 12 × 5 mL (en fazla 5000 rpm) ya da mikrotüp rotoru 24 × 1,5/2 mL (en fazla 14000 rpm). Tüpler karşılıklı ve eşit ağırlıkta dizilir.'],
+ ['rotor','Rotor','Açılı rotor 12 × 5 mL (en fazla 5000 rpm), mikrotüp rotoru 24 × 1,5/2 mL (en fazla 14000 rpm) ya da kovalı rotor 4 × 4 × 15 mL (en fazla 4500 rpm; kovalar dönerken yatay açılır). Tüpler karşılıklı ve eşit ağırlıkta dizilir.'],
  ['hub','Rotor somunu (mil)','Rotoru motor miline sabitler. Rotoru taktıktan sonra somunun sıkıldığından emin olunur.'],
  ['bowl','Rotor haznesi','Tüp kırılırsa dökülen sıvıyı tutar. Temiz ve kuru tutulur; çalışmadan önce içinde yabancı cisim olmamalı.']];
 const INFO=Object.fromEntries(PARTS.map(p=>[p[0],[p[1],p[2]]]));INFO.rack=['Tüp rafı (tepsi)','Santrifüjlenecek tüpler burada bekler. Tüpe dokun, sonra rotorda bir yuvaya dokun.'];
-const KINF={blood:'Kan tüpü (5 mL)',ea:'Etil asetatlı LLE tüpü',dcm:'DCM’li LLE tüpü',water:'Denge tüpü (su)',epp:'Eppendorf mikrotüpü',wm:'Denge mikrotüpü (su)'};
-const CAPC={blood:'#2F6FD8',ea:'#2E9E5B',dcm:'#E07A2A',water:'#E8EEF0',epp:'#F4EEDC',wm:'#CFE6EF'};
+const KINF={fal:'Falkon tüpü 15 mL (idrar)',wf:'Denge Falkonu (su)',blood:'Kan tüpü (5 mL)',ea:'Etil asetatlı LLE tüpü',dcm:'DCM’li LLE tüpü',water:'Denge tüpü (su)',epp:'Eppendorf mikrotüpü',wm:'Denge mikrotüpü (su)'};
+const CAPC={fal:'#2F7DE1',wf:'#CFE6EF',blood:'#2F6FD8',ea:'#2E9E5B',dcm:'#E07A2A',water:'#E8EEF0',epp:'#F4EEDC',wm:'#CFE6EF'};
 let S;
 function reset(task){const id=task||'parts';const set=id==='parts'?'kan':id;const rotor=S?S.rotor:'ang',seen=S?S.seen:{},done=S?S.done:{},mode=S?S.mode:'parts';
  S={task:id,mode,set,lid:'closed',lidA:0,rotor,prog:2,rpm:13000,sec:600,phase:'idle',cur:0,left:600,elapsed:0,temp:22,slots:Array(ROTORS[rotor].N).fill(null),tray:SETS[set].tubes().map(t=>({...t,where:null,st:null})),sel:null,msg:null,sel2:'v',
@@ -185,19 +196,28 @@ function reset(task){const id=task||'parts';const set=id==='parts'?'kan':id;cons
 const say=t=>$('#say').innerHTML=t;
 const R=()=>ROTORS[S.rotor];
 const ANG=k=>(-90+k*360/R().N)*Math.PI/180;
-function imb(){let x=0,y=0;S.slots.forEach((t,k)=>{if(t){x+=t.m*Math.cos(ANG(k));y+=t.m*Math.sin(ANG(k))}});return {x,y,m:Math.hypot(x,y)}}
+/* yuvanın rotor düzlemindeki yeri (yarıçap 1 ölçeğinde). Kovalı rotorda: kova açısı + kova içindeki 2×2 konum */
+const BUCJ=[[-.15,-.15],[-.15,.15],[.15,-.15],[.15,.15]];
+function POS(k){if(S.rotor!=='buc'){const a=ANG(k);return [Math.cos(a),Math.sin(a)]}const b=Math.floor(k/4),a=(-90+b*90)*Math.PI/180,[dr,dt]=BUCJ[k%4];return [Math.cos(a)*(1+dr)-Math.sin(a)*dt,Math.sin(a)*(1+dr)+Math.cos(a)*dt]}
+function imb(){let x=0,y=0;S.slots.forEach((t,k)=>{if(t){const p=POS(k);x+=t.m*p[0];y+=t.m*p[1]}});return {x,y,m:Math.hypot(x,y)}}
 const nPlaced=()=>S.slots.filter(Boolean).length;
-const samplesAll=()=>S.tray.filter(t=>t.kind!=='water'&&t.kind!=='wm').every(t=>t.where!=null);
-const fits=t=>(t.kind==='epp'||t.kind==='wm')?S.rotor==='mic':S.rotor==='ang';
+const BAL=k=>k==='water'||k==='wm'||k==='wf';
+const samplesAll=()=>S.tray.filter(t=>!BAL(t.kind)).every(t=>t.where!=null);
+const fits=t=>(t.kind==='epp'||t.kind==='wm')?S.rotor==='mic':(t.kind==='fal'||t.kind==='wf')?S.rotor==='buc':S.rotor==='ang';
 function verdict(kind,rpm,min){
  if(kind==='blood'){if((rpm>=4000&&min>=5)||(rpm>=3500&&min>=10))return 'ok';if(rpm>=2500&&min>=5)return 'mid';return 'bad'}
  if(kind==='ea'||kind==='dcm'){if((rpm>=4000&&min>=5)||(rpm>=2500&&min>=5)||(rpm>=3000&&min>=3))return 'ok';if(rpm>=1500&&min>=2)return 'mid';return 'bad'}
- if(kind==='epp'){if(rpm>=10000&&min>=5)return 'ok';if(rpm>=5000&&min>=3)return 'mid';return 'bad'}return 'ok'}
+ if(kind==='epp'){if(rpm>=10000&&min>=5)return 'ok';if(rpm>=5000&&min>=3)return 'mid';return 'bad'}
+ if(kind==='fal'){if(rpm>=2500&&min>=5)return 'ok';if(rpm>=1500&&min>=3)return 'mid';return 'bad'}return 'ok'}
 /* ================= 3B ================= */
-const box=$('#cv3');let R3=null;const K={tubes:{},slotHot:{ang:[],mic:[]},rotorG:{},keys:{}};const HOT=[];
+const box=$('#cv3');let R3=null;const K={tubes:{},slotHot:{ang:[],mic:[],buc:[]},rotorG:{},keys:{},buckets:[]};const HOT=[];
 function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');draw(x,w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t}
 function noiseTex(base,amt,n=512,speck=0){return canvasTex(n,n,(c,w,h)=>{c.fillStyle=base;c.fillRect(0,0,w,h);const d=c.getImageData(0,0,w,h);for(let i=0;i<d.data.length;i+=4){const v=(Math.random()-.5)*amt;d.data[i]+=v;d.data[i+1]+=v;d.data[i+2]+=v}c.putImageData(d,0,0);for(let i=0;i<speck;i++){c.fillStyle=`rgba(${Math.random()<.5?'60,70,75':'255,255,255'},${.15+Math.random()*.25})`;c.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1+Math.random()*2)}})}
 function hot(o,id){o.userData.hot=id;HOT.push(o);return o}
+const SLOTRING=new THREE.MeshStandardMaterial({color:'#F08A24',roughness:.4,metalness:.05,emissive:'#6A2E00',emissiveIntensity:.35});const NUMT={};
+function numSprite(n,sz){
+ const tex=NUMT[n]||(NUMT[n]=canvasTex(64,64,(c,w,h)=>{c.fillStyle='rgba(18,28,32,.78)';c.beginPath();c.arc(32,32,29,0,Math.PI*2);c.fill();c.fillStyle='#FFFFFF';c.font='700 34px "IBM Plex Mono",monospace';c.textAlign='center';c.textBaseline='middle';c.fillText(String(n),32,34)}));
+ const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:true,transparent:true}));sp.scale.set(sz,sz,1);return sp}
 const RC=new THREE.Vector3(0,7.2,-2);
 let M,addF,lcdTex,lcdCv,lastLcd='';
 const KEYDEF=[['minus','—',-.4,.55],['prog','PROG',1.25,.55],['rcf','RCF',2.9,.55],['select','SELECT',4.55,.55],['start','START\nSTOP',6.35,.68]];
@@ -211,7 +231,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
   alu:new THREE.MeshStandardMaterial({color:'#E6EAEC',metalness:.55,roughness:.26}),steel:new THREE.MeshStandardMaterial({color:'#C9CFD2',metalness:.95,roughness:.2}),
   dark:new THREE.MeshStandardMaterial({color:'#262D31',roughness:.45,metalness:.1}),rubber:new THREE.MeshStandardMaterial({color:'#1A1E20',roughness:.9}),
   bowl:new THREE.MeshStandardMaterial({color:'#1A1F22',roughness:.55,metalness:.3,side:THREE.DoubleSide}),
-  anod:new THREE.MeshStandardMaterial({color:'#30373D',roughness:.35,metalness:.7}),silv:new THREE.MeshStandardMaterial({color:'#C4CBCF',roughness:.28,metalness:.85}),
+  anod:new THREE.MeshStandardMaterial({color:'#B4BEC3',roughness:.3,metalness:.55}),silv:new THREE.MeshStandardMaterial({color:'#C4CBCF',roughness:.28,metalness:.85}),
   graph:new THREE.MeshPhysicalMaterial({color:'#2E373C',roughness:.4,clearcoat:.5}),
   teal:new THREE.MeshPhysicalMaterial({color:'#2C9EA3',roughness:.32,clearcoat:.7,clearcoatRoughness:.25}),lidIn:new THREE.MeshStandardMaterial({color:'#8DB0B4',roughness:.5}),
   pp:new THREE.MeshPhysicalMaterial({color:'#F4F6F2',roughness:.2,transparent:true,opacity:.38,clearcoat:.6,depthWrite:false,side:THREE.DoubleSide}),
@@ -265,9 +285,26 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
   for(let k=0;k<N;k++){const a=(-90+k*360/N)*Math.PI/180;const u=new THREE.Vector3(Math.cos(a),0,Math.sin(a));const d=u.clone().multiplyScalar(-Math.SQRT1_2).add(Y.clone().multiplyScalar(Math.SQRT1_2)).normalize();
    const E=type==='ang'?u.clone().multiplyScalar(5.9).add(new THREE.Vector3(0,3.1,0)):u.clone().multiplyScalar(6.1).add(new THREE.Vector3(0,2.3,0));
    const hole=add(new THREE.CylinderGeometry(type==='ang'?.68:.5,type==='ang'?.68:.5,.6,20),new THREE.MeshStandardMaterial({color:'#060708',roughness:.9}),E.x,E.y-.15,E.z,g,false);hole.quaternion.setFromUnitVectors(Y,d);
+   /* yuvayı belirgin yapan açık renkli halka ve numara */
+   const rr=type==='ang'?.68:.5;const ring=add(new THREE.TorusGeometry(rr+.12,type==='ang'?.13:.1,8,28),SLOTRING,E.x,E.y+.02,E.z,g,false);ring.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),d);
+   const nm=numSprite(k+1,type==='ang'?.95:.62);nm.position.copy(type==='ang'?u.clone().multiplyScalar(7.35).add(new THREE.Vector3(0,2.0,0)):u.clone().multiplyScalar(7.05).add(new THREE.Vector3(0,2.9,0)));g.add(nm);
    const hs=hot(add(new THREE.SphereGeometry(type==='ang'?1.0:.75,10,8),new THREE.MeshBasicMaterial({visible:false}),E.x,E.y+.5,E.z,g,false),'slot:'+k);K.slotHot[type][k]={hs,E,d}}
   return g}
- rotor('ang');rotor('mic');
+ /* kovalı (swing-out) rotor: 4 kol, her kolun ucunda dönerken yatay açılan kova; kovada 2×2 turuncu Falkon adaptörü */
+ function rotorBuc(){const g=new THREE.Group();g.position.copy(RC);C.add(g);K.rotorG.buc=g;
+  const arm=new THREE.MeshStandardMaterial({color:'#A7B2B7',metalness:.55,roughness:.3}),ad=new THREE.MeshStandardMaterial({color:'#F08A24',roughness:.45}),hole=new THREE.MeshStandardMaterial({color:'#2A1A0A',roughness:.9});
+  hot(add(new THREE.CylinderGeometry(1.5,1.7,2.4,28),M.steel,0,1.5,0,g),'part:hub');add(new THREE.CylinderGeometry(.75,.75,.6,6),M.steel,0,3.0,0,g);
+  for(let b=0;b<4;b++){const a=(-90+b*90)*Math.PI/180;const A=new THREE.Group();A.rotation.y=-a;g.add(A);
+   hot(add(new THREE.BoxGeometry(3.4,.9,1.3),arm,2.3,1.5,0,A),'part:rotor');hot(add(new THREE.BoxGeometry(.5,.9,4.6),arm,4.15,1.5,0,A),'part:rotor');
+   const P=new THREE.Group();P.position.set(4.6,1.5,0);A.add(P);K.buckets.push(P);
+   hot(add(new THREE.CylinderGeometry(1.95,1.75,6,36,1,true),M.teal,0,-3,0,P),'part:rotor');add(new THREE.CircleGeometry(1.75,36),M.teal,0,-6,0,P,false).rotation.x=Math.PI/2;
+   add(new THREE.CylinderGeometry(1.9,1.9,.55,36),ad,0,-.3,0,P);
+   for(let j=0;j<4;j++){const k=b*4+j,[dr,dt]=BUCJ[j],lx=dr/.15*.82,lz=dt/.15*.82;
+    add(new THREE.CylinderGeometry(.66,.66,.58,24),hole,lx,-.26,lz,P,false);add(new THREE.TorusGeometry(.72,.1,8,28),SLOTRING,lx,.0,lz,P,false).rotation.x=Math.PI/2;
+    const nm=numSprite(k+1,.55);nm.position.set(lx+(lx>0?.62:-.62),.35,lz+(lz>0?.62:-.62));P.add(nm);
+    const hs=hot(add(new THREE.SphereGeometry(.85,10,8),new THREE.MeshBasicMaterial({visible:false}),lx,.7,lz,P,false),'slot:'+k);K.slotHot.buc[k]={hs,E:new THREE.Vector3(lx,-5.8,lz),d:new THREE.Vector3(0,1,0),par:P}}}
+  return g}
+ rotor('ang');rotor('mic');rotorBuc();
  /* tepsi rafı */
  {const g=new THREE.Group();g.position.set(25,0,8);scene.add(g);add(RB(16,3.2,6.4,.3),M.white,0,1.6,0,g);for(let i=0;i<12;i++){const [x,z]=rackPos(i,true);add(new THREE.CircleGeometry(.75,20),M.dark,x,3.21,z,g,false).rotation.x=-Math.PI/2}
   hot(add(new THREE.BoxGeometry(16.5,3.6,7),new THREE.MeshBasicMaterial({visible:false}),0,1.6,0,g,false),'rack');K.rack=g}
@@ -288,19 +325,23 @@ function layers(t){const k=t.kind,v=t.st;const RED='#7A0F18',AQ='#D9C49A',EM='#E
  if(k==='blood'){if(v==='ok')return [[.55,RED,.97],[.45,'#E9C46A',.9]];if(v==='mid')return [[.5,RED,.97],[.15,'#A0402F',.9],[.35,'#D59A63',.85]];return [[1,RED,.97]]}
  if(k==='ea'||k==='dcm'){const org=k==='ea'?'#F3EBC8':'#EEF1E8';const em=v==='ok'?.03:v==='mid'?.12:v==='bad'?.4:1;if(!v)return [[1,EM,.92]];
   const a=[[.25-em/2,AQ,.92],[em,'#FFFFFF',.95],[.75-em/2,org,.6]];return k==='ea'?a:[a[2],a[1],a[0]]}
+ if(k==='fal'){if(v==='ok')return [[.05,'#B98D3E',.95],[.95,'#F3E3A0',.55]];if(v==='mid')return [[.03,'#B98D3E',.7],[.97,'#E9D58F',.75]];return [[1,'#E6D08A',.85]]}
  if(k==='epp'||k==='wm'){if(k==='wm')return [[1,'#BFE3EE',.6]];if(v==='ok')return [[.1,'#B9825A',.98],[.9,'#F1ECDD',.7]];if(v==='mid')return [[.12,'#B9825A',.6],[.88,'#E2CFC0',.8]];return [[1,'#E4D3C6',.9]]}
  return [[1,'#BFE3EE',.6]]}
-function tubeObj(t){let o=K.tubes[t.id];if(o)return o;o=new THREE.Group();const micro=t.kind==='epp'||t.kind==='wm';const add=addF;
- if(micro){add(new THREE.CylinderGeometry(.46,.46,2.4,20,1,true),M.pp,0,2.4,0,o,false);add(new THREE.CylinderGeometry(.46,.12,1.2,20,1,true),M.pp,0,.6,0,o,false);add(new THREE.CylinderGeometry(.54,.54,.4,20),new THREE.MeshStandardMaterial({color:CAPC[t.kind],roughness:.4}),0,3.8,0,o)}
+function tubeObj(t){let o=K.tubes[t.id];if(o)return o;o=new THREE.Group();const micro=t.kind==='epp'||t.kind==='wm',big=t.kind==='fal'||t.kind==='wf';const add=addF;
+ if(big){add(new THREE.CylinderGeometry(.64,.64,5.9,24,1,true),M.pp,0,4.05,0,o,false);add(new THREE.CylinderGeometry(.64,.12,1.1,24,1,true),M.pp,0,.55,0,o,false);
+  add(new THREE.CylinderGeometry(.78,.78,.95,24),new THREE.MeshStandardMaterial({color:CAPC[t.kind],roughness:.45}),0,7.45,0,o);
+  const lab=canvasTex(128,64,(c,w,h)=>{c.fillStyle='#FFFFFF';c.fillRect(0,0,w,h);c.fillStyle='#132228';c.font='700 40px "Source Sans 3",sans-serif';c.textAlign='center';c.fillText(t.lab,w/2,48)});add(new THREE.CylinderGeometry(.66,.66,1.4,24,1,true,-Math.PI/2.4,Math.PI/1.2),new THREE.MeshStandardMaterial({map:lab,roughness:.6}),0,5.2,0,o,false)}
+ else if(micro){add(new THREE.CylinderGeometry(.46,.46,2.4,20,1,true),M.pp,0,2.4,0,o,false);add(new THREE.CylinderGeometry(.46,.12,1.2,20,1,true),M.pp,0,.6,0,o,false);add(new THREE.CylinderGeometry(.54,.54,.4,20),new THREE.MeshStandardMaterial({color:CAPC[t.kind],roughness:.4}),0,3.8,0,o)}
  else{add(new THREE.CylinderGeometry(.58,.58,6.6,24,1,true),M.pp,0,3.9,0,o,false);add(new THREE.SphereGeometry(.58,20,10,0,Math.PI*2,Math.PI/2,Math.PI/2),M.pp,0,.6,0,o,false);
   add(new THREE.CylinderGeometry(.7,.7,1.2,24),new THREE.MeshStandardMaterial({color:CAPC[t.kind],roughness:.45}),0,7.7,0,o);
   const lab=canvasTex(128,64,(c,w,h)=>{c.fillStyle='#FFFFFF';c.fillRect(0,0,w,h);c.fillStyle='#132228';c.font='700 40px "Source Sans 3",sans-serif';c.textAlign='center';c.fillText(t.lab,w/2,48)});add(new THREE.CylinderGeometry(.6,.6,1.4,24,1,true,-Math.PI/2.4,Math.PI/1.2),new THREE.MeshStandardMaterial({map:lab,roughness:.6}),0,5.6,0,o,false)}
- const L=new THREE.Group();o.add(L);o.userData.L=L;o.userData.lk='';o.userData.micro=micro;
+ const L=new THREE.Group();o.add(L);o.userData.L=L;o.userData.lk='';o.userData.micro=micro;o.userData.big=big;
  const hb=hot(add(new THREE.BoxGeometry(micro?1.4:1.8,micro?4.4:8.6,micro?1.4:1.8),new THREE.MeshBasicMaterial({visible:false}),0,micro?2.2:4.3,0,o,false),'tube:'+t.id);
  R3.scene.add(o);K.tubes[t.id]=o;return o}
 function setLayers(t,o){const key=t.st+'|'+t.kind+'|'+t.info;if(o.userData.lk===key)return;o.userData.lk=key;const L=o.userData.L;while(L.children.length)L.remove(L.children[0]);
- const micro=o.userData.micro;const fill=micro?(t.kind==='wm'?.45+parseFloat(t.info.replace(',','.'))*.3:.75):(t.kind==='water'||t.kind==='wm'?Math.min(.95,parseFloat(t.info.replace(',','.'))/5):.8);
- const r=micro?.41:.52,y0=micro?.5:.25,H=(micro?3.1:7.0)*fill;let y=y0;
+ const micro=o.userData.micro,big=o.userData.big;const fill=big?Math.min(.95,parseFloat(t.info.replace(',','.'))/12):micro?(t.kind==='wm'?.45+parseFloat(t.info.replace(',','.'))*.3:.75):(t.kind==='water'||t.kind==='wm'?Math.min(.95,parseFloat(t.info.replace(',','.'))/5):.8);
+ const r=big?.58:micro?.41:.52,y0=big?.35:micro?.5:.25,H=(big?6.4:micro?3.1:7.0)*fill;let y=y0;
  layers(t).forEach(([f,c,op])=>{const h=Math.max(.02,H*f);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,20),new THREE.MeshPhysicalMaterial({color:c,transparent:true,opacity:op,roughness:.2,depthWrite:false}));m.position.y=y+h/2;L.add(m);y+=h})}
 /* olaylar */
 function onHot(h){const [a,b]=h.split(':');
@@ -320,22 +361,23 @@ function hints(){if(!R3)return;const h=hint()||'';const key=h+'|'+S.lidA.toFixed
  document.querySelectorAll('.hw').forEach(b=>b.classList.remove('hw'));if(!h)return;const [a,b]=h.split(':');
  if(a==='lid')curWarn=[warnBox(S.lid==='open'?K.lidH:K.lid,S.lid==='open'?4:0)];else if(a==='key')curWarn=[warnBox(K.keys[b],b==='knob'?3.2:1.8)];else if(a==='slot'){const s=K.slotHot[S.rotor][+b];curWarn=[warnBox(s.hs,S.rotor==='ang'?2.2:1.6)]}
  else if(a==='tube'){const o=K.tubes[b];if(o)curWarn=[warnBox(o)]}else if(a==='rot')$('#bRot').classList.add('hw');else if(a==='vent'){const v=$(`[data-v="${b}"]`);if(v)v.classList.add('hw')}else if(a==='bal')$('#balp').classList.add('hw');else if(a==='set'){$('#setCard').classList.add('hw');curWarn=[warnBox(K.lcd)]}}
-function hint(){if(S.mode!=='use'||window.__serbest)return null;const f=S.f;if(S.phase!=='idle')return null;
+function hint(){if(document.body.classList.contains('cders')||S.mode!=='use'||window.__serbest)return null;const f=S.f;if(S.phase!=='idle')return null;
  if(S.result&&!f.done)return 'lid';
  if(S.lid!=='open'){if(!f.placed)return 'lid';if(!f.set)return 'set';return 'key:start'}
  if(S.rotor!==SETS[S.set].rotor)return nPlaced()?null:'rot';
  if(!f.placed){const nv=S.tray.find(t=>(t.kind==='ea'||t.kind==='dcm')&&!t.vent);if(nv)return 'vent:'+nv.id;
   if(S.sel){const N=R().N;for(let k=0;k<N;k++){const t=S.slots[k];if(t&&!S.slots[(k+N/2)%N])return 'slot:'+((k+N/2)%N)}return 'slot:'+S.slots.findIndex(x=>!x)}
-  const nx=S.tray.find(t=>t.where==null&&t.kind!=='water'&&t.kind!=='wm');if(nx)return 'tube:'+nx.id;
-  const bt=S.tray.find(t=>(t.kind==='water'||t.kind==='wm')&&t.where==null);if(bt)return 'tube:'+bt.id;return 'bal'}
+  const nx=S.tray.find(t=>t.where==null&&!BAL(t.kind));if(nx)return 'tube:'+nx.id;
+  const bt=S.tray.find(t=>BAL(t.kind)&&t.where==null);if(bt)return 'tube:'+bt.id;return 'bal'}
  return 'lid'}
 /* her kare */
 let lastSy=performance.now();function sync(t){const nw=performance.now(),dt=Math.min(.25,(nw-lastSy)/1000);lastSy=nw;{const g=S.lid==='open'?1:0;S.lidA+=Math.sign(g-S.lidA)*Math.min(Math.abs(g-S.lidA),dt*2.2)}K.lid.rotation.x=-1.72*S.lidA;
- K.rotorG.ang.visible=S.rotor==='ang';K.rotorG.mic.visible=S.rotor==='mic';const rg=K.rotorG[S.rotor];rg.rotation.y=-S.rot;
+ for(const r in K.rotorG)K.rotorG[r].visible=S.rotor===r;const rg=K.rotorG[S.rotor];rg.rotation.y=-S.rot;
+ {const ph=Math.min(1,S.cur/1200)*1.05;K.buckets.forEach(P=>{P.rotation.z+=(ph-P.rotation.z)*.2})}
  const sh=S.phase==='error'?.25:S.cur>800?.015:0;K.C.position.set((Math.random()-.5)*sh,0,(Math.random()-.5)*sh);
  const Y=new THREE.Vector3(0,1,0);
  S.tray.forEach((tb,i)=>{const o=tubeObj(tb);setLayers(tb,o);
-  if(tb.where!=null&&S.slots[tb.where]===tb){const s=K.slotHot[S.rotor][tb.where];if(o.parent!==rg)rg.add(o);const sink=o.userData.micro?1.6:3.0;o.position.copy(s.E).addScaledVector(s.d,-sink);o.quaternion.setFromUnitVectors(Y,s.d)}
+  if(tb.where!=null&&S.slots[tb.where]===tb){const s=K.slotHot[S.rotor][tb.where],par=s.par||rg;if(o.parent!==par)par.add(o);const sink=o.userData.big?0:o.userData.micro?1.6:3.0;o.position.copy(s.E).addScaledVector(s.d,-sink);o.quaternion.setFromUnitVectors(Y,s.d)}
   else{if(o.parent!==R3.scene)R3.scene.add(o);const [x,z]=rackPos(i);o.position.set(x,S.sel===tb.id?3.4:1.0,z);o.quaternion.identity()}});
  drawLcd(t);
  curWarn.forEach(o=>{const k=.55+.45*Math.sin(t/160);o.material.opacity=k;o.children[0].material.opacity=.06+.12*k})}
@@ -378,7 +420,7 @@ function live(){const run=S.phase!=='idle';$('#dsp').hidden=S.mode!=='use';
  $('#dPh').textContent={idle:'HAZIR',accel:'HIZLANIYOR…',run:'ÇALIŞIYOR',decel:'YAVAŞLIYOR…',error:'DENGESİZLİK! DURUYOR'}[S.phase];$('#dPh').style.color=S.phase==='error'?'#FF6B6B':run?'#7CF2D8':'#9BB0B6';
  $('#dRpm').textContent=`${fmt(Math.round(S.cur/10)*10)} rpm`;$('#dTgt').textContent=`hedef ${fmt(S.rpm)} rpm · ${R().n.split(' · ')[0]} (en fazla ${fmt(R().max)})`;
  $('#dLeft').textContent=`Kalan ${mmss(run?S.left:S.sec)}`;$('#dTmp').textContent=`${fmt(S.temp,1)} °C`;$('#dBar').style.width=(run?Math.min(100,(1-S.left/S.sec)*100):0)+'%';
- const v=imb(),bad=v.m>R().tol,N=R().N;let s=`<circle r="46" fill="#0F191D" stroke="#34454D" stroke-width="3"/>`;for(let k=0;k<N;k++){const a=ANG(k),t=S.slots[k];s+=`<circle cx="${34*Math.cos(a)}" cy="${34*Math.sin(a)}" r="${N>12?4:6}" fill="${t?CAPC[t.kind]:'#26323A'}" stroke="#52636B"/>`}
+ const v=imb(),bad=v.m>R().tol,N=R().N;let s=`<circle r="46" fill="#0F191D" stroke="#34454D" stroke-width="3"/>`;for(let k=0;k<N;k++){const p=POS(k),t=S.slots[k];s+=`<circle cx="${(S.rotor==='buc'?30:34)*p[0]}" cy="${(S.rotor==='buc'?30:34)*p[1]}" r="${N>12?4:6}" fill="${t?CAPC[t.kind]:'#26323A'}" stroke="#52636B"/>`}
  if(nPlaced()&&v.m>.02){const L=Math.min(30,v.m*(S.rotor==='mic'?120:22));s+=`<line x1="0" y1="0" x2="${L*v.x/v.m}" y2="${L*v.y/v.m}" stroke="${bad?'#E5484D':'#2DBE5B'}" stroke-width="5" stroke-linecap="round"/>`}
  $('#dImb').innerHTML=s+'<circle r="6" fill="#C9CFD2"/>';$('#dImbT').innerHTML=nPlaced()?`Dengesizlik<br><b style="color:${bad?'#FF6B6B':'#2DBE5B'}">${fmt(v.m,2)} g</b> / sınır ${fmt(R().tol,2)} g`:'Rotor boş';
  const hd=$('#held');const st=S.tray.find(t=>t.id===S.sel);hd.hidden=!(S.mode==='use'&&st);if(st)hd.textContent='Seçili: '+st.n+' — rotorda bir yuvaya dokun';
@@ -391,37 +433,37 @@ function panel(){const use=S.mode==='use';$('#mParts').classList.toggle('on',!us
  $('#rotSub').textContent=`${R().n} · en fazla ${fmt(R().max)} rpm`;
  $('#tray').innerHTML=S.tray.map(t=>{const vent=(t.kind==='ea'||t.kind==='dcm')&&!t.vent;return `<span class="tw"><button class="tube${S.sel===t.id?' sel':''}${t.where!=null?' used':''}" data-t="${t.id}"${use?'':' disabled'}><i style="background:linear-gradient(${CAPC[t.kind]} 0 30%,${layers({kind:t.kind,st:null})[0][1]} 30%)"></i>${t.n} · ${t.info}${t.where!=null?` · yuva ${t.where+1}`:''}${vent?' <em>⚠ gaz</em>':''}</button>${vent?`<button class="vent" data-v="${t.id}"${use?'':' disabled'}>Gazını al</button>`:''}</span>`}).join('');
  $('#tray').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>pickTube(b.dataset.t));$('#tray').querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>vent(b.dataset.v));
- const B=SETS[S.set].bal,mic=SETS[S.set].rotor==='mic';$('#balp').innerHTML=`Denge tüpü (su${mic?', mikrotüp':''}): `+B.map(v=>`<button data-b="${v}"${use?'':' disabled'}>${fmt(v,1)} mL</button>`).join('');$('#balp').querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>makeBalance(+b.dataset.b));
+ const B=SETS[S.set].bal,mic=SETS[S.set].rotor==='mic',bk=SETS[S.set].rotor==='buc';$('#balp').innerHTML=`Denge tüpü (su${mic?', mikrotüp':bk?', Falkon':''}): `+B.map(v=>`<button data-b="${v}"${use?'':' disabled'}>${fmt(v,1)} mL</button>`).join('');$('#balp').querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>makeBalance(+b.dataset.b));
  $('#steps').innerHTML=steps().map((s,i)=>`<li class="${s.st}"><i>${s.st==='done'?'✓':i+1}</i>${s.t}</li>`).join('')}
 function steps(){if(S.task==='parts'){let cur=false;return PARTS.map(p=>{const d=S.seen[p[0]];let st=d?'done':'todo';if(!d&&!cur){st='cur';cur=true}return {t:p[1],st}})}
  const f=S.f;const L=[['Kapağı aç',f.opened],['Doğru rotoru tak',f.rotor],[S.set==='lle'?'Gazını al, tüpleri karşılıklı yerleştir':'Tüpleri karşılıklı yerleştir (gerekirse denge tüpü)',f.placed],['Kapağı kapat',f.closed],['Hızı (rpm) ve süreyi ayarla',f.set],['START’a bas',f.started],['Rotor durunca kapağı aç',f.done]];let cur=false;
  return L.map(([t,d])=>{let st=d?'done':'todo';if(!d&&!cur){st='cur';cur=true}return {t,st}})}
 /* ---------- eylemler ---------- */
 function checkRotor(){S.f.rotor=S.f.opened&&S.rotor===SETS[S.set].rotor}
-function rotorHint(){const need=SETS[S.set].rotor;if(S.rotor!==need)say(need==='mic'?'<b>Dikkat: rotoru değiştirmen gerekiyor!</b> Takılı olan 12 × 5 mL açılı rotor; mikrotüpler bu rotora uymaz. Rotor boşken <b>Rotoru değiştir</b> ile mikrotüp rotorunu tak.':'<b>Rotoru değiştir!</b> Takılı olan mikrotüp rotoru; 5 mL tüpler bu rotora sığmaz. 12 × 5 mL açılı rotoru tak.');return S.rotor!==need}
+function rotorHint(){const need=SETS[S.set].rotor;if(S.rotor!==need)say(need==='buc'?'<b>Rotoru değiştir!</b> 15 mL Falkon tüpleri açılı rotora da mikrotüp rotoruna da sığmaz. Rotor boşken <b>Rotoru değiştir</b> ile <b>kovalı rotoru</b> tak.':need==='mic'?'<b>Dikkat: rotoru değiştirmen gerekiyor!</b> Takılı olan 12 × 5 mL açılı rotor; mikrotüpler bu rotora uymaz. Rotor boşken <b>Rotoru değiştir</b> ile mikrotüp rotorunu tak.':'<b>Rotoru değiştir!</b> Takılı olan mikrotüp rotoru; 5 mL tüpler bu rotora sığmaz. 12 × 5 mL açılı rotoru tak.');return S.rotor!==need}
 function toggleLid(){if(S.mode!=='use')return;if(S.cur>0||S.phase!=='idle'){say('<b>Kapak kilitli.</b> Rotor dönerken kapak açılmaz; tamamen durmasını bekle.');return}
  S.lid=S.lid==='open'?'closed':'open';S.msg=null;
  if(S.lid==='open'){S.f.opened=true;checkRotor();if(S.result&&!S.f.done){S.f.done=true;showResult()}else if(!rotorHint()&&!S.f.placed)say(`Kapak açık ve doğru rotor takılı (${R().n}). Raftan bir tüpe dokun, sonra rotorda bir yuvaya dokun. Tüpler <b>karşılıklı</b> ve eşit ağırlıkta olmalı.`)}
  else{if(S.f.placed)S.f.closed=true;say(S.f.placed?`Kapak kapalı. Şimdi hızı (rpm) ve süreyi ayarla: cihazdaki tuşlarla ya da sağdaki panelden. Bu rotor en fazla <b>${fmt(R().max)} rpm</b> çıkar.`:'Kapak kapalı ama yerleşim tamamlanmadı.')}
  render()}
 function changeRotor(){if(S.phase!=='idle'||S.lid!=='open'){say('Rotoru değiştirmek için kapak açık ve cihaz durmuş olmalı.');return}if(nPlaced()){say('Önce rotordaki bütün tüpleri çıkar.');return}
- S.rotor=S.rotor==='ang'?'mic':'ang';S.slots=Array(R().N).fill(null);S.tray.forEach(t=>t.where=null);
+ S.rotor=ROTSIRA[(ROTSIRA.indexOf(S.rotor)+1)%ROTSIRA.length];S.slots=Array(R().N).fill(null);S.tray.forEach(t=>t.where=null);
  say(`${R().n} takıldı. Rotorun milde tam oturduğunu ve somununun sıkıldığını kontrol ettin. Bu rotor en fazla <b>${fmt(R().max)} rpm</b> çıkar.${S.rotor===SETS[S.set].rotor?'':' Ama bu görev için doğru rotor değil!'}`);render()}
 function pickTube(id){if(S.mode!=='use')return;const t=S.tray.find(x=>x.id===id);if(t.where!=null){slot(t.where);return}S.sel=S.sel===id?null:id;if(S.lid!=='open'&&S.sel)say('Tüpü yerleştirmek için önce <b>kapağı aç</b>.');else if(S.sel)say(`<b>${t.n}</b> seçildi (${fmt(t.m,2)} g). Şimdi rotorda bir yuvaya dokun.`);render()}
 function vent(id){const t=S.tray.find(x=>x.id===id);t.vent=true;say(`<b>${t.id}</b>: kapağı çeker ocakta yavaşça açtın, <i>pıss</i> diye basınç çıktı ve kapağı sıkıca kapattın. Organik çözücü buharı tüpte basınç yapar; gazı alınmayan tüp santrifüjde sızdırabilir ya da kapağı fırlayabilir.`);render()}
 function slot(k){if(S.mode!=='use')return;if(S.lid!=='open'){say('Kapak kapalıyken rotora tüp koyamazsın.');return}if(S.cur>0)return;const t=S.slots[k];
  if(t){S.slots[k]=null;t.where=null;S.sel=null;checkPlaced();say(`${t.n} rotordan alındı.`);render();return}
  if(!S.sel){say('Önce raftan bir tüp seç.');return}const tube=S.tray.find(x=>x.id===S.sel);
- if(!fits(tube)){say(tube.kind==='epp'||tube.kind==='wm'?'<b>Mikrotüp bu rotora uymaz!</b> 5 mL yuvalarda mikrotüp boşta kalır ve santrifüjde kırılır. Rotoru <b>mikrotüp rotoruyla değiştir</b>.':'<b>Bu tüp mikrotüp yuvasına sığmaz.</b> 5 mL tüpler için açılı rotoru tak.');return}
+ if(!fits(tube)){say((tube.kind==='fal'||tube.kind==='wf')?'<b>Falkon tüpü bu rotora sığmaz.</b> 15 mL tüpler <b>kovalı rotora</b> konur; rotoru değiştir.':S.rotor==='buc'?'<b>Bu tüp kovalı rotorun Falkon adaptörüne uymaz.</b> Tüp tipine uygun rotoru tak.':tube.kind==='epp'||tube.kind==='wm'?'<b>Mikrotüp bu rotora uymaz!</b> 5 mL yuvalarda mikrotüp boşta kalır ve santrifüjde kırılır. Rotoru <b>mikrotüp rotoruyla değiştir</b>.':'<b>Bu tüp mikrotüp yuvasına sığmaz.</b> 5 mL tüpler için açılı rotoru tak.');return}
  if((tube.kind==='ea'||tube.kind==='dcm')&&!tube.vent){say(`<b>Dur!</b> ${tube.id} tüpünde uçucu organik çözücü var. Santrifüje koymadan önce <b>gazını al</b> (sağdaki tepside “Gazını al”).`);return}
  if(tube.where!=null)S.slots[tube.where]=null;S.slots[k]=tube;tube.where=k;S.sel=null;if(!checkPlaced())say(`${tube.n} → yuva ${k+1}. ${samplesAll()?'':'Sıradaki tüpü karşısına yerleştir.'}`);render()}
 function checkPlaced(){const v=imb();const ok=samplesAll()&&v.m<=R().tol;const was=S.f.placed;S.f.placed=ok;S.f.closed=S.f.closed&&ok;
  if(ok&&!was){say(S.set==='lle'?'Dengeli! Aynı çözücüyü taşıyan tüpleri karşılıklı koydun: DCM tüpleri etil asetatlılardan daha ağırdır. Şimdi <b>kapağı kapat</b>.':'Dengeli! Bütün tüpler yerleşti ve dengesizlik sınırın altında. Şimdi <b>kapağı kapat</b>.');return true}
  if(!ok&&samplesAll()){say(`Bütün numuneler rotorda ama rotor <b>dengesiz</b> (${fmt(v.m,2)} g).${S.set==='lle'?' Etil asetatlı tüp ile DCM’li tüpün ağırlığı farklı; karşılıklı koyma.':' Tek sayıda tüp için karşısına <b>su ile denge tüpü</b> koy ya da simetrik diz.'}`);return true}return false}
-function makeBalance(v){if(S.mode!=='use')return;const mic=SETS[S.set].rotor==='mic';const kind=mic?'wm':'water';const m=mic?1.0+v:6.5+v;const ex=S.tray.find(t=>t.kind===kind);
+function makeBalance(v){if(S.mode!=='use')return;const rt=SETS[S.set].rotor,mic=rt==='mic';const kind=mic?'wm':rt==='buc'?'wf':'water';const m=mic?1.0+v:rt==='buc'?6.8+v:6.5+v;const ex=S.tray.find(t=>t.kind===kind);
  if(ex){if(ex.where!=null)S.slots[ex.where]=null;Object.assign(ex,{m,info:fmt(v,1)+' mL',where:null})}else S.tray.push({id:'D',lab:'D',n:'Denge (su)',kind,m,info:fmt(v,1)+' mL',where:null,st:null});S.sel='D';
- const ref=S.tray.find(t=>t.kind!=='water'&&t.kind!=='wm');say(`Su ile <b>${fmt(v,1)} mL</b> denge tüpü hazır (${fmt(m,2)} g). Karşılaştır: ${ref.n} ${fmt(ref.m,2)} g. Şimdi bu tüpü bir yuvaya yerleştir.`);checkPlaced();render()}
-function checkSet(){const min=S.sec/60;const kinds=[...new Set(S.tray.filter(t=>t.kind!=='water'&&t.kind!=='wm').map(t=>t.kind))];S.f.set=S.rpm<=ROTORS[SETS[S.set].rotor].max&&kinds.every(k=>verdict(k,S.rpm,min)==='ok')}
+ const ref=S.tray.find(t=>!BAL(t.kind));say(`Su ile <b>${fmt(v,1)} mL</b> denge tüpü hazır (${fmt(m,2)} g). Karşılaştır: ${ref.n} ${fmt(ref.m,2)} g. Şimdi bu tüpü bir yuvaya yerleştir.`);checkPlaced();render()}
+function checkSet(){const min=S.sec/60;const kinds=[...new Set(S.tray.filter(t=>!BAL(t.kind)).map(t=>t.kind))];S.f.set=S.rpm<=ROTORS[SETS[S.set].rotor].max&&kinds.every(k=>verdict(k,S.rpm,min)==='ok')}
 function setRpm(r){S.rpm=Math.max(500,Math.min(DEV_MAX,Math.round(r/10)*10));S.prog=0;checkSet()}
 function spinStep(d,s){if(S.phase!=='idle'||S.mode!=='use')return;if(d==='rpm')setRpm(S.rpm+s*100);else if(d==='t'){S.sec=Math.max(30,Math.min(5940,S.sec+s*30));S.prog=0;checkSet()}else if(d==='p'){S.prog=(((S.prog||1)-1+s+3)%3)+1;const p=PROGS[S.prog-1];S.rpm=p.rpm;S.sec=p.sec;checkSet()}S.msg=null;render()}
 function devBtn(id){if(S.mode!=='use')return;if(id==='start'){S.phase==='idle'?start():stop();return}if(S.phase!=='idle'){say('Çalışırken yalnızca <b>START/STOP</b> tuşu kullanılabilir.');return}
@@ -441,14 +483,16 @@ function tubeSide(t,v,x){const cap=CAPC[t.kind];
  if(t.kind==='epp'||t.kind==='wm'){const sup=v==='ok'?'#F1ECDD':v==='mid'?'#E2CFC0':'#CDB3A3';return `<g transform="translate(${x} 20)"><path d="M2 8 h20 v58 l-10 28 l-10 -28 z" fill="rgba(255,255,255,.18)" stroke="#AEB9BE"/><rect x="0" y="0" width="24" height="9" rx="2" fill="${cap}"/><path d="M3.5 22 h17 v44 l-8.5 24 l-8.5 -24 z" fill="${sup}" opacity=".9"/>${v==='ok'?'<path d="M7 80 l5 10 l5 -10 z" fill="#B9825A"/>':v==='mid'?'<path d="M6 76 l6 14 l6 -14 z" fill="#B9825A" opacity=".6"/>':''}</g>`}
  const body=inner=>`<g transform="translate(${x} 0)"><rect x="0" y="10" width="22" height="110" rx="10" fill="rgba(255,255,255,.15)" stroke="#AEB9BE"/><rect x="-1" y="2" width="24" height="12" rx="3" fill="${cap}"/>${inner}</g>`;
  if(t.kind==='blood'){if(v==='bad')return body('<rect x="2" y="30" width="18" height="88" rx="8" fill="#8E1B2A"/>');const pl=v==='ok'?46:30;return body(`<rect x="2" y="30" width="18" height="${pl}" fill="${v==='ok'?'#E9C46A':'#D59A63'}"/>${v==='mid'?`<rect x="2" y="${30+pl-12}" width="18" height="14" fill="#7A0F18" opacity=".45"/>`:''}<rect x="2" y="${30+pl}" width="18" height="${88-pl}" rx="8" fill="#7A0F18"/>`)}
- if(t.kind==='water')return body('<rect x="2" y="50" width="18" height="68" rx="8" fill="#BFE3EE" opacity=".8"/>');
+ if(t.kind==='water'||t.kind==='wf')return body('<rect x="2" y="50" width="18" height="68" rx="8" fill="#BFE3EE" opacity=".8"/>');
+ if(t.kind==='fal'){const sd=v==='ok'?8:v==='mid'?4:0;return body(`<rect x="2" y="34" width="18" height="${84-sd}" fill="${v==='ok'?'#F3E3A0':'#E6D08A'}" opacity=".9"/>${sd?`<rect x="2" y="${118-sd}" width="18" height="${sd}" rx="6" fill="#B98D3E"/>`:''}`)}
  const em=v==='ok'?3:v==='mid'?12:30;const org=t.kind==='ea'?'#F3EBC8':'#EEF1E8',aq='#D9C49A';
  if(t.kind==='ea')return body(`<rect x="2" y="30" width="18" height="${60-em/2}" fill="${org}" opacity=".95"/><rect x="2" y="${90-em/2}" width="18" height="${em}" fill="#FFFFFF" opacity=".9"/><rect x="2" y="${90+em/2}" width="18" height="${28-em/2}" rx="8" fill="${aq}"/>`);
  return body(`<rect x="2" y="30" width="18" height="${22-em/2}" fill="${aq}"/><rect x="2" y="${52-em/2}" width="18" height="${em}" fill="#FFFFFF" opacity=".9"/><rect x="2" y="${52+em/2}" width="18" height="${66-em/2}" rx="8" fill="${org}" opacity=".95"/>`)}
-function showResult(){const r=S.result;const list=S.tray.filter(t=>!(t.kind==='water'||t.kind==='wm')||t.where!=null);
- const vs=list.filter(t=>t.kind!=='water'&&t.kind!=='wm').map(t=>verdict(t.kind,r.rpm,r.min));const worst=vs.includes('bad')?'bad':vs.includes('mid')?'mid':'ok';if(worst==='ok')S.done[S.set]=1;
+function showResult(){const r=S.result;const list=S.tray.filter(t=>!BAL(t.kind)||t.where!=null);
+ const vs=list.filter(t=>!BAL(t.kind)).map(t=>verdict(t.kind,r.rpm,r.min));const worst=vs.includes('bad')?'bad':vs.includes('mid')?'mid':'ok';if(worst==='ok')S.done[S.set]=1;
  const T={kan:{ok:['Plazma berrak ayrıldı ✓','Hücreler dipte, üstte berrak sarı plazma. Numuneler analize hazır.'],mid:['Ayrım yetersiz','Plazma bulanık; hücreler tam çökmedi. Kan için daha yüksek hız ya da daha uzun süre gerekir.'],bad:['Ayrılmadı','Kan hâlâ karışık; plazma ayrılmadı.']},
   lle:{ok:['Fazlar net ayrıldı ✓','Etil asetatta organik faz üstte, DCM’de altta. Ara yüzde emülsiyon yok; organik fazı rahatça alabilirsin.'],mid:['İnce emülsiyon','Fazlar ayrıldı ama ara yüzde ince bir emülsiyon tabakası var. Organik fazı alırken kayıp olabilir.'],bad:['Kalın emülsiyon','Fazlar ayrılmadı; ara yüzde kalın beyaz bir emülsiyon var.']},
+  fal:{ok:['Çökelti dibe indi ✓','Kristal ve hücre çökeltisi dipte; üstteki berrak idrar alınıp analize (ör. SPE) verilebilir.'],mid:['Çökme eksik','Üst kısım hâlâ biraz bulanık. Daha uzun süre ya da biraz daha yüksek hız gerekir.'],bad:['Çökmedi','İdrar bulanık; çökelti dibe inmedi.']},
   epp:{ok:['Proteinler çöktü ✓','Dipte sıkı bir pelet, üstte berrak süpernatan. Süpernatanı dikkatle alabilirsin.'],mid:['Pelet gevşek','Pelet oluştu ama gevşek; süpernatan biraz bulanık.'],bad:['Çökme yetersiz','Süpernatan bulanık; proteinler dibe çökmedi.']}}[S.set][worst];
  $('#res').innerHTML=`<div class="card res ${worst}"><div class="resg"><svg viewBox="0 0 ${Math.max(170,list.length*30+10)} 142">${list.map((t,i)=>tubeSide(t,verdict(t.kind,r.rpm,r.min),6+i*30)).join('')}</svg><div><b class="big">${T[0]}</b><p style="margin-top:4px">${T[1]}</p><p style="font:500 12.5px var(--f-mono);margin-top:6px;color:#9BB0B6">${fmt(r.rpm)} rpm · ${fmt(r.min,1)} dk</p><div class="acts" style="margin-top:10px"><button class="bt" id="again">Aynı görevi baştan dene</button></div></div></div></div>`;$('#again').onclick=()=>{S.slots.fill(null);reset(S.task);S.mode='use';render()};
  say(worst==='ok'?'Tebrikler! Doğru ayarla santrifüjledin. Rotor durduktan sonra kapağı açtın; tüplerdeki ayrımı rotorda da görebilirsin. Diğer görevleri de dene.':'Rotor durdu ve kapağı açtın, ama sonuç istediğimiz gibi değil. Nedenini aşağıda oku ve ayarları değiştirerek tekrar dene.');render()}
