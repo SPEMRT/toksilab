@@ -460,7 +460,10 @@ return {sayfa:'santrifuj_pilot.html',hazir:'__cen',ad:'SANTRİFÜJ',model:'MY-Ce
  serbest:{yerlesim:'kontrol',
   kur:function(){var s=S();if(s.phase!=='idle')return;s.slots.fill(null);window.reset('bos');S().mode='use';window.render()},
   numune:[['kan','Kan · 5 tüp'],['lle','Ekstraksiyon · 4 tüp'],['epp','Eppendorf · 7 mikrotüp'],['fal','Falkon 15 mL · 6 tüp']],
-  numuneSec:function(id){var s=S();if(s.phase!=='idle'){return 'Santrifüj çalışırken numune değiştirilmez.'}s.slots.fill(null);window.reset(id);S().mode='use';window.render();return ''}}};
+  numuneSec:function(id){var s=S();if(s.phase!=='idle'){return 'Santrifüj çalışırken numune değiştirilmez.'}s.slots.fill(null);window.reset(id);S().mode='use';if(window.autoBalance)window.autoBalance();window.render();return ''},
+  ek:'<button class="bt sbVent" id="sbVent" hidden>💨 Gazını al (çeker ocakta)</button>',
+  ekBagla:function(d){d.querySelector('#sbVent').onclick=function(){var s=S(),t=s.tray.filter(function(x){return (x.kind==='ea'||x.kind==='dcm')&&!x.vent}),sel=t.filter(function(x){return x.id===s.sel})[0];(sel?[sel]:t).forEach(function(x){window.vent(x.id)})}},
+  ekYenile:function(d,s){var b=d.querySelector('#sbVent');if(!b)return;var t=s.tray.filter(function(x){return (x.kind==='ea'||x.kind==='dcm')&&!x.vent}),sel=t.filter(function(x){return x.id===s.sel})[0];b.hidden=!t.length;b.textContent=sel?'💨 '+sel.id+' tüpünün gazını al':'💨 Gazını al: '+t.length+' tüp (çeker ocakta)'}}};
 }
 
 /* ---------- sayfaya göre cihaz ---------- */
@@ -505,8 +508,10 @@ css.textContent=
 '#sbEk{display:grid;gap:7px;margin-top:4px;border-top:1px solid rgba(255,255,255,.12);padding-top:8px}#sbEk .sbNum{background:#1F9A97;color:#fff;font-weight:700}#sbEk .sbNumL{display:grid;gap:5px}#sbEk .sbNumL[hidden]{display:none}'+
 '#sbEk .sbUy{background:#3A1416;color:#FFE1E1;border-radius:10px;padding:8px 10px;border-left:4px solid #E5484D;font-size:12.5px}#sbEk .sbUy b.nm{display:block;font:700 10px "IBM Plex Mono",monospace;color:#FF8A8A;letter-spacing:.08em;margin-bottom:3px}#sbEk .sbUy ul{margin:0 0 0 16px;display:grid;gap:3px}'+
 '#sbEk .sbNot{background:#F1F6F7;color:#16242A;border-radius:10px;padding:8px 10px;border-left:4px solid #2BD9C0;font-size:12.5px;line-height:1.35}#sbEk .sbNot>b:first-child{display:block;font:600 10px "IBM Plex Mono",monospace;color:#1F9A97;letter-spacing:.08em;margin-bottom:2px}#sbEk [hidden]{display:none}'+
+'body.sbk .sbGizle{display:none!important}#sbEk .sbVent{background:#B7791F;color:#fff;font-weight:700}#sbEk .sbVent[hidden]{display:none}'+
 '#sbEk .sbDers{border:0;background:none;color:#9BB0B6;font:600 12.5px "Source Sans 3",sans-serif;cursor:pointer;padding:4px}'+
 '@media (max-width:900px){body.cders.serbest.sbk.panel .stage{right:0;bottom:50dvh}body.cders.serbest.sbk.panel #cv3{width:100vw!important;height:50dvh!important}body.sbk #side{width:auto;max-height:50dvh}}'+
+'body.cders .dsp{pointer-events:auto!important;cursor:move;transform:scale(.8);transform-origin:top right;touch-action:none;user-select:none;-webkit-user-select:none}body.cders .dsp.tasindi{transform-origin:top left}body.cders .dsp.sur{box-shadow:0 0 0 2px #2BD9C0,0 10px 26px rgba(0,0,0,.45)}'+
 '#dersMini.uy{background:#C62828;animation:dersHal 1.1s infinite}'+
 '#dersP .not{background:#F1F6F7;color:#16242A;border-radius:12px;padding:10px 12px;border-left:5px solid #2BD9C0;font-size:14.5px}#dersP .not b.nm{display:block;font:600 11px "IBM Plex Mono",monospace;color:#1F9A97;letter-spacing:.08em;margin-bottom:3px}'+
 
@@ -562,6 +567,7 @@ function serbestBasla(){SERB=true;window.__serbest=true;
  if(C.serbest.yerlesim==='kontrol'){document.body.classList.add('sbk','panel');var mp=document.getElementById('mPanel');if(mp)mp.classList.add('on');kontrolEk()}else kucult(innerWidth<=900);
  dispatchEvent(new Event('resize'));
  if(!SUT)SUT=setInterval(function(){if(!SERB||!P)return;var s=S();if(!s)return;if(C.serbest.yenile)C.serbest.yenile(P,s);var L=C.serbest.kural?C.serbest.kural(s):[],h=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+  var ek=document.getElementById('sbEk');if(ek&&C.serbest.ekYenile)C.serbest.ekYenile(ek,s);
   var u=document.getElementById('sbUy')||P.querySelector('#dUy');if(u&&h!==SUH){SUH=h;u.innerHTML=h?'<b class="nm">⚠ DİKKAT</b><ul>'+h+'</ul>':'';u.hidden=!h;if(h&&document.body.classList.contains('dk')){var mi=document.getElementById('dersMini');if(mi)mi.classList.add('uy')}}if(!h){var m2=document.getElementById('dersMini');if(m2)m2.classList.remove('uy')}},400)}
 var SUT=null,SUH='';
 function serbestCiz(){
@@ -575,13 +581,25 @@ function serbestCiz(){
 /* sayfanın kendi uzman notları (gizli mentor balonu) serbest kullanımda panele yansıtılır */
 function notIzle(){var y=document.getElementById('say');if(!y||!window.MutationObserver)return;new MutationObserver(function(){if(!SERB)return;NOT=y.innerHTML;['dNot','sbNot'].forEach(function(id){var n=document.getElementById(id),t=n&&n.querySelector('.nt');if(n&&t){t.innerHTML=NOT;n.hidden=!NOT}})}).observe(y,{childList:true,characterData:true,subtree:true})}
 /* serbest kullanım (kontrol düzeni): bilgi paneli yok; sağda küçültülmüş Kontroller paneli, altında Numune seç, uyarılar ve uzman notu */
+function dspKur(){var e=document.getElementById('dsp');if(!e||e.dataset.sur)return;e.dataset.sur=1;e.title='Sürükleyerek istediğin yere taşı';var K2='toksilab_dsp_'+SAYFA,dr=null;
+ var koy=function(fx,fy){var par=e.offsetParent||e.parentElement;if(!par)return;var W=par.clientWidth,H=par.clientHeight,w=e.offsetWidth*.8,h=e.offsetHeight*.8;var x=Math.max(4,Math.min(W-w-4,fx*W)),y=Math.max(4,Math.min(H-h-4,fy*H));
+  ['left','top'].forEach(function(k,i){e.style.setProperty(k,(i?y:x)+'px','important')});['right','bottom'].forEach(function(k){e.style.setProperty(k,'auto','important')});e.classList.add('tasindi')};
+ try{var o=JSON.parse(localStorage.getItem(K2)||'null');if(o)setTimeout(function(){koy(o.x,o.y)},300)}catch(_){}
+ addEventListener('resize',function(){try{var o=JSON.parse(localStorage.getItem(K2)||'null');if(o)koy(o.x,o.y)}catch(_){}});
+ e.addEventListener('pointerdown',function(ev){var r=e.getBoundingClientRect(),par=(e.offsetParent||e.parentElement).getBoundingClientRect();dr={dx:ev.clientX-r.left,dy:ev.clientY-r.top,par:par};e.classList.add('sur');try{e.setPointerCapture(ev.pointerId)}catch(_){}ev.preventDefault();ev.stopPropagation()});
+ e.addEventListener('pointermove',function(ev){if(!dr)return;var P2=dr.par;koy((ev.clientX-dr.dx-P2.left)/P2.width,(ev.clientY-dr.dy-P2.top)/P2.height)});
+ var bit=function(){if(!dr)return;dr=null;e.classList.remove('sur');var par=e.offsetParent||e.parentElement;try{localStorage.setItem(K2,JSON.stringify({x:parseFloat(e.style.left)/par.clientWidth,y:parseFloat(e.style.top)/par.clientHeight}))}catch(_){}};
+ e.addEventListener('pointerup',bit);e.addEventListener('pointercancel',bit);
+ e.addEventListener('dblclick',function(){try{localStorage.removeItem(K2)}catch(_){}['left','top','right','bottom'].forEach(function(k){e.style.removeProperty(k)});e.classList.remove('tasindi')})}
 function kontrolEk(){var side=document.getElementById('side');if(!side||document.getElementById('sbEk'))return;var c=side.querySelector('.card')||side;var d=document.createElement('div');d.id='sbEk';
  var nl=C.serbest.numune||[];d.innerHTML=(nl.length?'<button class="bt sbNum" id="sbNumB">🧪 Numune seç ▾</button><div class="sbNumL" id="sbNumL" hidden>'+nl.map(function(n){return '<button class="bt" data-num="'+n[0]+'">'+n[1]+'</button>'}).join('')+'</div>':'')+
-  '<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div><button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
+  (C.serbest.ek||'')+'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div><button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
  c.appendChild(d);var L2=d.querySelector('#sbNumL');
  if(L2)d.querySelector('#sbNumB').onclick=function(){L2.hidden=!L2.hidden};
  d.querySelectorAll('[data-num]').forEach(function(b){b.onclick=function(){var m=C.serbest.numuneSec(b.dataset.num);if(!m)L2.hidden=true;else{NOT=m;var n=document.getElementById('sbNot');n.querySelector('.nt').innerHTML=m;n.hidden=false}}});
- d.querySelector('#sbDers').onclick=function(){ac('liste')}}
+ d.querySelector('#sbDers').onclick=function(){ac('liste')};if(C.serbest.ekBagla)C.serbest.ekBagla(d);
+ /* tüp listesi ve elle denge tüpü düğmeleri serbest kullanımda gösterilmez (denge tüpü rafa kendiliğinden gelir) */
+ ['tray','balp'].forEach(function(id){var e=document.getElementById(id);if(!e)return;e.classList.add('sbGizle');var pr=e.previousElementSibling;if(pr&&pr.classList.contains('sub')&&id==='tray')pr.classList.add('sbGizle')})}
 /* paneli küçült / aç */
 function kucult(on){var b=document.body;b.classList.toggle('dk',!!on);if(!on&&b.classList.contains('panel')){b.classList.remove('panel');var m=document.getElementById('mPanel');if(m)m.classList.remove('on')}
  var mi=document.getElementById('dersMini');if(mi)mi.textContent=SERB?'📘 Serbest kullanım paneli':'📘 Ders panelini aç';setTimeout(function(){dispatchEvent(new Event('resize'))},30)}
@@ -672,7 +690,7 @@ function basla(){
  var Mi=document.createElement('button');Mi.id='dersMini';Mi.textContent='📘 Ders panelini aç';Mi.onclick=function(){kucult(false)};document.body.appendChild(Mi);
  /* serbest kullanımda Kontroller açılınca ders paneli yer açmak için küçülür */
  if(window.MutationObserver)new MutationObserver(function(){if(document.body.classList.contains('panel')&&!document.body.classList.contains('dk'))kucult(true)}).observe(document.body,{attributes:true,attributeFilter:['class']});
- notIzle();
+ notIzle();dspKur();
  var H=document.createElement('div');H.id='dersHalka';document.body.appendChild(H);
  /* önceki bölümlerin kaydı sayfanın görev durumuna da işlenir (eğitim modülü takibi için) */
  var o=oku(),s=S();C.senkron(s,o);if(C.kur)C.kur();

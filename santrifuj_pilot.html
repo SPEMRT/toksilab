@@ -461,11 +461,14 @@ function slot(k){if(S.mode!=='use')return;if(S.lid!=='open'){say('Kapak kapalıy
  if(t){S.slots[k]=null;t.where=null;S.sel=null;checkPlaced();say(`${t.n} rotordan alındı.`);render();return}
  if(!S.sel){say('Önce raftan bir tüp seç.');return}const tube=S.tray.find(x=>x.id===S.sel);
  if(!fits(tube)){say((tube.kind==='fal'||tube.kind==='wf')?'<b>Falkon tüpü bu rotora sığmaz.</b> 15 mL tüpler <b>kovalı rotora</b> konur; rotoru değiştir.':S.rotor==='buc'?'<b>Bu tüp kovalı rotorun Falkon adaptörüne uymaz.</b> Tüp tipine uygun rotoru tak.':tube.kind==='epp'||tube.kind==='wm'?'<b>Mikrotüp bu rotora uymaz!</b> 5 mL yuvalarda mikrotüp boşta kalır ve santrifüjde kırılır. Rotoru <b>mikrotüp rotoruyla değiştir</b>.':'<b>Bu tüp mikrotüp yuvasına sığmaz.</b> 5 mL tüpler için açılı rotoru tak.');return}
- if((tube.kind==='ea'||tube.kind==='dcm')&&!tube.vent){say(`<b>Dur!</b> ${tube.id} tüpünde uçucu organik çözücü var. Santrifüje koymadan önce <b>gazını al</b> (sağdaki tepside “Gazını al”).`);return}
+ if((tube.kind==='ea'||tube.kind==='dcm')&&!tube.vent){say(`<b>Dur!</b> ${tube.id} tüpünde uçucu organik çözücü var. Santrifüje koymadan önce <b>gazını al</b> (Kontroller panelindeki <b>💨 Gazını al</b>).`);return}
  if(tube.where!=null)S.slots[tube.where]=null;S.slots[k]=tube;tube.where=k;S.sel=null;if(!checkPlaced())say(`${tube.n} → yuva ${k+1}. ${samplesAll()?'':'Sıradaki tüpü karşısına yerleştir.'}`);render()}
 function checkPlaced(){const v=imb();const ok=samplesAll()&&v.m<=R().tol;const was=S.f.placed;S.f.placed=ok;S.f.closed=S.f.closed&&ok;
  if(ok&&!was){say(S.set==='lle'?'Dengeli! Aynı çözücüyü taşıyan tüpleri karşılıklı koydun: DCM tüpleri etil asetatlılardan daha ağırdır. Şimdi <b>kapağı kapat</b>.':'Dengeli! Bütün tüpler yerleşti ve dengesizlik sınırın altında. Şimdi <b>kapağı kapat</b>.');return true}
  if(!ok&&samplesAll()){say(`Bütün numuneler rotorda ama rotor <b>dengesiz</b> (${fmt(v.m,2)} g).${S.set==='lle'?' Etil asetatlı tüp ile DCM’li tüpün ağırlığı farklı; karşılıklı koyma.':' Tek sayıda tüp için karşısına <b>su ile denge tüpü</b> koy ya da simetrik diz.'}`);return true}return false}
+/* serbest kullanım: seçilen numuneye uygun ağırlıkta denge tüpü rafa kendiliğinden gelir */
+function autoBalance(){if(S.set==='bos')return;const ref=S.tray.find(t=>!BAL(t.kind));if(!ref)return;const sk=S.set,kind=sk==='epp'?'wm':sk==='fal'?'wf':'water',base=kind==='wm'?1.0:kind==='wf'?6.8:6.5;const v=Math.max(.1,Math.round((ref.m-base)*10)/10);
+ S.tray=S.tray.filter(t=>!BAL(t.kind));S.tray.push({id:'D',lab:'D',n:'Denge (su)',kind,m:base+v,info:fmt(v,1)+' mL',where:null,st:null});render()}
 function makeBalance(v){if(S.mode!=='use')return;const sk=S.set,mic=sk==='epp';const kind=mic?'wm':sk==='fal'?'wf':'water';const m=mic?1.0+v:sk==='fal'?6.8+v:6.5+v;const ex=S.tray.find(t=>t.kind===kind);
  if(ex){if(ex.where!=null)S.slots[ex.where]=null;Object.assign(ex,{m,info:fmt(v,1)+' mL',where:null})}else S.tray.push({id:'D',lab:'D',n:'Denge (su)',kind,m,info:fmt(v,1)+' mL',where:null,st:null});S.sel='D';
  const ref=S.tray.find(t=>!BAL(t.kind));say(`Su ile <b>${fmt(v,1)} mL</b> denge tüpü hazır (${fmt(m,2)} g). Karşılaştır: ${ref.n} ${fmt(ref.m,2)} g. Şimdi bu tüpü bir yuvaya yerleştir.`);checkPlaced();render()}
@@ -533,7 +536,7 @@ reset('parts');
 try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 setInterval(loop,50);
 window.scrOf=n=>{const o=n.split('.').reduce((a,k)=>a[k],K);const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};
-Object.assign(window,{reset,render,toggleLid,changeRotor,pickTube,vent,slot,makeBalance,spinStep,devBtn,start,stop,setRpm,onHot,imb});Object.defineProperty(window,'S',{get:()=>S});window.__cen=1;
+Object.assign(window,{autoBalance,reset,render,toggleLid,changeRotor,pickTube,vent,slot,makeBalance,spinStep,devBtn,start,stop,setRpm,onHot,imb});Object.defineProperty(window,'S',{get:()=>S});window.__cen=1;
 window.TL_GOREV=()=>S&&S.done; /* eğitim çubuğu için (salt okunur) */
 
 /* tam sayfa yardımcıları */
