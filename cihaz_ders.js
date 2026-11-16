@@ -453,7 +453,7 @@ senepp:{ad:'Eppendorf: protein çöktürme',ozet:'Rotor değişimi, 7 mikrotüp 
  ['Protein çöktürmede neden yüksek hız gerekir?',['Tüp ısınsın diye','Küçük protein parçacıkları sıkı bir pelet olarak dibe insin diye','Süre kısalsın diye'],1,'Bu laboratuvarda mikrotüp için 13000 rpm, 10 dakika.']],
  bitti:function(){S().done.epp=1}}
 };
-return {sayfa:'santrifuj_pilot.html',hazir:'__cen',ad:'SANTRİFÜJ',model:'MY-Centri 320',adTam:'Santrifüjün',
+return {sayfa:'santrifuj_pilot.html',hazir:'__cen',sonucKarti:true,ad:'SANTRİFÜJ',model:'MY-Centri 320',adTam:'Santrifüjün',
  acl:'Cihazı dört kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 4–6 dakika sürer.',
  GM:{parts:'sentani',kan:'senkan',lle:'senlle',epp:'senepp'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['sentani','senkan','senlle','senepp'],
  senkron:function(s,o){['sentani:parts','senkan:kan','senlle:lle','senepp:epp'].forEach(function(x){x=x.split(':');if(o[x[0]]&&o[x[0]].bitti)s.done[x[1]]=1})},
@@ -497,14 +497,14 @@ var L=DERS[D],ADIM=L?L.adim:[],SORU=L?L.soru:[];
 /* ---------- görünüm ---------- */
 var css=document.createElement('style');
 css.textContent=
-'body.cders .mentor,body.cders #stepc,body.cders #tband,body.cders:not(.serbest) #side,body.cders:not(.serbest) #res,body.cders .rot,body.cders #mTasks,body.cders #mParts,body.cders #mUse,body.cders:not(.serbest) #mPanel,body.cders #mReset,body.cders #egCubuk,body.cders #mHome,body.cders #hLab{display:none!important}'+
+'body.cders .mentor,body.cders #stepc,body.cders #tband,body.cders:not(.serbest) #side,body.cders:not(.serbest):not(.resOk) #res,body.cders .rot,body.cders #mTasks,body.cders #mParts,body.cders #mUse,body.cders:not(.serbest) #mPanel,body.cders #mReset,body.cders #egCubuk,body.cders #mHome,body.cders #hLab{display:none!important}'+
 'body.cders.dk #dersK{display:none}body.cders.dk .stage{right:0}body.cders.dk #cv3{width:100vw!important}'+
 '#dersX{position:absolute;top:10px;right:10px;width:30px;height:30px;border:0;border-radius:8px;background:#33444C;color:#EAF2F3;font:700 16px/1 "Source Sans 3",sans-serif;cursor:pointer;z-index:2}#dersX:hover{background:#40545D}'+
 '#dersP .ust{padding-right:38px}'+
 '#dersMini{display:none;position:fixed;z-index:21;left:12px;bottom:12px;border:0;border-radius:999px;padding:10px 16px;background:#2F7DE1;color:#fff;font:700 14px "Source Sans 3",system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}body.cders.dk #dersMini{display:block}'+
 '#dersP .uyari{background:#3A1416;color:#FFE1E1;border-radius:12px;padding:10px 12px;border-left:5px solid #E5484D;font-size:14.5px}#dersP .uyari b.nm{display:block;font:700 11px "IBM Plex Mono",monospace;color:#FF8A8A;letter-spacing:.08em;margin-bottom:4px}#dersP .uyari ul{margin:0 0 0 18px;display:grid;gap:4px}'+
 'body.cders.serbest.sbk #dersK,body.cders.serbest.sbk #dersMini{display:none!important}body.cders.serbest.sbk.panel .stage{right:300px}body.cders.serbest.sbk.panel #cv3{width:calc(100vw - 300px)!important}body.cders.serbest.sbk:not(.panel) .stage{right:0}body.cders.serbest.sbk:not(.panel) #cv3{width:100vw!important}'+
-'body.sbk #side{width:300px;padding:8px;font-size:13px;gap:8px}body.sbk #side h2{font-size:17px}body.sbk #side .sub{font-size:11px}body.sbk #side .bt{padding:6px 8px;font-size:12.5px}body.sbk #side .sideX{display:none}body.sbk.panel .dsp{right:312px;top:auto;bottom:12px}body.sbk:not(.panel) .dsp{top:auto;bottom:12px}'+
+'body.sbk #side{width:300px;padding:8px;font-size:13px;gap:8px}body.sbk #side h2{font-size:17px}body.sbk #side .sub{font-size:11px}body.sbk #side .bt{padding:6px 8px;font-size:12.5px}body.sbk #side .sideX{display:none}body.sbk .dsp{right:auto;left:96px;top:auto;bottom:12px;transform-origin:bottom left}'+
 '#sbEk{display:grid;gap:7px;margin-top:4px;border-top:1px solid rgba(255,255,255,.12);padding-top:8px}#sbEk .sbNum{background:#1F9A97;color:#fff;font-weight:700}#sbEk .sbNumL{display:grid;gap:5px}#sbEk .sbNumL[hidden]{display:none}'+
 '#sbEk .sbUy{background:#3A1416;color:#FFE1E1;border-radius:10px;padding:8px 10px;border-left:4px solid #E5484D;font-size:12.5px}#sbEk .sbUy b.nm{display:block;font:700 10px "IBM Plex Mono",monospace;color:#FF8A8A;letter-spacing:.08em;margin-bottom:3px}#sbEk .sbUy ul{margin:0 0 0 16px;display:grid;gap:3px}'+
 '#sbEk .sbNot{background:#F1F6F7;color:#16242A;border-radius:10px;padding:8px 10px;border-left:4px solid #2BD9C0;font-size:12.5px;line-height:1.35}#sbEk .sbNot>b:first-child{display:block;font:600 10px "IBM Plex Mono",monospace;color:#1F9A97;letter-spacing:.08em;margin-bottom:2px}#sbEk [hidden]{display:none}'+
@@ -512,6 +512,9 @@ css.textContent=
 '#sbEk .sbDers{border:0;background:none;color:#9BB0B6;font:600 12.5px "Source Sans 3",sans-serif;cursor:pointer;padding:4px}'+
 '@media (max-width:900px){body.cders.serbest.sbk.panel .stage{right:0;bottom:50dvh}body.cders.serbest.sbk.panel #cv3{width:100vw!important;height:50dvh!important}body.sbk #side{width:auto;max-height:50dvh}}'+
 'body.cders .dsp{pointer-events:auto!important;cursor:move;transform:scale(.8);transform-origin:top right;touch-action:none;user-select:none;-webkit-user-select:none}body.cders .dsp.tasindi{transform-origin:top left}body.cders .dsp.sur{box-shadow:0 0 0 2px #2BD9C0,0 10px 26px rgba(0,0,0,.45)}'+
+'body.cders.resOk #res:not(:empty):not([hidden]),body.cders.serbest #res:not(:empty):not([hidden]){display:block!important;position:fixed;left:96px;top:58px;right:auto;bottom:auto;transform:none;width:min(360px,calc(100vw - 110px));max-height:60vh;z-index:16;font-size:13px}'+
+'body.cders #res .res,body.cders #res .card{padding:10px 12px}body.cders #res .big{font-size:17px}body.cders #res .resg{gap:10px}body.cders #res .resg svg{height:104px}body.cders.resOk:not(.serbest) #res #again{display:none}'+
+'@media (max-width:900px){body.cders.resOk #res:not(:empty):not([hidden]),body.cders.serbest #res:not(:empty):not([hidden]){left:8px;top:56px;width:calc(100vw - 16px);max-height:34dvh}}'+
 '#dersMini.uy{background:#C62828;animation:dersHal 1.1s infinite}'+
 '#dersP .not{background:#F1F6F7;color:#16242A;border-radius:12px;padding:10px 12px;border-left:5px solid #2BD9C0;font-size:14.5px}#dersP .not b.nm{display:block;font:600 11px "IBM Plex Mono",monospace;color:#1F9A97;letter-spacing:.08em;margin-bottom:3px}'+
 
@@ -684,7 +687,7 @@ window.__izin=function(h){if(SERB||!L)return true;var a=ADIM[i];if(!a||a.test||!
 window.__izinUyari=function(){var a=ADIM[i];uyari=!a||!a.ask||gecti?'Bu adımda cihazla işlem yapılmaz: önce açıklamayı okuyup <b>Devam</b>’a basın.':'Bu adımda o parçayla işlem yapılmaz. Yanıp sönen sarı halkanın gösterdiği yere tıklayın.';hataM=uyari;ciz()};
 function basla(){
  if(!window[C.hazir]||!window.S||!window.scrOf){setTimeout(basla,150);return}
- document.body.classList.add('cders');document.documentElement.classList.remove('dersOn');
+ document.body.classList.add('cders');if(C.sonucKarti)document.body.classList.add('resOk');document.documentElement.classList.remove('dersOn');
  var K=document.createElement('div');K.id='dersK';P=document.createElement('div');P.id='dersP';K.appendChild(P);document.body.appendChild(K);
  var X=document.createElement('button');X.id='dersX';X.title='Paneli küçült';X.textContent='—';X.onclick=function(){kucult(true)};K.appendChild(X);
  var Mi=document.createElement('button');Mi.id='dersMini';Mi.textContent='📘 Ders panelini aç';Mi.onclick=function(){kucult(false)};document.body.appendChild(Mi);

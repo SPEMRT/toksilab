@@ -316,7 +316,9 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  R3={renderer,scene,cam,ctl,warn:[]};
  new ResizeObserver(fit).observe(box);fit();
  const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
- const pick=e=>{const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,cam);const hit=ray.intersectObjects(HOT.filter(o=>visibleDeep(o)),false).find(h=>!(S.lidA<.5&&h.object.userData.hot.startsWith('slot')));return hit?hit.object.userData.hot:null};
+ const pick=e=>{const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,cam);const hs=ray.intersectObjects(HOT.filter(o=>visibleDeep(o)),false).filter(h=>!(S.lidA<.5&&h.object.userData.hot.startsWith('slot')));let hit=hs[0];
+  /* raf ile raftaki tüp aynı ışında ise tüp seçilir (rafın tıklama alanı tüplerin alt kısmını örtüyordu) */
+  if(hit&&hit.object.userData.hot==='rack'){const t=hs.find(h=>h.object.userData.hot.startsWith('tube:'));if(t)hit=t}return hit?hit.object.userData.hot:null};
  renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY}});
  renderer.domElement.addEventListener('pointerup',e=>{if(!down)return;const m=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;if(m<7){const h=pick(e);if(S.mode==='parts'){tipAt(h,e);return}if(h)onHot(h)}});
  renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||down){if(down)hideTip();return}const h=pick(e);renderer.domElement.style.cursor=h?'pointer':'grab';if(S.mode==='parts')tipAt(h,e)});
@@ -343,7 +345,8 @@ function tubeObj(t){let o=K.tubes[t.id];if(o)return o;o=new THREE.Group();const 
   add(new THREE.CylinderGeometry(.7,.7,1.2,24),new THREE.MeshStandardMaterial({color:CAPC[t.kind],roughness:.45}),0,7.7,0,o);
   const lab=canvasTex(128,64,(c,w,h)=>{c.fillStyle='#FFFFFF';c.fillRect(0,0,w,h);c.fillStyle='#132228';c.font='700 40px "Source Sans 3",sans-serif';c.textAlign='center';c.fillText(t.lab,w/2,48)});add(new THREE.CylinderGeometry(.6,.6,1.4,24,1,true,-Math.PI/2.4,Math.PI/1.2),new THREE.MeshStandardMaterial({map:lab,roughness:.6}),0,5.6,0,o,false)}
  const L=new THREE.Group();o.add(L);o.userData.L=L;o.userData.lk='';o.userData.micro=micro;o.userData.big=big;
- const hb=o.userData.hb=hot(add(new THREE.BoxGeometry(micro?1.4:1.8,micro?4.4:8.6,micro?1.4:1.8),new THREE.MeshBasicMaterial({visible:false}),0,micro?2.2:4.3,0,o,false),'tube:'+t.id);
+ /* tıklama alanı tüpün kendi biçiminde (silindir): kutu, önündeki/arkasındaki tüpün tıklamasını yakalıyordu */
+ const hb=o.userData.hb=hot(add(new THREE.CylinderGeometry(micro?.62:.74,micro?.62:.74,micro?4.1:big?8.0:8.3,16),new THREE.MeshBasicMaterial({visible:false}),0,micro?2.05:big?4.0:4.15,0,o,false),'tube:'+t.id);
  R3.scene.add(o);K.tubes[t.id]=o;return o}
 function setLayers(t,o){const key=t.st+'|'+t.kind+'|'+t.info;if(o.userData.lk===key)return;o.userData.lk=key;const L=o.userData.L;while(L.children.length)L.remove(L.children[0]);
  const micro=o.userData.micro,big=o.userData.big;const fill=big?Math.min(.95,parseFloat(t.info.replace(',','.'))/12):micro?(t.kind==='wm'?.45+parseFloat(t.info.replace(',','.'))*.3:.75):(t.kind==='water'||t.kind==='wm'?Math.min(.95,parseFloat(t.info.replace(',','.'))/5):.8);
