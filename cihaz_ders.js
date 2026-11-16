@@ -1,7 +1,7 @@
 /* MY ToksiLab · Rehberli dersler: 3B cihaz sayfaları
    Sayfa doğrudan rehberli açılır; ?ders= yoksa bölüm listesi gösterilir.
    Serbest kullanım aynı sayfada açılır (?serbest=1): görev yok, solda yalnız ⚙ Kontroller eklenir, sağ panel küçültülebilir.
-   santrifuj_pilot.html?ders=sentani | senkan | senlle | senepp  (tanıma · kandan plazma · faz ayırma · protein çöktürme)
+   santrifuj_pilot.html?ders=sentani | senkan | senlle | senepp | senfal  (tanıma · kandan plazma · faz ayırma · protein çöktürme · kovalı rotor)
    vorteks_pilot.html?ders=vortani | vorkul | vorlle   (tanıma · HS viali · ekstraksiyon)
    terazi_pilot.html?ders=terani | terkal | ter10      (tanıma · seviye ve kalibrasyon · 10 mg tartım)
    ultra_pilot.html?ders=ulttani | ultdeg              (tanıma · mobil faz degazlama)
@@ -448,12 +448,43 @@ senepp:{ad:'Eppendorf: protein çöktürme',ozet:'Rotor değişimi, 7 mikrotüp 
  ['Mikrotüpler açılı (12 × 5 mL) rotora konursa ne olur?',['Bir şey olmaz','Boşta kalır ve dönerken kırılabilir','Daha iyi çöker'],1,'Mikrotüp için mikrotüp rotoru takılır.'],
  ['Rotor değiştirmeden önce ne kontrol edilir?',['Cihaz durmuş, kapak açık ve rotor boş mu','Ekran parlaklığı','Tüplerin rengi'],0,'Takılan rotorun somunu da sıkılır.'],
  ['Protein çöktürmede neden yüksek hız gerekir?',['Tüp ısınsın diye','Küçük protein parçacıkları sıkı bir pelet olarak dibe insin diye','Süre kısalsın diye'],1,'Bu laboratuvarda mikrotüp için 13000 rpm, 10 dakika.']],
- bitti:function(){S().done.epp=1}}
+ bitti:function(){S().done.epp=1}},
+senfal:{ad:'Falkon tüpleri: kovalı rotor',ozet:'Rotoru kovalı rotora çevirme, karşılıklı kovaları eşit yükleme, 3000 rpm 5 dakika.',baslik:'SANTRİFÜJ · KOVALI ROTOR',mod:'use',gorev:'fal',
+ kur:function(){var s=S();if(s.rotor!=='ang'){s.rotor='ang';s.slots=Array(12).fill(null);s.tray.forEach(function(t){t.where=null})}},
+ adim:[
+ {bolum:'Giriş',b:'Ne yapacaksınız?',
+  html:'<p>Rafta <b>6 Falkon tüpü</b> var (15 mL’lik tüp, içinde 10 mL idrar). İdrardaki kristal ve hücreleri dibe çöktürüp üstteki berrak idrarı alacaksınız.</p><p>Falkon tüpleri açılı rotora da mikrotüp rotoruna da sığmaz. Büyük tüpler <b>kovalı (swing-out) rotora</b> konur.</p>'},
+ ac_(),
+ {bolum:'Rotor',ask:'Aşağıdaki düğmeyle rotoru değiştirin; <b>kovalı rotor</b> takılana kadar basın (açılı → mikrotüp → kovalı).',dugme:['Rotoru değiştir',function(){window.changeRotor()}],ok:function(s){return s.rotor==='buc'},
+  hata:function(){var s=S();return s.slots.some(Boolean)?'Rotorda tüp var; önce tüpleri çıkarın.':s.rotor==='mic'?'Bu mikrotüp rotoru. Bir kez daha basın.':''},
+  b:'Kovalı rotor takıldı',html:'<p>Dört kolun ucunda dört <b>kova</b> asılı; her kovada turuncu adaptörde 4 Falkon yuvası var (toplam 16). En fazla <b>4500 rpm</b>.</p><p>Rotor dönerken kovalar menteşelerinden <b>dışa doğru yatay açılır</b>; tüpler dönme sırasında yatay durur. Bu yüzden çökelti tüpün tam <b>dibinde</b> toplanır (açılı rotorda dip köşede toplanır).</p><p>Kovalar takılı olduğu yerde serbestçe sallanabilmeli; eksik ya da yanlış kova takılmaz.</p>'},
+ {bolum:'Yerleştirme',b:'Kovaları tanıyın',html:'<p>Yuvalar numaralıdır: <b>1–4</b> birinci kova, <b>5–8</b> ikinci, <b>9–12</b> üçüncü, <b>13–16</b> dördüncü kova.</p><p>Karşılıklı kovalar: <b>1. ↔ 3.</b> ve <b>2. ↔ 4.</b> Kovalı rotorda denge iki kuralla kurulur:</p><ul><li>Karşılıklı kovalar <b>aynı ağırlıkta</b> yüklenir.</li><li>Kovanın içinde tüpler <b>simetrik</b> dizilir.</li></ul>'},
+ {bolum:'Yerleştirme',ask:'Raftan <b>Falkon 1</b>’i alıp <b>1. yuvaya</b> (birinci kova) koyun.',halka:function(s){return tup('F1').where==null&&s.sel!=='F1'?['tubes.F1',-50,60]:['slotHot.buc.0.hs',0,46]},ok:function(){return tup('F1').where===0},canli:denge,
+  hata:function(){var w=tup('F1').where;return w!=null&&w!==0?'Falkon 1 yuva '+(w+1)+'’de. Tüpe tıklayarak geri alın, 1. yuvaya koyun.':''}},
+ {bolum:'Yerleştirme',ask:'<b>Falkon 2</b>’yi karşı kovada aynı yere, <b>9. yuvaya</b> koyun.',halka:function(s){return tup('F2').where==null&&s.sel!=='F2'?['tubes.F2',-50,60]:['slotHot.buc.8.hs',0,46]},ok:function(){return tup('F2').where===8},canli:denge,
+  hata:function(){var w=tup('F2').where;return w!=null&&w!==8?'Falkon 2 yuva '+(w+1)+'’de: karşı kovada aynı yer 9. yuva.':''},
+  b:'Karşılıklı kovalar dengede',html:'<p>1. kova ile 3. kova aynı yükü taşıyor: dengesizlik <b>0 g</b>.</p>'},
+ {bolum:'Yerleştirme',ask:'Kalan 4 tüpü yerleştirin: her tüpü <b>karşı kovada aynı yere</b> gelecek şekilde dizin (ör. 3 ↔ 11, 5 ↔ 13, 7 ↔ 15).',canli:denge,
+  halka:function(s){var t=s.tray.filter(function(x){return x.kind==='fal'&&x.where==null})[0];return t&&s.sel!==t.id?['tubes.'+t.id,-50,60]:null},
+  ok:function(s){return s.f.placed},
+  hata:function(){var s=S();if(!s.tray.filter(function(t){return t.kind==='fal'}).every(function(t){return t.where!=null}))return '';return 'Altı tüp de rotorda ama rotor dengesiz ('+g2(window.imb().m)+' g). Karşılıklı kovaların yükü eşit değil; bir tüpü karşı kovaya taşıyın.'},
+  b:'Rotor dengeli',html:'<p>Altı tüp: karşılıklı iki kovada ikişer, diğer iki kovada birer tüp. Karşılıklı kovalar eşit yüklendiği için rotor dengede.</p><p>Tek sayıda tüp olsaydı, eksik kalan kovaya aynı ağırlıkta <b>su dolu Falkon</b> (denge tüpü) konurdu. Boş kova bile takılı kalır; kova hiçbir zaman çıkarılıp çalıştırılmaz.</p>'},
+ kapat_(),
+ {bolum:'Ayar',ask:'<b>PROG</b> tuşuyla <b>P1</b>’i yükleyin (3000 rpm · 5:00).',halka:['keys.prog',0,40],canli:ekran,ok:function(s){return s.prog===1},
+  b:'P1 idrar için uygun',html:'<p>İdrar çökeltisi için <b>3000 rpm, 5 dakika</b> yeterlidir ve kovalı rotorun sınırı (4500 rpm) içindedir.</p><p>Ekrandaki önceki program (13000 rpm) bu rotor için kesinlikle kullanılmaz: kovalı rotorun hız sınırı en düşük olanıdır.</p>'},
+ start_(),bekle_(),
+ sonuc_('<p>Çökelti tüplerin <b>tam dibinde</b> toplandı; üstteki berrak idrar pipetle alınıp analize (ör. SPE) verilir.</p><p>Aklınızda kalsın: büyük tüp → <b>kovalı rotor</b>; karşılıklı kovalar <b>eşit yük</b>; hız rotorun <b>sınırı içinde</b> (≤ 4500 rpm).</p>','<p>Çökme eksik; daha uzun süre gerekir.</p>'),
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['15 mL Falkon tüpleri hangi rotora konur?',['Açılı rotora','Mikrotüp rotoruna','Kovalı rotora'],2,'Büyük tüpler kovalı rotorun adaptörlerine konur.'],
+ ['Kovalı rotorda denge nasıl kurulur?',['Bütün tüpler tek kovaya konur','Karşılıklı kovalar eşit ağırlıkta yüklenir','Kovalardan biri çıkarılır'],1,'Kova içinde de tüpler simetrik dizilir.'],
+ ['Kovalı rotorda dönerken tüpler nasıl durur?',['Dik','Yatay (kovalar dışa açılır)','Ters'],1,'Çökelti bu yüzden tüpün tam dibinde toplanır.']],
+ bitti:function(){S().done.fal=1}}
 };
 return {sayfa:'santrifuj_pilot.html',hazir:'__cen',ad:'SANTRİFÜJ',model:'MY-Centri 320',adTam:'Santrifüjün',
- acl:'Cihazı dört kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 4–6 dakika sürer.',
- GM:{parts:'sentani',kan:'senkan',lle:'senlle',epp:'senepp'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['sentani','senkan','senlle','senepp'],
- senkron:function(s,o){['sentani:parts','senkan:kan','senlle:lle','senepp:epp'].forEach(function(x){x=x.split(':');if(o[x[0]]&&o[x[0]].bitti)s.done[x[1]]=1})},
+ acl:'Cihazı beş kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 4–6 dakika sürer.',
+ GM:{parts:'sentani',kan:'senkan',lle:'senlle',epp:'senepp',fal:'senfal'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['sentani','senkan','senlle','senepp','senfal'],
+ senkron:function(s,o){['sentani:parts','senkan:kan','senlle:lle','senepp:epp','senfal:fal'].forEach(function(x){x=x.split(':');if(o[x[0]]&&o[x[0]].bitti)s.done[x[1]]=1})},
  serbest:{kur:function(){var s=S();if(s.phase!=='idle')return;s.slots.fill(null);window.reset('kan');S().mode='use';window.render()},
   html:'<div class="kart"><h4>Tüp seti</h4><div>Hangi numunelerle çalışmak istiyorsunuz?</div><div class="sec"><button data-set="kan">Kan · 5 tüp (açılı rotor)</button><button data-set="lle">Ekstraksiyon · 4 tüp (açılı rotor)</button><button data-set="epp">Eppendorf · 7 mikrotüp (mikrotüp rotoru)</button><button data-set="fal">Falkon 15 mL · 6 tüp (kovalı rotor)</button></div><div class="acl">Gereken rotor takılı değilse kapağı açıp ⚙ Kontroller ▸ <b>Rotoru değiştir</b>.</div></div>',
   bagla:function(P){P.querySelectorAll('[data-set]').forEach(function(b){b.onclick=function(){var s=S();if(s.phase!=='idle')return;s.slots.fill(null);window.reset(b.dataset.set);S().mode='use';window.render()}})}}};
