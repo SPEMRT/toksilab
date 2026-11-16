@@ -468,15 +468,15 @@ var C=null;[vorteks,terazi,ultra,santrifuj].some(function(f){var c=f();if(c.sayf
 if(!C)return;
 /* serbest kullanımda canlı uyarı kuralları: yanlış giden şey kesin dille panelde gösterilir */
 var SK={
- 'terazi_pilot.html':{kural:function(s){if(!(s.boat||s.powder>0||s.held))return [];var t=window.tartimSorunlari?window.tartimSorunlari():[];
+ 'terazi_pilot.html':{yerlesim:'kontrol',kural:function(s){if(!(s.boat||s.powder>0||s.held))return [];var t=window.tartimSorunlari?window.tartimSorunlari():[];
   return t.filter(function(x){return !(/darası/.test(x)&&!(s.powder>0))&&!(/kalibrasyon/.test(x)&&!s.boat)})}},
- 'vorteks_pilot.html':{html:'<div class="alt"><button class="is" id="dHold">✋ Tüpü bastırarak tut</button></div>',
+ 'vorteks_pilot.html':{yerlesim:'kontrol',html:'<div class="alt"><button class="is" id="dHold">✋ Tüpü bastırarak tut</button></div>',
   bagla:function(P){P.querySelector('#dHold').onclick=function(){window.holdToggle()}},
   yenile:function(P,s){var b=P.querySelector('#dHold');if(b){b.textContent=s.hold?'✋ Tüpü bırak':'✋ Tüpü bastırarak tut';b.disabled=!s.cupT}},
   kural:function(s){var L=[],k=s.cupT||s.held;if(k&&!s.caps[k])L.push('Tüpün kapağı açık: vortekslemeden önce kapak sıkıca kapatılır, yoksa sıvı sıçrar ve numune kaybolur.');
    if(s.cupT&&s.rpm>150&&!(s.press||s.hold))L.push('Başlık dönüyor ama tüpü bastırarak tutmuyorsun: tüp karışmaz, hız artınca başlıktan fırlar.');
    if(s.sw==='on'&&!s.cupT&&s.rpm>150)L.push('Başlık boşta dönüyor: iş bitince anahtarı O konumuna al.');return L}},
- 'ultra_pilot.html':{kural:function(s){var L=[];if(s.pow&&s.run&&s.water<1.5)L.push('Hazne yeterince dolu değil: ultrason az suyla çalışırsa dönüştürücüler zarar görür. Suyu 2/3 çizgisine (≈ 2 L) doldur.');
+ 'ultra_pilot.html':{yerlesim:'kontrol',kural:function(s){var L=[];if(s.pow&&s.run&&s.water<1.5)L.push('Hazne yeterince dolu değil: ultrason az suyla çalışırsa dönüştürücüler zarar görür. Suyu 2/3 çizgisine (≈ 2 L) doldur.');
    if(s.water>2.6)L.push('Su çizginin üstünde: şişe ya da sepet konunca taşar.');
    if(s.bot&&s.bot.in&&s.bot.cap==='tight'&&s.run)L.push('Şişenin kapağı sıkı: çıkan gaz kaçamaz. Degazlamada kapak yarım tur gevşetilir.');
    if(s.bot&&s.bot.in&&s.set>30)L.push('Isıtma açık: mobil faz ısınırsa buharlaşmayla bileşimi değişir; degazlama ısıtmasız yapılır.');return L}},
@@ -576,10 +576,10 @@ function serbestCiz(){
 function notIzle(){var y=document.getElementById('say');if(!y||!window.MutationObserver)return;new MutationObserver(function(){if(!SERB)return;NOT=y.innerHTML;['dNot','sbNot'].forEach(function(id){var n=document.getElementById(id),t=n&&n.querySelector('.nt');if(n&&t){t.innerHTML=NOT;n.hidden=!NOT}})}).observe(y,{childList:true,characterData:true,subtree:true})}
 /* serbest kullanım (kontrol düzeni): bilgi paneli yok; sağda küçültülmüş Kontroller paneli, altında Numune seç, uyarılar ve uzman notu */
 function kontrolEk(){var side=document.getElementById('side');if(!side||document.getElementById('sbEk'))return;var c=side.querySelector('.card')||side;var d=document.createElement('div');d.id='sbEk';
- d.innerHTML='<button class="bt sbNum" id="sbNumB">🧪 Numune seç ▾</button><div class="sbNumL" id="sbNumL" hidden>'+(C.serbest.numune||[]).map(function(n){return '<button class="bt" data-num="'+n[0]+'">'+n[1]+'</button>'}).join('')+'</div>'+
+ var nl=C.serbest.numune||[];d.innerHTML=(nl.length?'<button class="bt sbNum" id="sbNumB">🧪 Numune seç ▾</button><div class="sbNumL" id="sbNumL" hidden>'+nl.map(function(n){return '<button class="bt" data-num="'+n[0]+'">'+n[1]+'</button>'}).join('')+'</div>':'')+
   '<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div><button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
  c.appendChild(d);var L2=d.querySelector('#sbNumL');
- d.querySelector('#sbNumB').onclick=function(){L2.hidden=!L2.hidden};
+ if(L2)d.querySelector('#sbNumB').onclick=function(){L2.hidden=!L2.hidden};
  d.querySelectorAll('[data-num]').forEach(function(b){b.onclick=function(){var m=C.serbest.numuneSec(b.dataset.num);if(!m)L2.hidden=true;else{NOT=m;var n=document.getElementById('sbNot');n.querySelector('.nt').innerHTML=m;n.hidden=false}}});
  d.querySelector('#sbDers').onclick=function(){ac('liste')}}
 /* paneli küçült / aç */
