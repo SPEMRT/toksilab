@@ -1,7 +1,7 @@
 /* MY ToksiLab · Rehberli dersler: 3B cihaz sayfaları
    Sayfa doğrudan rehberli açılır; ?ders= yoksa bölüm listesi gösterilir.
    Serbest kullanım aynı sayfada açılır (?serbest=1): görev yok, solda yalnız ⚙ Kontroller eklenir, sağ panel küçültülebilir.
-   santrifuj_pilot.html?ders=sentani | senkan | senlle | senepp | senfal  (tanıma · kandan plazma · faz ayırma · protein çöktürme · kovalı rotor)
+   santrifuj_pilot.html?ders=sentani | senkan | senlle | senepp  (tanıma · kandan plazma · faz ayırma · protein çöktürme)
    vorteks_pilot.html?ders=vortani | vorkul | vorlle   (tanıma · HS viali · ekstraksiyon)
    terazi_pilot.html?ders=terani | terkal | ter10      (tanıma · seviye ve kalibrasyon · 10 mg tartım)
    ultra_pilot.html?ders=ulttani | ultdeg              (tanıma · mobil faz degazlama)
@@ -291,125 +291,129 @@ return {sayfa:'ultra_pilot.html',hazir:'__ult',ad:'ULTRASONİK BANYO',model:'3 L
 
 /* ---------- santrifüj ---------- */
 function santrifuj(){
-var AD={'Kapak (kilitli)':'lid','Ekran':'lcd','Tuşlar':'keys','Ayar düğmesi':'knob','Rotor':'rotor','Rotor somunu (mil)':'hub','Rotor haznesi':'bowl','Tüp rafı (tepsi)':'rack'};
-var ADI={lid:'kapak',lcd:'ekran',keys:'tuşlar',knob:'ayar düğmesi',rotor:'rotor',hub:'rotor somunu',bowl:'rotor haznesi',rack:'tüp rafı',tube:'tüp'};
+var AD={'Kapak (kilitli)':'lid','Ekran':'lcd','PROG tuşu':'k_prog','RCF tuşu':'k_rcf','SELECT tuşu':'k_select','START/STOP tuşu':'k_start','Ayar düğmesi':'knob','Rotor':'rotor','Rotor somunu (mil)':'hub','Rotor haznesi':'bowl','Tüp rafı (tepsi)':'rack'};
+var ADI={lid:'kapak',lcd:'ekran',k_prog:'PROG tuşu',k_rcf:'RCF tuşu',k_select:'SELECT tuşu',k_start:'START/STOP tuşu',knob:'ayar düğmesi',rotor:'rotor',hub:'rotor somunu',bowl:'rotor haznesi',rack:'tüp rafı',tube:'tüp'};
 for(var i=1;i<=5;i++)AD['Kan '+i]='tube';
 function tup(id){return S().tray.filter(function(t){return t.id===id})[0]}
-function yuva(k){return function(){return ['slotHot.'+S().rotor+'.'+k+'.hs',0,48]}}
 function g2(v){return v.toFixed(2).replace('.',',')}
 function rpm(v){return Math.round(v).toLocaleString('tr-TR')}
 function mmss(sn){sn=Math.max(0,Math.round(sn));return Math.floor(sn/60)+':'+('0'+sn%60).slice(-2)}
-function denge(s){var v=window.imb(),n=s.slots.filter(Boolean).length,tol=s.rotor==='mic'?.15:.5;return 'Rotorda '+n+' tüp · dengesizlik '+g2(v.m)+' g (sınır '+g2(tol)+' g)'+(n&&v.m>tol?' ✗':n?' ✓':'')}
+function tol(s){return {buc:.5,mic:.15,ang:.5}[s.rotor]||.5}
+function denge(s){var v=window.imb(),n=s.slots.filter(Boolean).length,t=tol(s);return 'Rotorda '+n+' tüp · dengesizlik '+g2(v.m)+' g (sınır '+g2(t)+' g)'+(n&&v.m>t?' ✗':n?' ✓':'')}
 function ekran(s){return 'Ekran: P'+(s.prog||'–')+' · '+rpm(s.rpm)+' rpm · '+mmss(s.sec)+' · ayar alanı: '+(s.sel2==='t'?'süre':'hız')}
 function calisma(s){return {idle:'Hazır',accel:'Hızlanıyor',run:'Çalışıyor',decel:'Yavaşlıyor',error:'DENGESİZLİK, duruyor'}[s.phase]+' · '+rpm(Math.round(s.cur/10)*10)+' rpm · kalan '+mmss(s.phase==='idle'?0:s.left)}
-function kapakKapat(){var s=S();if(s.lid==='open')window.toggleLid()}
 var KAPAK=['lidH',-10,80];
-function ac_(){return {bolum:'Hazırlık',ask:'<b>Kapağın ön kenarına</b> tıklayarak kapağı açın.',oto:1,halka:KAPAK,ok:function(s){return s.lid==='open'}}}
-function kapat_(son){return {bolum:'Çalıştırma',ask:'Kapağın ön kenarına tıklayarak <b>kapağı kapatın</b>.',halka:KAPAK,ok:function(s){return s.lid==='closed'&&s.f.closed},
+/* raftaki yerleşmemiş tüplerin hepsine sarı halka; tüp seçiliyse önerilen karşı yuvaya da */
+function tupHalka(tur,yk){return function(s){var L=s.tray.filter(function(t){return (tur?tur.indexOf(t.kind)>=0:true)&&t.where==null}).map(function(t){return ['tubes.'+t.id,yk||-46,56]});
+ var N=s.slots.length;if(s.sel){for(var k=0;k<N;k++){if(s.slots[k]&&!s.slots[(k+N/2)%N]){L.unshift(['slotHot.'+s.rotor+'.'+((k+N/2)%N)+'.hs',0,46]);break}}}return L.length?L:null}}
+/* ayar düğmesi açılır kutusu açıksa halka sağ/sol düğmede */
+function dugmeHalka(yon){return function(){var k=document.getElementById('kpop');return k&&!k.hidden?['#'+(yon<0?'kL':'kR'),0,0]:['keys.knob',0,54]}}
+function ac_(){return {bolum:'Hazırlık',ask:'<b>Kapağın ön kenarına</b> tıklayarak kapağı açın.',oto:1,halka:KAPAK,izin:['lid'],ok:function(s){return s.lid==='open'}}}
+function kapat_(){return {bolum:'Çalıştırma',ask:'Kapağın ön kenarına tıklayarak <b>kapağı kapatın</b>.',halka:KAPAK,izin:['lid'],ok:function(s){return s.lid==='closed'&&s.f.closed},
   hata:function(){var s=S();return s.lid==='closed'&&!s.f.placed?'Yerleşim tamamlanmadan kapak kapandı. Kapağı yeniden açıp tüpleri dengeli yerleştirin.':''},
-  b:'Kapak kapalı',html:'<p>Kapak kapandı. Çalışma sırasında kapak <b>kilitlenir</b>: rotor tamamen durmadan açılamaz. Dönen bir rotora el değmesi ciddi yaralanmaya yol açar; kapağı zorlamayın.</p>'+(son||'')}}
-function start_(){return {bolum:'Çalıştırma',ask:'Kırmızı <b>START/STOP</b> tuşuna basın.',halka:['keys.start',0,40],ok:function(s){return s.phase!=='idle'||!!s.result},
-  hata:function(){var s=S();return s.msg==='Err'&&s.rpm>(s.rotor==='mic'?14000:5000)?'Cihaz başlamadı: hız, takılı rotorun sınırının üstünde. Hızı düşürün.':s.msg==='LId'?'Kapak açık; cihaz çalışmaz. Önce kapağı kapatın.':''},
+  b:'Kapak kapalı',html:'<p>Kapak kapandı. Çalışma sırasında kapak <b>kilitlenir</b>: rotor tamamen durmadan açılamaz. Dönen bir rotora el değmesi ciddi yaralanmaya yol açar; kapağı zorlamayın.</p>'}}
+function start_(){return {bolum:'Çalıştırma',ask:'Kırmızı <b>START/STOP</b> tuşuna basın.',halka:['keys.start',0,40],izin:['key:start'],ok:function(s){return s.phase!=='idle'||!!s.result},
+  hata:function(){var s=S();return s.msg==='Err'?'Cihaz başlamadı: hız, takılı rotorun sınırının üstünde. Hızı düşürün.':s.msg==='LId'?'Kapak açık; cihaz çalışmaz. Önce kapağı kapatın.':''},
   b:'Santrifüj hızlanıyor',html:'<p>Rotor birkaç saniyede ayarlanan hıza çıkar; o sırada cihaz dengesizliği de ölçer. Dengesizlik sınırı aşılırsa kendini durdurur.</p><p>Süre, rotor <b>ayarlanan hıza ulaştığında</b> saymaya başlar. Simülasyonda süre hızlandırılmıştır.</p>'}}
-function bekle_(){return {bolum:'Çalıştırma',ask:'Santrifüj çalışıyor. Rotor <b>tamamen durana</b> kadar bekleyin.',bekle:1,canli:calisma,ok:function(s){return s.phase==='idle'&&!!s.result},
+function bekle_(){return {bolum:'Çalıştırma',ask:'Santrifüj çalışıyor. Rotor <b>tamamen durana</b> kadar bekleyin.',bekle:1,izin:[],canli:calisma,ok:function(s){return s.phase==='idle'&&!!s.result},
   b:'Rotor durdu',html:'<p>Süre doldu, rotor yavaşladı ve durdu; ekranda <b>End</b> yazıyor. Kapak kilidi ancak şimdi açılır.</p><p>Bitince tüpler <b>sarsılmadan</b> alınır: ayrılan tabakalar yeniden karışmasın.</p>'}}
-function sonuc_(ok,kotu){return {bolum:'Sonuç',ask:'<b>Kapağı açın</b> ve tüplere bakın.',halka:KAPAK,ok:function(s){return s.f.done},
-  b:function(){var r=S().result,k=S().tray.filter(function(t){return t.st}).map(function(t){return t.st}),w=k.indexOf('bad')>=0?'bad':k.indexOf('mid')>=0?'mid':'ok';return w==='ok'?'Ayrım tamam ✓':'Ayrım yetersiz'},
+function sonuc_(ok,kotu){return {bolum:'Sonuç',ask:'<b>Kapağı açın</b> ve tüplere bakın.',halka:KAPAK,izin:['lid'],ok:function(s){return s.f.done},
+  b:function(){var k=S().tray.filter(function(t){return t.st}).map(function(t){return t.st}),w=k.indexOf('bad')>=0?'bad':k.indexOf('mid')>=0?'mid':'ok';return w==='ok'?'Ayrım tamam ✓':'Ayrım yetersiz'},
   html:function(){var r=S().result,k=S().tray.filter(function(t){return t.st}).map(function(t){return t.st}),w=k.indexOf('bad')>=0?'bad':k.indexOf('mid')>=0?'mid':'ok';
    return '<p>'+rpm(r.rpm)+' rpm · '+(r.min).toFixed(1).replace('.',',')+' dakika.</p>'+(w==='ok'?ok:kotu)}}}
+var KOVA='<p>Takılı rotor <b>kovalı (swing-out) rotor</b>: dört kolun ucunda dört kova, her kovada turuncu adaptörde 4 yuva (toplam 16). En fazla <b>4500 rpm</b>. Rotor dönerken kovalar dışa doğru yatay açılır; tüpler dönme sırasında yatay durur, çöken madde tüpün tam dibinde toplanır.</p><p>Yuvalar numaralıdır: <b>1–4</b> birinci kova, <b>5–8</b> ikinci, <b>9–12</b> üçüncü, <b>13–16</b> dördüncü. Karşılıklı kovalar <b>1. ↔ 3.</b> ve <b>2. ↔ 4.</b>; bir yuvanın tam karşısı <b>8 yuva ötesidir</b> (1 ↔ 9, 5 ↔ 13).</p>';
+var KUR=function(rot){return function(){var s=S();if(s.rotor!==rot){s.rotor=rot;s.slots=Array({buc:16,mic:24,ang:12}[rot]).fill(null);s.tray.forEach(function(t){t.where=null})}var k=document.getElementById('kpop');if(k)k.hidden=true}};
 
 var DERS={
-sentani:{ad:'Cihazı tanıma',ozet:'Santrifüj ne yapar; kapak, ekran, tuşlar, rotor ve denge.',baslik:'SANTRİFÜJ · CİHAZI TANIMA',mod:'parts',gorev:'parts',kur:function(){var s=S();s.lid='closed'},
+sentani:{ad:'Cihazı tanıma',ozet:'Santrifüj ne yapar; kapak, ekran, tuşlar tek tek, ayar düğmesi, rotor ve denge.',baslik:'SANTRİFÜJ · CİHAZI TANIMA',mod:'parts',gorev:'parts',kur:function(){KUR('buc')();S().lid='closed'},
  adim:[
  {bolum:'Giriş',b:'Santrifüj ne işe yarar?',
   html:'<p>Santrifüj tüpleri çok hızlı döndürür. Dönme, tüpteki her şeyi dışa, yani tüpün <b>dibine</b> doğru iten güçlü bir kuvvet yaratır. Bu kuvvet yerçekiminin binlerce katıdır.</p><p>Sonuçta <b>ağır olan dibe</b> iner, hafif olan üstte kalır. Laboratuvarda üç iş için kullanılır:</p><ul><li><b>Kan:</b> hücreleri dibe indirip üstte berrak plazmayı ayırmak.</li><li><b>Sıvı-sıvı ekstraksiyon:</b> vorteksten sonra karışan iki sıvıyı yeniden ayırmak.</li><li><b>Protein çöktürme:</b> çöken proteinleri mikrotüpün dibinde sıkı bir pelet hâline getirmek.</li></ul><p>Bu kadar hızlı dönen bir cihazda en önemli kural <b>dengedir</b>; bunu bölümler boyunca göreceksiniz.</p>'},
- {bolum:'Dış parçalar',ask:'Cihazın üstündeki beyaz <b>kapağa</b> tıklayın.',parca:['lid'],halka:KAPAK,
+ {bolum:'Ön panel',ask:'Cihazın üstündeki beyaz <b>kapağa</b> tıklayın.',parca:['lid'],halka:KAPAK,
   b:'Kapak (kilitli)',ne:'Rotor haznesini kapatan, menteşeli kapaktır.',neden:'Çalışma sırasında kilitlenir: rotor tamamen durmadan açılmaz. Kapak açıkken de cihaz çalışmaz.',yanlis:'Kapak hiçbir zaman zorlanmaz. Çalışırken açılmaya çalışılan kapak hem kilidi bozar hem de dönen rotora el değebilir.'},
- {bolum:'Dış parçalar',ask:'Ön paneldeki turuncu <b>ekrana</b> tıklayın.',parca:['lcd'],halka:['lcd',0,110],
+ {bolum:'Ön panel',ask:'Ön paneldeki turuncu <b>ekrana</b> tıklayın.',parca:['lcd'],halka:['lcd',0,110],
   b:'Ekran',ne:'Soldan sağa: <b>P</b> program numarası, <b>rpm</b> hız, <b>dk:sn</b> süre.',neden:'Durgunken ayarları, çalışırken anlık hızı ve kalan süreyi gösterir. Altı çizili alan, ayar düğmesinin değiştireceği alandır.',yanlis:'Başlatmadan önce ekrandaki hız ve süre <b>her seferinde</b> okunur. Önceki kullanıcıdan kalan program numunenize uygun olmayabilir.'},
- {bolum:'Dış parçalar',ask:'Ekranın altındaki <b>tuşlardan</b> birine tıklayın.',parca:['keys'],halka:['keys.prog',0,70],
-  b:'Tuşlar',html:'<ul><li><b>—</b>: seçili alanı (hız ya da süre) azaltır.</li><li><b>PROG</b>: kayıtlı hazır programları sırayla yükler (P1, P2, P3).</li><li><b>RCF</b>: hızı g kuvveti olarak gösterir; bu laboratuvarda rpm ile çalışıyoruz.</li><li><b>SELECT</b>: ayar alanını hız ↔ süre arasında değiştirir.</li><li><b>START/STOP</b> (kırmızı): başlatır ya da durdurur.</li></ul>'},
- {bolum:'Dış parçalar',ask:'Sağdaki büyük yuvarlak <b>ayar düğmesine</b> tıklayın.',parca:['knob'],halka:['keys.knob',0,54],
-  b:'Ayar düğmesi',ne:'SELECT ile seçilen alanı artırır.',neden:'Hız 100 rpm, süre 30 saniye adımlarla artar; azaltmak için <b>—</b> tuşu kullanılır.',yanlis:'Ayarı değiştirdikten sonra ekranı yeniden okuyun; bir alanı değiştirirken diğerine dokunulmadığından emin olun.'},
+ {bolum:'Ön panel',ask:'Ekranın altındaki ilk tuşa, <b>PROG</b> tuşuna tıklayın.',parca:['k_prog'],halka:['keys.prog',0,40],
+  b:'PROG tuşu',ne:'Kayıtlı hazır programları sırayla yükler: P1, P2, P3.',neden:'Sık kullanılan hız-süre ikilileri hazır durur; her basışta sıradaki program ekrana gelir.',yanlis:'Program yalnız bir başlangıçtır. Yüklenen hızın takılı rotorun sınırı içinde ve numuneye uygun olduğu her seferinde kontrol edilir.'},
+ {bolum:'Ön panel',ask:'Yanındaki <b>RCF</b> tuşuna tıklayın.',parca:['k_rcf'],halka:['keys.rcf',0,40],
+  b:'RCF tuşu',ne:'Hızı g kuvveti olarak gösterir (RCF: yerçekiminin kaç katı).',neden:'Aynı rpm, büyük rotorda daha büyük kuvvet yaratır; yayınlarda bu yüzden g kuvveti verilir.',yanlis:'Bu laboratuvarda ayarlar <b>rpm</b> ile yapılır; RCF tuşunu kullanmanız gerekmez.'},
+ {bolum:'Ön panel',ask:'<b>SELECT</b> tuşuna tıklayın.',parca:['k_select'],halka:['keys.select',0,40],
+  b:'SELECT tuşu',ne:'Ayar alanını <b>hız ↔ süre</b> arasında değiştirir.',neden:'Ekranda seçili alanın altı çizilidir. Ayar düğmesi yalnız seçili alanı değiştirir.',yanlis:'Değer girmeden önce altı çizili alana bakın: hızı değiştirmek isterken süreyi değiştirmek sık yapılan bir hatadır.'},
+ {bolum:'Ön panel',ask:'Kırmızı <b>START/STOP</b> tuşuna tıklayın.',parca:['k_start'],halka:['keys.start',0,40],
+  b:'START/STOP tuşu',ne:'Çalıştırmayı başlatır; çalışırken basılırsa durdurur.',neden:'Durdurulduğunda rotor yavaşlar; kapak ancak rotor tamamen durunca açılır.',yanlis:'Acil durumda da STOP kullanılır; kapak zorlanmaz, rotorun durması beklenir.'},
+ {bolum:'Ön panel',ask:'Sağdaki büyük yuvarlak <b>ayar düğmesine</b> tıklayın.',parca:['knob'],halka:['keys.knob',0,54],
+  b:'Ayar düğmesi',ne:'SELECT ile seçilen alanı (hız ya da süre) değiştirir.',neden:'<b>Sağa çevirince artar, sola çevirince azalır.</b> Hız 100 rpm, süre 30 saniye adımlarla değişir. Simülasyonda düğmeye tıklayınca açılan kutudaki ↻ (sağa) ve ↺ (sola) ile çevirirsiniz; basılı tutunca hızlı değişir.',yanlis:'Değeri değiştirdikten sonra ekranı yeniden okuyun.'},
  {bolum:'İç parçalar',ask:'İçini görmek için kapağı açın.',dugme:['Kapağı aç',function(){S().lid='open'}],ok:function(s){return s.lidA>.9},
-  b:'Rotor haznesi açıldı',html:'<p>Kapağın altında <b>rotor</b> var. Tüpler rotordaki eğik yuvalara konur. Takılı olan, 12 yuvalı <b>açılı rotor</b>dur (5 mL tüpler için).</p>'},
- {bolum:'İç parçalar',ask:'Rotorun koyu gri gövdesine tıklayın.',parca:['rotor'],halka:['rotorG.ang',0,150],
-  b:'Rotor',ne:'Tüpleri taşıyan, motorla dönen parçadır. Bu cihazın üç rotoru var; yuvalar turuncu halkalı ve numaralıdır.',neden:'<b>Açılı rotor</b> 12 × 5 mL, en fazla <b>5000 rpm</b>. <b>Mikrotüp rotoru</b> 24 × 1,5/2 mL, en fazla <b>14000 rpm</b>. <b>Kovalı rotor</b> 4 kova × 4 × 15 mL Falkon, en fazla <b>4500 rpm</b>; kovalar dönerken yatay açılır. Tüp tipine göre rotor seçilir.',yanlis:'Her rotorun bir <b>en yüksek hızı</b> vardır ve aşılmaz. Mikrotüp, 5 mL yuvasına konmaz: boşta kalır ve kırılır.'},
- {bolum:'İç parçalar',ask:'Rotorun ortasındaki <b>somuna</b> tıklayın.',parca:['hub'],halka:['rotorG.ang',-34,46],
+  b:'Rotor haznesi açıldı',html:KOVA},
+ {bolum:'İç parçalar',ask:'Kovalardan birine ya da rotorun koluna tıklayın.',parca:['rotor'],halka:['rotorG.buc',0,170],
+  b:'Rotor',ne:'Tüpleri taşıyan, motorla dönen parçadır. Bu cihazın üç rotoru var; yuvalar turuncu halkalı ve numaralıdır.',neden:'<b>Kovalı rotor</b> 4 kova × 4 yuva, en fazla <b>4500 rpm</b> (kan, ekstraksiyon ve Falkon tüpleri). <b>Mikrotüp rotoru</b> 24 × 1,5/2 mL, en fazla <b>14000 rpm</b>. <b>Açılı rotor</b> 12 × 5 mL, en fazla <b>5000 rpm</b>. Tüp tipine göre rotor seçilir.',yanlis:'Her rotorun bir <b>en yüksek hızı</b> vardır ve aşılmaz. Kovalı rotorda dört kova her zaman takılı olur; boş kova bile çıkarılmaz.'},
+ {bolum:'İç parçalar',ask:'Rotorun ortasındaki <b>somuna</b> tıklayın.',parca:['hub'],halka:['rotorG.buc',-26,50],
   b:'Rotor somunu (mil)',ne:'Rotoru motor miline sabitler.',neden:'Rotor takıldıktan sonra somunun sıkıldığından emin olunur; gevşek rotor dönerken yerinden çıkabilir.',yanlis:'Rotor değiştirirken somun iyice sıkılır; çalışmadan önce rotoru elle hafifçe çevirip yerine oturduğu kontrol edilir.'},
- {bolum:'İç parçalar',ask:'Rotorun çevresindeki <b>hazneye</b> tıklayın.',parca:['bowl'],halka:['rotorG.ang',10,210],
-  b:'Rotor haznesi',ne:'Rotorun içinde döndüğü metal hazne.',neden:'Bir tüp kırılır ya da sızdırırsa sıvıyı tutar.',yanlis:'Hazne temiz ve kuru tutulur. Kırık tüp olursa cihaz durunca temizlenir; kan dökülmüşse dezenfekte edilir.'},
+ {bolum:'İç parçalar',ask:'Rotorun çevresindeki <b>hazneye</b> tıklayın.',parca:['bowl'],halka:['rotorG.buc',10,230],
+  b:'Rotor haznesi',ne:'Rotorun içinde döndüğü hazne.',neden:'Bir tüp kırılır ya da sızdırırsa sıvıyı tutar.',yanlis:'Hazne temiz ve kuru tutulur. Kırık tüp olursa cihaz durunca temizlenir; kan dökülmüşse dezenfekte edilir.'},
  {bolum:'İç parçalar',ask:'Sağdaki <b>tüp rafına</b> ya da raftaki bir tüpe tıklayın.',parca:['rack','tube'],halka:['rack',-30,140],
   b:'Tüpler ve denge',html:'<p>Rafta 5 kan tüpü duruyor. Santrifüjde en önemli kural: <b>tüpler rotora karşılıklı ve eşit ağırlıkta</b> dizilir.</p><p>Dengesiz bir rotor dönerken şiddetle titrer, cihazı tezgâhta yürütür, yatakları ve rotoru bozar. Bu cihaz dengesizliği algılayınca kendini durdurur.</p><p>Tek sayıda tüp varsa karşısına aynı ağırlıkta <b>su dolu bir denge tüpü</b> konur.</p>'},
  {bolum:'Kontrol',test:1}],
  soru:[
  ['Santrifüjde tüpler nasıl dizilir?',['Yan yana, aynı tarafa','Karşılıklı ve eşit ağırlıkta','Rastgele'],1,'Dengesiz rotor titrer ve cihaz durur; rotor ve yataklar zarar görür.'],
- ['Kapak ne zaman açılabilir?',['Rotor tamamen durduktan sonra','Süre bitmeden önce','Yavaşlarken'],0,'Çalışma sırasında kapak kilitlidir; zorlanmaz.'],
- ['Mikrotüpler hangi rotora konur?',['12 × 5 mL açılı rotora','24 yuvalı mikrotüp rotoruna','Herhangi birine'],1,'5 mL yuvasında mikrotüp boşta kalır ve kırılır.']],
+ ['Hızı ya da süreyi azaltmak için ne yapılır?',['Ayar düğmesi sola çevrilir','PROG tuşuna basılır','Cihaz kapatılıp açılır'],0,'Sağa çevirince artar, sola çevirince azalır; SELECT hangi alanın değişeceğini seçer.'],
+ ['Kapak ne zaman açılabilir?',['Rotor tamamen durduktan sonra','Süre bitmeden önce','Yavaşlarken'],0,'Çalışma sırasında kapak kilitlidir; zorlanmaz.']],
  bitti:function(){S().done.parts=1;S().lid='closed'}},
 
-senkan:{ad:'Kan: plazma ayırma',ozet:'Karşılıklı dizme, denge tüpü, rotor sınırı, 4000 rpm 10 dakika.',baslik:'SANTRİFÜJ · KANDAN PLAZMA',mod:'use',gorev:'kan',
+senkan:{ad:'Kan: plazma ayırma',ozet:'Kovalı rotor, karşılıklı dizme, denge tüpü, 4000 rpm 10 dakika.',baslik:'SANTRİFÜJ · KANDAN PLAZMA',mod:'use',gorev:'kan',kur:KUR('buc'),
  adim:[
  {bolum:'Giriş',b:'Ne yapacaksınız?',
-  html:'<p>Rafta <b>5 kan tüpü</b> var (her biri 4,0 mL). Hücreleri dibe indirip üstte berrak <b>plazmayı</b> ayıracaksınız.</p><p>Sıra hep aynıdır:</p><ul><li>Kapağı aç, doğru rotoru kontrol et.</li><li>Tüpleri <b>karşılıklı</b> diz; gerekiyorsa denge tüpü koy.</li><li>Kapağı kapat, hız ve süreyi ayarla, başlat.</li><li>Rotor durunca kapağı aç, tüpleri sarsmadan al.</li></ul>'},
+  html:'<p>Rafta <b>5 kan tüpü</b> var (her biri 4,0 mL). Hücreleri dibe indirip üstte berrak <b>plazmayı</b> ayıracaksınız.</p><p>Sıra hep aynıdır:</p><ul><li>Kapağı aç, doğru rotoru kontrol et.</li><li>Tüpleri <b>karşılıklı</b> diz; gerekiyorsa denge tüpü koy.</li><li>Kapağı kapat, hız ve süreyi ayarla, başlat.</li><li>Rotor durunca kapağı aç, tüpleri sarsmadan al.</li></ul><p>Her adımda yalnız o adımın parçasıyla çalışılır; açıklamayı okuyup <b>Devam</b>’a basın.</p>'},
  ac_(),
- {bolum:'Hazırlık',b:'Doğru rotor mu?',html:'<p>Takılı rotor <b>12 × 5 mL açılı rotor</b>; kan tüpleri için doğru rotor. Bu rotor <b>en fazla 5000 rpm</b> çıkar.</p><p>Rotorun yuvaları numaralıdır. 12 yuvalı rotorda bir yuvanın tam karşısı <b>6 yuva ötesidir</b> (1 ↔ 7, 2 ↔ 8, …).</p>'},
- {bolum:'Yerleştirme',ask:'Raftan <b>Kan 1</b> tüpüne tıklayın.',oto:1,halka:['tubes.K1',-46,60],ok:function(s){return s.sel==='K1'||tup('K1').where!=null}},
- {bolum:'Yerleştirme',ask:'Rotorda yanıp sönen <b>1. yuvaya</b> tıklayın.',halka:yuva(0),ok:function(){return tup('K1').where!=null},
-  hata:function(){return S().sel!=='K1'&&tup('K1').where==null?'Kan 1 seçili değil. Önce raftaki Kan 1’e tıklayın.':''},
-  b:'İlk tüp yerinde',html:'<p>Tüp yuvaya eğik oturdu. Açılı rotorda tüpler dönerken dışa doğru eğiktir; çöken hücreler tüpün dış-alt köşesinde toplanır.</p>'},
- {bolum:'Yerleştirme',ask:'Şimdi <b>Kan 2</b>’yi seçip Kan 1’in <b>tam karşısındaki</b> yuvaya koyun.',halka:function(s){var a=tup('K1').where,b=tup('K2');if(b.where==null&&s.sel!=='K2')return ['tubes.K2',-46,60];return ['slotHot.'+s.rotor+'.'+((a+6)%12)+'.hs',0,48]},
-  ok:function(){var a=tup('K1').where,b=tup('K2').where;return a!=null&&b===(a+6)%12},
-  hata:function(){var a=tup('K1').where,b=tup('K2').where;return b!=null&&b!==(a+6)%12?'Kan 2 karşıya gelmedi (yuva '+(b+1)+'). Tüpe tıklayarak geri alın, sonra yanıp sönen yuvaya koyun.':''},
-  canli:denge,
-  b:'Karşılıklı: dengeli',html:'<p>İki eşit tüp birbirinin tam karşısında: kuvvetler birbirini dengeliyor. Göstergede dengesizlik <b>0 g</b>.</p>'},
- {bolum:'Yerleştirme',ask:'<b>Kan 3, 4 ve 5</b>’i de yerleştirin. Her tüpü bir öncekinin karşısına koymaya çalışın.',canli:denge,
-  halka:function(s){var t=s.tray.filter(function(x){return x.kind==='blood'&&x.where==null})[0];return t&&s.sel!==t.id?['tubes.'+t.id,-46,60]:null},
+ {bolum:'Hazırlık',b:'Doğru rotor mu?',html:KOVA+'<p>Kan tüpleri kovadaki adaptörlere dik oturur; kovalı rotor kan için doğru rotordur.</p>'},
+ {bolum:'Yerleştirme',ask:'Raftaki <b>5 kan tüpünü</b> rotora yerleştirin: tüpe tıklayın, sonra bir yuvaya. Her tüpün <b>karşısına</b> (8 yuva ötesi) bir tüp gelsin.',canli:denge,izin:['tube','slot','rack'],
+  halka:tupHalka(['blood']),
   ok:function(s){return s.tray.filter(function(t){return t.kind==='blood'}).every(function(t){return t.where!=null})},
   b:function(){return S().f.placed?'Dengeli yerleştirdiniz':'Bir tüp karşısız kaldı'},
-  html:function(){return S().f.placed?'<p>Beş tüpü dengeli dizdiniz. Tek sayıda tüp de simetrik dizilebilir: örneğin üç tüp 120° arayla (1, 5, 9) dengelidir.</p><p>Yine de en güvenli ve en kolay yol, tek kalan tüpün karşısına <b>denge tüpü</b> koymaktır.</p>':'<p>Beş tek sayıdır: iki çift karşılıklı, ama biri <b>karşısız</b>. Göstergede dengesizlik sınırın üstünde; cihaz bu hâliyle çalıştırılırsa titreşip durur.</p><p>Çözüm: karşısına aynı ağırlıkta <b>su dolu denge tüpü</b> koymak.</p>'}},
- {bolum:'Yerleştirme',ask:'Denge tüpü hazırlayın: kan tüpü 4,0 mL kan içeriyor (kan sudan biraz ağırdır). Aşağıdan su hacmini seçin, sonra hazırlanan tüpü <b>karşısız tüpün karşısına</b> koyun.',canli:denge,
+  html:function(){return S().f.placed?'<p>Beş tüpü dengeli dizdiniz. Yine de en güvenli ve en kolay yol, tek kalan tüpün karşısına <b>denge tüpü</b> koymaktır.</p>':'<p>Beş tek sayıdır: iki çift karşılıklı, ama biri <b>karşısız</b>. Göstergede dengesizlik sınırın üstünde; cihaz bu hâliyle çalıştırılırsa titreşip durur.</p><p>Çözüm: karşısına aynı ağırlıkta <b>su dolu denge tüpü</b> koymak.</p>'}},
+ {bolum:'Yerleştirme',ask:'Denge tüpü hazırlayın: kan tüpü 4,0 mL kan içeriyor (kan sudan biraz ağırdır). Aşağıdan su hacmini seçin, sonra hazırlanan tüpü <b>karşısız tüpün karşısına</b> koyun.',canli:denge,izin:['tube','slot'],
   dugme:[['3,0 mL',function(){window.makeBalance(3)}],['3,5 mL',function(){window.makeBalance(3.5)}],['4,0 mL',function(){window.makeBalance(4)}],['4,5 mL',function(){window.makeBalance(4.5)}]],
-  halka:function(s){var d=s.tray.filter(function(t){return t.kind==='water'})[0];if(!d||d.where!=null)return null;var N=12;for(var k=0;k<N;k++){var t=s.slots[k];if(t&&!s.slots[(k+6)%N])return ['slotHot.'+s.rotor+'.'+((k+6)%N)+'.hs',0,48]}return null},
+  halka:function(s){var d=s.tray.filter(function(t){return t.kind==='water'})[0];if(!d||d.where!=null)return null;var N=s.slots.length;for(var k=0;k<N;k++){if(s.slots[k]&&!s.slots[(k+N/2)%N])return ['slotHot.'+s.rotor+'.'+((k+N/2)%N)+'.hs',0,46]}return null},
   ok:function(s){return s.f.placed},
-  hata:function(){var s=S(),d=s.tray.filter(function(t){return t.kind==='water'})[0];if(!d||d.where==null)return '';var v=window.imb();return 'Hâlâ dengesiz ('+g2(v.m)+' g). Denge tüpü doğru yuvada mı, hacmi kan tüpüne yakın mı? Tüpe tıklayarak geri alabilir, başka hacim seçebilirsiniz.'},
-  b:'Rotor dengeli',html:'<p>Dengesizlik sınırın altında. Denge tüpü, karşısındaki numuneyle <b>aynı ağırlıkta</b> olmalıdır; aynı hacim yetmez, çünkü kan sudan yoğundur (≈ 1,06 g/mL).</p><p>Gerçekte denge tüpü terazide tartılarak hazırlanır; gramın onda biri kadar fark kabul edilir.</p>'},
+  hata:function(){var s=S(),d=s.tray.filter(function(t){return t.kind==='water'})[0];if(!d||d.where==null)return '';return 'Hâlâ dengesiz ('+g2(window.imb().m)+' g). Denge tüpü doğru yuvada mı, hacmi kan tüpüne yakın mı? Tüpe tıklayarak geri alabilir, başka hacim seçebilirsiniz.'},
+  b:'Rotor dengeli',html:'<p>Dengesizlik sınırın altında. Denge tüpü, karşısındaki numuneyle <b>aynı ağırlıkta</b> olmalıdır; aynı hacim yetmez, çünkü kan sudan yoğundur (≈ 1,06 g/mL).</p><p>Gerçekte denge tüpü terazide tartılarak hazırlanır.</p>'},
  kapat_(),
- {bolum:'Ayar',b:'Ekrana bakın',html:function(){var s=S();return '<p>Ekranda <b>P'+s.prog+' · '+rpm(s.rpm)+' rpm · '+mmss(s.sec)+'</b> yazıyor. Bu, mikrotüpler için kayıtlı program.</p><p>Takılı açılı rotor en fazla <b>5000 rpm</b> çıkar. Bu ayarla START’a basılırsa cihaz çalışmaz ya da gerçek hayatta rotor zarar görür. Önceki kullanıcıdan kalan programa güvenilmez; her seferinde okunur.</p>'}},
- {bolum:'Ayar',ask:'<b>PROG</b> tuşuna basarak <b>P1</b>’i yükleyin.',halka:['keys.prog',0,40],canli:ekran,ok:function(s){return s.prog===1},
-  b:'P1: 3000 rpm · 5:00',html:'<p>P1 rotorun sınırı içinde, ama kandan berrak plazma almak için <b>yetersiz</b>: 3000 rpm’de 5 dakikada hücreler tam çökmez, plazma bulanık kalır.</p><p>Plazma için bu laboratuvarda <b>4000 rpm, 10 dakika</b> kullanılır. Hızı ve süreyi elle ayarlayacaksınız.</p>'},
- {bolum:'Ayar',ask:'Ayar alanı <b>hız</b> (ekranda rpm’in altı çizili). <b>Ayar düğmesine</b> tıklayarak hızı <b>4000 rpm</b>’e çıkarın.',halka:['keys.knob',0,54],canli:ekran,ok:function(s){return s.rpm>=4000&&s.rpm<=5000},
-  hata:function(){var s=S();return s.sel2==='t'?'Ayar alanı süreye geçmiş. <b>SELECT</b> ile hıza dönün.':s.rpm>5000?'Rotorun sınırı 5000 rpm. <b>—</b> tuşuyla düşürün.':''},
-  b:'Hız: '+'4000 rpm',html:'<p>Her tıklama 100 rpm ekledi. Hız arttıkça kuvvet <b>hızın karesiyle</b> artar: 4000 rpm, 3000 rpm’e göre yaklaşık 1,8 kat daha güçlü çöktürür.</p>'},
- {bolum:'Ayar',ask:'<b>SELECT</b> ile süre alanına geçin, sonra ayar düğmesiyle süreyi <b>10:00</b>’a getirin.',halka:function(s){return s.sel2==='t'?['keys.knob',0,54]:['keys.select',0,40]},canli:ekran,ok:function(s){return s.sec>=600&&s.sec<=900&&s.rpm>=4000&&s.rpm<=5000},
-  hata:function(){var s=S();return s.sec>900?'Süre fazla uzun. <b>—</b> ile 10:00’a indirin.':''},
+ {bolum:'Ayar',b:'Ekrana bakın',html:function(){var s=S();return '<p>Ekranda <b>P'+s.prog+' · '+rpm(s.rpm)+' rpm · '+mmss(s.sec)+'</b> yazıyor. Bu, mikrotüpler için kayıtlı program.</p><p>Takılı kovalı rotor en fazla <b>4500 rpm</b> çıkar. Bu ayarla START’a basılırsa cihaz çalışmaz ya da gerçek hayatta rotor zarar görür. Önceki kullanıcıdan kalan programa güvenilmez; her seferinde okunur.</p>'}},
+ {bolum:'Ayar',ask:'<b>PROG</b> tuşuna basarak <b>P1</b>’i yükleyin.',halka:['keys.prog',0,40],izin:['key:prog'],canli:ekran,ok:function(s){return s.prog===1},
+  b:'P1: 3000 rpm · 5:00',html:'<p>P1 rotorun sınırı içinde, ama kandan berrak plazma almak için <b>yetersiz</b>: 3000 rpm’de 5 dakikada hücreler tam çökmez, plazma bulanık kalır.</p><p>Plazma için bu laboratuvarda <b>4000 rpm, 10 dakika</b> kullanılır. Hızı ve süreyi ayar düğmesiyle değiştireceksiniz.</p>'},
+ {bolum:'Ayar',ask:'Ayar alanı <b>hız</b> (ekranda rpm’in altı çizili). <b>Ayar düğmesine</b> tıklayın; açılan kutuda <b>↻ sağa</b> çevirerek hızı <b>4000 rpm</b>’e çıkarın. Fazla çıkarsa <b>↺ sola</b> çevirin.',halka:dugmeHalka(1),izin:['key:knob','key:select'],canli:ekran,ok:function(s){return s.rpm>=4000&&s.rpm<=4500&&s.sel2!=='t'},
+  hata:function(){var s=S();return s.sel2==='t'?'Ayar alanı süreye geçmiş. <b>SELECT</b> ile hıza dönün.':s.rpm>4500?'Kovalı rotorun sınırı 4500 rpm. Düğmeyi <b>sola</b> çevirerek düşürün.':''},
+  b:'Hız: 4000 rpm',html:'<p>Düğme sağa çevrildikçe hız 100 rpm artar, sola çevrildikçe azalır. Kuvvet <b>hızın karesiyle</b> artar: 4000 rpm, 3000 rpm’e göre yaklaşık 1,8 kat daha güçlü çöktürür.</p>'},
+ {bolum:'Ayar',ask:'<b>SELECT</b> ile süre alanına geçin, sonra ayar düğmesini <b>sağa</b> çevirerek süreyi <b>10:00</b>’a getirin.',halka:function(s){return s.sel2==='t'?dugmeHalka(1)():['keys.select',0,40]},izin:['key:knob','key:select'],canli:ekran,ok:function(s){return s.sec>=600&&s.sec<=900&&s.rpm>=4000&&s.rpm<=4500},
+  hata:function(){var s=S();return s.sec>900?'Süre fazla uzun. Düğmeyi <b>sola</b> çevirerek 10:00’a indirin.':''},
   b:'Ayar tamam: 4000 rpm · 10:00',html:'<p>Başlatmadan önce son kez ekrana bakılır: hız rotorun sınırı içinde mi, süre doğru mu?</p>'},
  start_(),bekle_(),
  sonuc_('<p>Tüplerde altta koyu kırmızı <b>hücreler</b>, üstte berrak sarı <b>plazma</b>. Plazma, hücre tabakasına dokunulmadan pipetle alınır.</p><p>Aklınızda kalsın:</p><ul><li>Tüpler <b>karşılıklı</b>; tek kalan için <b>denge tüpü</b>.</li><li>Ekranı oku: hız rotorun <b>sınırı içinde</b> mi?</li><li>Kan için <b>4000 rpm, 10 dakika</b>.</li><li>Kapak ancak rotor <b>durunca</b> açılır.</li></ul>','<p>Plazma bulanık; hücreler tam çökmemiş. Kan için daha yüksek hız ya da daha uzun süre gerekir. Bölümü baştan deneyin.</p>'),
  {bolum:'Kontrol',test:1}],
  soru:[
  ['5 kan tüpü santrifüjlenecek. Ne yapılır?',['Beşi yan yana dizilir','Tek kalanın karşısına aynı ağırlıkta su tüpü konur','Bir tüp dışarıda bırakılır, analiz edilmez'],1,'Denge tüpü numuneyle aynı ağırlıkta olmalıdır.'],
- ['Ekranda 13000 rpm yazıyor, açılı rotor takılı (en fazla 5000 rpm). Ne yapılır?',['Hemen başlatılır','Hız rotorun sınırı içine düşürülür','Süre kısaltılır'],1,'Rotorun en yüksek hızı aşılmaz.'],
+ ['Ekranda 13000 rpm yazıyor, kovalı rotor takılı (en fazla 4500 rpm). Ne yapılır?',['Hemen başlatılır','Hız rotorun sınırı içine düşürülür','Süre kısaltılır'],1,'Rotorun en yüksek hızı aşılmaz.'],
  ['Denge tüpüne neden kanla aynı hacimde değil, aynı ağırlıkta su konur?',['Kan sudan yoğundur; eşit hacim eşit ağırlık değildir','Su daha ucuzdur','Fark etmez'],0,'Kan ≈ 1,06 g/mL; denge ağırlığa göre kurulur.']],
  bitti:function(){S().done.kan=1}},
 
-senlle:{ad:'Ekstraksiyon tüplerinde faz ayırma',ozet:'Gaz alma, farklı yoğunluklu çözücüler, karşılıklı dizme.',baslik:'SANTRİFÜJ · FAZ AYIRMA',mod:'use',gorev:'lle',
+senlle:{ad:'Ekstraksiyon tüplerinde faz ayırma',ozet:'Kovalı rotor, gaz alma, farklı yoğunluklu çözücüler, karşılıklı dizme.',baslik:'SANTRİFÜJ · FAZ AYIRMA',mod:'use',gorev:'lle',kur:KUR('buc'),
  adim:[
  {bolum:'Giriş',b:'Ne yapacaksınız?',
   html:'<p>Rafta 4 ekstraksiyon tüpü var. Vorteksten sonra içlerindeki iki sıvı (sulu faz ve organik çözücü) bulanık bir emülsiyon hâlinde. Santrifüj iki sıvıyı yeniden ayıracak.</p><ul><li><b>E1, E2</b>: etil asetat (≈ 0,90 g/mL, sudan hafif: üstte kalır)</li><li><b>D1, D2</b>: diklorometan, DCM (≈ 1,33 g/mL, sudan ağır: alta iner)</li></ul><p>İki önemli nokta: organik çözücü tüpte <b>basınç</b> yapar ve iki çözücünün tüpleri <b>aynı ağırlıkta değildir</b>.</p>'},
  ac_(),
- {bolum:'Hazırlık',ask:'Her tüpün kapağını çeker ocakta yavaşça açıp <b>gazını alın</b>, sonra sıkıca kapatın.',canli:function(s){var n=s.tray.filter(function(t){return (t.kind==='ea'||t.kind==='dcm')&&t.vent}).length;return 'Gazı alınan tüp: '+n+' / 4'},
+ {bolum:'Hazırlık',b:'Kovalı rotor',html:KOVA},
+ {bolum:'Hazırlık',ask:'Her tüpün kapağını çeker ocakta yavaşça açıp <b>gazını alın</b>, sonra sıkıca kapatın.',izin:[],canli:function(s){var n=s.tray.filter(function(t){return (t.kind==='ea'||t.kind==='dcm')&&t.vent}).length;return 'Gazı alınan tüp: '+n+' / 4'},
   dugme:[['E1 gazını al',function(){window.vent('E1')}],['E2',function(){window.vent('E2')}],['D1',function(){window.vent('D1')}],['D2',function(){window.vent('D2')}]],
   ok:function(s){return s.tray.filter(function(t){return t.kind==='ea'||t.kind==='dcm'}).every(function(t){return t.vent})},
   b:'Basınç alındı',html:'<p>Uçucu çözücü vorteks sırasında ısınıp buharlaşır ve tüpte basınç yapar. Gazı alınmadan santrifüje konan tüp <b>sızdırabilir</b> ya da kapağı fırlayabilir; çözücü buharı haznede yayılır.</p><p>Gaz alma her zaman <b>çeker ocakta</b> yapılır.</p>'},
- {bolum:'Yerleştirme',ask:'Tüpleri yerleştirin: her tüpün karşısına <b>aynı çözücüyü</b> taşıyan tüpü koyun (E1 ↔ E2, D1 ↔ D2).',canli:denge,
-  halka:function(s){var t=s.tray.filter(function(x){return x.where==null})[0];return t&&s.sel!==t.id?['tubes.'+t.id,-46,60]:null},
+ {bolum:'Yerleştirme',ask:'Dört tüpü yerleştirin: her tüpün karşısına (8 yuva ötesi) <b>aynı çözücüyü</b> taşıyan tüpü koyun (E1 ↔ E2, D1 ↔ D2).',canli:denge,izin:['tube','slot','rack'],
+  halka:tupHalka(['ea','dcm']),
   ok:function(s){return s.f.placed},
   hata:function(){var s=S();if(!s.tray.every(function(t){return t.where!=null}))return '';return 'Dört tüp de rotorda ama rotor dengesiz ('+g2(window.imb().m)+' g). Etil asetatlı tüp DCM’li tüpün karşısına konmuş olabilir; tüpe tıklayıp yerini değiştirin.'},
   b:'Dengeli',html:'<p>Etil asetatlı tüpler DCM’li tüplerden <b>daha hafiftir</b> (aynı hacimde DCM yaklaşık %50 daha ağır). Bu yüzden etil asetat tüpü DCM tüpünün karşısına konursa rotor dengesiz olur; karşılıklı tüpler aynı içerikte olmalıdır.</p>'},
  kapat_(),
- {bolum:'Ayar',ask:'<b>PROG</b> tuşuyla <b>P1</b>’i yükleyin (3000 rpm · 5:00).',halka:['keys.prog',0,40],canli:ekran,ok:function(s){return s.prog===1},
-  b:'P1 faz ayırma için uygun',html:'<p>İki sıvıyı ayırmak, kanı ayırmaktan kolaydır: <b>3000 rpm, 5 dakika</b> emülsiyonu kırmaya yeter ve açılı rotorun sınırı içindedir.</p><p>Gerekenden çok yüksek hız ekstraksiyonda yarar sağlamaz; tüpü zorlar.</p>'},
+ {bolum:'Ayar',ask:'<b>PROG</b> tuşuyla <b>P1</b>’i yükleyin (3000 rpm · 5:00).',halka:['keys.prog',0,40],izin:['key:prog'],canli:ekran,ok:function(s){return s.prog===1},
+  b:'P1 faz ayırma için uygun',html:'<p>İki sıvıyı ayırmak, kanı ayırmaktan kolaydır: <b>3000 rpm, 5 dakika</b> emülsiyonu kırmaya yeter ve kovalı rotorun sınırı içindedir.</p><p>Gerekenden çok yüksek hız ekstraksiyonda yarar sağlamaz; tüpü zorlar.</p>'},
  start_(),bekle_(),
  sonuc_('<p>Fazlar net ayrıldı: etil asetat tüplerinde organik faz <b>üstte</b>, DCM tüplerinde <b>altta</b>. Ara yüzde emülsiyon yok.</p><p>Organik faz pipetle alınırken ara yüze dokunulmaz. DCM altta olduğu için pipet sulu fazın içinden geçirilir; bu yüzden DCM’li ekstraksiyonda dikkatli olunur.</p>','<p>Ara yüzde emülsiyon kaldı. Hızı ya da süreyi artırıp yeniden santrifüjleyin.</p>'),
  {bolum:'Kontrol',test:1}],
@@ -419,75 +423,44 @@ senlle:{ad:'Ekstraksiyon tüplerinde faz ayırma',ozet:'Gaz alma, farklı yoğun
  ['DCM ile ekstraksiyonda organik faz nerededir?',['Üstte','Altta','Ortada'],1,'DCM sudan ağırdır (1,33 g/mL).']],
  bitti:function(){S().done.lle=1}},
 
-senepp:{ad:'Eppendorf: protein çöktürme',ozet:'Rotor değişimi, 7 mikrotüp + denge tüpü, 13000 rpm.',baslik:'SANTRİFÜJ · PROTEİN ÇÖKTÜRME',mod:'use',gorev:'epp',
- kur:function(){var s=S();if(s.rotor!=='ang'){s.rotor='ang';s.slots=Array(12).fill(null);s.tray.forEach(function(t){t.where=null})}},
+senepp:{ad:'Eppendorf: protein çöktürme',ozet:'Rotor değişimi, 7 mikrotüp + denge tüpü, 13000 rpm.',baslik:'SANTRİFÜJ · PROTEİN ÇÖKTÜRME',mod:'use',gorev:'epp',kur:KUR('buc'),
  adim:[
  {bolum:'Giriş',b:'Ne yapacaksınız?',
-  html:'<p>Rafta <b>7 Eppendorf mikrotüpü</b> var: her birinde 0,3 mL kan ve 0,7 mL asetonitril. Asetonitril kandaki proteinleri çöktürdü; tüpler bulanık.</p><p>Çöken proteinleri dibe sıkı bir <b>pelet</b> hâlinde indirip üstteki berrak sıvıyı (süpernatan) almak için <b>yüksek hız</b> gerekir: 10000 rpm’in üstü.</p><p>Takılı rotor ise 5 mL tüpler için.</p>'},
+  html:'<p>Rafta <b>7 Eppendorf mikrotüpü</b> var: her birinde 0,3 mL kan ve 0,7 mL asetonitril. Asetonitril kandaki proteinleri çöktürdü; tüpler bulanık.</p><p>Çöken proteinleri dibe sıkı bir <b>pelet</b> hâlinde indirip üstteki berrak sıvıyı (süpernatan) almak için <b>yüksek hız</b> gerekir: 10000 rpm’in üstü.</p><p>Takılı kovalı rotor ise en fazla 4500 rpm çıkar ve mikrotüp yuvası yoktur.</p>'},
  ac_(),
- {bolum:'Rotor',ask:'Mikrotüpler bu rotora uymaz. Aşağıdaki düğmeyle <b>mikrotüp rotorunu</b> takın.',dugme:['Rotoru değiştir',function(){window.changeRotor()}],ok:function(s){return s.rotor==='mic'},
-  hata:function(){return S().slots.some(Boolean)?'Rotorda tüp var; önce tüpleri çıkarın.':''},
+ {bolum:'Rotor',ask:'Mikrotüpler kovalı rotora uymaz. Aşağıdaki düğmeyle <b>mikrotüp rotorunu</b> takın.',izin:[],dugme:['Rotoru değiştir',function(){window.changeRotor()}],ok:function(s){return s.rotor==='mic'},
+  hata:function(){var s=S();return s.slots.some(Boolean)?'Rotorda tüp var; önce tüpleri çıkarın.':s.rotor==='ang'?'Bu açılı rotor. Bir kez daha basın.':''},
   b:'Mikrotüp rotoru takıldı',html:'<p><b>24 × 1,5/2 mL</b>, en fazla <b>14000 rpm</b>. Rotor değiştirirken:</p><ul><li>Cihaz durmuş ve kapak açık olmalı; rotor boş olmalı.</li><li>Rotor mile tam oturtulur, <b>somun sıkılır</b>.</li><li>Mikrotüp kapakları kapatılır; açık kapak dönerken kopabilir.</li></ul><p>Yanlış rotorda mikrotüp boşta kalır ve kırılır.</p>'},
- {bolum:'Yerleştirme',ask:'7 mikrotüpün hepsini rotora yerleştirin; mümkün olduğunca karşılıklı dizin.',canli:denge,
-  halka:function(s){var t=s.tray.filter(function(x){return x.kind==='epp'&&x.where==null})[0];return t&&s.sel!==t.id?['tubes.'+t.id,-30,44]:null},
+ {bolum:'Yerleştirme',ask:'Raftaki <b>7 mikrotüpü</b> rotora yerleştirin; mümkün olduğunca karşılıklı dizin (24 yuvalı rotorda karşı yuva 12 yuva ötesi).',canli:denge,izin:['tube','slot','rack'],
+  halka:tupHalka(['epp'],-30),
   ok:function(s){return s.tray.filter(function(t){return t.kind==='epp'}).every(function(t){return t.where!=null})},
-  b:'Yedi tüp: biri karşısız',html:'<p>24 yuvalı rotorda bir yuvanın karşısı <b>12 yuva ötesidir</b>. Yedi tek sayıdır; bir tüp karşısız kalır. Mikrotüp rotorunda dengesizlik sınırı daha dardır (0,15 g): tüpler küçük, ama hız çok yüksek.</p>'},
- {bolum:'Yerleştirme',ask:'Denge mikrotüpü hazırlayın (mikrotüpte 1,0 mL sıvı var) ve <b>karşısız tüpün karşısına</b> koyun.',canli:denge,
+  b:'Yedi tüp: biri karşısız',html:'<p>Yedi tek sayıdır; bir tüp karşısız kalır. Mikrotüp rotorunda dengesizlik sınırı daha dardır (0,15 g): tüpler küçük, ama hız çok yüksek.</p>'},
+ {bolum:'Yerleştirme',ask:'Denge mikrotüpü hazırlayın (mikrotüpte 1,0 mL sıvı var) ve <b>karşısız tüpün karşısına</b> koyun.',canli:denge,izin:['tube','slot'],
   dugme:[['0,8 mL su',function(){window.makeBalance(.8)}],['1,0 mL',function(){window.makeBalance(1)}],['1,2 mL',function(){window.makeBalance(1.2)}]],
   halka:function(s){var d=s.tray.filter(function(t){return t.kind==='wm'})[0];if(!d||d.where!=null)return null;for(var k=0;k<24;k++){var t=s.slots[k];if(t&&!s.slots[(k+12)%24])return ['slotHot.mic.'+((k+12)%24)+'.hs',0,36]}return null},
   ok:function(s){return s.f.placed},
   hata:function(){var s=S(),d=s.tray.filter(function(t){return t.kind==='wm'})[0];if(!d||d.where==null)return '';return 'Hâlâ dengesiz ('+g2(window.imb().m)+' g). Denge tüpünü karşısız tüpün tam karşısına koyun.'},
   b:'Rotor dengeli',html:'<p>Sekiz tüp, dört karşılıklı çift. Yüksek hızda küçük bir ağırlık farkı bile büyük kuvvet yaratır; bu yüzden mikrotüp rotorunun sınırı daha dardır.</p>'},
  kapat_(),
- {bolum:'Ayar',ask:'Ekrandaki programı okuyun. Gerekirse <b>PROG</b> ile <b>P2</b>’yi yükleyin (13000 rpm · 10:00).',halka:['keys.prog',0,40],canli:ekran,ok:function(s){return s.prog===2||(s.rpm>=10000&&s.rpm<=14000&&s.sec>=300)},
-  b:'P2: 13000 rpm · 10:00',html:'<p>13000 rpm mikrotüp rotorunun sınırı (14000) içinde ve protein peletini sıkılaştırmaya yeter. Kandaki açılı rotorla bu hız <b>asla</b> kullanılmaz.</p>'},
+ {bolum:'Ayar',ask:'Ekrandaki programı okuyun. Gerekirse <b>PROG</b> ile <b>P2</b>’yi yükleyin (13000 rpm · 10:00).',halka:['keys.prog',0,40],izin:['key:prog'],canli:ekran,ok:function(s){return s.prog===2||(s.rpm>=10000&&s.rpm<=14000&&s.sec>=300)},
+  b:'P2: 13000 rpm · 10:00',html:'<p>13000 rpm mikrotüp rotorunun sınırı (14000) içinde ve protein peletini sıkılaştırmaya yeter. Kovalı ya da açılı rotorla bu hız <b>asla</b> kullanılmaz.</p>'},
  start_(),bekle_(),
  sonuc_('<p>Dipte sıkı bir <b>protein peleti</b>, üstte berrak <b>süpernatan</b>. Süpernatan, pelete dokunulmadan pipetle alınıp analize (ör. LC-MS/MS) verilir.</p><p>Aklınızda kalsın: mikrotüp → <b>mikrotüp rotoru</b>; karşılıklı diz, tek kalana <b>denge tüpü</b>; yüksek hız ama <b>rotorun sınırı içinde</b>.</p>','<p>Pelet gevşek ya da süpernatan bulanık. Daha yüksek hız (≥ 10000 rpm) gerekir.</p>'),
  {bolum:'Kontrol',test:1}],
  soru:[
- ['Mikrotüpler açılı (12 × 5 mL) rotora konursa ne olur?',['Bir şey olmaz','Boşta kalır ve dönerken kırılabilir','Daha iyi çöker'],1,'Mikrotüp için mikrotüp rotoru takılır.'],
+ ['Mikrotüpler kovalı rotora konabilir mi?',['Evet','Hayır; mikrotüp rotoru takılır','Yalnız düşük hızda'],1,'Mikrotüp için mikrotüp rotoru takılır; diğer rotorlarda boşta kalır ve kırılabilir.'],
  ['Rotor değiştirmeden önce ne kontrol edilir?',['Cihaz durmuş, kapak açık ve rotor boş mu','Ekran parlaklığı','Tüplerin rengi'],0,'Takılan rotorun somunu da sıkılır.'],
  ['Protein çöktürmede neden yüksek hız gerekir?',['Tüp ısınsın diye','Küçük protein parçacıkları sıkı bir pelet olarak dibe insin diye','Süre kısalsın diye'],1,'Bu laboratuvarda mikrotüp için 13000 rpm, 10 dakika.']],
- bitti:function(){S().done.epp=1}},
-senfal:{ad:'Falkon tüpleri: kovalı rotor',ozet:'Rotoru kovalı rotora çevirme, karşılıklı kovaları eşit yükleme, 3000 rpm 5 dakika.',baslik:'SANTRİFÜJ · KOVALI ROTOR',mod:'use',gorev:'fal',
- kur:function(){var s=S();if(s.rotor!=='ang'){s.rotor='ang';s.slots=Array(12).fill(null);s.tray.forEach(function(t){t.where=null})}},
- adim:[
- {bolum:'Giriş',b:'Ne yapacaksınız?',
-  html:'<p>Rafta <b>6 Falkon tüpü</b> var (15 mL’lik tüp, içinde 10 mL idrar). İdrardaki kristal ve hücreleri dibe çöktürüp üstteki berrak idrarı alacaksınız.</p><p>Falkon tüpleri açılı rotora da mikrotüp rotoruna da sığmaz. Büyük tüpler <b>kovalı (swing-out) rotora</b> konur.</p>'},
- ac_(),
- {bolum:'Rotor',ask:'Aşağıdaki düğmeyle rotoru değiştirin; <b>kovalı rotor</b> takılana kadar basın (açılı → mikrotüp → kovalı).',dugme:['Rotoru değiştir',function(){window.changeRotor()}],ok:function(s){return s.rotor==='buc'},
-  hata:function(){var s=S();return s.slots.some(Boolean)?'Rotorda tüp var; önce tüpleri çıkarın.':s.rotor==='mic'?'Bu mikrotüp rotoru. Bir kez daha basın.':''},
-  b:'Kovalı rotor takıldı',html:'<p>Dört kolun ucunda dört <b>kova</b> asılı; her kovada turuncu adaptörde 4 Falkon yuvası var (toplam 16). En fazla <b>4500 rpm</b>.</p><p>Rotor dönerken kovalar menteşelerinden <b>dışa doğru yatay açılır</b>; tüpler dönme sırasında yatay durur. Bu yüzden çökelti tüpün tam <b>dibinde</b> toplanır (açılı rotorda dip köşede toplanır).</p><p>Kovalar takılı olduğu yerde serbestçe sallanabilmeli; eksik ya da yanlış kova takılmaz.</p>'},
- {bolum:'Yerleştirme',b:'Kovaları tanıyın',html:'<p>Yuvalar numaralıdır: <b>1–4</b> birinci kova, <b>5–8</b> ikinci, <b>9–12</b> üçüncü, <b>13–16</b> dördüncü kova.</p><p>Karşılıklı kovalar: <b>1. ↔ 3.</b> ve <b>2. ↔ 4.</b> Kovalı rotorda denge iki kuralla kurulur:</p><ul><li>Karşılıklı kovalar <b>aynı ağırlıkta</b> yüklenir.</li><li>Kovanın içinde tüpler <b>simetrik</b> dizilir.</li></ul>'},
- {bolum:'Yerleştirme',ask:'Raftan <b>Falkon 1</b>’i alıp <b>1. yuvaya</b> (birinci kova) koyun.',halka:function(s){return tup('F1').where==null&&s.sel!=='F1'?['tubes.F1',-50,60]:['slotHot.buc.0.hs',0,46]},ok:function(){return tup('F1').where===0},canli:denge,
-  hata:function(){var w=tup('F1').where;return w!=null&&w!==0?'Falkon 1 yuva '+(w+1)+'’de. Tüpe tıklayarak geri alın, 1. yuvaya koyun.':''}},
- {bolum:'Yerleştirme',ask:'<b>Falkon 2</b>’yi karşı kovada aynı yere, <b>9. yuvaya</b> koyun.',halka:function(s){return tup('F2').where==null&&s.sel!=='F2'?['tubes.F2',-50,60]:['slotHot.buc.8.hs',0,46]},ok:function(){return tup('F2').where===8},canli:denge,
-  hata:function(){var w=tup('F2').where;return w!=null&&w!==8?'Falkon 2 yuva '+(w+1)+'’de: karşı kovada aynı yer 9. yuva.':''},
-  b:'Karşılıklı kovalar dengede',html:'<p>1. kova ile 3. kova aynı yükü taşıyor: dengesizlik <b>0 g</b>.</p>'},
- {bolum:'Yerleştirme',ask:'Kalan 4 tüpü yerleştirin: her tüpü <b>karşı kovada aynı yere</b> gelecek şekilde dizin (ör. 3 ↔ 11, 5 ↔ 13, 7 ↔ 15).',canli:denge,
-  halka:function(s){var t=s.tray.filter(function(x){return x.kind==='fal'&&x.where==null})[0];return t&&s.sel!==t.id?['tubes.'+t.id,-50,60]:null},
-  ok:function(s){return s.f.placed},
-  hata:function(){var s=S();if(!s.tray.filter(function(t){return t.kind==='fal'}).every(function(t){return t.where!=null}))return '';return 'Altı tüp de rotorda ama rotor dengesiz ('+g2(window.imb().m)+' g). Karşılıklı kovaların yükü eşit değil; bir tüpü karşı kovaya taşıyın.'},
-  b:'Rotor dengeli',html:'<p>Altı tüp: karşılıklı iki kovada ikişer, diğer iki kovada birer tüp. Karşılıklı kovalar eşit yüklendiği için rotor dengede.</p><p>Tek sayıda tüp olsaydı, eksik kalan kovaya aynı ağırlıkta <b>su dolu Falkon</b> (denge tüpü) konurdu. Boş kova bile takılı kalır; kova hiçbir zaman çıkarılıp çalıştırılmaz.</p>'},
- kapat_(),
- {bolum:'Ayar',ask:'<b>PROG</b> tuşuyla <b>P1</b>’i yükleyin (3000 rpm · 5:00).',halka:['keys.prog',0,40],canli:ekran,ok:function(s){return s.prog===1},
-  b:'P1 idrar için uygun',html:'<p>İdrar çökeltisi için <b>3000 rpm, 5 dakika</b> yeterlidir ve kovalı rotorun sınırı (4500 rpm) içindedir.</p><p>Ekrandaki önceki program (13000 rpm) bu rotor için kesinlikle kullanılmaz: kovalı rotorun hız sınırı en düşük olanıdır.</p>'},
- start_(),bekle_(),
- sonuc_('<p>Çökelti tüplerin <b>tam dibinde</b> toplandı; üstteki berrak idrar pipetle alınıp analize (ör. SPE) verilir.</p><p>Aklınızda kalsın: büyük tüp → <b>kovalı rotor</b>; karşılıklı kovalar <b>eşit yük</b>; hız rotorun <b>sınırı içinde</b> (≤ 4500 rpm).</p>','<p>Çökme eksik; daha uzun süre gerekir.</p>'),
- {bolum:'Kontrol',test:1}],
- soru:[
- ['15 mL Falkon tüpleri hangi rotora konur?',['Açılı rotora','Mikrotüp rotoruna','Kovalı rotora'],2,'Büyük tüpler kovalı rotorun adaptörlerine konur.'],
- ['Kovalı rotorda denge nasıl kurulur?',['Bütün tüpler tek kovaya konur','Karşılıklı kovalar eşit ağırlıkta yüklenir','Kovalardan biri çıkarılır'],1,'Kova içinde de tüpler simetrik dizilir.'],
- ['Kovalı rotorda dönerken tüpler nasıl durur?',['Dik','Yatay (kovalar dışa açılır)','Ters'],1,'Çökelti bu yüzden tüpün tam dibinde toplanır.']],
- bitti:function(){S().done.fal=1}}
+ bitti:function(){S().done.epp=1}}
 };
 return {sayfa:'santrifuj_pilot.html',hazir:'__cen',ad:'SANTRİFÜJ',model:'MY-Centri 320',adTam:'Santrifüjün',
- acl:'Cihazı beş kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 4–6 dakika sürer.',
- GM:{parts:'sentani',kan:'senkan',lle:'senlle',epp:'senepp',fal:'senfal'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['sentani','senkan','senlle','senepp','senfal'],
- senkron:function(s,o){['sentani:parts','senkan:kan','senlle:lle','senepp:epp','senfal:fal'].forEach(function(x){x=x.split(':');if(o[x[0]]&&o[x[0]].bitti)s.done[x[1]]=1})},
- serbest:{kur:function(){var s=S();if(s.phase!=='idle')return;s.slots.fill(null);window.reset('kan');S().mode='use';window.render()},
-  html:'<div class="kart"><h4>Tüp seti</h4><div>Hangi numunelerle çalışmak istiyorsunuz?</div><div class="sec"><button data-set="kan">Kan · 5 tüp (açılı rotor)</button><button data-set="lle">Ekstraksiyon · 4 tüp (açılı rotor)</button><button data-set="epp">Eppendorf · 7 mikrotüp (mikrotüp rotoru)</button><button data-set="fal">Falkon 15 mL · 6 tüp (kovalı rotor)</button></div><div class="acl">Gereken rotor takılı değilse kapağı açıp ⚙ Kontroller ▸ <b>Rotoru değiştir</b>.</div></div>',
-  bagla:function(P){P.querySelectorAll('[data-set]').forEach(function(b){b.onclick=function(){var s=S();if(s.phase!=='idle')return;s.slots.fill(null);window.reset(b.dataset.set);S().mode='use';window.render()}})}}};
+ acl:'Cihazı dört kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 4–6 dakika sürer.',
+ GM:{parts:'sentani',kan:'senkan',lle:'senlle',epp:'senepp'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['sentani','senkan','senlle','senepp'],
+ senkron:function(s,o){['sentani:parts','senkan:kan','senlle:lle','senepp:epp'].forEach(function(x){x=x.split(':');if(o[x[0]]&&o[x[0]].bitti)s.done[x[1]]=1})},
+ serbest:{yerlesim:'kontrol',
+  kur:function(){var s=S();if(s.phase!=='idle')return;s.slots.fill(null);window.reset('bos');S().mode='use';window.render()},
+  numune:[['kan','Kan · 5 tüp'],['lle','Ekstraksiyon · 4 tüp'],['epp','Eppendorf · 7 mikrotüp'],['fal','Falkon 15 mL · 6 tüp']],
+  numuneSec:function(id){var s=S();if(s.phase!=='idle'){return 'Santrifüj çalışırken numune değiştirilmez.'}s.slots.fill(null);window.reset(id);S().mode='use';window.render();return ''}}};
 }
 
 /* ---------- sayfaya göre cihaz ---------- */
@@ -527,6 +500,13 @@ css.textContent=
 '#dersP .ust{padding-right:38px}'+
 '#dersMini{display:none;position:fixed;z-index:21;left:12px;bottom:12px;border:0;border-radius:999px;padding:10px 16px;background:#2F7DE1;color:#fff;font:700 14px "Source Sans 3",system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}body.cders.dk #dersMini{display:block}'+
 '#dersP .uyari{background:#3A1416;color:#FFE1E1;border-radius:12px;padding:10px 12px;border-left:5px solid #E5484D;font-size:14.5px}#dersP .uyari b.nm{display:block;font:700 11px "IBM Plex Mono",monospace;color:#FF8A8A;letter-spacing:.08em;margin-bottom:4px}#dersP .uyari ul{margin:0 0 0 18px;display:grid;gap:4px}'+
+'body.cders.serbest.sbk #dersK,body.cders.serbest.sbk #dersMini{display:none!important}body.cders.serbest.sbk.panel .stage{right:300px}body.cders.serbest.sbk.panel #cv3{width:calc(100vw - 300px)!important}body.cders.serbest.sbk:not(.panel) .stage{right:0}body.cders.serbest.sbk:not(.panel) #cv3{width:100vw!important}'+
+'body.sbk #side{width:300px;padding:8px;font-size:13px;gap:8px}body.sbk #side h2{font-size:17px}body.sbk #side .sub{font-size:11px}body.sbk #side .bt{padding:6px 8px;font-size:12.5px}body.sbk #side .sideX{display:none}body.sbk.panel .dsp{right:312px;top:auto;bottom:12px}body.sbk:not(.panel) .dsp{top:auto;bottom:12px}'+
+'#sbEk{display:grid;gap:7px;margin-top:4px;border-top:1px solid rgba(255,255,255,.12);padding-top:8px}#sbEk .sbNum{background:#1F9A97;color:#fff;font-weight:700}#sbEk .sbNumL{display:grid;gap:5px}#sbEk .sbNumL[hidden]{display:none}'+
+'#sbEk .sbUy{background:#3A1416;color:#FFE1E1;border-radius:10px;padding:8px 10px;border-left:4px solid #E5484D;font-size:12.5px}#sbEk .sbUy b.nm{display:block;font:700 10px "IBM Plex Mono",monospace;color:#FF8A8A;letter-spacing:.08em;margin-bottom:3px}#sbEk .sbUy ul{margin:0 0 0 16px;display:grid;gap:3px}'+
+'#sbEk .sbNot{background:#F1F6F7;color:#16242A;border-radius:10px;padding:8px 10px;border-left:4px solid #2BD9C0;font-size:12.5px;line-height:1.35}#sbEk .sbNot>b:first-child{display:block;font:600 10px "IBM Plex Mono",monospace;color:#1F9A97;letter-spacing:.08em;margin-bottom:2px}#sbEk [hidden]{display:none}'+
+'#sbEk .sbDers{border:0;background:none;color:#9BB0B6;font:600 12.5px "Source Sans 3",sans-serif;cursor:pointer;padding:4px}'+
+'@media (max-width:900px){body.cders.serbest.sbk.panel .stage{right:0;bottom:50dvh}body.cders.serbest.sbk.panel #cv3{width:100vw!important;height:50dvh!important}body.sbk #side{width:auto;max-height:50dvh}}'+
 '#dersMini.uy{background:#C62828;animation:dersHal 1.1s infinite}'+
 '#dersP .not{background:#F1F6F7;color:#16242A;border-radius:12px;padding:10px 12px;border-left:5px solid #2BD9C0;font-size:14.5px}#dersP .not b.nm{display:block;font:600 11px "IBM Plex Mono",monospace;color:#1F9A97;letter-spacing:.08em;margin-bottom:3px}'+
 
@@ -578,9 +558,11 @@ function serbestBasla(){SERB=true;window.__serbest=true;
  try{var q=new URLSearchParams(location.search);q.delete('ders');q.delete('gorev');q.set('serbest','1');history.replaceState(null,'',location.pathname+'?'+q.toString())}catch(e){}
  document.body.classList.add('serbest');var h=document.getElementById('dersHalka');if(h)h.style.display='none';
  if(C.serbest&&C.serbest.kur)C.serbest.kur();else{window.reset('free');S().mode='use';window.render()}
- NOT='';serbestCiz();kucult(innerWidth<=900);dispatchEvent(new Event('resize'));
+ NOT='';serbestCiz();
+ if(C.serbest.yerlesim==='kontrol'){document.body.classList.add('sbk','panel');var mp=document.getElementById('mPanel');if(mp)mp.classList.add('on');kontrolEk()}else kucult(innerWidth<=900);
+ dispatchEvent(new Event('resize'));
  if(!SUT)SUT=setInterval(function(){if(!SERB||!P)return;var s=S();if(!s)return;if(C.serbest.yenile)C.serbest.yenile(P,s);var L=C.serbest.kural?C.serbest.kural(s):[],h=L.map(function(x){return '<li>'+x+'</li>'}).join('');
-  var u=P.querySelector('#dUy');if(u&&h!==SUH){SUH=h;u.innerHTML=h?'<b class="nm">⚠ DİKKAT</b><ul>'+h+'</ul>':'';u.hidden=!h;if(h&&document.body.classList.contains('dk')){var mi=document.getElementById('dersMini');if(mi)mi.classList.add('uy')}}if(!h){var m2=document.getElementById('dersMini');if(m2)m2.classList.remove('uy')}},400)}
+  var u=document.getElementById('sbUy')||P.querySelector('#dUy');if(u&&h!==SUH){SUH=h;u.innerHTML=h?'<b class="nm">⚠ DİKKAT</b><ul>'+h+'</ul>':'';u.hidden=!h;if(h&&document.body.classList.contains('dk')){var mi=document.getElementById('dersMini');if(mi)mi.classList.add('uy')}}if(!h){var m2=document.getElementById('dersMini');if(m2)m2.classList.remove('uy')}},400)}
 var SUT=null,SUH='';
 function serbestCiz(){
  P.innerHTML='<div class="ust"><b>'+C.ad+' · SERBEST</b><span>'+C.model+'</span></div>'+
@@ -591,7 +573,15 @@ function serbestCiz(){
   '<div class="alt"><button class="ince" id="dListe">☰ Bölümler (rehberli ders)</button></div>';
  P.querySelector('#dListe').onclick=function(){ac('liste')};if(C.serbest&&C.serbest.bagla)C.serbest.bagla(P)}
 /* sayfanın kendi uzman notları (gizli mentor balonu) serbest kullanımda panele yansıtılır */
-function notIzle(){var y=document.getElementById('say');if(!y||!window.MutationObserver)return;new MutationObserver(function(){if(!SERB)return;NOT=y.innerHTML;var n=document.getElementById('dNot'),t=document.getElementById('dNotT');if(n&&t){t.innerHTML=NOT;n.hidden=!NOT}}).observe(y,{childList:true,characterData:true,subtree:true})}
+function notIzle(){var y=document.getElementById('say');if(!y||!window.MutationObserver)return;new MutationObserver(function(){if(!SERB)return;NOT=y.innerHTML;['dNot','sbNot'].forEach(function(id){var n=document.getElementById(id),t=n&&n.querySelector('.nt');if(n&&t){t.innerHTML=NOT;n.hidden=!NOT}})}).observe(y,{childList:true,characterData:true,subtree:true})}
+/* serbest kullanım (kontrol düzeni): bilgi paneli yok; sağda küçültülmüş Kontroller paneli, altında Numune seç, uyarılar ve uzman notu */
+function kontrolEk(){var side=document.getElementById('side');if(!side||document.getElementById('sbEk'))return;var c=side.querySelector('.card')||side;var d=document.createElement('div');d.id='sbEk';
+ d.innerHTML='<button class="bt sbNum" id="sbNumB">🧪 Numune seç ▾</button><div class="sbNumL" id="sbNumL" hidden>'+(C.serbest.numune||[]).map(function(n){return '<button class="bt" data-num="'+n[0]+'">'+n[1]+'</button>'}).join('')+'</div>'+
+  '<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div><button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
+ c.appendChild(d);var L2=d.querySelector('#sbNumL');
+ d.querySelector('#sbNumB').onclick=function(){L2.hidden=!L2.hidden};
+ d.querySelectorAll('[data-num]').forEach(function(b){b.onclick=function(){var m=C.serbest.numuneSec(b.dataset.num);if(!m)L2.hidden=true;else{NOT=m;var n=document.getElementById('sbNot');n.querySelector('.nt').innerHTML=m;n.hidden=false}}});
+ d.querySelector('#sbDers').onclick=function(){ac('liste')}}
 /* paneli küçült / aç */
 function kucult(on){var b=document.body;b.classList.toggle('dk',!!on);if(!on&&b.classList.contains('panel')){b.classList.remove('panel');var m=document.getElementById('mPanel');if(m)m.classList.remove('on')}
  var mi=document.getElementById('dersMini');if(mi)mi.textContent=SERB?'📘 Serbest kullanım paneli':'📘 Ders panelini aç';setTimeout(function(){dispatchEvent(new Event('resize'))},30)}
@@ -616,7 +606,8 @@ function ciz(){
  if(a.test){h+=test()}
  else{
   var bek=!!a.ask&&!gecti;
-  if(a.ask)h+='<div class="ask'+(gecti?' tamam':'')+'">'+(gecti?(a.bekle?'✓ Açıklamayı okuyun, sonra devam edin.':'✓ Doğru. Açıklamayı okuyun, sonra devam edin.'):a.ask)+(uyari&&!gecti?'<small>'+uyari+'</small>':'')+'</div>';
+  if(a.ask)h+='<div class="ask'+(gecti?' tamam':'')+'">'+(gecti?(a.bekle?'✓ Açıklamayı okuyun, sonra devam edin.':'✓ Doğru. Açıklamayı okuyun, sonra devam edin.'):a.ask)+(uyari?'<small>'+uyari+'</small>':'')+'</div>';
+  else if(uyari)h+='<div class="ask"><small style="margin-top:0">'+uyari+'</small></div>';
   if(bek&&a.canli)h+='<div class="canli" id="dCanli"></div>';
   if(bek&&a.tut)h+='<div class="alt"><button class="is" id="dTut">✋ Bastır (basılı tutun)</button></div>';
   if(bek&&a.dugme)h+='<div class="alt">'+dugmeler(a).map(function(d,k){return '<button class="is" data-dg="'+k+'">'+d[0]+'</button>'}).join('')+'</div>';
@@ -660,13 +651,19 @@ function parcaTik(){
   if(a.parca.indexOf(id)>=0){tamam()}else{uyari='Burası: <b>'+C.ADI[id]+'</b>. Yanıp sönen halkanın gösterdiği yere tıklayın.';ciz()}},30)}
 /* yanıp sönen halka: sahnedeki nesnenin ekrandaki yerine konur */
 function halka(){
- var h=document.getElementById('dersHalka'),a=L&&ADIM[i];
- if(h){var g=!SERB&&a&&a.halka&&a.ask&&!gecti&&window.scrOf;
-  if(g){try{var y=typeof a.halka==='function'?a.halka(S()):a.halka,p,w;
-   var hh;if(y[0].charAt(0)==='#'){var r=document.querySelector(y[0]).getBoundingClientRect();if(!r.width)throw 0;p=[r.left+r.width/2,r.top+r.height/2];w=r.width+16;hh=r.height+16}else{p=window.scrOf(y[0]);w=hh=y[2]}
-   h.style.display='block';h.style.borderRadius=y[0].charAt(0)==='#'?'12px':'50%';h.style.left=p[0]+'px';h.style.top=(p[1]+y[1])+'px';h.style.width=w+'px';h.style.height=hh+'px'}catch(e){h.style.display='none'}}
-  else h.style.display='none'}
+ var a=L&&ADIM[i],y=null;
+ if(!SERB&&a&&a.halka&&a.ask&&!gecti&&window.scrOf){try{y=typeof a.halka==='function'?a.halka(S()):a.halka}catch(e){y=null}}
+ var liste=!y?[]:Array.isArray(y[0])?y:[y];
+ while(HK.length<liste.length){var e=document.createElement('div');e.className='dersHalka2';e.style.cssText='position:fixed;z-index:12;pointer-events:none;border:4px solid #F2B632;box-shadow:0 0 0 3px rgba(242,182,50,.25),0 0 22px rgba(242,182,50,.9);transform:translate(-50%,-50%);animation:dersHal 1.1s infinite;display:none';document.body.appendChild(e);HK.push(e)}
+ HK.forEach(function(h,k){var q=liste[k];if(!q){h.style.display='none';return}
+  try{var p,w,hh;if(q[0].charAt(0)==='#'){var r=document.querySelector(q[0]).getBoundingClientRect();if(!r.width)throw 0;p=[r.left+r.width/2,r.top+r.height/2];w=r.width+16;hh=r.height+16}else{p=window.scrOf(q[0]);w=hh=q[2]}
+   h.style.display='block';h.style.borderRadius=q[0].charAt(0)==='#'?'12px':'50%';h.style.left=p[0]+'px';h.style.top=(p[1]+q[1])+'px';h.style.width=w+'px';h.style.height=hh+'px'}catch(e){h.style.display='none'}});
  requestAnimationFrame(halka)}
+var HK=[];
+/* rehberli derste her adımda yalnız o adımın parçasıyla etkileşim (sayfa onHot içinde sorar) */
+window.__izin=function(h){if(SERB||!L)return true;var a=ADIM[i];if(!a||a.test||!a.ask||gecti)return false;if(!a.izin)return true;
+ return a.izin.some(function(p){return h===p||h.indexOf(p+':')===0})};
+window.__izinUyari=function(){var a=ADIM[i];uyari=!a||!a.ask||gecti?'Bu adımda cihazla işlem yapılmaz: önce açıklamayı okuyup <b>Devam</b>’a basın.':'Bu adımda o parçayla işlem yapılmaz. Yanıp sönen sarı halkanın gösterdiği yere tıklayın.';hataM=uyari;ciz()};
 function basla(){
  if(!window[C.hazir]||!window.S||!window.scrOf){setTimeout(basla,150);return}
  document.body.classList.add('cders');document.documentElement.classList.remove('dersOn');
