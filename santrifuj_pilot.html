@@ -323,9 +323,10 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  renderer.domElement.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hideTip()});
  animate()}
 function rackPos(i,local){const x=-6.25+(i%6)*2.5,z=i<6?-1.4:1.4;return local?[x,z]:[25+x,8+z]}
-const visibleDeep=o=>{while(o){if(o.visible===false)return false;o=o.parent}return true};
+const visibleDeep=o=>{let r=o;while(o){if(o.visible===false)return false;r=o;o=o.parent}return !!(R3&&r===R3.scene)};
 /* tüp nesneleri */
-function clearTubes(){Object.values(K.tubes).forEach(o=>{o.parent&&o.parent.remove(o)});K.tubes={}}
+/* numune seti değişince eski tüplerin tıklama alanları da kaldırılır (yoksa rafta görünmez “hayalet” tüpler tıklamayı yakalar) */
+function clearTubes(){Object.values(K.tubes).forEach(o=>{o.parent&&o.parent.remove(o);const hb=o.userData.hb;if(hb){const i=HOT.indexOf(hb);if(i>=0)HOT.splice(i,1)}});K.tubes={}}
 function layers(t){const k=t.kind,v=t.st;const RED='#7A0F18',AQ='#D9C49A',EM='#EFE9D6';
  if(k==='blood'){if(v==='ok')return [[.55,RED,.97],[.45,'#E9C46A',.9]];if(v==='mid')return [[.5,RED,.97],[.15,'#A0402F',.9],[.35,'#D59A63',.85]];return [[1,RED,.97]]}
  if(k==='ea'||k==='dcm'){const org=k==='ea'?'#F3EBC8':'#EEF1E8';const em=v==='ok'?.03:v==='mid'?.12:v==='bad'?.4:1;if(!v)return [[1,EM,.92]];
@@ -342,7 +343,7 @@ function tubeObj(t){let o=K.tubes[t.id];if(o)return o;o=new THREE.Group();const 
   add(new THREE.CylinderGeometry(.7,.7,1.2,24),new THREE.MeshStandardMaterial({color:CAPC[t.kind],roughness:.45}),0,7.7,0,o);
   const lab=canvasTex(128,64,(c,w,h)=>{c.fillStyle='#FFFFFF';c.fillRect(0,0,w,h);c.fillStyle='#132228';c.font='700 40px "Source Sans 3",sans-serif';c.textAlign='center';c.fillText(t.lab,w/2,48)});add(new THREE.CylinderGeometry(.6,.6,1.4,24,1,true,-Math.PI/2.4,Math.PI/1.2),new THREE.MeshStandardMaterial({map:lab,roughness:.6}),0,5.6,0,o,false)}
  const L=new THREE.Group();o.add(L);o.userData.L=L;o.userData.lk='';o.userData.micro=micro;o.userData.big=big;
- const hb=hot(add(new THREE.BoxGeometry(micro?1.4:1.8,micro?4.4:8.6,micro?1.4:1.8),new THREE.MeshBasicMaterial({visible:false}),0,micro?2.2:4.3,0,o,false),'tube:'+t.id);
+ const hb=o.userData.hb=hot(add(new THREE.BoxGeometry(micro?1.4:1.8,micro?4.4:8.6,micro?1.4:1.8),new THREE.MeshBasicMaterial({visible:false}),0,micro?2.2:4.3,0,o,false),'tube:'+t.id);
  R3.scene.add(o);K.tubes[t.id]=o;return o}
 function setLayers(t,o){const key=t.st+'|'+t.kind+'|'+t.info;if(o.userData.lk===key)return;o.userData.lk=key;const L=o.userData.L;while(L.children.length)L.remove(L.children[0]);
  const micro=o.userData.micro,big=o.userData.big;const fill=big?Math.min(.95,parseFloat(t.info.replace(',','.'))/12):micro?(t.kind==='wm'?.45+parseFloat(t.info.replace(',','.'))*.3:.75):(t.kind==='water'||t.kind==='wm'?Math.min(.95,parseFloat(t.info.replace(',','.'))/5):.8);
