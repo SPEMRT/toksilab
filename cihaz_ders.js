@@ -56,19 +56,19 @@ vorkul:{ad:'İlk karıştırma: HS viali',ozet:'TOUCH modu, hız ayarı, viali b
  adim:[
  {bolum:'Giriş',b:'Ne yapacaksınız?',
   html:'<p>Kanda alkol analizi için hazırlanmış bir HS vialini karıştıracaksınız. Vialde kan dipte, su ve iç standart üstte duruyor: iki ayrı tabaka.</p><p>Vial bu hâliyle analiz edilirse sonuç yanlış çıkar. Birkaç saniyelik bir karıştırma yeter; bunun için <b>TOUCH</b> modu kullanılır.</p>'},
- {bolum:'Ayar',ask:'<b>Anahtara</b> tıklayın. Her tıklamada konum değişir: O → ON → TOUCH. <b>TOUCH</b> olana kadar tıklayın.',halka:['sw',0,54],ok:function(s){return s.sw==='touch'},
+ {bolum:'Ayar',ask:'<b>Anahtara</b> tıklayın. Her tıklamada konum değişir: O → ON → TOUCH. <b>TOUCH</b> olana kadar tıklayın.',halka:['sw',0,54],izin:['sw'],ok:function(s){return s.sw==='touch'},
   b:'Anahtar TOUCH konumunda',html:'<p>Güç ışığı yandı; sağ üstteki göstergede <b>TOUCH</b> yazıyor. Başlık şu an dönmüyor: TOUCH modunda yalnızca tüp bastırıldığında döner.</p><p>Kısa karıştırmalar için en güvenli moddur; tüpü kaldırdığınız anda cihaz durur.</p>'},
- {bolum:'Ayar',ask:'<b>Hız düğmesine</b> tıklayın ve açılan kutudaki <b>+</b> ile hızı <b>5</b>. kademeye getirin.',halka:['knob',0,54],ok:function(s){return s.lvl===5},hata:function(){var s=S();return s.lvl>5?'Hız '+s.lvl+'. kademede. <b>−</b> ile 5’e indirin.':''},
+ {bolum:'Ayar',ask:'<b>Hız düğmesine</b> tıklayın ve açılan kutudaki <b>+</b> ile hızı <b>5</b>. kademeye getirin.',halka:['knob',0,54],izin:['knob'],ok:function(s){return s.lvl===5},hata:function(){var s=S();return s.lvl>5?'Hız '+s.lvl+'. kademede. <b>−</b> ile 5’e indirin.':''},
   b:'Hız: 5. kademe',html:'<p>5. kademe yaklaşık <b>1500 rpm</b>’dir. Küçük bir vial için orta hız yeterlidir:</p><ul><li>Çok düşük hızda girdap oluşmaz, sıvı karışmaz.</li><li>Çok yüksek hızda vial elden kayabilir.</li></ul>'},
- {bolum:'Karıştırma',ask:'Raftaki <b>HS vialine</b> (kısa, koyu kırmızı sıvılı) tıklayarak viali alın.',halka:['tubes.hs',-38,70],ok:function(s){return s.held==='hs'||s.cupT==='hs'},hata:yanlisTup('hs'),
+ {bolum:'Karıştırma',ask:'Raftaki <b>HS vialine</b> (kısa, koyu kırmızı sıvılı) tıklayarak viali alın.',halka:['tubes.hs',-38,70],izin:['tube:hs'],ok:function(s){return s.held==='hs'||s.cupT==='hs'},hata:yanlisTup('hs'),
   b:'Vial elinizde',html:'<p>Viale bakın: altta koyu kırmızı <b>kan</b>, üstte berrak sıvı (su ve iç standart). İki tabaka henüz karışmamış.</p><p>Vorteksten önce her zaman kapağa bakılır. HS vialinin kapağı preslenmiştir ve sızdırmaz.</p>'},
- {bolum:'Karıştırma',ask:'Viali yerleştirin: <b>karıştırma başlığına</b> tıklayın.',oto:1,halka:['cup',0,62],ok:function(s){return s.cupT==='hs'}},
- {bolum:'Karıştırma',ask:'Vialin (ya da başlığın) üstüne <b>basılı tutun</b>. Sıvı tek renk olana kadar bırakmayın.',tut:1,canli:function(s){return 'Homojenlik: %'+Math.round(s.mix.hs*100)+(s.press?' · '+Math.round(s.rpm/10)*10+' rpm':' · bekliyor')},halka:['cup',-6,92],ok:function(s){return s.mix.hs>=1},
+ {bolum:'Karıştırma',ask:'Viali yerleştirin: <b>karıştırma başlığına</b> tıklayın.',oto:1,halka:['cup',0,62],izin:['cup'],ok:function(s){return s.cupT==='hs'}},
+ {bolum:'Karıştırma',ask:'Vialin (ya da başlığın) üstüne <b>basılı tutun</b>. Sıvı tek renk olana kadar bırakmayın.',tut:1,izin:['cup','tube:hs'],canli:function(s){return 'Homojenlik: %'+Math.round(s.mix.hs*100)+(s.press?' · '+Math.round(s.rpm/10)*10+' rpm':' · bekliyor')},halka:['cup',-6,92],ok:function(s){return s.mix.hs>=1},
   hata:function(){var s=S();return s.cupT!=='hs'?'Vial başlıkta değil. Viali alıp başlığa tıklayın.':s.sw!=='touch'?'Anahtar TOUCH konumunda olmalı.':s.lvl<3?'Hız çok düşük; düğmeden 5. kademeye getirin.':''},
   b:'Vial homojen',html:'<p>Bastırdığınızda başlık döndü, bıraktığınızda durdu: TOUCH modu böyle çalışır.</p><p>Sıvı artık <b>tek renk</b>: kan, su ve iç standart tamamen karıştı. Yaklaşık 10 saniye yetti.</p><p>Karışmamış bir vialde cihaz gaz fazından eksik örnek alır ve sonuç düşük çıkar.</p>'},
- {bolum:'Bitirme',ask:'Viali kaldırın: <b>başlığa</b> bir kez, kısaca tıklayın (basılı tutmayın).',oto:1,dugme:['Viali kaldır',function(){if(S().cupT)window.cupTap()}],halka:['cup',-6,92],ok:function(s){return s.held==='hs'&&!s.cupT}},
- {bolum:'Bitirme',ask:'Viali yerine koyun: <b>tüp rafına</b> tıklayın.',oto:1,halka:['rack',-34,120],ok:function(s){return !s.held&&!s.cupT}},
- {bolum:'Bitirme',ask:'Cihazı kapatın: <b>anahtara</b> tıklayarak <b>O</b> konumuna getirin.',halka:['sw',0,54],ok:function(s){return s.sw==='off'},
+ {bolum:'Bitirme',ask:'Viali kaldırın: <b>başlığa</b> bir kez, kısaca tıklayın (basılı tutmayın).',oto:1,dugme:['Viali kaldır',function(){if(S().cupT)window.cupTap()}],halka:['cup',-6,92],izin:['cup','tube:hs'],ok:function(s){return s.held==='hs'&&!s.cupT}},
+ {bolum:'Bitirme',ask:'Viali yerine koyun: <b>tüp rafına</b> tıklayın.',oto:1,halka:['rack',-34,120],izin:['rack','tube:hs'],ok:function(s){return !s.held&&!s.cupT}},
+ {bolum:'Bitirme',ask:'Cihazı kapatın: <b>anahtara</b> tıklayarak <b>O</b> konumuna getirin.',halka:['sw',0,54],izin:['sw'],ok:function(s){return s.sw==='off'},
   b:'İş bitti',html:'<p>Sırayı aklınızda tutun:</p><ul><li>Anahtar <b>TOUCH</b>, hız orta.</li><li>Kapağı kontrol et, viali başlığa koy.</li><li>Sıvı tek renk olana kadar <b>bastır</b>.</li><li>Viali rafa koy, anahtarı <b>O</b> yap.</li></ul><p>Vial artık headspace cihazına yüklenebilir.</p>'},
  {bolum:'Kontrol',test:1}],
  soru:[
@@ -81,25 +81,25 @@ vorlle:{ad:'Sıvı-sıvı ekstraksiyon: Falkon tüpü',ozet:'Kapak kontrolü, d�
  adim:[
  {bolum:'Giriş',b:'Ne yapacaksınız?',
   html:'<p>Falkon tüpünde iki sıvı var: altta <b>plazma</b>, üstte <b>organik çözücü</b>. Bu ikisi su ile yağ gibi birbirine karışmaz.</p><p>Aradığımız madde plazmadan çözücüye geçsin diye iki sıvının çok güçlü ve uzun süre karıştırılması gerekir: <b>yüksek hızda 30 saniye</b>. Bunun için <b>ON</b> (sürekli) modu kullanılır.</p><p>Çözücü tüpe yeni eklendi; <b>kapak henüz açık</b>.</p>'},
- {bolum:'Hazırlık',ask:'Raftaki <b>Falkon tüpüne</b> (uzun olan) tıklayarak tüpü alın.',oto:1,halka:['tubes.fal',-60,80],ok:function(s){return s.held==='fal'},hata:yanlisTup('fal')},
- {bolum:'Hazırlık',ask:'Tüpün kapağı açık, tezgâhta duruyor. Aşağıdaki düğmeyle kapağı kapatın.',dugme:['Kapağı sıkıca kapat',function(){if(!S().caps.fal)window.capToggle()}],ok:function(s){return s.caps.fal},
+ {bolum:'Hazırlık',ask:'Raftaki <b>Falkon tüpüne</b> (uzun olan) tıklayarak tüpü alın.',oto:1,halka:['tubes.fal',-60,80],izin:['tube:fal'],ok:function(s){return s.held==='fal'},hata:yanlisTup('fal')},
+ {bolum:'Hazırlık',ask:'Tüpün kapağı açık, tezgâhta duruyor. Aşağıdaki düğmeyle kapağı kapatın.',izin:[],dugme:['Kapağı sıkıca kapat',function(){if(!S().caps.fal)window.capToggle()}],ok:function(s){return s.caps.fal},
   hata:function(){var s=S();if(s.cupT==='fal'&&!s.caps.fal){window.cupTap();return 'Kapağı açık tüp başlığa konmaz; tüp elinize geri alındı. Önce kapağı kapatın.'}return ''},
   b:'Önce kapak',html:'<p>Vorteksten önce bakılacak ilk şey kapaktır. Açık ya da gevşek kapakla karıştırılırsa:</p><ul><li>Sıvı dışarı sıçrar; <b>numune kaybolur</b>.</li><li>Tezgâh, cihaz ve eldiven kirlenir (<b>bulaşma</b>).</li><li>Çözücü buharı solunur.</li></ul><p>Vidalı kapak sonuna kadar çevrilerek kapatılır.</p>'},
- {bolum:'Hazırlık',ask:'<b>Hız düğmesine</b> tıklayın ve hızı <b>3</b>. kademeye getirin.',halka:['knob',0,54],ok:function(s){return s.lvl===3},hata:function(){var s=S();return s.lvl>3?'Hız '+s.lvl+'. kademede. <b>−</b> ile 3’e indirin.':''},
+ {bolum:'Hazırlık',ask:'<b>Hız düğmesine</b> tıklayın ve hızı <b>3</b>. kademeye getirin.',halka:['knob',0,54],izin:['knob'],ok:function(s){return s.lvl===3},hata:function(){var s=S();return s.lvl>3?'Hız '+s.lvl+'. kademede. <b>−</b> ile 3’e indirin.':''},
   b:'Düşük hızla başlayın',html:'<p>Sonunda yüksek hıza çıkacaksınız, ama <b>başlangıç her zaman düşük hızdadır</b>.</p><p>Yüksek hızla başlanırsa sıvı bir anda kapağa sıçrar. Kapağa yapışan sıvı karışmaya katılmaz ve tüp elinizden kayabilir.</p>'},
- {bolum:'Karıştırma',ask:'Tüpü yerleştirin: <b>karıştırma başlığına</b> tıklayın.',oto:1,halka:['cup',0,62],ok:function(s){return s.cupT==='fal'},hata:yanlisTup('fal')},
- {bolum:'Karıştırma',ask:'Tüpü elinizle başlığa <b>bastırarak tutun</b>. Çalıştırmadan önce tutulur.',dugme:['✋ Tüpü bastırarak tut',function(){if(!S().hold)window.holdToggle()}],ok:function(s){return s.hold||s.press},
+ {bolum:'Karıştırma',ask:'Tüpü yerleştirin: <b>karıştırma başlığına</b> tıklayın.',oto:1,halka:['cup',0,62],izin:['cup'],ok:function(s){return s.cupT==='fal'},hata:yanlisTup('fal')},
+ {bolum:'Karıştırma',ask:'Tüpü elinizle başlığa <b>bastırarak tutun</b>. Çalıştırmadan önce tutulur.',izin:[],dugme:['✋ Tüpü bastırarak tut',function(){if(!S().hold)window.holdToggle()}],ok:function(s){return s.hold||s.press},
   b:'Tüp her zaman elle tutulur',html:'<p>ON modunda başlık siz durdurana kadar döner, ama tüp başlığın üstünde <b>kendi kendine durmaz</b>: elle bastırılmazsa karışmaz, hız artınca başlıktan <b>fırlar</b> ve tezgâha düşer.</p><p>Bu yüzden önce tüp başlığa bastırılarak tutulur, sonra anahtar açılır; iş bitince önce anahtar kapatılır, sonra tüp bırakılır.</p>'},
- {bolum:'Karıştırma',ask:'<b>Anahtara</b> bir kez tıklayarak <b>ON</b> konumuna getirin.',halka:['sw',0,54],ok:function(s){return s.sw==='on'},hata:function(){return S().sw==='touch'?'Anahtar TOUCH konumuna geçti. ON olana kadar yeniden tıklayın.':''},
+ {bolum:'Karıştırma',ask:'<b>Anahtara</b> bir kez tıklayarak <b>ON</b> konumuna getirin.',halka:['sw',0,54],izin:['sw'],ok:function(s){return s.sw==='on'},hata:function(){return S().sw==='touch'?'Anahtar TOUCH konumuna geçti. ON olana kadar yeniden tıklayın.':''},
   b:'ON: sürekli çalışma',html:'<p>Başlık dönmeye başladı ve siz durdurana kadar dönecek. Uzun karıştırmalarda elinizle bastırmanız gerekmez; yine de tüp <b>sıkıca tutulur</b>.</p><p>Şu an hız düşük: sıvı yavaşça dönüyor, ama iki tabaka hâlâ ayrı.</p>'},
- {bolum:'Karıştırma',ask:'Şimdi hızı yükseltin: <b>hız düğmesine</b> tıklayın ve <b>8</b>. kademeye çıkarın.',oto:1,halka:['knob',0,54],ok:function(s){return s.lvl>=7&&s.cupT==='fal'}},
- {bolum:'Karıştırma',ask:'<b>30 saniye</b> yüksek hızda karıştırın. Tüpü ve göstergeyi izleyin…',bekle:1,canli:function(s){return 'Yüksek hızda geçen süre: '+Math.min(30,Math.floor(s.tHigh))+' / 30 sn · ekstraksiyon %'+Math.round(s.mix.fal*100)},ok:function(s){return s.mix.fal>=1},
+ {bolum:'Karıştırma',ask:'Şimdi hızı yükseltin: <b>hız düğmesine</b> tıklayın ve <b>8</b>. kademeye çıkarın.',oto:1,halka:['knob',0,54],izin:['knob'],ok:function(s){return s.lvl>=7&&s.cupT==='fal'}},
+ {bolum:'Karıştırma',ask:'<b>30 saniye</b> yüksek hızda karıştırın. Tüpü ve göstergeyi izleyin…',bekle:1,izin:[],canli:function(s){return 'Yüksek hızda geçen süre: '+Math.min(30,Math.floor(s.tHigh))+' / 30 sn · ekstraksiyon %'+Math.round(s.mix.fal*100)},ok:function(s){return s.mix.fal>=1},
   dugme:['✋ Tüpü bastırarak tut',function(){if(!S().hold)window.holdToggle()}],
   hata:function(){var s=S();return s.cupT!=='fal'?'Tüp başlıkta değil. Tüpü başlığa geri koyun.':!(s.hold||s.press)?'Tüpü bastırarak tutmuyorsunuz: karışmıyor. Aşağıdaki düğmeyle yeniden tutun.':s.sw!=='on'?'Anahtar ON konumunda olmalı.':s.lvl<7?'Hız düştü. En az 7. kademe olmalı.':''},
   b:'Ekstraksiyon tamam',html:'<p>Tüpe bakın: iki tabaka kayboldu, sıvı <b>bulanık</b> ve tek renk. Buna <b>emülsiyon</b> denir: iki sıvı çok küçük damlacıklar hâlinde birbirine karıştı ve aradığımız madde çözücüye geçti.</p><p>Süre kısa tutulursa ya da hız düşük kalırsa maddenin bir kısmı plazmada kalır; sonuç düşük çıkar.</p>'},
- {bolum:'Bitirme',ask:'Tüpü kaldırın: <b>başlığa</b> bir kez, kısaca tıklayın (basılı tutmayın).',oto:1,dugme:['Tüpü kaldır',function(){if(S().cupT)window.cupTap()}],halka:['cup',-6,92],ok:function(s){return s.held==='fal'&&!s.cupT}},
- {bolum:'Bitirme',ask:'Cihazı kapatın: <b>anahtara</b> tıklayarak <b>O</b> konumuna getirin.',oto:1,halka:['sw',0,54],ok:function(s){return s.sw==='off'}},
- {bolum:'Bitirme',ask:'Tüpü yerine koyun: <b>tüp rafına</b> tıklayın.',halka:['rack',-34,120],ok:function(s){return !s.held&&!s.cupT},
+ {bolum:'Bitirme',ask:'Tüpü kaldırın: <b>başlığa</b> bir kez, kısaca tıklayın (basılı tutmayın).',oto:1,dugme:['Tüpü kaldır',function(){if(S().cupT)window.cupTap()}],halka:['cup',-6,92],izin:['cup','tube:fal'],ok:function(s){return s.held==='fal'&&!s.cupT}},
+ {bolum:'Bitirme',ask:'Cihazı kapatın: <b>anahtara</b> tıklayarak <b>O</b> konumuna getirin.',oto:1,halka:['sw',0,54],izin:['sw'],ok:function(s){return s.sw==='off'}},
+ {bolum:'Bitirme',ask:'Tüpü yerine koyun: <b>tüp rafına</b> tıklayın.',halka:['rack',-34,120],izin:['rack','tube:fal'],ok:function(s){return !s.held&&!s.cupT},
   b:'Sıradaki adım: santrifüj',html:'<p>Emülsiyon bu hâliyle kullanılamaz; iki sıvının yeniden ayrılması gerekir. Bunun için tüp <b>santrifüje</b> konur (4000 rpm, 5 dakika). Ardından üstteki çözücü tabakası alınır.</p><p>Aklınızda kalsın:</p><ul><li>Önce <b>kapak</b>.</li><li><b>Düşük</b> hızla başla, sonra yükselt.</li><li>Yüksek hızda <b>30 saniye</b>.</li><li>Tüpü kaldır, cihazı <b>kapat</b>.</li></ul>'},
  {bolum:'Kontrol',test:1}],
  soru:[
@@ -264,23 +264,23 @@ ultdeg:{ad:'Mobil fazı degaze etme',ozet:'Hazneyi doldurma, kapağı gevşetme,
  {bolum:'Giriş',b:'Ne yapacaksınız?',
   html:'<p>LC-MS/MS’in <b>mobil fazı</b> (1 L su + %0,1 formik asit) içinde çözünmüş hava vardır. Bu hava cihazın pompasında kabarcık yapar:</p><ul><li>Basınç dalgalanır,</li><li>Maddelerin çıkış zamanı kayar,</li><li>Sonuçlar tutarsız olur.</li></ul><p>Bu yüzden şişe kullanılmadan önce ultrasonik banyoda <b>degaze edilir</b>: çözünmüş hava kabarcık hâlinde dışarı atılır.</p>'},
  {bolum:'Hazırlık',ask:'Tezgâhtaki <b>su kabına</b> tıklayın; açılan kutudan <b>+0,5 L</b> ile hazneye su ekleyin. Haznede 1,5–2,0 L olunca durun.',canli:function(s){return 'Haznedeki su: '+L1(s.water)+' · hedef 1,5–2,0 L (şişe konunca +0,45 L)'},
-  halka:pop('#w1',['part:jug',0,60]),ok:function(s){return s.water>=1.5&&s.water<=2.05},hata:function(){return S().water>2.05?'Su fazla. Kutudaki <b>Banyoyu boşalt</b> ile boşaltıp yeniden doldurun.':''},
+  halka:pop('#w1',['part:jug',0,60]),izin:['part:jug','bath','part:tank','part:mark','part:basket'],ok:function(s){return s.water>=1.5&&s.water<=2.05},hata:function(){return S().water>2.05?'Su fazla. Kutudaki <b>Banyoyu boşalt</b> ile boşaltıp yeniden doldurun.':''},
   b:'Su hazır',html:'<p>Haznede yeterince su var. Şişe konunca su yükselecek ve <b>2/3 çizgisine</b> gelecek.</p><p>Su seviyesi şişeyle birlikte hesaplanır: önce boş haznede çizgiye kadar doldurursanız, şişeyi koyunca taşar.</p>'},
- {bolum:'Hazırlık',ask:'Cihazı açın: paneldeki kırmızı <b>⏻</b> tuşuna tıklayın.',halka:['key:pw',0,40],ok:function(s){return s.pow},
+ {bolum:'Hazırlık',ask:'Cihazı açın: paneldeki kırmızı <b>⏻</b> tuşuna tıklayın.',halka:['key:pw',0,40],izin:['key:pw'],ok:function(s){return s.pow},
   b:'Cihaz açık',html:'<p>Ekranda ayarlı süre (dakika) ve sıcaklık görünüyor.</p><p>Degazlamada <b>ısıtma yapılmaz</b>. Isınan mobil fazdan çözücü buharlaşır ve bileşimi değişir. Sıcaklık ayarı oda sıcaklığında kalır.</p>'},
- {bolum:'Şişe',ask:'<b>Mobil faz şişesine</b> tıklayın ve açılan kutudan <b>Kapağı yarım tur gevşet</b>’i seçin.',halka:pop('#b1',['bottle',0,64]),ok:function(s){return s.bot.cap==='loose'},
+ {bolum:'Şişe',ask:'<b>Mobil faz şişesine</b> tıklayın ve açılan kutudan <b>Kapağı yarım tur gevşet</b>’i seçin.',halka:pop('#b1',['bottle',0,64]),izin:['bottle'],ok:function(s){return s.bot.cap==='loose'},
   b:'Kapak gevşek',html:'<p>Kapak yarım tur gevşetildi, ama şişenin üstünde duruyor.</p><ul><li>Kapak <b>sıkı</b> kalırsa çıkan gaz kaçamaz; degazlama olmaz, şişede basınç birikir.</li><li>Kapak <b>tamamen açılırsa</b> şişeye toz ve banyo suyu girebilir.</li></ul>'},
- {bolum:'Şişe',ask:'Şişeye yeniden tıklayın ve <b>Şişeyi banyoya (sepete) koy</b>’u seçin.',halka:pop('#b2',['bottle',0,64]),ok:function(s){return s.bot.in},
+ {bolum:'Şişe',ask:'Şişeye yeniden tıklayın ve <b>Şişeyi banyoya (sepete) koy</b>’u seçin.',halka:pop('#b2',['bottle',0,64]),izin:['bottle'],ok:function(s){return s.bot.in},
   b:'Şişe sepette',html:function(){var s=S(),lv=s.water+.45;return '<p>Şişe sepete kondu; su yükseldi: haznede şimdi <b>'+L1(lv)+'</b>.</p><p>Su seviyesi şişedeki sıvının seviyesine yakın olmalı. Böylece ses dalgası şişedeki sıvının tamamına ulaşır.</p>'}},
- {bolum:'Çalıştırma',ask:'Süreyi <b>10 dakikaya</b> getirin: süre göstergesinin altındaki <b>▲</b> tuşuna tıklayın.',canli:function(s){return 'Ayarlı süre: '+s.tmin+' dk · hedef 10 dk'},halka:function(s){return [s.tmin>10?'key:tDn':'key:tUp',0,36]},ok:function(s){return s.tmin===10},
+ {bolum:'Çalıştırma',ask:'Süreyi <b>10 dakikaya</b> getirin: süre göstergesinin altındaki <b>▲</b> tuşuna tıklayın.',canli:function(s){return 'Ayarlı süre: '+s.tmin+' dk · hedef 10 dk'},halka:function(s){return [s.tmin>10?'key:tDn':'key:tUp',0,36]},izin:['key:tUp','key:tDn'],ok:function(s){return s.tmin===10},
   hata:function(){return S().tmin>10?'Süre 10 dakikayı geçti. <b>▼</b> ile azaltın.':''},
   b:'Süre: 10 dakika',html:'<p>Mobil faz degazlaması için <b>10–15 dakika</b> yeterlidir. Daha uzun süre bir yarar sağlamaz; su ısınır ve çözücü buharlaşır.</p>'},
- {bolum:'Çalıştırma',ask:'Ortadaki sarı <b>▶❚❚</b> tuşuna tıklayarak ultrasonu başlatın.',oto:1,halka:['key:go',0,40],ok:function(s){return s.ev.start}},
- {bolum:'Çalıştırma',ask:'Ultrason çalışıyor. Şişeyi izleyin… (Simülasyonda 1 saniye = 1 dakika.)',bekle:1,canli:function(s){var r=Math.max(0,Math.ceil(s.rem));return (s.ev.fin?'Süre bitti ✓':'Kalan: '+Math.floor(r/60)+' dk '+(r%60)+' sn')+' · çözünmüş gaz %'+Math.round(s.bot.gas)},ok:function(s){return s.ev.fin},
+ {bolum:'Çalıştırma',ask:'Ortadaki sarı <b>▶❚❚</b> tuşuna tıklayarak ultrasonu başlatın.',oto:1,halka:['key:go',0,40],izin:['key:go'],ok:function(s){return s.ev.start}},
+ {bolum:'Çalıştırma',ask:'Ultrason çalışıyor. Şişeyi izleyin… (Simülasyonda 1 saniye = 1 dakika.)',bekle:1,izin:[],canli:function(s){var r=Math.max(0,Math.ceil(s.rem));return (s.ev.fin?'Süre bitti ✓':'Kalan: '+Math.floor(r/60)+' dk '+(r%60)+' sn')+' · çözünmüş gaz %'+Math.round(s.bot.gas)},ok:function(s){return s.ev.fin},
   b:'Degazlama tamam',html:function(){return '<p>Çalışırken şişenin içinden <b>kabarcıklar</b> yükseldi: bu, sıvıdan çıkan çözünmüş havadır. Çözünmüş gaz %100’den <b>%'+Math.round(S().bot.gas)+'</b>’e indi.</p><p>Süre bitince cihaz öttü ve kendiliğinden durdu.</p>'}},
- {bolum:'Bitirme',ask:'Şişeye tıklayın ve <b>Şişeyi banyodan çıkar</b>’ı seçin.',oto:1,halka:pop('#b2',['bottle',0,64]),ok:function(s){return !s.bot.in}},
- {bolum:'Bitirme',ask:'Şişeye yeniden tıklayın ve <b>Kapağı sıkıca kapat</b>’ı seçin.',oto:1,halka:pop('#b1',['bottle',0,64]),ok:function(s){return s.bot.cap==='tight'}},
- {bolum:'Bitirme',ask:'Cihazı kapatın: kırmızı <b>⏻</b> tuşuna tıklayın.',halka:['key:pw',0,40],ok:function(s){return !s.pow},
+ {bolum:'Bitirme',ask:'Şişeye tıklayın ve <b>Şişeyi banyodan çıkar</b>’ı seçin.',oto:1,halka:pop('#b2',['bottle',0,64]),izin:['bottle'],ok:function(s){return !s.bot.in}},
+ {bolum:'Bitirme',ask:'Şişeye yeniden tıklayın ve <b>Kapağı sıkıca kapat</b>’ı seçin.',oto:1,halka:pop('#b1',['bottle',0,64]),izin:['bottle'],ok:function(s){return s.bot.cap==='tight'}},
+ {bolum:'Bitirme',ask:'Cihazı kapatın: kırmızı <b>⏻</b> tuşuna tıklayın.',halka:['key:pw',0,40],izin:['key:pw'],ok:function(s){return !s.pow},
   b:'Mobil faz hazır',html:'<p>Şişenin dışı kuru bir kâğıtla silinir, üzerine tarih ve hazırlayanın adı yazılır, sonra LC-MS/MS’e bağlanır. Cihazda pompa bir süre yeni sıvıyla yıkanır (<b>purge</b>).</p><p>Aklınızda kalsın:</p><ul><li>Su <b>2/3</b> çizgisine (şişeyle birlikte).</li><li>Kapak <b>gevşek</b>, ısıtma <b>yok</b>.</li><li><b>10 dakika</b> ultrason.</li><li>Şişeyi çıkar, kapağı <b>sık</b>, cihazı <b>kapat</b>.</li></ul>'},
  {bolum:'Kontrol',test:1}],
  soru:[
@@ -478,17 +478,15 @@ if(!C)return;
 /* serbest kullanımda canlı uyarı kuralları: yanlış giden şey kesin dille panelde gösterilir */
 var SK={
  /* terazi serbest kullanımı bir sınavdır: uyarı, halka ve not yok; yapılan her şey kaydedilir, ilk kayıttan sonra 📋 Rapor */
- 'terazi_pilot.html':{yerlesim:'kontrol',sessiz:true,kur:function(){window.reset('free');var s=S();s.mode='use';s.lev={x:3,y:-1};s.cal=false;s.log=[];if(window.otBasla)window.otBasla();window.render()}},
- 'vorteks_pilot.html':{yerlesim:'kontrol',html:'<div class="alt"><button class="is" id="dHold">✋ Tüpü bastırarak tut</button></div>',
-  bagla:function(P){P.querySelector('#dHold').onclick=function(){window.holdToggle()}},
-  yenile:function(P,s){var b=P.querySelector('#dHold');if(b){b.textContent=s.hold?'✋ Tüpü bırak':'✋ Tüpü bastırarak tut';b.disabled=!s.cupT}},
-  kural:function(s){var L=[],k=s.cupT||s.held;if(k&&!s.caps[k])L.push('Tüpün kapağı açık: vortekslemeden önce kapak sıkıca kapatılır, yoksa sıvı sıçrar ve numune kaybolur.');
-   if(s.cupT&&s.rpm>150&&!(s.press||s.hold))L.push('Başlık dönüyor ama tüpü bastırarak tutmuyorsun: tüp karışmaz, hız artınca başlıktan fırlar.');
-   if(s.sw==='on'&&!s.cupT&&s.rpm>150)L.push('Başlık boşta dönüyor: iş bitince anahtarı O konumuna al.');return L}},
- 'ultra_pilot.html':{yerlesim:'kontrol',kural:function(s){var L=[];if(s.pow&&s.run&&s.water<1.5)L.push('Hazne yeterince dolu değil: ultrason az suyla çalışırsa dönüştürücüler zarar görür. Suyu 2/3 çizgisine (≈ 2 L) doldur.');
-   if(s.water>2.6)L.push('Su çizginin üstünde: şişe ya da sepet konunca taşar.');
-   if(s.bot&&s.bot.in&&s.bot.cap==='tight'&&s.run)L.push('Şişenin kapağı sıkı: çıkan gaz kaçamaz. Degazlamada kapak yarım tur gevşetilir.');
-   if(s.bot&&s.bot.in&&s.set>30)L.push('Isıtma açık: mobil faz ısınırsa buharlaşmayla bileşimi değişir; degazlama ısıtmasız yapılır.');return L}},
+ 'terazi_pilot.html':{yerlesim:'kontrol',sessiz:true,kur:function(){window.reset('free');var s=S();s.mode='use';s.lev={x:3,y:-1};s.cal=false;s.log=[];if(window.otBasla)window.otBasla();window.render()},
+  ses:function(s){var o=window.serbestTartim&&window.serbestTartim.ot(),n=o?o.tartim.length:0;return s.pendingSave?'⏳ Kaydet’e basıldı: değer <b>● KARARLI</b> olunca kayıt alınacak'+(s.tL||s.tR?' (önce kapıyı kapat)':'')+'.':n?'<b>'+n+' kayıt</b> alındı. Raporu soldaki <b>📋 Rapor</b> ile yeniden açabilirsin. Yeni tartım için raporda <b>🔄 Tartımı yenile</b>, bitince yine <b>Kaydet</b>.':'Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. Tartımı bitirince ekrandaki <b>Kaydet</b> tuşuna bas: kayıt alınır ve değerlendirme raporun açılır.'}},
+ /* vorteks ve ultrasonik banyo serbest kullanımı da sessiz sınavdır: her karıştırma / her ultrason çalıştırması kaydedilir, ✅ İşi bitirdim ile rapor açılır */
+ 'vorteks_pilot.html':{yerlesim:'kontrol',sessiz:true,kur:function(){if(window.serbestKur)window.serbestKur()},
+  ek:'<button class="bt sbBitir" id="sbBitir">✅ İşi bitirdim · Raporu gör</button>',ekBagla:function(d){d.querySelector('#sbBitir').onclick=function(){if(window.serbestRapor)window.serbestRapor.ac()}},
+  ses:function(s){var o=window.serbestRapor&&window.serbestRapor.ot(),n=o?o.kayit.length:0;return n?'<b>'+n+' karıştırma</b> kaydedildi. Bitirince <b>✅ İşi bitirdim</b>: değerlendirme raporun açılır. Raporu soldaki <b>📋 Rapor</b> ile yeniden açabilirsin.':'Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. Raftaki tüpleri karıştır; her karıştırma kaydedilir. Bitirince <b>✅ İşi bitirdim</b>’e bas: değerlendirme raporun açılır.'}},
+ 'ultra_pilot.html':{yerlesim:'kontrol',sessiz:true,kur:function(){if(window.serbestKur)window.serbestKur()},
+  ek:'<button class="bt sbBitir" id="sbBitir">✅ İşi bitirdim · Raporu gör</button>',ekBagla:function(d){d.querySelector('#sbBitir').onclick=function(){if(window.serbestRapor)window.serbestRapor.ac()}},
+  ses:function(s){var o=window.serbestRapor&&window.serbestRapor.ot(),n=o?o.kayit.length:0;return n?'<b>'+n+' ultrason çalıştırması</b> kaydedildi. Bitirince <b>✅ İşi bitirdim</b>: değerlendirme raporun açılır. Raporu soldaki <b>📋 Rapor</b> ile yeniden açabilirsin.':'Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. Görev: mobil faz şişesini degaze et. Her ultrason çalıştırması kaydedilir. Bitirince <b>✅ İşi bitirdim</b>’e bas: değerlendirme raporun açılır.'}},
  'santrifuj_pilot.html':{kural:function(s){var L=[],mx={ang:5000,mic:14000,buc:4500}[s.rotor]||5000,tol={ang:.5,mic:.15,buc:.5}[s.rotor]||.5;
    if(s.rpm>mx)L.push('Ayarlanan hız ('+s.rpm.toLocaleString('tr-TR')+' rpm) takılı rotorun sınırının üstünde (en fazla '+mx.toLocaleString('tr-TR')+' rpm). Bu ayarla çalıştırılmaz.');
    if(s.slots.some(Boolean)&&window.imb&&window.imb().m>tol)L.push('Rotor dengesiz ('+window.imb().m.toFixed(2).replace('.',',')+' g): tüpler karşılıklı ve eşit ağırlıkta olmalı; tek kalan tüpün karşısına denge tüpü koy.');
@@ -516,6 +514,17 @@ css.textContent=
 '#sbEk .sbNot{background:#F1F6F7;color:#16242A;border-radius:10px;padding:8px 10px;border-left:4px solid #2BD9C0;font-size:12.5px;line-height:1.35}#sbEk .sbNot>b:first-child{display:block;font:600 10px "IBM Plex Mono",monospace;color:#1F9A97;letter-spacing:.08em;margin-bottom:2px}#sbEk [hidden]{display:none}'+
 'body.sbk .sbGizle{display:none!important}#sbEk .sbVent{background:#B7791F;color:#fff;font-weight:700}#sbEk .sbVent[hidden]{display:none}'+
 '#sbEk .sbSes{font-size:12.5px;color:#D7E4E7;line-height:1.4;background:#25333A;border-radius:10px;padding:8px 10px;border-left:4px solid #2BD9C0}'+
+'#sbEk .sbBitir{background:#2DBE5B;color:#fff;font-weight:700}'+
+'#mRapor.yeni{animation:rkY 1.2s 2}@keyframes rkY{50%{background:#2BD9C0;color:#062126}}'+
+'#raporK{position:fixed;inset:0;z-index:2147483100;background:rgba(5,10,12,.7);display:grid;place-items:start center;overflow:auto;padding:22px 12px}#raporK[hidden]{display:none}'+
+'#raporK .rk{background:#fff;color:#16242A;border-radius:14px;max-width:820px;width:100%;padding:18px 20px;font:14.5px/1.45 "Source Sans 3",system-ui,sans-serif}'+
+'#raporK h2{font:700 24px "Barlow Condensed",sans-serif;margin:0}#raporK h3{font:700 15px "Barlow Condensed",sans-serif;letter-spacing:.05em;text-transform:uppercase;color:#1F6F8B;margin:14px 0 6px}'+
+'#raporK .rkS{color:#4A5B62;font-size:13px}#raporK .rkB{float:right;display:flex;gap:6px;flex-wrap:wrap}#raporK .rkB button{border:0;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;background:#E3EBEE;color:#16242A}#raporK .rkB .rkP{background:#1F6F8B;color:#fff}#raporK .rkB .rkYen{background:#2DBE5B;color:#fff}'+
+'#raporK .rkPuan{display:flex;align-items:baseline;gap:8px;border-left:6px solid;padding:6px 12px;margin-top:10px;background:#F4F8F9;border-radius:8px}#raporK .rkPuan b{font:700 40px "Barlow Condensed",sans-serif}#raporK .rkPuan em{font-style:normal;font-weight:700;margin-left:8px}'+
+'#raporK ul{list-style:none;display:grid;gap:5px;padding:0;margin:0}#raporK li{display:grid;grid-template-columns:22px 1fr;gap:6px}#raporK li i{font-style:normal;font-weight:700;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#fff}#raporK li.ok i{background:#2DBE5B}#raporK li.no i{background:#E5484D}#raporK li.no span{color:#8E2A2E}'+
+'#raporK .rkT{border:1px solid #D5DEE2;border-radius:10px;padding:8px 10px;margin-bottom:8px}#raporK .rkTh{display:flex;gap:10px;align-items:baseline;margin-bottom:6px;flex-wrap:wrap}#raporK .rkTh span{font:600 14px "IBM Plex Mono",monospace}#raporK .rkTh em{margin-left:auto;font-style:normal;font-weight:700;color:#1F6F8B}'+
+'#raporK .rkN{margin-top:12px;font-size:12px;color:#6B7F86}#raporK .rkBos{color:#8E2A2E;font-weight:600}'+
+'@media print{body.rkPrint>*:not(#raporK){display:none!important}body.rkPrint #raporK{position:static;background:none;padding:0}body.rkPrint .rkB{display:none!important}}'+
 '#sbEk .sbDers{border:0;background:none;color:#9BB0B6;font:600 12.5px "Source Sans 3",sans-serif;cursor:pointer;padding:4px}'+
 '@media (max-width:900px){body.cders.serbest.sbk.panel .stage{right:0;bottom:50dvh}body.cders.serbest.sbk.panel #cv3{width:100vw!important;height:50dvh!important}body.sbk #side{width:auto;max-height:50dvh}}'+
 'body.cders .dsp{pointer-events:auto!important;cursor:move;transform:scale(.8);transform-origin:top right;touch-action:none;user-select:none;-webkit-user-select:none}body.cders .dsp.tasindi{transform-origin:top left}body.cders .dsp.sur{box-shadow:0 0 0 2px #2BD9C0,0 10px 26px rgba(0,0,0,.45)}'+
@@ -576,9 +585,9 @@ function serbestBasla(){SERB=true;window.__serbest=true;
  NOT='';serbestCiz();
  if(C.serbest.yerlesim==='kontrol'){document.body.classList.add('sbk','panel');var mp=document.getElementById('mPanel');if(mp)mp.classList.add('on');kontrolEk()}else kucult(innerWidth<=900);
  dispatchEvent(new Event('resize'));
- if(!SUT)SUT=setInterval(function(){if(!SERB||!P)return;var s=S();if(!s)return;if(C.serbest.yenile)C.serbest.yenile(P,s);var L=C.serbest.kural?C.serbest.kural(s):[],h=L.map(function(x){return '<li>'+x+'</li>'}).join('');
+ if(!SUT)SUT=setInterval(function(){if(!SERB||!P)return;var s=S();if(!s)return;if(C.serbest.yenile)C.serbest.yenile(P,s);var L=C.serbest.kural&&!C.serbest.sessiz?C.serbest.kural(s):[],h=L.map(function(x){return '<li>'+x+'</li>'}).join('');
   var ek=document.getElementById('sbEk');if(ek&&C.serbest.ekYenile)C.serbest.ekYenile(ek,s);
-  var ss=document.getElementById('sbSes');if(ss&&window.serbestTartim){var o=window.serbestTartim.ot(),n=o?o.tartim.length:0,h=s.pendingSave?'⏳ Kaydet’e basıldı: değer <b>● KARARLI</b> olunca kayıt alınacak'+(s.tL||s.tR?' (önce kapıyı kapat)':'')+'.':n?'<b>'+n+' kayıt</b> alındı. Raporu soldaki <b>📋 Rapor</b> ile yeniden açabilirsin. Yeni tartım için raporda <b>🔄 Tartımı yenile</b>, bitince yine <b>Kaydet</b>.':'Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. Tartımı bitirince ekrandaki <b>Kaydet</b> tuşuna bas: kayıt alınır ve değerlendirme raporun açılır.';if(ss.innerHTML!==h)ss.innerHTML=h}
+  var ss=document.getElementById('sbSes');if(ss&&C.serbest.ses){var sh=C.serbest.ses(s);if(ss.innerHTML!==sh)ss.innerHTML=sh}
   var u=document.getElementById('sbUy')||P.querySelector('#dUy');if(u&&h!==SUH){SUH=h;u.innerHTML=h?'<b class="nm">⚠ DİKKAT</b><ul>'+h+'</ul>':'';u.hidden=!h;if(h&&document.body.classList.contains('dk')){var mi=document.getElementById('dersMini');if(mi)mi.classList.add('uy')}}if(!h){var m2=document.getElementById('dersMini');if(m2)m2.classList.remove('uy')}},400)}
 var SUT=null,SUH='';
 function serbestCiz(){
@@ -604,13 +613,28 @@ function dspKur(){var e=document.getElementById('dsp');if(!e||e.dataset.sur)retu
  e.addEventListener('dblclick',function(){try{localStorage.removeItem(K2)}catch(_){}['left','top','right','bottom'].forEach(function(k){e.style.removeProperty(k)});e.classList.remove('tasindi')})}
 function kontrolEk(){var side=document.getElementById('side');if(!side||document.getElementById('sbEk'))return;var c=side.querySelector('.card')||side;var d=document.createElement('div');d.id='sbEk';
  var nl=C.serbest.numune||[];d.innerHTML=(nl.length?'<button class="bt sbNum" id="sbNumB">🧪 Numune seç ▾</button><div class="sbNumL" id="sbNumL" hidden>'+nl.map(function(n){return '<button class="bt" data-num="'+n[0]+'">'+n[1]+'</button>'}).join('')+'</div>':'')+
-  (C.serbest.ek||'')+(C.serbest.sessiz?'<div class="sbSes" id="sbSes">Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. Tartımı bitirince ekrandaki <b>Kaydet</b> tuşuna bas: kayıt alınır ve değerlendirme raporun açılır.</div>':'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div>')+'<button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
+  (C.serbest.ek||'')+(C.serbest.sessiz?'<div class="sbSes" id="sbSes">'+(C.serbest.ses?C.serbest.ses(S()):'')+'</div>':'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div>')+'<button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
  c.appendChild(d);var L2=d.querySelector('#sbNumL');
  if(L2)d.querySelector('#sbNumB').onclick=function(){L2.hidden=!L2.hidden};
  d.querySelectorAll('[data-num]').forEach(function(b){b.onclick=function(){var m=C.serbest.numuneSec(b.dataset.num);if(!m)L2.hidden=true;else{NOT=m;var n=document.getElementById('sbNot');n.querySelector('.nt').innerHTML=m;n.hidden=false}}});
  d.querySelector('#sbDers').onclick=function(){ac('liste')};if(C.serbest.ekBagla)C.serbest.ekBagla(d);
  /* tüp listesi ve elle denge tüpü düğmeleri serbest kullanımda gösterilmez (denge tüpü rafa kendiliğinden gelir) */
  ['tray','balp'].forEach(function(id){var e=document.getElementById(id);if(!e)return;e.classList.add('sbGizle');var pr=e.previousElementSibling;if(pr&&pr.classList.contains('sub')&&id==='tray')pr.classList.add('sbGizle')})}
+/* ortak serbest kullanım raporu (vorteks, ultrasonik banyo): sayfa kayıtları hazırlar, burada gösterilir.
+   R = {baslik, kayitAd, kayitlar:[{ad,deger,puan,k:[[ok,iyi,kotu]]}], bitirme:[[ok,iyi,kotu]], puan, bos, not, sure, yenileAd, yenile} */
+function raporDugme(fn){var b=document.getElementById('mRapor');if(!b){b=document.createElement('button');b.id='mRapor';b.innerHTML='<span>📋</span>Rapor';b.title='Serbest kullanım değerlendirme raporu';var nav=document.querySelector('.snav');if(nav)nav.appendChild(b)}b.onclick=fn;b.classList.add('yeni');setTimeout(function(){b.classList.remove('yeni')},2400)}
+function raporGoster(R){var nt=R.puan>=90?['Çok iyi','#1F7A3A']:R.puan>=75?['İyi','#2F7DE1']:R.puan>=60?['Geliştirilmeli','#B85C00']:['Yeniden çalışılmalı','#C62828'];
+ var ik=function(x){return '<li class="'+(x[0]?'ok':'no')+'"><i>'+(x[0]?'✓':'✗')+'</i><span>'+(x[0]?x[1]:x[2])+'</span></li>'};
+ var o=document.getElementById('raporK');if(!o){o=document.createElement('div');o.id='raporK';document.body.appendChild(o);o.addEventListener('click',function(e){if(e.target===o)o.hidden=true})}
+ o.hidden=false;o.innerHTML='<div class="rk"><div class="rkB">'+(R.yenile?'<button class="rkYen" id="rkY">🔄 '+R.yenileAd+'</button>':'')+'<button class="rkP" id="rkP">🖨 Yazdır</button><button id="rkX">Kapat</button></div>'+
+  '<h2>'+R.baslik+'</h2><div class="rkS">'+new Date().toLocaleString('tr-TR')+' · süre '+R.sure+' dk · '+R.kayitlar.length+' kayıt</div>'+
+  '<div class="rkPuan" style="border-color:'+nt[1]+'"><b style="color:'+nt[1]+'">'+R.puan+'</b><span>/ 100</span><em style="color:'+nt[1]+'">'+nt[0]+'</em></div>'+
+  '<h3>'+R.kayitAd+'</h3>'+(R.kayitlar.length?R.kayitlar.map(function(x,i){return '<div class="rkT"><div class="rkTh"><b>'+(i+1)+'. '+x.ad+'</b><span>'+x.deger+'</span><em>'+x.puan+' puan</em></div><ul>'+x.k.map(ik).join('')+'</ul></div>'}).join(''):'<p class="rkBos">'+R.bos+'</p>')+
+  (R.bitirme&&R.bitirme.length?'<h3>İşi bitirme</h3><ul>'+R.bitirme.map(ik).join('')+'</ul>':'')+
+  '<p class="rkN">'+R.not+'</p></div>';
+ o.querySelector('#rkX').onclick=function(){o.hidden=true};var y=o.querySelector('#rkY');if(y)y.onclick=function(){R.yenile();o.hidden=true};
+ o.querySelector('#rkP').onclick=function(){document.body.classList.add('rkPrint');window.print();setTimeout(function(){document.body.classList.remove('rkPrint')},400)}}
+window.__raporGoster=raporGoster;window.__raporDugme=raporDugme;
 /* paneli küçült / aç */
 function kucult(on){var b=document.body;b.classList.toggle('dk',!!on);if(!on&&b.classList.contains('panel')){b.classList.remove('panel');var m=document.getElementById('mPanel');if(m)m.classList.remove('on')}
  var mi=document.getElementById('dersMini');if(mi)mi.textContent=SERB?'📘 Serbest kullanım paneli':'📘 Ders panelini aç';setTimeout(function(){dispatchEvent(new Event('resize'))},30)}

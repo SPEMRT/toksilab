@@ -193,13 +193,14 @@ function tick(){const now=performance.now(),dt=Math.min(.3,(now-lastT)/1000);las
  const k=S.cupT;
  /* gerçekte tüp başlığa elle bastırılmadan karışmaz; hızlı dönen başlıkta tutulmayan tüp fırlar */
  if(k&&S.rpm>150&&!tutuyor()){S.tFree+=dt;if(!S.ev.freeW&&S.tFree>.4){S.ev.freeW=1;say('<b style="color:#C62828">⚠ Tüpü bastırarak tutmuyorsun!</b> Başlık dönüyor ama tüp elle başlığa bastırılmadan karışmaz; hız artınca tüp başlıktan <b>fırlar</b>. Tüpü bastırarak tut (“✋ Tüpü bastırarak tut” ya da tüpe basılı tut).');render()}
-  if(S.rpm>1400&&S.tFree>1.2){const kk=k;S.cupT=null;S.held=null;S.hold=false;S.press=false;S.tFree=0;S.ev.freeW=0;S.flags.push('Tüp bastırılmadan çalıştırıldı: başlıktan fırladı.');if(!S.caps[kk]&&S.spills.length<10)for(let i=0;i<4;i++)S.spills.push([(Math.random()-.5)*14,(Math.random()-.5)*12+3]);say('<b style="color:#C62828">⚠ Tüp başlıktan fırladı!</b> Elle bastırılmadan çalışan vortekste tüp tutunamaz, tezgâha düşer'+(S.caps[kk]?'':' ve kapağı açık olduğu için içindekiler döküldü')+'. Tüp rafa geri kondu. Her zaman tüpü başlığa <b>bastırarak tut</b>, sonra çalıştır.');render()}}
+  if(S.rpm>1400&&S.tFree>1.2){const kk=k;if(OT&&OT.cur){OT.cur.ucti=true;otKapat()}S.cupT=null;S.held=null;S.hold=false;S.press=false;S.tFree=0;S.ev.freeW=0;S.flags.push('Tüp bastırılmadan çalıştırıldı: başlıktan fırladı.');if(!S.caps[kk]&&S.spills.length<10)for(let i=0;i<4;i++)S.spills.push([(Math.random()-.5)*14,(Math.random()-.5)*12+3]);say('<b style="color:#C62828">⚠ Tüp başlıktan fırladı!</b> Elle bastırılmadan çalışan vortekste tüp tutunamaz, tezgâha düşer'+(S.caps[kk]?'':' ve kapağı açık olduğu için içindekiler döküldü')+'. Tüp rafa geri kondu. Her zaman tüpü başlığa <b>bastırarak tut</b>, sonra çalıştır.');render()}}
  else S.tFree=0;
  if(k&&S.rpm>150&&tutuyor()){const f=Math.max(0,(S.rpm-300)/2700);S.tRun+=dt;S.ev.started=true;if(S.sw==='touch')S.tTouch+=dt;
   if(k==='hs')S.mix.hs=Math.min(1,S.mix.hs+dt*.24*f);
   else if(k==='fal'){if(S.rpm>=1950){S.tHigh+=dt;S.mix.fal=Math.min(1,S.mix.fal+dt/30)}else S.mix.fal=Math.min(1,S.mix.fal+dt*.012*f)}
   else S.mix.ep=Math.min(1,S.mix.ep+dt*.3*f);
   if(!S.caps[k]&&S.rpm>600){S.vol[k]=Math.max(.35,S.vol[k]-dt*.06);if(Math.random()<dt*3&&S.spills.length<10)S.spills.push([(Math.random()-.5)*12,(Math.random()-.5)*10+3]);if(!S.ev.spillF){S.ev.spillF=true;S.flags.push('Kapak açıkken vortekslendi: sıvı sıçradı, numune kaybı ve kontaminasyon.');say('<b>Dikkat!</b> Kapak açık: sıvı sıçrıyor ve dökülüyor! Hemen durdur.');render()}}}
+ if(ot()&&OT.cur)otIzle(dt);
  if(S.res===null)checkDone();
  renderLive()}
 /* ================= 3B SAHNE ================= */
@@ -304,7 +305,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  /* giriş */
  const ray=new THREE.Raycaster(),ptr=new THREE.Vector2();let down=null;
  const pick=e=>{const r=renderer.domElement.getBoundingClientRect();ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ptr,cam);const hit=ray.intersectObjects(HOT.filter(o=>visibleDeep(o)),false)[0];return hit?hit.object.userData.hot:null};
- renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:performance.now()};if(S.mode==='use'){const h=pick(e);if(S.cupT&&(h==='cup'||h==='tube:'+S.cupT)){startPress();ctl.enabled=false}}});
+ renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:performance.now()};if(S.mode==='use'){const h=pick(e);if(S.cupT&&(h==='cup'||h==='tube:'+S.cupT)&&(!window.__izin||window.__izin(h))){startPress();ctl.enabled=false}}});
  const up=e=>{const wasP=S.press;if(wasP){endPress();ctl.enabled=true}if(!down)return;const m=Math.hypot(e.clientX-down.x,e.clientY-down.y),dur=performance.now()-down.t;down=null;if(m<7){const h=pick(e);if(S.mode==='parts'){tipAt(h,e);return}if(wasP&&dur>350)return;if(h)onHot(h)}};
  renderer.domElement.addEventListener('pointerup',up);addEventListener('pointercancel',()=>{if(S.press){endPress();ctl.enabled=true}down=null});
  renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||down){if(down&&!S.press)hideTip();return}const h=pick(e);renderer.domElement.style.cursor=h?'pointer':'grab';if(S.mode==='parts')tipAt(h,e)});
@@ -312,7 +313,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  ctl.addEventListener('start',()=>{camAnim=null});
  animate()}
 const visibleDeep=o=>{while(o){if(o.visible===false)return false;o=o.parent}return true};
-function onHot(h){const [a,b]=h.split(':');
+function onHot(h){if(window.__izin&&!window.__izin(h)){if(window.__izinUyari)window.__izinUyari(h);return}const [a,b]=h.split(':');
  if(a==='sw')cycleSw();else if(a==='knob')showKnob();else if(a==='cup')cupTap();else if(a==='tube')tubeTap(b);else if(a==='rack')toRack()}
 /* kamera */
 let camAnim=null;const camDir=new THREE.Vector3(.3,.42,1).normalize();
@@ -420,10 +421,10 @@ function tubeTap(k){if(S.mode!=='use')return;
  if(S.held||S.cupT){say('Önce elindeki ya da başlıktaki tüpü bırak.');return}
  S.held=k;S.ev['took_'+k]=true;say(k==='hs'?'HS vialini aldın. Krimp kapak sıkı; açılmaz. Şimdi viali <b>başlığa</b> koy.':k==='fal'?(S.caps.fal?'Falkon tüpünü aldın; kapak kapalı. Şimdi başlığa koy.':'Falkon tüpünü aldın. <b>Kapak açık!</b> Vortekslemeden önce <b>Kapağı kapat</b>.'):'Eppendorf tüpünü aldın. Kapağın tam kapalı olduğundan emin ol.');render()}
 function cupTap(){if(S.mode!=='use')return;
- if(S.held){if(S.cupT){say('Başlıkta zaten bir tüp var.');return}const k=S.held;S.cupT=k;S.held=null;S.tRun=0;S.ev['cup_'+k]=true;
+ if(S.held){if(S.cupT){say('Başlıkta zaten bir tüp var.');return}const k=S.held;S.cupT=k;S.held=null;S.tRun=0;S.ev['cup_'+k]=true;otAc(k);
   if(S.sw==='on'&&S.lvl>=8)fastStart();
   say(S.sw==='touch'?'Tüp başlıkta. Şimdi başlığa ya da tüpe <b>basılı tut</b> (ya da “Bastır” düğmesini basılı tut): TOUCH modunda yalnız bastırınca döner.':S.sw==='on'?(S.caps[k]?'Tüp başlıkta ve dönüyor. Tüpü sıkıca tut.':'<b>Kapak açık!</b> Sıvı sıçrayacak!'):'Tüp başlıkta. Anahtar kapalı; çalıştırmak için <b>ON</b> ya da <b>TOUCH</b> seç.');render();return}
-  if(S.cupT){S.held=S.cupT;S.cupT=null;S.press=false;S.hold=false;say(`Tüpü başlıktan kaldırdın (${fmt(S.tRun,1)} s karıştırıldı).`+(S.sw==='on'?' Anahtarı kapatmayı unutma.':''));render();return}
+  if(S.cupT){if(OT&&OT.cur){OT.cur.donerken=S.rpm>150;otKapat()}S.held=S.cupT;S.cupT=null;S.press=false;S.hold=false;say(`Tüpü başlıktan kaldırdın (${fmt(S.tRun,1)} s karıştırıldı).`+(S.sw==='on'?' Anahtarı kapatmayı unutma.':''));render();return}
  say('Başlıkta tüp yok. Raftan bir tüp al.')}
 function toRack(){if(S.mode!=='use')return;if(S.cupT&&!S.held){say('Önce tüpü başlıktan kaldır.');return}if(!S.held){say('Elinde tüp yok.');return}const k=S.held;S.held=null;say(`${TUBE[k].n} rafa geri kondu.`);render()}
 function capToggle(){if(S.mode!=='use')return;const k=S.held;if(!k){say(S.cupT?'Kapağı açıp kapatmak için önce tüpü başlıktan kaldır.':'Elinde tüp yok.');return}
@@ -442,6 +443,50 @@ function evaluate(){const t=T();const f=[...S.flags];
  const ok=!f.length;S.res={ok};if(ok)S.done[t.id]=1;S.ev.hsDone=t.id==='hs';
  $('#res').innerHTML=`<div class="card res ${ok?'ok':'bad'}"><b class="big">${ok?(t.id==='hs'?'Vial homojen ✓':'Ekstraksiyon tamam ✓'):'Görev kabul edilmedi'}</b><div class="kv"><span>Karıştırma süresi</span><b>${fmt(S.tRun,1)} s</b>${t.id==='lle'?`<span>Yüksek hızda (≥ 2000 rpm)</span><b>${fmt(S.tHigh,1)} s</b>`:''}<span>Kalan hacim</span><b>%${Math.round(S.vol[t.id==='hs'?'hs':'fal']*100)}</b></div>${f.length?`<ul>${f.map(x=>`<li>${x}</li>`).join('')}</ul>`:`<p class="sub" style="font-size:13px">${t.id==='hs'?'Kan, su ve İS tamamen karıştı. Vial artık HS-GC-MS otomatik örnekleyicisine konabilir.':'İki faz karıştı ve bulanık bir <b>emülsiyon</b> oluştu: analit organik faza geçti. Fazları ayırmak için tüpü <b>santrifüjle</b> (4000 rpm, 5 dk), sonra üstteki organik fazı al.'}</p>`}<div class="acts">${t.id==='lle'?'<a class="bt" style="text-align:center;text-decoration:none" href="https://spemrt.github.io/toksilab/santrifuj_pilot.html" target="_blank" rel="noopener">Santrifüje git ↗</a>':''}<button class="bt" id="again">Aynı görevi tekrar dene</button></div></div>`;
  $('#again').onclick=()=>{reset(t.id);S.mode='use';render()};say(ok?(t.id==='hs'?'Mükemmel! Vial homojen; kısa bir TOUCH vorteksi yeterli oldu.':'Mükemmel! Kapalı tüp, düşük hızla başlangıç ve 30 s yüksek hız: doğru ekstraksiyon.'):'Görev kabul edilmedi. Aşağıdaki notları oku ve tekrar dene.');render()}
+/* ===== serbest kullanım: sessiz kayıt ve değerlendirme raporu =====
+   Serbest kullanımda uyarı yoktur. Tüp başlığa her konduğunda bir karıştırma kaydı açılır, kaldırılınca (ya da tüp fırlayınca) kapanır.
+   ✅ İşi bitirdim ile rapor açılır: her karıştırmanın denetimi, işi bitirme ve puan. */
+let OT=null;
+const sessiz=()=>S&&S.task==='free'&&document.body.classList.contains('serbest');
+const ot=()=>sessiz()&&OT;
+function otBasla(){OT={t0:Date.now(),kayit:[],cur:null}}
+function otAc(k){if(!ot())return;OT.cur={k,tm:new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),donuyor:false,hizli:false,kapakAcik:false,dokuldu:false,touch:0,on:0,ucti:false,donerken:false,t:0,yuksek:0,mix0:S.mix[k]}}
+function otIzle(dt){const c=OT.cur,k=c.k,don=running();
+ /* her yeni başlatmada hız kademesine bakılır: 8 ve üstü “yüksek hızla başlama” */
+ if(don&&!c.donuyor&&S.lvl>=8)c.hizli=true;c.donuyor=don;
+ if(S.rpm>150){if(!S.caps[k])c.kapakAcik=true;if(!S.caps[k]&&S.rpm>600)c.dokuldu=true;
+  if(tutuyor()){c.t+=dt;if(S.sw==='touch')c.touch+=dt;if(S.sw==='on')c.on+=dt;if(S.rpm>=1950)c.yuksek+=dt}}}
+function otKapat(){if(!OT||!OT.cur)return;const c=OT.cur;c.mix=S.mix[c.k];OT.kayit.push(c);OT.cur=null;if(window.__raporDugme)window.__raporDugme(raporAc)}
+const TAD={hs:'HS viali',fal:'Falkon tüpü (ekstraksiyon)',ep:'Eppendorf tüpü'};
+function raporAc(){if(!OT)return;
+ /* başlıkta hâlâ bir tüp varsa o karıştırma da o anki hâliyle rapora girer */
+ const liste=OT.cur?OT.kayit.concat([Object.assign({},OT.cur,{mix:S.mix[OT.cur.k],acik:true})]):OT.kayit;
+ const kayitlar=liste.map(c=>{const k=[];let d=0;const e=(ok,iyi,kotu,ceza)=>{k.push([ok,iyi,kotu]);if(!ok)d+=ceza};
+  e(!c.kapakAcik,c.k==='hs'?'Krimp kapaklı vial: sızdırmaz':'Kapak sıkıca kapalıydı',c.dokuldu?'Kapak açıkken vortekslendi: sıvı sıçradı, numune kaybı ve kontaminasyon. Vortekslemeden önce kapak sıkıca kapatılır.':'Kapak açıkken vortekslendi. Vortekslemeden önce kapak sıkıca kapatılır.',25);
+  e(!c.ucti,'Tüp başlığa bastırılarak tutuldu','Tüp bastırılmadan çalıştırıldı ve başlıktan fırladı. Önce tüp başlığa bastırılarak tutulur, sonra çalıştırılır.',25);
+  e(!c.hizli,'Düşük hızla başlandı','Yüksek hızla (8. kademe ve üstü) başlandı: sıvı bir anda kapağa sıçrar. Her zaman düşük hızla başlanır, sonra artırılır.',15);
+  if(c.k==='hs')e(c.touch>=.5,'Kısa karıştırma için TOUCH modu kullanıldı','HS viali gibi kısa karıştırmalarda TOUCH modu kullanılır (tüp kaldırılınca cihaz kendiliğinden durur).',10);
+  if(c.k==='fal')e(c.on>=.5,'Uzun karıştırma için ON (sürekli) modu kullanıldı','Ekstraksiyon gibi uzun karıştırmalarda ON (sürekli) modu kullanılır.',10);
+  const yeter=c.mix>=1;
+  e(yeter,c.k==='hs'?'Vial homojen oldu (tek renk, tabaka kalmadı)':c.k==='fal'?'Yüksek hızda yeterince karıştırıldı: iki faz emülsiyon oldu':'Tüp tamamen karıştı',
+   c.k==='hs'?'Vial homojen olmadı (%'+Math.round(c.mix*100)+'). Sıvı tek renk olana kadar karıştırılır; karışmamış vialde sonuç düşük çıkar.':
+   c.k==='fal'?'Ekstraksiyon yetersiz (%'+Math.round(c.mix*100)+'; yüksek hızda '+fmt(c.yuksek,1)+' s). En az 7. kademede 30 saniye karıştırılır; yoksa madde plazmada kalır.':
+   'Tüp tam karışmadı (%'+Math.round(c.mix*100)+').',20);
+  if(!c.ucti&&!c.acik)e(!c.donerken,'Tüp, başlık durduktan sonra kaldırıldı','Tüp başlık dönerken kaldırıldı. ON modunda önce anahtar O’ya alınır, sonra tüp kaldırılır.',5);
+  return {ad:TAD[c.k]+' · '+c.tm,deger:fmt(c.t,1)+' s',puan:Math.max(0,100-d),k}});
+ const bit=[];let bd=0;const b=(ok,iyi,kotu,ceza)=>{bit.push([ok,iyi,kotu]);if(!ok)bd+=ceza};
+ b(S.sw==='off','Anahtar O konumuna alındı','Cihaz açık bırakıldı: iş bitince anahtar O konumuna alınır.',5);
+ b(!S.cupT&&!S.held,'Tüpler rafa kondu','Tüp '+(S.cupT?'başlıkta':'elde')+' kaldı: kullanılmayan tüp rafta, dik durur.',5);
+ const ort=kayitlar.length?kayitlar.reduce((a,x)=>a+x.puan,0)/kayitlar.length:0;
+ window.__raporGoster({baslik:'Serbest vorteks · değerlendirme raporu',kayitAd:'Karıştırmalar',kayitlar,bitirme:bit,puan:kayitlar.length?Math.max(0,Math.round(ort-bd)):0,sure:Math.round((Date.now()-OT.t0)/60000),
+  bos:'Hiç karıştırma yapılmadı: bir tüpü başlığa koyup karıştırın, sonra yeniden <b>✅ İşi bitirdim</b>’e basın.',
+  not:'Puanlama: her karıştırma 100 üzerinden; kapak açık −25, tüp fırladı −25, yüksek hızla başlama −15, yanlış mod −10, yetersiz karıştırma −20, başlık dönerken kaldırma −5. Karıştırmaların ortalamasından işi bitirme eksikleri (her biri −5) düşülür.',
+  yenileAd:'Yeni tüplerle başla',yenile:serbestYenile})}
+/* serbest kullanımın başlangıcı: Falkon tüpünün kapağı açık bırakılmış (kapak kontrolü sınanır) */
+function serbestKur(){reset('free');S.mode='use';S.caps.fal=false;otBasla();render()}
+/* yeni tüpler: tüpler ve cihaz ilk hâline döner, kayıtlar korunur */
+function serbestYenile(){const o=OT;reset('free');S.mode='use';S.caps.fal=false;OT=o;if(OT)OT.cur=null;render()}
+window.serbestRapor={ac:raporAc,ot:()=>OT};
 /* ---------- girişler ---------- */
 function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
 $('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}
@@ -460,7 +505,7 @@ reset('parts');
 try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 setInterval(tick,100);
 window.scrOf=n=>{const o=n.split('.').reduce((a,k)=>a[k],K);const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};
-Object.assign(window,{reset,render,setSw,setLvl,tubeTap,cupTap,toRack,capToggle,startPress,endPress,holdToggle,onHot});Object.defineProperty(window,'S',{get:()=>S});window.__vor=1;
+Object.assign(window,{serbestKur,reset,render,setSw,setLvl,tubeTap,cupTap,toRack,capToggle,startPress,endPress,holdToggle,onHot});Object.defineProperty(window,'S',{get:()=>S});window.__vor=1;
 
 /* tam sayfa yardımcıları */
 $('#mPanel').onclick=()=>{document.body.classList.toggle('panel');$('#mPanel').classList.toggle('on',document.body.classList.contains('panel'))};
