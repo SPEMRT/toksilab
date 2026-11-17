@@ -205,6 +205,7 @@ function tick(){const now=performance.now(),dt=Math.min(.3,(now-lastT)/1000);las
  if(S.calRun){S.calRun-=dt;if(S.calRun<=0){S.calRun=0;S.cal=true;S.ev.cal=true;disturb();if(ot()){OT.kalT=Date.now();olay('kalibrasyon',{lev:levelOk()})}say('İç kalibrasyon tamamlandı ✓. Terazi içindeki referans ağırlıkla kendini ayarladı. Bu, sıcaklık değişince ve her gün işe başlarken yapılır.');if(S.task==='level'){S.done.level=1}render()}}
  const r=reading(),settle=performance.now()-S.lastDist<2200;const a=amp()*(settle?3:1);S.disp+=(r-S.disp)*(settle?.18:.5)+(Math.random()-.5)*a;
  if(S.pendingTare&&stable()){S.pendingTare=false;doTare()}
+ if(S.pendingSave&&!S.tL&&!S.tR&&stable()){S.pendingSave=false;key('s')}
  renderLive()}
 /* ================= 3B SAHNE ================= */
 const box=$('#cv3');let R3=null;
@@ -515,9 +516,10 @@ function key(k){if(S.mode!=='use')return;
  if(k==='t'){if(ot()){if(!S.boat)OT.bosDara++;if(!stable())OT.karsizDara++}if(!stable()){S.pendingTare=true;say('Değer kararsız. Terazi <b>kararlı olmasını bekliyor</b>; olunca dara kendiliğinden alınacak. Kapıların kapalı olduğundan emin ol.');return}doTare();return}
  if(k==='z'){if(S.boat&&ot())OT.kayiksizSifir++;if(S.boat){say('Kefede kap varken <b>→T← Dara</b> kullanılır. Sıfırlama boş kefe içindir.');return}S.zero=trueMass();S.tare=0;S.disp=0;disturb();S.lastDist-=2200;say('Terazi sıfırlandı (boş kefe = 0).');render();return}
  if(k==='c'){if(S.calRun)return;S.menu=!S.menu;if(S.menu)say('<b>Ayarlar</b> menüsü açıldı: iç kalibrasyon ve tartım birimi (g / mg).');render();return}
- if(k==='s'){if(S.task==='parts'||S.task==='level'){say('Kaydetme tartım görevlerinde ve serbest tartımda kullanılır.');return}if(S.tL||S.tR){if(ot())OT.acikKaydet++;say('Kapı açıkken kayıt alınmaz; önce kapıyı kapat.');return}if(!stable()){if(ot())OT.kararsizKaydet++;say('Değer kararsız; <b>● KARARLI</b> işaretini bekle.');return}
+ if(k==='s'){if(S.task==='parts'||S.task==='level'){say('Kaydetme tartım görevlerinde ve serbest tartımda kullanılır.');return}if(S.task==='free'&&(S.tL||S.tR||!stable())){if(ot()&&(S.tL||S.tR))OT.acikKaydet++;S.pendingSave=true;render();return}
+  if(S.tL||S.tR){say('Kapı açıkken kayıt alınmaz; önce kapıyı kapat.');return}if(!stable()){say('Değer kararsız; <b>● KARARLI</b> işaretini bekle.');return}
   if(S.task==='free'){const tm=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});S.log.push({v:S.disp,u:S.unit,tm});S.ev.saved=true;
-   if(ot()){const mg=S.disp;/* ekran değeri her zaman mg cinsinden tutulur */OT.tartim.push({tm,v:S.disp,u:S.unit,mg,oku:reading(),gercek:S.powder,lev:levelOk(),kal:S.cal,kayik:S.boat,dara:!!S.boat&&tareOk(),dokulme:S.spill>0,kalSonra:OT.kalT&&OT.levT?OT.kalT>=OT.levT:false});raporDugme()}
+   if(ot()){const mg=S.disp;/* ekran değeri her zaman mg cinsinden tutulur */OT.tartim.push({tm,v:S.disp,u:S.unit,mg,oku:reading(),gercek:S.powder,lev:levelOk(),kal:S.cal,kayik:S.boat,dara:!!S.boat&&tareOk(),dokulme:S.spill>0,kalSonra:OT.kalT&&OT.levT?OT.kalT>=OT.levT:false});raporDugme();const rk=$('#raporK');if(rk&&!rk.hidden)raporAc()}
    showLog();say('Kayıt alındı.');render();return}
   evaluate()}}
 /* ---------- değerlendirme raporu ---------- */
@@ -536,8 +538,7 @@ function raporHesap(){const T=OT.tartim.map((r,i)=>{const k=[];let d=0;
  ek(!!OT.levT,'Terazi düzlendi','Oturum boyunca terazi hiç düzlenmedi.',0);
  ek(OT.dokulme===0,'Kefeye madde dökülmedi',OT.dokulme+' kez madde kayık yokken kefeye döküldü (kontaminasyon).',Math.min(20,OT.dokulme*10));
  ek(OT.elleKapi===0,'Kapılar sensörle açılıp kapandı','Kapı '+OT.elleKapi+' kez elle açıldı: cam titrer, parmak izi kalır. Sensör kullanılır.',Math.min(6,OT.elleKapi*2));
- ek(OT.acikKaydet===0,'Kapı açıkken kayıt denenmedi','Kapı açıkken '+OT.acikKaydet+' kez kaydetmeye çalışıldı: hava akımı değeri oynatır.',Math.min(9,OT.acikKaydet*3));
- ek(OT.kararsizKaydet===0,'Kararlı değer beklendi','Değer kararsızken '+OT.kararsizKaydet+' kez kaydetmeye çalışıldı: ● KARARLI işareti beklenir.',Math.min(9,OT.kararsizKaydet*3));
+ ek(OT.acikKaydet===0,'Kapı açıkken kayıt denenmedi','Kapı açıkken '+OT.acikKaydet+' kez Kaydet’e basıldı: kayıt, kapı kapanıp değer oturana kadar bekledi. Hava akımı değeri oynatır; önce kapı kapatılır, ● KARARLI beklenir.',Math.min(9,OT.acikKaydet*3));
  ek(OT.bosDara===0&&OT.kayiksizSifir===0,'Dara ve sıfırlama doğru kullanıldı',(OT.bosDara?OT.bosDara+' kez boş kefede dara alındı (boş kefe için →0← Sıfırla). ':'')+(OT.kayiksizSifir?OT.kayiksizSifir+' kez kayık varken sıfırlama denendi (kap için →T← Dara).':''),Math.min(6,(OT.bosDara+OT.kayiksizSifir)*2));
  if(OT.kalRed.length)ek(false,'','İç kalibrasyon '+OT.kalRed.length+' kez koşullar sağlanmadan denendi ('+[...new Set(OT.kalRed)].join(', ')+'): kapılar kapalı, kefe boş ve terazi düz olmalı.',Math.min(6,OT.kalRed.length*2));
  if(OT.fazlaAtik)G.push([true,'Fazla madde '+OT.fazlaAtik+' kez atığa alındı (stok şişesine geri konmadı)','']);
@@ -553,7 +554,6 @@ function raporAc(){if(!OT||!OT.tartim.length)return;const R=raporHesap(),not=R.p
  <div class="rkPuan" style="border-color:${not[1]}"><b style="color:${not[1]}">${R.puan}</b><span>/ 100</span><em style="color:${not[1]}">${not[0]}</em></div>
  <h3>Tartımlar</h3>${R.T.map((x,i)=>`<div class="rkT"><div class="rkTh"><b>${i+1}. kayıt · ${x.r.tm}</b><span>${x.r.u==='mg'?fmt(x.r.v,3)+' mg':g6(x.r.v)+' g'}</span><em>${x.puan} puan</em></div><ul>${x.k.map(k=>ik(k[0],k[1],k[2])).join('')}</ul></div>`).join('')}
  <h3>Çalışma düzeni</h3><ul>${R.G.filter(g=>g[1]||g[2]).map(g=>ik(g[0],g[1],g[2])).join('')}</ul>
- ${oneri.length?`<h3>Hoca notu: bir dahaki sefere</h3><ol>${oneri.map(x=>'<li>'+x+'</li>').join('')}</ol>`:'<h3>Hoca notu</h3><p>Temiz bir tartım: hazırlık, dara ve kayıt kurallara uygun. Böyle devam.</p>'}
  <p class="rkN">Puanlama: her kayıt 100 üzerinden; terazi düz değil −20, dara yok −20, kayıksız / dökülme −15, kalibrasyon eksik −10, kaydedilen değer madde miktarıyla uyumsuz −10. Kayıtların ortalamasından çalışma düzeni hataları düşülür.</p></div>`;
  o.querySelector('#rkX').onclick=()=>{o.hidden=true};o.querySelector('#rkP').onclick=()=>{document.body.classList.add('rkPrint');window.print();setTimeout(()=>document.body.classList.remove('rkPrint'),400)}}
 window.serbestTartim={basla:otBasla,rapor:raporAc,hesap:()=>OT&&raporHesap(),ot:()=>OT};
