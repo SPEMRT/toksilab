@@ -130,6 +130,8 @@ html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;botto
 body.cders .loupe:not(.left){right:400px}body.cders.dk .loupe:not(.left){right:10px}
 body.cders.serbest.sbk.panel .loupe:not(.left){right:310px}body.cders.serbest.sbk:not(.panel) .loupe:not(.left){right:10px}
 @media (max-width:900px){body.cders .loupe:not(.left),body.cders.serbest.sbk.panel .loupe:not(.left){right:8px}}
+/* derste sonuç kartı sol altta: sol üstteki pipet standını örtmesin */
+@media (min-width:901px){body.cders.resOk:not(.serbest) #res:not(:empty):not([hidden]){top:auto!important;bottom:12px!important}}
 </style>
 <script>document.documentElement.classList.add('dersOn');setTimeout(function(){if(!document.body||!document.body.classList.contains('cders'))document.documentElement.classList.remove('dersOn')},12000)</script>
 </head>
