@@ -182,7 +182,7 @@ const T=()=>TASKS.find(x=>x.id===S.task);
 const levelOk=()=>Math.hypot(S.lev.x,S.lev.y)<.6;
 /* ===== serbest kullanım: sessiz kayıt ve değerlendirme raporu =====
    Serbest tartımda (görev 'free') hiçbir uyarı verilmez; yapılan her işlem kaydedilir. İlk kayıttan sonra
-   soldaki menüde 📋 Rapor çıkar: hazırlık, her tartımın denetimi, çalışma düzeni, öneriler ve puan. */
+   soldaki menüde 📋 Rapor çıkar: hazırlık, her tartımın denetimi ve puan (çalışma düzeni raporda gösterilmez). */
 let OT=null;
 function otBasla(){OT={t0:Date.now(),olay:[],tartim:[],kalT:null,levT:null,elleKapi:0,acikKaydet:0,kararsizKaydet:0,dokulme:0,fazlaAtik:0,aktarim:[],kalRed:[],karsizDara:0,bosDara:0,kayiksizSifir:0,acikEkleme:0}}
 const ot=()=>S&&S.task==='free'&&OT;
@@ -543,7 +543,7 @@ function raporHesap(){const T=OT.tartim.map((r,i)=>{const k=[];let d=0;
  if(OT.kalRed.length)ek(false,'','İç kalibrasyon '+OT.kalRed.length+' kez koşullar sağlanmadan denendi ('+[...new Set(OT.kalRed)].join(', ')+'): kapılar kapalı, kefe boş ve terazi düz olmalı.',Math.min(6,OT.kalRed.length*2));
  if(OT.fazlaAtik)G.push([true,'Fazla madde '+OT.fazlaAtik+' kez atığa alındı (stok şişesine geri konmadı)','']);
  if(OT.aktarim.length)G.push([true,'Tartılan madde '+OT.aktarim.map(a=>a.k==='vol'?'balon jojeye':'erlene').join(', ')+' aktarıldı','']);
- const ort=T.length?T.reduce((a,x)=>a+x.puan,0)/T.length:0;const puan=Math.max(0,Math.round(ort-gd));
+ const ort=T.length?T.reduce((a,x)=>a+x.puan,0)/T.length:0;const puan=Math.max(0,Math.round(ort));/* çalışma düzeni raporda gösterilmiyor; puana da katılmaz */
  return {T,G,puan,sure:Math.round((Date.now()-OT.t0)/60000)}}
 function raporAc(){if(!OT||!OT.tartim.length)return;const R=raporHesap(),not=R.puan>=90?['Çok iyi','#1F7A3A']:R.puan>=75?['İyi','#2F7DE1']:R.puan>=60?['Geliştirilmeli','#B85C00']:['Yeniden çalışılmalı','#C62828'];
  const ik=(ok,a,b)=>`<li class="${ok?'ok':'no'}"><i>${ok?'✓':'✗'}</i><span>${ok?a:b}</span></li>`;
@@ -553,8 +553,7 @@ function raporAc(){if(!OT||!OT.tartim.length)return;const R=raporHesap(),not=R.p
  <h2>Serbest tartım · değerlendirme raporu</h2><div class="rkS">${new Date().toLocaleString('tr-TR')} · süre ${R.sure} dk · ${R.T.length} kayıt</div>
  <div class="rkPuan" style="border-color:${not[1]}"><b style="color:${not[1]}">${R.puan}</b><span>/ 100</span><em style="color:${not[1]}">${not[0]}</em></div>
  <h3>Tartımlar</h3>${R.T.map((x,i)=>`<div class="rkT"><div class="rkTh"><b>${i+1}. kayıt · ${x.r.tm}</b><span>${x.r.u==='mg'?fmt(x.r.v,3)+' mg':g6(x.r.v)+' g'}</span><em>${x.puan} puan</em></div><ul>${x.k.map(k=>ik(k[0],k[1],k[2])).join('')}</ul></div>`).join('')}
- <h3>Çalışma düzeni</h3><ul>${R.G.filter(g=>g[1]||g[2]).map(g=>ik(g[0],g[1],g[2])).join('')}</ul>
- <p class="rkN">Puanlama: her kayıt 100 üzerinden; terazi düz değil −20, dara yok −20, kayıksız / dökülme −15, kalibrasyon eksik −10, kaydedilen değer madde miktarıyla uyumsuz −10. Kayıtların ortalamasından çalışma düzeni hataları düşülür.</p></div>`;
+ <p class="rkN">Puanlama: her kayıt 100 üzerinden; terazi düz değil −20, dara yok −20, kayıksız / dökülme −15, kalibrasyon eksik −10, kaydedilen değer madde miktarıyla uyumsuz −10. Rapor puanı, kayıtların ortalamasıdır.</p></div>`;
  o.querySelector('#rkX').onclick=()=>{o.hidden=true};o.querySelector('#rkY').onclick=()=>{tartimYenile();o.hidden=true};o.querySelector('#rkP').onclick=()=>{document.body.classList.add('rkPrint');window.print();setTimeout(()=>document.body.classList.remove('rkPrint'),400)}}
 /* yeni tartım: terazinin üstü ilk hâline döner (kayık, madde, spatula, kapılar, dara); seviye ve kalibrasyon yerinde kalır, rapor kayıtları korunur */
 function tartimYenile(){Object.assign(S,{boat:null,powder:0,spill:0,held:null,heldPow:0,spLoad:false,tL:0,tR:0,tare:0,zero:0,disp:0,pendingSave:false,pendingTare:false,menu:false,hand:0});fpK=null;const fp=$('#fpop');if(fp)fp.hidden=true;$('#res').innerHTML='';disturb();S.lastDist-=2200;render()}
