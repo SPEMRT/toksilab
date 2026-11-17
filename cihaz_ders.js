@@ -463,12 +463,14 @@ return {sayfa:'santrifuj_pilot.html',hazir:'__cen',sonucKarti:true,ad:'SANTRİF�
  acl:'Cihazı dört kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 4–6 dakika sürer.',
  GM:{parts:'sentani',kan:'senkan',lle:'senlle',epp:'senepp'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['sentani','senkan','senlle','senepp'],
  senkron:function(s,o){['sentani:parts','senkan:kan','senlle:lle','senepp:epp'].forEach(function(x){x=x.split(':');if(o[x[0]]&&o[x[0]].bitti)s.done[x[1]]=1})},
- serbest:{yerlesim:'kontrol',
-  kur:function(){var s=S();if(s.phase!=='idle')return;s.slots.fill(null);window.reset('bos');S().mode='use';window.render()},
+ /* serbest kullanım sessiz sınavdır: uyarı ve sonuç kartı yok; her çalıştırma kaydedilir, ✅ İşi bitirdim ile rapor */
+ serbest:{yerlesim:'kontrol',sessiz:true,
+  kur:function(){if(window.serbestKur)window.serbestKur()},
+  ses:function(s){var o=window.serbestRapor&&window.serbestRapor.ot(),n=o?o.kayit.length:0;return n?'<b>'+n+' çalıştırma</b> kaydedildi. Bitirince <b>✅ İşi bitirdim</b>: değerlendirme raporun açılır. Raporu soldaki <b>📋 Rapor</b> ile yeniden açabilirsin.':'Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. <b>🧪 Numune seç</b> ile tüpleri rafa al, santrifüjle. Her çalıştırma kaydedilir. Bitirince <b>✅ İşi bitirdim</b>’e bas: değerlendirme raporun açılır.'},
   numune:[['kan','Kan · 5 tüp'],['lle','Ekstraksiyon · 4 tüp'],['epp','Eppendorf · 7 mikrotüp'],['fal','Falkon 15 mL · 6 tüp']],
   numuneSec:function(id){var s=S();if(s.phase!=='idle'){return 'Santrifüj çalışırken numune değiştirilmez.'}s.slots.fill(null);window.reset(id);S().mode='use';if(window.autoBalance)window.autoBalance();window.render();return ''},
-  ek:'<button class="bt sbVent" id="sbVent" hidden>💨 Gazını al (çeker ocakta)</button>',
-  ekBagla:function(d){d.querySelector('#sbVent').onclick=function(){var s=S(),t=s.tray.filter(function(x){return (x.kind==='ea'||x.kind==='dcm')&&!x.vent}),sel=t.filter(function(x){return x.id===s.sel})[0];(sel?[sel]:t).forEach(function(x){window.vent(x.id)})}},
+  ek:'<button class="bt sbVent" id="sbVent" hidden>💨 Gazını al (çeker ocakta)</button><button class="bt sbBitir" id="sbBitir">✅ İşi bitirdim · Raporu gör</button>',
+  ekBagla:function(d){d.querySelector('#sbBitir').onclick=function(){if(window.serbestRapor)window.serbestRapor.ac()};d.querySelector('#sbVent').onclick=function(){var s=S(),t=s.tray.filter(function(x){return (x.kind==='ea'||x.kind==='dcm')&&!x.vent}),sel=t.filter(function(x){return x.id===s.sel})[0];(sel?[sel]:t).forEach(function(x){window.vent(x.id)})}},
   ekYenile:function(d,s){var b=d.querySelector('#sbVent');if(!b)return;var t=s.tray.filter(function(x){return (x.kind==='ea'||x.kind==='dcm')&&!x.vent}),sel=t.filter(function(x){return x.id===s.sel})[0];b.hidden=!t.length;b.textContent=sel?'💨 '+sel.id+' tüpünün gazını al':'💨 Gazını al: '+t.length+' tüp (çeker ocakta)'}}};
 }
 
@@ -616,7 +618,7 @@ function kontrolEk(){var side=document.getElementById('side');if(!side||document
   (C.serbest.ek||'')+(C.serbest.sessiz?'<div class="sbSes" id="sbSes">'+(C.serbest.ses?C.serbest.ses(S()):'')+'</div>':'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div>')+'<button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
  c.appendChild(d);var L2=d.querySelector('#sbNumL');
  if(L2)d.querySelector('#sbNumB').onclick=function(){L2.hidden=!L2.hidden};
- d.querySelectorAll('[data-num]').forEach(function(b){b.onclick=function(){var m=C.serbest.numuneSec(b.dataset.num);if(!m)L2.hidden=true;else{NOT=m;var n=document.getElementById('sbNot');n.querySelector('.nt').innerHTML=m;n.hidden=false}}});
+ d.querySelectorAll('[data-num]').forEach(function(b){b.onclick=function(){var m=C.serbest.numuneSec(b.dataset.num);if(!m)L2.hidden=true;else{NOT=m;var n=document.getElementById('sbNot');if(n){n.querySelector('.nt').innerHTML=m;n.hidden=false}}}});
  d.querySelector('#sbDers').onclick=function(){ac('liste')};if(C.serbest.ekBagla)C.serbest.ekBagla(d);
  /* tüp listesi ve elle denge tüpü düğmeleri serbest kullanımda gösterilmez (denge tüpü rafa kendiliğinden gelir) */
  ['tray','balp'].forEach(function(id){var e=document.getElementById(id);if(!e)return;e.classList.add('sbGizle');var pr=e.previousElementSibling;if(pr&&pr.classList.contains('sub')&&id==='tray')pr.classList.add('sbGizle')})}

@@ -465,7 +465,7 @@ function slot(k){if(S.mode!=='use')return;if(S.lid!=='open'){say('Kapak kapalıy
  if(t){S.slots[k]=null;t.where=null;S.sel=null;checkPlaced();say(`${t.n} rotordan alındı.`);render();return}
  if(!S.sel){say('Önce raftan bir tüp seç.');return}const tube=S.tray.find(x=>x.id===S.sel);
  if(!fits(tube)){say((tube.kind==='fal'||tube.kind==='wf')?'<b>Falkon tüpü bu rotora sığmaz.</b> 15 mL tüpler <b>kovalı rotora</b> konur; rotoru değiştir.':S.rotor==='buc'?'<b>Bu tüp kovalı rotorun Falkon adaptörüne uymaz.</b> Tüp tipine uygun rotoru tak.':tube.kind==='epp'||tube.kind==='wm'?'<b>Mikrotüp bu rotora uymaz!</b> 5 mL yuvalarda mikrotüp boşta kalır ve santrifüjde kırılır. Rotoru <b>mikrotüp rotoruyla değiştir</b>.':'<b>Bu tüp mikrotüp yuvasına sığmaz.</b> 5 mL tüpler için açılı rotoru tak.');return}
- if((tube.kind==='ea'||tube.kind==='dcm')&&!tube.vent){say(`<b>Dur!</b> ${tube.id} tüpünde uçucu organik çözücü var. Santrifüje koymadan önce <b>gazını al</b> (Kontroller panelindeki <b>💨 Gazını al</b>).`);return}
+ if((tube.kind==='ea'||tube.kind==='dcm')&&!tube.vent&&!sessiz()){say(`<b>Dur!</b> ${tube.id} tüpünde uçucu organik çözücü var. Santrifüje koymadan önce <b>gazını al</b> (Kontroller panelindeki <b>💨 Gazını al</b>).`);return}
  if(tube.where!=null)S.slots[tube.where]=null;S.slots[k]=tube;tube.where=k;S.sel=null;if(!checkPlaced())say(`${tube.n} → yuva ${k+1}. ${samplesAll()?'':'Sıradaki tüpü karşısına yerleştir.'}`);render()}
 function checkPlaced(){const v=imb();const ok=samplesAll()&&v.m<=R().tol;const was=S.f.placed;S.f.placed=ok;S.f.closed=S.f.closed&&ok;
  if(ok&&!was){say(S.set==='lle'?'Dengeli! Aynı çözücüyü taşıyan tüpleri karşılıklı koydun: DCM tüpleri etil asetatlılardan daha ağırdır. Şimdi <b>kapağı kapat</b>.':'Dengeli! Bütün tüpler yerleşti ve dengesizlik sınırın altında. Şimdi <b>kapağı kapat</b>.');return true}
@@ -495,8 +495,8 @@ function knobPopYaz(){const k=$('#kpop');if(!k||k.hidden)return;$('#kpT').textCo
 function start(){if(S.mode!=='use')return;S.msg=null;const kp=$('#kpop');if(kp)kp.hidden=true;
  if(S.lid==='open'){S.msg='LId';say('<b>Kapak açık!</b> Santrifüj kapak kilitlenmeden çalışmaz. Önce kapağı kapat.');render();return}
  if(!nPlaced()){S.msg='Err';say('Rotor boş. Önce tüpleri yerleştir.');render();return}
- if(S.rpm>R().max){S.msg='Err';say(`<b>Dur!</b> ${fmt(S.rpm)} rpm, takılı rotorun sınırının (<b>${R().n}: en fazla ${fmt(R().max)} rpm</b>) üstünde. Rotor ya da tüpler zarar görebilir; hızı düşür.${S.prog===2?' İpucu: ekranda mikrotüp programı P2 kalmış.':''}`);render();return}
- S.phase='accel';S.left=S.sec;S.elapsed=0;S.result=null;S.f.done=false;S.tray.forEach(t=>t.st=null);$('#res').innerHTML='';say('Santrifüj hızlanıyor… Kapak kilitlendi.');render()}
+ if(S.rpm>R().max){S.msg='Err';if(ot()){const t='Takılı rotorun sınırının üstünde bir hızla ('+fmt(S.rpm)+' rpm; '+R().n+' en fazla '+fmt(R().max)+' rpm) başlatma denendi';if(OT.tehlike.indexOf(t)<0)OT.tehlike.push(t)}say(`<b>Dur!</b> ${fmt(S.rpm)} rpm, takılı rotorun sınırının (<b>${R().n}: en fazla ${fmt(R().max)} rpm</b>) üstünde. Rotor ya da tüpler zarar görebilir; hızı düşür.${S.prog===2?' İpucu: ekranda mikrotüp programı P2 kalmış.':''}`);render();return}
+ S.phase='accel';S.left=S.sec;S.elapsed=0;S.result=null;otAc();S.f.done=false;S.tray.forEach(t=>t.st=null);$('#res').innerHTML='';say('Santrifüj hızlanıyor… Kapak kilitlendi.');render()}
 function stop(){if(S.phase==='accel'||S.phase==='run'){S.phase='decel';say('Durduruluyor. Rotor tamamen durana kadar kapak açılmaz.');render()}}
 /* ---------- sonuç ---------- */
 function tubeSide(t,v,x){const cap=CAPC[t.kind];
@@ -508,7 +508,7 @@ function tubeSide(t,v,x){const cap=CAPC[t.kind];
  const em=v==='ok'?3:v==='mid'?12:30;const org=t.kind==='ea'?'#F3EBC8':'#EEF1E8',aq='#D9C49A';
  if(t.kind==='ea')return body(`<rect x="2" y="30" width="18" height="${60-em/2}" fill="${org}" opacity=".95"/><rect x="2" y="${90-em/2}" width="18" height="${em}" fill="#FFFFFF" opacity=".9"/><rect x="2" y="${90+em/2}" width="18" height="${28-em/2}" rx="8" fill="${aq}"/>`);
  return body(`<rect x="2" y="30" width="18" height="${22-em/2}" fill="${aq}"/><rect x="2" y="${52-em/2}" width="18" height="${em}" fill="#FFFFFF" opacity=".9"/><rect x="2" y="${52+em/2}" width="18" height="${66-em/2}" rx="8" fill="${org}" opacity=".95"/>`)}
-function showResult(){const r=S.result;const list=S.tray.filter(t=>!BAL(t.kind)||t.where!=null);
+function showResult(){if(sessiz()){render();return}const r=S.result;const list=S.tray.filter(t=>!BAL(t.kind)||t.where!=null);
  const vs=list.filter(t=>!BAL(t.kind)).map(t=>verdict(t.kind,r.rpm,r.min));const worst=vs.includes('bad')?'bad':vs.includes('mid')?'mid':'ok';if(worst==='ok')S.done[S.set]=1;
  const T={kan:{ok:['Plazma berrak ayrıldı ✓','Hücreler dipte, üstte berrak sarı plazma. Numuneler analize hazır.'],mid:['Ayrım yetersiz','Plazma bulanık; hücreler tam çökmedi. Kan için daha yüksek hız ya da daha uzun süre gerekir.'],bad:['Ayrılmadı','Kan hâlâ karışık; plazma ayrılmadı.']},
   lle:{ok:['Fazlar net ayrıldı ✓','Etil asetatta organik faz üstte, DCM’de altta. Ara yüzde emülsiyon yok; organik fazı rahatça alabilirsin.'],mid:['İnce emülsiyon','Fazlar ayrıldı ama ara yüzde ince bir emülsiyon tabakası var. Organik fazı alırken kayıp olabilir.'],bad:['Kalın emülsiyon','Fazlar ayrılmadı; ara yüzde kalın beyaz bir emülsiyon var.']},
@@ -516,6 +516,40 @@ function showResult(){const r=S.result;const list=S.tray.filter(t=>!BAL(t.kind)|
   epp:{ok:['Proteinler çöktü ✓','Dipte sıkı bir pelet, üstte berrak süpernatan. Süpernatanı dikkatle alabilirsin.'],mid:['Pelet gevşek','Pelet oluştu ama gevşek; süpernatan biraz bulanık.'],bad:['Çökme yetersiz','Süpernatan bulanık; proteinler dibe çökmedi.']}}[S.set][worst];
  $('#res').innerHTML=`<div class="card res ${worst}"><div class="resg"><svg viewBox="0 0 ${Math.max(170,list.length*30+10)} 142">${list.map((t,i)=>tubeSide(t,verdict(t.kind,r.rpm,r.min),6+i*30)).join('')}</svg><div><b class="big">${T[0]}</b><p style="margin-top:4px">${T[1]}</p><p style="font:500 12.5px var(--f-mono);margin-top:6px;color:#9BB0B6">${fmt(r.rpm)} rpm · ${fmt(r.min,1)} dk</p><div class="acts" style="margin-top:10px"><button class="bt" id="again">Aynı görevi baştan dene</button></div></div></div></div>`;$('#again').onclick=()=>{S.slots.fill(null);reset(S.task);S.mode='use';render()};
  say(worst==='ok'?'Tebrikler! Doğru ayarla santrifüjledin. Rotor durduktan sonra kapağı açtın; tüplerdeki ayrımı rotorda da görebilirsin. Diğer görevleri de dene.':'Rotor durdu ve kapağı açtın, ama sonuç istediğimiz gibi değil. Nedenini aşağıda oku ve ayarları değiştirerek tekrar dene.');render()}
+/* ===== serbest kullanım: sessiz kayıt ve değerlendirme raporu =====
+   Serbest kullanımda uyarı ve sonuç kartı yoktur. Her START bir kayıt açar, rotor durunca kapanır. ✅ İşi bitirdim ile rapor açılır. */
+let OT=null;
+const sessiz=()=>!!window.__serbest;
+const ot=()=>sessiz()&&OT;
+function otBasla(){OT={t0:Date.now(),kayit:[],cur:null,tehlike:[]}}
+function otAc(){if(!ot())return;const v=imb(),num=S.tray.filter(t=>!BAL(t.kind));
+ OT.cur={tm:new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),set:S.set,rotor:S.rotor,rn:R().n,n:nPlaced(),imb:v.m,tol:R().tol,rpm:S.rpm,sec:S.sec,
+  hepsi:num.every(t=>t.where!=null),eksik:num.filter(t=>t.where==null).length,gazsiz:num.filter(t=>t.where!=null&&(t.kind==='ea'||t.kind==='dcm')&&!t.vent).map(t=>t.id),
+  kinds:[...new Set(num.filter(t=>t.where!=null).map(t=>t.kind))]}}
+function otKapat(hata){if(!OT||!OT.cur)return;const c=OT.cur;c.hata=hata;c.gecen=S.elapsed;OT.kayit.push(c);OT.cur=null;if(window.__raporDugme)window.__raporDugme(raporAc)}
+const NAD={kan:'Kan',lle:'Ekstraksiyon',epp:'Eppendorf',fal:'Falkon',bos:'Boş'};
+const IYI={kan:'4000 rpm · 10 dk (en az 3500 rpm · 10 dk ya da 4000 rpm · 5 dk)',ea:'3000 rpm · 5 dk',dcm:'3000 rpm · 5 dk',epp:'13000 rpm · 10 dk (en az 10000 rpm · 5 dk)',fal:'3000 rpm · 5 dk (en az 2500 rpm · 5 dk)'};
+function raporAc(){if(!OT)return;
+ const liste=OT.cur?OT.kayit.concat([Object.assign({},OT.cur,{acik:true,gecen:S.elapsed})]):OT.kayit;
+ const kayitlar=liste.map(c=>{const k=[];let d=0;const e=(ok,iyi,kotu,ceza)=>{k.push([ok,iyi,kotu]);if(!ok)d+=ceza};
+  e(c.hepsi,'Bütün numuneler rotordaydı','Raftaki '+c.eksik+' numune santrifüjlenmeden kaldı.',10);
+  e(c.imb<=c.tol,'Rotor dengeliydi (dengesizlik '+fmt(c.imb,2)+' g)','Rotor dengesizdi ('+fmt(c.imb,2)+' g; sınır '+fmt(c.tol,2)+' g)'+(c.hata?': cihaz titreşimi algılayıp durdu.':'.')+' Tüpler karşılıklı ve eşit ağırlıkta dizilir; tek kalan tüpün karşısına denge tüpü konur.',30);
+  if(c.set==='lle')e(!c.gazsiz.length,'Organik çözücülü tüplerin gazı alındı','Gazı alınmadan santrifüjlenen tüp: '+c.gazsiz.join(', ')+'. Çözücü buharı basınç yapar; tüp sızdırabilir ya da kapağı fırlayabilir. Önce çeker ocakta kapak yavaşça açılıp basınç alınır.',20);
+  const min=c.sec/60,vs=c.kinds.map(x=>verdict(x,c.rpm,min)),w=vs.includes('bad')?'bad':vs.includes('mid')?'mid':'ok';
+  if(c.kinds.length)e(w==='ok','Hız ve süre numuneye uygundu ('+fmt(c.rpm)+' rpm · '+mmss(c.sec)+')',(w==='bad'?'Hız ya da süre çok düşük':'Hız ya da süre yetersiz')+' ('+fmt(c.rpm)+' rpm · '+mmss(c.sec)+'): ayrım tam olmaz. Önerilen: '+c.kinds.map(x=>IYI[x]).filter((x,i,a)=>a.indexOf(x)===i).join('; ')+'.',w==='bad'?20:10);
+  if(!c.hata&&!c.acik)e(c.gecen>=c.sec-1,'Süre tamamlandı','Santrifüj süre bitmeden durduruldu ('+mmss(c.gecen)+' / '+mmss(c.sec)+').',10);
+  return {ad:NAD[c.set]+' · '+c.tm,deger:c.n+' tüp · '+c.rn,puan:Math.max(0,100-d),k}});
+ const bit=[];let bd=0;const b=(ok,iyi,kotu,ceza)=>{bit.push([ok,iyi,kotu]);if(!ok)bd+=ceza};
+ b(!nPlaced(),'Tüpler rotordan alındı','Tüpler rotorda bırakıldı: iş bitince tüpler alınır, rotor ve hazne kontrol edilir.',5);
+ OT.tehlike.forEach(t=>{bit.push([false,'',t+' (cihaz izin vermedi)']);bd+=10});
+ const ort=kayitlar.length?kayitlar.reduce((a,x)=>a+x.puan,0)/kayitlar.length:0;
+ window.__raporGoster({baslik:'Serbest santrifüj · değerlendirme raporu',kayitAd:'Çalıştırmalar',kayitlar,bitirme:bit,puan:kayitlar.length?Math.max(0,Math.round(ort-bd)):0,sure:Math.round((Date.now()-OT.t0)/60000),
+  bos:'Santrifüj hiç çalıştırılmadı: numune seçip tüpleri yerleştirin, santrifüjleyin, sonra yeniden <b>✅ İşi bitirdim</b>’e basın.',
+  not:'Puanlama: her çalıştırma 100 üzerinden; rotor dengesiz −30, gazı alınmamış tüp −20, hız / süre yetersiz −10 ya da −20, rafta numune kaldı −10, süre bitmeden durdurma −10. Çalıştırmaların ortalamasından işi bitirme eksikleri (−5) ve engellenen tehlikeli girişimler (her biri −10) düşülür.',
+  yenileAd:'Yeniden başla',yenile:serbestYenile})}
+function serbestKur(){if(S.phase!=='idle')return;S.slots.fill(null);reset('bos');S.mode='use';otBasla();render()}
+function serbestYenile(){if(S.phase!=='idle')return;const o=OT;S.slots.fill(null);reset('bos');S.mode='use';OT=o;if(OT)OT.cur=null;render()}
+window.serbestRapor={ac:raporAc,ot:()=>OT};
 /* ---------- döngü ---------- */
 let last=performance.now();
 function loop(){const now=performance.now(),dt=Math.min(.1,(now-last)/1000);last=now;let ch=false;
@@ -523,7 +557,7 @@ function loop(){const now=performance.now(),dt=Math.min(.1,(now-last)/1000);last
   else if(S.cur>=S.rpm){S.phase='run';S.f.started=true;say(`Çalışıyor: ${fmt(S.rpm)} rpm. Süre hızlandırılmış gösteriliyor (1 sn ≈ ${SPEED} sn).`);render()}}
  else if(S.phase==='run'){S.left-=dt*SPEED;S.elapsed+=dt*SPEED;S.temp=Math.min(26,S.temp+dt*.02);ch=true;if(S.left<=0){S.left=0;S.elapsed=S.sec;S.phase='decel';render()}}
  else if(S.phase==='decel'||S.phase==='error'){S.cur=Math.max(0,S.cur-(S.phase==='error'?6000:3000)*dt);ch=true;if(S.cur<=0){const wasErr=S.phase==='error';S.phase='idle';S.left=S.sec;
-   if(!wasErr&&S.elapsed>0){S.result={rpm:S.rpm,min:Math.round(S.elapsed)/60};S.tray.forEach(t=>{if(t.where!=null)t.st=verdict(t.kind,S.result.rpm,S.result.min)});S.msg='End';say('Rotor durdu, kapak kilidi açıldı. Şimdi <b>kapağı aç</b> ve sonuca bak.')}render()}}
+   otKapat(wasErr);if(!wasErr&&S.elapsed>0){S.result={rpm:S.rpm,min:Math.round(S.elapsed)/60};S.tray.forEach(t=>{if(t.where!=null)t.st=verdict(t.kind,S.result.rpm,S.result.min)});S.msg='End';say('Rotor durdu, kapak kilidi açıldı. Şimdi <b>kapağı aç</b> ve sonuca bak.')}render()}}
  if(S.cur>0)S.rot+=Math.min(S.cur,900)/60*2*Math.PI*dt*.35;
  if(ch)live()}
 /* ---------- girişler ---------- */
@@ -540,7 +574,7 @@ reset('parts');
 try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 setInterval(loop,50);
 window.scrOf=n=>{const o=n.split('.').reduce((a,k)=>a[k],K);const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};
-Object.assign(window,{autoBalance,reset,render,toggleLid,changeRotor,pickTube,vent,slot,makeBalance,spinStep,devBtn,start,stop,setRpm,onHot,imb});Object.defineProperty(window,'S',{get:()=>S});window.__cen=1;
+Object.assign(window,{serbestKur,autoBalance,reset,render,toggleLid,changeRotor,pickTube,vent,slot,makeBalance,spinStep,devBtn,start,stop,setRpm,onHot,imb});Object.defineProperty(window,'S',{get:()=>S});window.__cen=1;
 window.TL_GOREV=()=>S&&S.done; /* eğitim çubuğu için (salt okunur) */
 
 /* tam sayfa yardımcıları */
