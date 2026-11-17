@@ -515,7 +515,7 @@ css.textContent=
 '#sbEk .sbUy{background:#3A1416;color:#FFE1E1;border-radius:10px;padding:8px 10px;border-left:4px solid #E5484D;font-size:12.5px}#sbEk .sbUy b.nm{display:block;font:700 10px "IBM Plex Mono",monospace;color:#FF8A8A;letter-spacing:.08em;margin-bottom:3px}#sbEk .sbUy ul{margin:0 0 0 16px;display:grid;gap:3px}'+
 '#sbEk .sbNot{background:#F1F6F7;color:#16242A;border-radius:10px;padding:8px 10px;border-left:4px solid #2BD9C0;font-size:12.5px;line-height:1.35}#sbEk .sbNot>b:first-child{display:block;font:600 10px "IBM Plex Mono",monospace;color:#1F9A97;letter-spacing:.08em;margin-bottom:2px}#sbEk [hidden]{display:none}'+
 'body.sbk .sbGizle{display:none!important}#sbEk .sbVent{background:#B7791F;color:#fff;font-weight:700}#sbEk .sbVent[hidden]{display:none}'+
-'#sbEk .sbSes{font-size:12px;color:#9BB0B6;line-height:1.35}'+
+'#sbEk .sbSes{font-size:12.5px;color:#D7E4E7;line-height:1.4;background:#25333A;border-radius:10px;padding:8px 10px;border-left:4px solid #2BD9C0}'+
 '#sbEk .sbDers{border:0;background:none;color:#9BB0B6;font:600 12.5px "Source Sans 3",sans-serif;cursor:pointer;padding:4px}'+
 '@media (max-width:900px){body.cders.serbest.sbk.panel .stage{right:0;bottom:50dvh}body.cders.serbest.sbk.panel #cv3{width:100vw!important;height:50dvh!important}body.sbk #side{width:auto;max-height:50dvh}}'+
 'body.cders .dsp{pointer-events:auto!important;cursor:move;transform:scale(.8);transform-origin:top right;touch-action:none;user-select:none;-webkit-user-select:none}body.cders .dsp.tasindi{transform-origin:top left}body.cders .dsp.sur{box-shadow:0 0 0 2px #2BD9C0,0 10px 26px rgba(0,0,0,.45)}'+
@@ -578,6 +578,7 @@ function serbestBasla(){SERB=true;window.__serbest=true;
  dispatchEvent(new Event('resize'));
  if(!SUT)SUT=setInterval(function(){if(!SERB||!P)return;var s=S();if(!s)return;if(C.serbest.yenile)C.serbest.yenile(P,s);var L=C.serbest.kural?C.serbest.kural(s):[],h=L.map(function(x){return '<li>'+x+'</li>'}).join('');
   var ek=document.getElementById('sbEk');if(ek&&C.serbest.ekYenile)C.serbest.ekYenile(ek,s);
+  var ss=document.getElementById('sbSes');if(ss&&window.serbestTartim){var o=window.serbestTartim.ot(),n=o?o.tartim.length:0,h=s.pendingSave?'⏳ Kaydet’e basıldı: değer <b>● KARARLI</b> olunca kayıt alınacak'+(s.tL||s.tR?' (önce kapıyı kapat)':'')+'.':n?'<b>'+n+' kayıt</b> alındı. Soldaki <b>📋 Rapor</b> her kayıtta güncellenir. Yeni tartım için yine <b>Kaydet</b>.':'Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. Tartımı bitirince ekrandaki <b>Kaydet</b> tuşuna bas: kayıt alınır ve solda <b>📋 Rapor</b> açılır.';if(ss.innerHTML!==h)ss.innerHTML=h}
   var u=document.getElementById('sbUy')||P.querySelector('#dUy');if(u&&h!==SUH){SUH=h;u.innerHTML=h?'<b class="nm">⚠ DİKKAT</b><ul>'+h+'</ul>':'';u.hidden=!h;if(h&&document.body.classList.contains('dk')){var mi=document.getElementById('dersMini');if(mi)mi.classList.add('uy')}}if(!h){var m2=document.getElementById('dersMini');if(m2)m2.classList.remove('uy')}},400)}
 var SUT=null,SUH='';
 function serbestCiz(){
@@ -603,7 +604,7 @@ function dspKur(){var e=document.getElementById('dsp');if(!e||e.dataset.sur)retu
  e.addEventListener('dblclick',function(){try{localStorage.removeItem(K2)}catch(_){}['left','top','right','bottom'].forEach(function(k){e.style.removeProperty(k)});e.classList.remove('tasindi')})}
 function kontrolEk(){var side=document.getElementById('side');if(!side||document.getElementById('sbEk'))return;var c=side.querySelector('.card')||side;var d=document.createElement('div');d.id='sbEk';
  var nl=C.serbest.numune||[];d.innerHTML=(nl.length?'<button class="bt sbNum" id="sbNumB">🧪 Numune seç ▾</button><div class="sbNumL" id="sbNumL" hidden>'+nl.map(function(n){return '<button class="bt" data-num="'+n[0]+'">'+n[1]+'</button>'}).join('')+'</div>':'')+
-  (C.serbest.ek||'')+(C.serbest.sessiz?'<div class="sbSes">Serbest kullanım: uyarı yok. Kendi bildiğin gibi çalış; ilk kayıttan sonra solda <b>📋 Rapor</b> çıkar.</div>':'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div>')+'<button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
+  (C.serbest.ek||'')+(C.serbest.sessiz?'<div class="sbSes" id="sbSes">Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. Tartımı bitirince ekrandaki <b>Kaydet</b> tuşuna bas: kayıt alınır ve solda <b>📋 Rapor</b> açılır.</div>':'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div>')+'<button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
  c.appendChild(d);var L2=d.querySelector('#sbNumL');
  if(L2)d.querySelector('#sbNumB').onclick=function(){L2.hidden=!L2.hidden};
  d.querySelectorAll('[data-num]').forEach(function(b){b.onclick=function(){var m=C.serbest.numuneSec(b.dataset.num);if(!m)L2.hidden=true;else{NOT=m;var n=document.getElementById('sbNot');n.querySelector('.nt').innerHTML=m;n.hidden=false}}});
