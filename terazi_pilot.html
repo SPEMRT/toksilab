@@ -107,6 +107,16 @@ html.dersOn #tip{visibility:hidden!important}
 html.dersOn .stage{right:390px}html.dersOn #cv3{width:calc(100vw - 390px)!important}
 html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;bottom:0;width:390px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
 @media (max-width:900px){html.dersOn .stage{right:0;bottom:46dvh}html.dersOn #cv3{width:100vw!important;height:54dvh!important}html.dersOn body::after{top:auto;left:0;width:auto;height:46dvh;border-radius:16px 16px 0 0}}
+#mRapor.yeni{animation:rkY 1.2s 2}@keyframes rkY{50%{background:#2BD9C0;color:#062126}}
+#raporK{position:fixed;inset:0;z-index:2147483100;background:rgba(5,10,12,.7);display:grid;place-items:start center;overflow:auto;padding:22px 12px}#raporK[hidden]{display:none}
+#raporK .rk{background:#fff;color:#16242A;border-radius:14px;max-width:820px;width:100%;padding:18px 20px;font:14.5px/1.45 'Source Sans 3',system-ui,sans-serif}
+#raporK h2{font:700 24px 'Barlow Condensed',sans-serif}#raporK h3{font:700 15px 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:#1F6F8B;margin:14px 0 6px}
+#raporK .rkS{color:#4A5B62;font-size:13px}#raporK .rkB{float:right;display:flex;gap:6px}#raporK .rkB button{border:0;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;background:#E3EBEE;color:#16242A}#raporK .rkB button:first-child{background:#1F6F8B;color:#fff}
+#raporK .rkPuan{display:flex;align-items:baseline;gap:8px;border-left:6px solid;padding:6px 12px;margin-top:10px;background:#F4F8F9;border-radius:8px}#raporK .rkPuan b{font:700 40px 'Barlow Condensed',sans-serif}#raporK .rkPuan em{font-style:normal;font-weight:700;margin-left:8px}
+#raporK ul{list-style:none;display:grid;gap:5px;padding:0}#raporK li{display:grid;grid-template-columns:22px 1fr;gap:6px}#raporK li i{font-style:normal;font-weight:700;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#fff}#raporK li.ok i{background:#2DBE5B}#raporK li.no i{background:#E5484D}#raporK li.no span{color:#8E2A2E}
+#raporK .rkT{border:1px solid #D5DEE2;border-radius:10px;padding:8px 10px;margin-bottom:8px}#raporK .rkTh{display:flex;gap:10px;align-items:baseline;margin-bottom:6px;flex-wrap:wrap}#raporK .rkTh span{font:600 14px 'IBM Plex Mono',monospace}#raporK .rkTh em{margin-left:auto;font-style:normal;font-weight:700;color:#1F6F8B}
+#raporK ol{padding-left:20px;display:grid;gap:4px}#raporK .rkN{margin-top:12px;font-size:12px;color:#6B7F86}
+@media print{body.rkPrint>*:not(#raporK){display:none!important}body.rkPrint #raporK{position:static;background:none;padding:0}body.rkPrint .rkB{display:none!important}}
 </style>
 <script>document.documentElement.classList.add('dersOn');setTimeout(function(){if(!document.body||!document.body.classList.contains('cders'))document.documentElement.classList.remove('dersOn')},12000)</script>
 </head>
@@ -167,9 +177,17 @@ function reset(task){const t=TASKS.find(x=>x.id===(task||'parts'));const keep=S&
  if(t.id==='w10'||t.id==='w5'){S.ev.lev=levelOk()&&S.cal}
  $('#res').innerHTML='';
  say(t.id==='parts'?'Merhaba! Bu bizim mikroterazimiz: 0,000001 g’a (1 µg) kadar okur. Önce parçalarını tanıyalım: fareyi merak ettiğin parçanın üzerine getir, açıklaması çıksın (telefonda parçaya dokun). Tezgahtaki malzemelerin de açıklaması var. Sahneyi sürükleyerek döndürebilirsin.':t.id==='level'?'Görev: <b>seviye ve iç kalibrasyon</b>. Ekranın sol üstündeki su terazisine bak: kabarcık ortada değil. Öndeki <b>ayaklara</b> dokunup çevirerek ortala.':t.id==='free'?'<b>Serbest tartım:</b> görev yok. Kayık al, kefeye koy, darasını al, spatulayla istediğin kadar ekle, <b>Kaydet</b> ile kayda geçir. Sonra kayığı alıp <b>erlene</b> ya da <b>balon jojeye</b> boşaltabilirsin. Birimi ekrandaki <b>Ayarlar</b>’dan değiştirebilirsin.':`Görev: <b>${t.t}</b>. ${levelOk()&&S.cal?'Terazi düz ve kalibre. ':'<b>Dikkat:</b> önce seviye ve kalibrasyon görevini yap. '}${t.unit?'Önce ekrandaki <b>Ayarlar</b> tuşundan birimi <b>mg</b> yap. ':''}Sonra yan kapıyı aç: ekranın üstündeki <b>sensöre</b> elini yaklaştır (dokun).`);render()}
-const say=t=>$('#say').innerHTML=t;
+const say=t=>{if(S&&S.task==='free'&&document.body.classList.contains('serbest'))return;$('#say').innerHTML=t};
 const T=()=>TASKS.find(x=>x.id===S.task);
 const levelOk=()=>Math.hypot(S.lev.x,S.lev.y)<.6;
+/* ===== serbest kullanım: sessiz kayıt ve değerlendirme raporu =====
+   Serbest tartımda (görev 'free') hiçbir uyarı verilmez; yapılan her işlem kaydedilir. İlk kayıttan sonra
+   soldaki menüde 📋 Rapor çıkar: hazırlık, her tartımın denetimi, çalışma düzeni, öneriler ve puan. */
+let OT=null;
+function otBasla(){OT={t0:Date.now(),olay:[],tartim:[],kalT:null,levT:null,elleKapi:0,acikKaydet:0,kararsizKaydet:0,dokulme:0,fazlaAtik:0,aktarim:[],kalRed:[],karsizDara:0,bosDara:0,kayiksizSifir:0,acikEkleme:0}}
+const ot=()=>S&&S.task==='free'&&OT;
+function olay(tur,v){if(!ot())return;OT.olay.push(Object.assign({tur,t:Date.now()},v||{}))}
+
 /* serbest tartım denetimi: kayığın darası alındı mı (kefedeki kayık, dara anındaki kayıkla aynı mı) */
 const tareOk=()=>!S.boat||Math.abs(S.tare+S.zero-BOAT[S.boat].m)<.05;
 const UY=t=>`<b style="color:#C62828">⚠ ${t}</b>`;
@@ -184,7 +202,7 @@ let lastT=performance.now();
 function tick(){const now=performance.now(),dt=Math.min(.3,(now-lastT)/1000);lastT=now;
  S.doorL+=((S.tL)-S.doorL)*Math.min(1,dt*5);S.doorR+=((S.tR)-S.doorR)*Math.min(1,dt*5);if(S.hand>0)S.hand-=dt;
 
- if(S.calRun){S.calRun-=dt;if(S.calRun<=0){S.calRun=0;S.cal=true;S.ev.cal=true;disturb();say('İç kalibrasyon tamamlandı ✓. Terazi içindeki referans ağırlıkla kendini ayarladı. Bu, sıcaklık değişince ve her gün işe başlarken yapılır.');if(S.task==='level'){S.done.level=1}render()}}
+ if(S.calRun){S.calRun-=dt;if(S.calRun<=0){S.calRun=0;S.cal=true;S.ev.cal=true;disturb();if(ot()){OT.kalT=Date.now();olay('kalibrasyon',{lev:levelOk()})}say('İç kalibrasyon tamamlandı ✓. Terazi içindeki referans ağırlıkla kendini ayarladı. Bu, sıcaklık değişince ve her gün işe başlarken yapılır.');if(S.task==='level'){S.done.level=1}render()}}
  const r=reading(),settle=performance.now()-S.lastDist<2200;const a=amp()*(settle?3:1);S.disp+=(r-S.disp)*(settle?.18:.5)+(Math.random()-.5)*a;
  if(S.pendingTare&&stable()){S.pendingTare=false;doTare()}
  renderLive()}
@@ -350,6 +368,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
 const visibleDeep=o=>{while(o){if(o.visible===false)return false;o=o.parent}return true};
 function onHot(h){const [a,b]=h.split(':');
  if(S.mode==='parts'){const id=a==='part'?b:a==='sens'?'sens':a==='door'?'d'+b.toLowerCase():a==='pan'?'pan':a==='foot'?'feet':null;if(id)seePart(id);return}
+ if(window.__izin&&!window.__izin(h)){if(window.__izinUyari)window.__izinUyari(h);return}
  if(a==='sens')sensor(b);else if(a==='door')sensor(b,true);else if(a==='pan')panTap();else if(a==='item')item(b);else if(a==='key')key(b);else if(a==='foot')showFoot(b)}
 /* kamera */
 let camAnim=null;const camDir=new THREE.Vector3(.22,.4,1).normalize();
@@ -460,7 +479,7 @@ function hint(){if(document.body.classList.contains('cders'))return null;/* rehb
  return null}
 /* ---------- eylemler ---------- */
 function seePart(id){S.part=id;S.seen[id]=1;const p=PARTS.find(x=>x[0]===id);say(`<b>${p[1]}</b>: ${p[2]}`);if(PARTS.every(x=>S.seen[x[0]])&&!S.done.parts){S.done.parts=1;setTimeout(()=>say('Harika, terazinin bütün parçalarını tanıdın! Şimdi <b>Görevler</b>’den “Seviye ve iç kalibrasyon” ile başla.'),1800)}render()}
-function sensor(k,touchDoor){if(S.mode!=='use')return;if(S.calRun){say('Kalibrasyon sürerken kapıları açma.');return}const key=k==='L'?'tL':'tR';S[key]=S[key]?0:1;disturb();
+function sensor(k,touchDoor){if(S.mode!=='use')return;if(ot()&&touchDoor)OT.elleKapi++;if(S.calRun){say('Kalibrasyon sürerken kapıları açma.');return}const key=k==='L'?'tL':'tR';S[key]=S[key]?0:1;disturb();
  if(S[key]){S.ev.open=true;say(touchDoor?`${k==='L'?'Sol':'Sağ'} kapıyı elle açtın. Sensörü kullanırsan cama dokunmazsın; parmak izi ve titreşim olmaz.`:`${k==='L'?'Sol':'Sağ'} kapı geriye kayarak açıldı. Açık kapı hava akımı yaratır; değerin oynadığını görüyor musun?`)}
  else say(`${k==='L'?'Sol':'Sağ'} kapı kapandı. Değerin oturmasını bekle: ekranda <b>● KARARLI</b> yazmalı.`);
  render()}
@@ -469,7 +488,7 @@ function item(k){if(S.mode!=='use')return;
  if(k==='vi'){if(S.held!=='sp'){say(S.held?'Önce elindekini bırak, sonra temiz spatulayı al.':'Standarttan almak için önce <b>temiz spatula kabından</b> bir spatula al.');return}S.spLoad=true;S.ev.load=true;say('Spatulaya referans standarttan aldın. Kapı açıkken <b>kefedeki kayığa</b> dokun. Hedefe yaklaştıkça <b>Az (hafif vur)</b> moduna geç.');render();return}
  if(k==='erl'||k==='vol'){const nm=k==='erl'?'erlene':'balon jojeye';if(S.held!=='al'&&S.held!=='pl'){say(S.boat?`Önce kayığı kefeden al (kapıyı aç, kefeye dokun), sonra ${nm} boşalt.`:'Elinde boşaltılacak dolu bir kayık yok.');return}
   if(S.heldPow<=0){say('Kayık boş; boşaltılacak bir şey yok.');return}
-  const m=S.heldPow;S.fl[k]+=m;S.heldPow=0;S.held=null;S.ev.transfer=true;say(`Kayıktaki <b>${fmt(m,3)} mg</b> maddeyi ${nm} boşalttın. Kayığı az miktar çözücüyle (ör. metanol) içine durulayarak <b>kantitatif aktarım</b> yaparsın; boş kayık atığa gider.${k==='vol'?' Sonra balon jojeyi çözücüyle <b>çizgisine</b> tamamlarsın.':''}`);render();return}
+  const m=S.heldPow;S.fl[k]+=m;S.heldPow=0;S.held=null;S.ev.transfer=true;if(ot())OT.aktarim.push({k,m});say(`Kayıktaki <b>${fmt(m,3)} mg</b> maddeyi ${nm} boşalttın. Kayığı az miktar çözücüyle (ör. metanol) içine durulayarak <b>kantitatif aktarım</b> yaparsın; boş kayık atığa gider.${k==='vol'?' Sonra balon jojeyi çözücüyle <b>çizgisine</b> tamamlarsın.':''}`);render();return}
  if(S.held==='sp'){say('Elinde spatula var. Önce spatulayı temiz kaba bırak.');return}
  if(S.held===k){if(S.heldPow>0){say('Dolu kayığı yığına bırakamazsın: kefeye geri koy ya da erlene / balon jojeye boşalt.');return}S.held=null;say('Kayığı yerine bıraktın.');render();return}
  if(S.held){say('Elin dolu. Önce elindekini bırak.');return}
@@ -479,33 +498,71 @@ function panTap(){if(S.mode!=='use')return;const open=S.tL||S.tR;
  if(!open){say('Kefeye ulaşmak için önce bir yan kapıyı aç: ekrandaki <b>sensöre</b> elini yaklaştır.');return}
  if(S.held==='al'||S.held==='pl'){if(S.boat){say('Kefede zaten kayık var.');return}S.boat=S.held;S.powder=S.heldPow;S.held=null;S.heldPow=0;S.ev.place=true;S.hand=1;disturb();say('Kayığı kefenin ortasına koydun. Şimdi kapıyı kapat ve değerin <b>kararlı</b> olmasını bekle.');render();return}
  if(S.held==='sp'){if(!S.spLoad){say('Spatula boş. Önce <b>referans standart</b> şişesine dokunarak spatulaya madde al.');return}
-  if(!S.boat){const a=.5+Math.random();S.spill+=a;S.hand=1.2;disturb();S.flags.push('Standart doğrudan kefeye döküldü (kontaminasyon).');say('<b>Hata!</b> Kefede kayık yoktu; standart doğrudan kefeye döküldü. Kefe kirlendi ve madde boşa gitti.');render();return}
+  if(!S.boat){if(ot())OT.dokulme++;const a=.5+Math.random();S.spill+=a;S.hand=1.2;disturb();S.flags.push('Standart doğrudan kefeye döküldü (kontaminasyon).');say('<b>Hata!</b> Kefede kayık yoktu; standart doğrudan kefeye döküldü. Kefe kirlendi ve madde boşa gitti.');render();return}
   if(!S.ev.tare)S.flags.push('Dara alınmadan madde eklendi.');
-  if(S.task==='free'&&(!tareOk()||!levelOk())&&!S.ev.uyEkle){S.ev.uyEkle=1;const a0=S.sp==='bol'?1.2+Math.random()*2.6:.04+Math.random()*.22;S.powder+=a0;S.hand=1.1;disturb();S.ev.add=true;say(UY(!levelOk()?'Dikkat: terazi düz değilken tartım yapıyorsun!':'Dikkat: kayığın darasını almadan tartım yapıyorsun!')+' '+tartimSorunlari().slice(0,2).join(' '));render();return}
+  if(ot())olay('ekle',{dara:tareOk(),lev:levelOk(),kal:S.cal});
   const a=S.sp==='bol'?1.2+Math.random()*2.6:.04+Math.random()*.22;S.powder+=a;S.hand=1.1;disturb();S.ev.add=true;
   const t=T();if(!t.target){say(`Yaklaşık ${fmt(a,2)} mg ekledin. Kesin değeri kapıyı kapatıp kararlı olunca okursun.`);render();return}
   const rem=t.target-S.powder;say(rem>1.5?`Ekledin. Hedefe yaklaşık ${fmt(rem,1)} mg kaldı. Kapı açıkken değer oynar; kesin değeri kapıyı kapatıp okursun.`:rem>t.tol?`Hedefe çok yaklaştın (yaklaşık ${fmt(rem,2)} mg). <b>Az (hafif vur)</b> moduna geç: spatulaya hafifçe vurarak birkaç tane düşür.`:rem<-t.tol?'Hedefi aştın. <b>Fazlayı al</b> ile fazlalığı atığa al. Asla stok şişesine geri koyma!':'Hedefe ulaştın gibi görünüyor. Kapıyı kapat ve kararlı değeri kontrol et.');render();return}
  if(S.boat&&!S.held){S.held=S.boat;S.heldPow=S.powder;S.boat=null;S.powder=0;S.hand=1;disturb();say(S.heldPow>0?`Dolu kayığı kefeden aldın (${fmt(S.heldPow,3)} mg). Şimdi <b>erlene</b> ya da <b>balon jojeye</b> dokunarak boşalt.`:'Boş kayığı kefeden aldın.');render();return}
  say('Elinde bir şey yok. Tezgahtan kayık ya da spatula al.')}
-function removeExcess(){if(S.mode!=='use')return;if(!(S.tL||S.tR)){say('Fazlayı almak için kapıyı aç.');return}if(!S.boat||S.powder<=0)return;const a=Math.min(S.powder,.08+Math.random()*.35);S.powder-=a;S.hand=1;disturb();say(`Spatulayla yaklaşık ${fmt(a,2)} mg aldın ve <b>atığa</b> attın. Stok şişesine geri koymak referans standardı kirletir; yapılmaz.`);render()}
+function removeExcess(){if(S.mode!=='use')return;if(!(S.tL||S.tR)){say('Fazlayı almak için kapıyı aç.');return}if(!S.boat||S.powder<=0)return;if(ot())OT.fazlaAtik++;const a=Math.min(S.powder,.08+Math.random()*.35);S.powder-=a;S.hand=1;disturb();say(`Spatulayla yaklaşık ${fmt(a,2)} mg aldın ve <b>atığa</b> attın. Stok şişesine geri koymak referans standardı kirletir; yapılmaz.`);render()}
 function doTare(){S.tare=trueMass()-S.zero+(levelOk()?0:.004*Math.hypot(S.lev.x,S.lev.y)+.02);S.disp=0;S.ev.tare=!!S.boat;disturb();S.lastDist-=2200;
  say(S.boat?'Dara alındı: ekran sıfır. Kayığın ağırlığı artık hesaba katılmıyor. Şimdi temiz spatulayı al, standarttan doldur ve kayığa ekle.':'Boş kefede dara aldın. Boş kefe için <b>→0← Sıfırla</b> kullanılır; dara, kap (kayık) için.');render()}
-function calibrate(){S.menu=false;if(S.tL||S.tR||S.boat){S.ev.calReady=false;say('İç kalibrasyon için <b>kapılar kapalı</b> ve <b>kefe boş</b> olmalı.');render();return}if(!levelOk()){say('Önce teraziyi düzle; kabarcık ortada değil.');render();return}S.ev.calReady=true;S.calRun=4;say('İç kalibrasyon başladı… Terazi içindeki motorlu referans ağırlığı indirip kaldırıyor. Bu sırada dokunma.');render()}
+function calibrate(){S.menu=false;if(ot()&&(S.tL||S.tR||S.boat||!levelOk()))OT.kalRed.push(S.tL||S.tR?'kapı açık':S.boat?'kefede kayık var':'terazi düz değil');if(S.tL||S.tR||S.boat){S.ev.calReady=false;say('İç kalibrasyon için <b>kapılar kapalı</b> ve <b>kefe boş</b> olmalı.');render();return}if(!levelOk()){say('Önce teraziyi düzle; kabarcık ortada değil.');render();return}S.ev.calReady=true;S.calRun=4;say('İç kalibrasyon başladı… Terazi içindeki motorlu referans ağırlığı indirip kaldırıyor. Bu sırada dokunma.');render()}
 function setUnit(u){S.unit=u;lastScr='';S.menu=false;say(u==='mg'?'Birim <b>mg</b> oldu: ekran artık miligram gösteriyor (ör. 10,023 mg). Küçük tartımlarda okumak kolaylaşır.':'Birim <b>g</b> oldu: 6 ondalık gram (0,000001 g = 1 µg).');render()}
 function key(k){if(S.mode!=='use')return;
- if(k==='t'){if(!stable()){S.pendingTare=true;say('Değer kararsız. Terazi <b>kararlı olmasını bekliyor</b>; olunca dara kendiliğinden alınacak. Kapıların kapalı olduğundan emin ol.');return}doTare();return}
- if(k==='z'){if(S.boat){say('Kefede kap varken <b>→T← Dara</b> kullanılır. Sıfırlama boş kefe içindir.');return}S.zero=trueMass();S.tare=0;S.disp=0;disturb();S.lastDist-=2200;say('Terazi sıfırlandı (boş kefe = 0).');render();return}
+ if(k==='t'){if(ot()){if(!S.boat)OT.bosDara++;if(!stable())OT.karsizDara++}if(!stable()){S.pendingTare=true;say('Değer kararsız. Terazi <b>kararlı olmasını bekliyor</b>; olunca dara kendiliğinden alınacak. Kapıların kapalı olduğundan emin ol.');return}doTare();return}
+ if(k==='z'){if(S.boat&&ot())OT.kayiksizSifir++;if(S.boat){say('Kefede kap varken <b>→T← Dara</b> kullanılır. Sıfırlama boş kefe içindir.');return}S.zero=trueMass();S.tare=0;S.disp=0;disturb();S.lastDist-=2200;say('Terazi sıfırlandı (boş kefe = 0).');render();return}
  if(k==='c'){if(S.calRun)return;S.menu=!S.menu;if(S.menu)say('<b>Ayarlar</b> menüsü açıldı: iç kalibrasyon ve tartım birimi (g / mg).');render();return}
- if(k==='s'){if(S.task==='parts'||S.task==='level'){say('Kaydetme tartım görevlerinde ve serbest tartımda kullanılır.');return}if(S.tL||S.tR){say('Kapı açıkken kayıt alınmaz; önce kapıyı kapat.');return}if(!stable()){say('Değer kararsız; <b>● KARARLI</b> işaretini bekle.');return}
-  if(S.task==='free'){const sor=tartimSorunlari().filter(x=>!/kalibrasyon/.test(x));S.log.push({v:S.disp,u:S.unit,tm:new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),hata:sor.length?(!levelOk()?'terazi düz değil':'dara alınmadı'):''});S.ev.saved=true;showLog();
-   say(sor.length?UY('Bu kayıt GEÇERSİZ: yanlış tartım yaptın.')+' '+sor.join(' ')+' Kayıt listede <b>geçersiz</b> olarak işaretlendi; sorunu düzeltip yeniden tart.':'Kayıt alındı ✓.'+(S.cal?'':' Not: iç kalibrasyon yapılmadı; doğru tartım için Ayarlar → İç kalibrasyon.')+' İstersen kayığı alıp erlene ya da balon jojeye boşalt.');render();return}
+ if(k==='s'){if(S.task==='parts'||S.task==='level'){say('Kaydetme tartım görevlerinde ve serbest tartımda kullanılır.');return}if(S.tL||S.tR){if(ot())OT.acikKaydet++;say('Kapı açıkken kayıt alınmaz; önce kapıyı kapat.');return}if(!stable()){if(ot())OT.kararsizKaydet++;say('Değer kararsız; <b>● KARARLI</b> işaretini bekle.');return}
+  if(S.task==='free'){const tm=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});S.log.push({v:S.disp,u:S.unit,tm});S.ev.saved=true;
+   if(ot()){const mg=S.disp;/* ekran değeri her zaman mg cinsinden tutulur */OT.tartim.push({tm,v:S.disp,u:S.unit,mg,oku:reading(),gercek:S.powder,lev:levelOk(),kal:S.cal,kayik:S.boat,dara:!!S.boat&&tareOk(),dokulme:S.spill>0,kalSonra:OT.kalT&&OT.levT?OT.kalT>=OT.levT:false});raporDugme()}
+   showLog();say('Kayıt alındı.');render();return}
   evaluate()}}
+/* ---------- değerlendirme raporu ---------- */
+function raporDugme(){let b=$('#mRapor');if(!b){b=document.createElement('button');b.id='mRapor';b.innerHTML='<span>📋</span>Rapor';b.title='Serbest kullanım değerlendirme raporu';b.onclick=raporAc;const nav=document.querySelector('.snav');if(nav)nav.appendChild(b)}b.classList.add('yeni');setTimeout(()=>b.classList.remove('yeni'),2400)}
+function raporHesap(){const T=OT.tartim.map((r,i)=>{const k=[];let d=0;
+  /* fark: terazinin o anki gerçek okuması − kayıktaki madde (ekran dalgalanması kullanıcının hatası sayılmaz) */
+  const fark=(r.oku!=null?r.oku:r.mg)-r.gercek;
+  k.push([r.lev,'Terazi düzdü (kabarcık halkanın içinde)','Kabarcık ortada değilken tartıldı. Eğik terazide ölçüm hatalıdır; önce ayaklarla kabarcık ortalanır.']);if(!r.lev)d+=20;
+  k.push([r.kal&&r.kalSonra,'İç kalibrasyon, terazi düzlendikten sonra yapılmıştı',r.kal?'Kalibrasyon terazi düzlenmeden yapılmış; düzledikten sonra yinelenmeli.':'İç kalibrasyon yapılmadan tartıldı. Her gün ve terazi düzlendikten sonra Ayarlar → İç kalibrasyon.']);if(!(r.kal&&r.kalSonra))d+=10;
+  k.push([!!r.kayik&&!r.dokulme,'Madde tartım kayığına alındı',r.dokulme?'Madde doğrudan kefeye döküldü: kefe kirlendi, ölçüm geçersiz. Her zaman kayık kullanılır.':'Kefede kayık yoktu.']);if(!r.kayik||r.dokulme)d+=15;
+  if(r.kayik)k.push([r.dara,'Kayığın darası alındı (→T←)','Dara alınmadan tartıldı: kaydedilen değere kayığın ağırlığı ('+fmt(BOAT[r.kayik].m,2)+' mg) da girdi. Kayık konup değer durulduktan sonra →T← Dara.']);if(r.kayik&&!r.dara)d+=20;
+  const dogru=Math.abs(fark)<=.05;k.push([dogru,'Kaydedilen değer, kayıktaki madde miktarıyla uyumlu','Kaydedilen '+fmt(r.mg,3)+' mg, ama kayıktaki madde '+fmt(r.gercek,3)+' mg (fark '+(fark>0?'+':'')+fmt(fark,3)+' mg). Fark yukarıdaki hatalardan geliyor.']);if(!dogru)d+=10;
+  return {r,k,puan:Math.max(0,100-d),fark}});
+ const G=[];let gd=0;
+ const ek=(ok,iyi,kotu,ceza)=>{G.push([ok,iyi,kotu]);if(!ok)gd+=ceza};
+ ek(!!OT.levT,'Terazi düzlendi','Oturum boyunca terazi hiç düzlenmedi.',0);
+ ek(OT.dokulme===0,'Kefeye madde dökülmedi',OT.dokulme+' kez madde kayık yokken kefeye döküldü (kontaminasyon).',Math.min(20,OT.dokulme*10));
+ ek(OT.elleKapi===0,'Kapılar sensörle açılıp kapandı','Kapı '+OT.elleKapi+' kez elle açıldı: cam titrer, parmak izi kalır. Sensör kullanılır.',Math.min(6,OT.elleKapi*2));
+ ek(OT.acikKaydet===0,'Kapı açıkken kayıt denenmedi','Kapı açıkken '+OT.acikKaydet+' kez kaydetmeye çalışıldı: hava akımı değeri oynatır.',Math.min(9,OT.acikKaydet*3));
+ ek(OT.kararsizKaydet===0,'Kararlı değer beklendi','Değer kararsızken '+OT.kararsizKaydet+' kez kaydetmeye çalışıldı: ● KARARLI işareti beklenir.',Math.min(9,OT.kararsizKaydet*3));
+ ek(OT.bosDara===0&&OT.kayiksizSifir===0,'Dara ve sıfırlama doğru kullanıldı',(OT.bosDara?OT.bosDara+' kez boş kefede dara alındı (boş kefe için →0← Sıfırla). ':'')+(OT.kayiksizSifir?OT.kayiksizSifir+' kez kayık varken sıfırlama denendi (kap için →T← Dara).':''),Math.min(6,(OT.bosDara+OT.kayiksizSifir)*2));
+ if(OT.kalRed.length)ek(false,'','İç kalibrasyon '+OT.kalRed.length+' kez koşullar sağlanmadan denendi ('+[...new Set(OT.kalRed)].join(', ')+'): kapılar kapalı, kefe boş ve terazi düz olmalı.',Math.min(6,OT.kalRed.length*2));
+ if(OT.fazlaAtik)G.push([true,'Fazla madde '+OT.fazlaAtik+' kez atığa alındı (stok şişesine geri konmadı)','']);
+ if(OT.aktarim.length)G.push([true,'Tartılan madde '+OT.aktarim.map(a=>a.k==='vol'?'balon jojeye':'erlene').join(', ')+' aktarıldı','']);
+ const ort=T.length?T.reduce((a,x)=>a+x.puan,0)/T.length:0;const puan=Math.max(0,Math.round(ort-gd));
+ return {T,G,puan,sure:Math.round((Date.now()-OT.t0)/60000)}}
+function raporAc(){if(!OT||!OT.tartim.length)return;const R=raporHesap(),not=R.puan>=90?['Çok iyi','#1F7A3A']:R.puan>=75?['İyi','#2F7DE1']:R.puan>=60?['Geliştirilmeli','#B85C00']:['Yeniden çalışılmalı','#C62828'];
+ const ik=(ok,a,b)=>`<li class="${ok?'ok':'no'}"><i>${ok?'✓':'✗'}</i><span>${ok?a:b}</span></li>`;
+ const oneri=[];R.T.forEach(x=>x.k.forEach(k=>{if(!k[0]&&oneri.indexOf(k[2])<0)oneri.push(k[2])}));R.G.forEach(g=>{if(!g[0]&&g[2]&&oneri.indexOf(g[2])<0)oneri.push(g[2])});
+ let o=$('#raporK');if(!o){o=document.createElement('div');o.id='raporK';document.body.appendChild(o);o.addEventListener('click',e=>{if(e.target===o)o.hidden=true})}
+ o.hidden=false;o.innerHTML=`<div class="rk"><div class="rkB"><button id="rkP">🖨 Yazdır</button><button id="rkX">Kapat</button></div>
+ <h2>Serbest tartım · değerlendirme raporu</h2><div class="rkS">${new Date().toLocaleString('tr-TR')} · süre ${R.sure} dk · ${R.T.length} kayıt</div>
+ <div class="rkPuan" style="border-color:${not[1]}"><b style="color:${not[1]}">${R.puan}</b><span>/ 100</span><em style="color:${not[1]}">${not[0]}</em></div>
+ <h3>Tartımlar</h3>${R.T.map((x,i)=>`<div class="rkT"><div class="rkTh"><b>${i+1}. kayıt · ${x.r.tm}</b><span>${x.r.u==='mg'?fmt(x.r.v,3)+' mg':g6(x.r.v)+' g'}</span><em>${x.puan} puan</em></div><ul>${x.k.map(k=>ik(k[0],k[1],k[2])).join('')}</ul></div>`).join('')}
+ <h3>Çalışma düzeni</h3><ul>${R.G.filter(g=>g[1]||g[2]).map(g=>ik(g[0],g[1],g[2])).join('')}</ul>
+ ${oneri.length?`<h3>Hoca notu: bir dahaki sefere</h3><ol>${oneri.map(x=>'<li>'+x+'</li>').join('')}</ol>`:'<h3>Hoca notu</h3><p>Temiz bir tartım: hazırlık, dara ve kayıt kurallara uygun. Böyle devam.</p>'}
+ <p class="rkN">Puanlama: her kayıt 100 üzerinden; terazi düz değil −20, dara yok −20, kayıksız / dökülme −15, kalibrasyon eksik −10, kaydedilen değer madde miktarıyla uyumsuz −10. Kayıtların ortalamasından çalışma düzeni hataları düşülür.</p></div>`;
+ o.querySelector('#rkX').onclick=()=>{o.hidden=true};o.querySelector('#rkP').onclick=()=>{document.body.classList.add('rkPrint');window.print();setTimeout(()=>document.body.classList.remove('rkPrint'),400)}}
+window.serbestTartim={basla:otBasla,rapor:raporAc,hesap:()=>OT&&raporHesap(),ot:()=>OT};
 function sugg(){const x=S.lev.x,y=S.lev.y,a=-(x+y)/2,b=(x-y)/2;if(b&&Math.abs(b)>=Math.abs(a))return ['R',Math.sign(b)];if(a)return ['L',Math.sign(a)];return null}
-function foot(k,dir){S.lev.x+=(k==='L'?1:-1)*dir;S.lev.y+=dir;S.ev.look=true;disturb();S.cal=false;if(levelOk())setTimeout(()=>{fpK=null},900);
+function foot(k,dir){const kalVardi=S.cal;S.lev.x+=(k==='L'?1:-1)*dir;S.lev.y+=dir;S.ev.look=true;disturb();S.cal=false;if(ot()){if(levelOk()&&!OT.levT)OT.levT=Date.now();if(!levelOk())OT.levT=null;if(kalVardi){OT.kalT=null;olay('kalbozuldu')}}if(levelOk())setTimeout(()=>{fpK=null},900);
  const f=k==='L'?K.footL:K.footR;if(f)f.rotation.y+=dir*.9;
  say(levelOk()?'Kabarcık ortalandı ✓. Terazi düz. Şimdi kapıları kapat, kefeyi boş bırak ve <b>iç kalibrasyonu</b> başlat (ekranda “Ayar”).':`${k==='L'?'Sol':'Sağ'} ayağı ${dir>0?'↻ saat yönünde':'↺ saat yönünün tersine'} çevirdin. Kabarcık her zaman <b>yüksek tarafa</b> kaçar. ${(()=>{const g=sugg();return g?`İpucu: şimdi <b>${g[0]==='L'?'sol':'sağ'} ayağı ${g[1]>0?'↻':'↺'}</b> çevir.`:''})()}`);render()}
 const dv=v=>S.unit==='mg'?{n:fmt(v,3),u:'mg'}:{n:g6(v),u:'g'};
-function showLog(){$('#res').innerHTML=`<div class="card"><h3>Tartım kayıtları</h3>${S.log.length?`<div class="kv">${S.log.map((r,i)=>`<span>${i+1}. ${r.tm}${r.hata?` <i style="color:#E5484D;font-style:normal">· geçersiz (${r.hata})</i>`:''}</span><b style="${r.hata?'text-decoration:line-through;color:#E5484D':''}">${r.u==='mg'?fmt(r.v,3)+' mg':g6(r.v)+' g'}</b>`).join('')}</div>`:'<p class="sub">Henüz kayıt yok.</p>'}<p class="sub" style="font-size:12.5px">Erlen: ${fmt(S.fl.erl,3)} mg · Balon joje: ${fmt(S.fl.vol,3)} mg</p></div>`}
+function showLog(){$('#res').innerHTML=`<div class="card"><h3>Tartım kayıtları</h3>${S.log.length?`<div class="kv">${S.log.map((r,i)=>`<span>${i+1}. ${r.tm}</span><b>${r.u==='mg'?fmt(r.v,3)+' mg':g6(r.v)+' g'}</b>`).join('')}</div>`:'<p class="sub">Henüz kayıt yok.</p>'}<p class="sub" style="font-size:12.5px">Erlen: ${fmt(S.fl.erl,3)} mg · Balon joje: ${fmt(S.fl.vol,3)} mg</p></div>`}
 function evaluate(){const t=T(),v=S.disp,err=v-t.target;const f=[...S.flags];
  if(!S.ev.lev)f.push('Terazi düzlenmemiş ya da kalibre edilmemişken tartım yapıldı.');
  if(t.unit&&S.unit!==t.unit)f.push('Görev mg biriminde kayıt istiyordu; birim değiştirilmedi.');
@@ -528,7 +585,7 @@ try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 document.fonts&&document.fonts.ready.then(()=>{lastScr=''});
 setInterval(tick,120);
 setInterval(()=>{if(S.mode!=='use')return;let ch=false;if(S.boat&&!S.ev.tare&&stable()&&!S.ev.stab1){S.ev.stab1=true;ch=true}const t=T();if(t.target&&S.ev.tare&&!S.tL&&!S.tR&&stable()){const r=Math.abs(S.disp-t.target)<=t.tol;if(r!==!!S.ev.inRange){S.ev.inRange=r;ch=true}}if(ch)render()},500);
-window.scrOf=n=>{const v=K[n].getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};Object.assign(window,{tartimSorunlari,tareOk,calibrate,setUnit,sugg,showFoot,seePart,sensor,item,panTap,key,foot,removeExcess,reset,render,levelOk,onHot});Object.defineProperty(window,'S',{get:()=>S});window.__bal=1;
+window.scrOf=n=>{const v=K[n].getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};Object.assign(window,{otBasla,raporAc,tartimSorunlari,tareOk,calibrate,setUnit,sugg,showFoot,seePart,sensor,item,panTap,key,foot,removeExcess,reset,render,levelOk,onHot});Object.defineProperty(window,'S',{get:()=>S});window.__bal=1;
 
 /* tam sayfa yardımcıları */
 $('#mPanel').onclick=()=>{document.body.classList.toggle('panel');$('#mPanel').classList.toggle('on',document.body.classList.contains('panel'))};
