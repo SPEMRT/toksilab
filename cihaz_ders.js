@@ -523,7 +523,7 @@ function aktarim(o){var P=o.pip,V=o.vol,ters=o.ters,hac=V+' µL';
  {bolum:'Bitirme',ask:'<b>Uç atığına</b> (kırmızı kap) tıklayın.',oto:1,halka:H('loc:waste',0,70),izin:['loc:waste'],ok:function(s){return s.loc==='waste'}},
  {bolum:'Bitirme',ask:'<b>Ejektöre</b> basın: piston panelindeki <b>EJEKTÖR</b> düğmesi (ya da pipetteki gri düğme).',halka:['#lej',0,0],izin:['ej'],ok:function(s){return !s.tip&&!s.ej},
   b:'Uç atıldı',html:'<p>Uç ele dokunmadan, ejektörle doğrudan atığa atıldı. '+(o.pip&&V===200?'Kanlı uç <b>tıbbi atık</b> kabına gider.':'Kullanılmış uç bir daha kullanılmaz.')+'</p>'},
- {bolum:'Bitirme',ask:'Pipeti yerine asın: <b>pipet standına</b> tıklayın.',halka:['stand',-60,90],izin:['stand','body:'+P,'stand:'+P],ok:function(s){return s.loc==='rest'},
+ {bolum:'Bitirme',ask:'Pipeti yerine asın: <b>pipet standına</b> tıklayın.',halka:H('stand',0,70),izin:['stand','body:'+P,'stand:'+P],ok:function(s){return s.loc==='rest'},
   b:'İş bitti',html:'<p>Kullanılmayan pipet standda <b>dik</b> durur. Yatırılırsa uçta kalan sıvı pipetin içine akar ve pistonu bozar.</p><p>Sırayı aklınızda tutun:</p><ul>'+o.ozet+'</ul>'},
  {bolum:'Kontrol',test:1}]}
 var DERS={
