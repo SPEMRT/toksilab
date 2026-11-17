@@ -296,7 +296,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  const onPlane=e=>{setR(e);return ray.ray.intersectPlane(plane,hp)?hp.clone():null};
  const hitPt=e=>{setR(e);const hs=ray.intersectObjects(HOT.filter(o=>visibleDeep(o)),false);return hs.length?hs[0].point.clone():null};
  renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};if(S.mode!=='use')return;const h=pick(e);const k=h==='bottle'&&(S.task==='degas'||S.task==='free')?'bottle':h==='part:jug'?'jug':null;
-  if(k&&!(S.run&&!S.pause&&k==='bottle'&&S.bot.in)){const hit=hitPt(e);if(!hit)return;const obj=k==='bottle'?K.B:K.J;const n=cam.getWorldDirection(new THREE.Vector3()).setY(0).normalize();plane.setFromNormalAndCoplanarPoint(n,hit);
+  if(k&&!(S.run&&!S.pause&&k==='bottle'&&S.bot.in)&&(!window.__izin||window.__izin(h))){const hit=hitPt(e);if(!hit)return;const obj=k==='bottle'?K.B:K.J;const n=cam.getWorldDirection(new THREE.Vector3()).setY(0).normalize();plane.setFromNormalAndCoplanarPoint(n,hit);
    drag={k,sx:e.clientX,sy:e.clientY,on:false,off:obj.position.clone().sub(hit)};ctl.enabled=false;try{renderer.domElement.setPointerCapture(e.pointerId)}catch(_){}}});
  renderer.domElement.addEventListener('pointermove',e=>{if(!drag)return;if(!drag.on&&Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>6){drag.on=true;closePop();hideTip()}if(drag.on){const p=onPlane(e);if(p){p.add(drag.off);p.x=Math.max(-55,Math.min(55,p.x));p.z=Math.max(-20,Math.min(24,p.z));p.y=Math.max(0,Math.min(45,p.y));S.drag={k:drag.k,x:p.x,y:p.y,z:p.z}}}});
  renderer.domElement.addEventListener('pointerup',e=>{if(drag){ctl.enabled=true;const d=drag;drag=null;if(d.on){down=null;dropAt(d.k);return}}if(!down)return;const m=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;if(m<7){const h=pick(e);if(S.mode==='parts'){tipAt(h,e);return}onHot(h,e)}});
@@ -338,7 +338,8 @@ function step(now){const dt=Math.min(.5,(now-lastF)/1000);lastF=now;if(!S)return
    if(S.bot.in&&ok)S.bot.gas=Math.max(0,S.bot.gas-(S.bot.cap==='loose'?11:3.5)*simMin);
    if(S.rack.in&&ok)S.rack.ext=Math.min(100,S.rack.ext+22*simMin);
    if(S.rack.in&&!S.rack.caps)S.ev.evap=1;
-   if(S.rem<=0){S.rem=0;S.run=false;S.pause=false;S.beepT=now+2500;beep(3);S.ev.fin=1;onFinish()}}
+   if(ot()&&OT.cur)otIzle();
+   if(S.rem<=0){S.rem=0;S.run=false;S.pause=false;S.beepT=now+2500;beep(3);S.ev.fin=1;if(OT&&OT.cur){OT.cur.bitti=true;otKapat()}onFinish()}}
   if(S.water>LOVER-disp()&&!S.ev.spill){S.ev.spill=1;S.flags.push('Banyo taştı: su tezgaha döküldü (2/3 çizgisinin üstüne dolduruldu).')}}
  if(!R3)return;
  /* su ve yüzey */
@@ -359,7 +360,43 @@ function step(now){const dt=Math.min(.5,(now-lastF)/1000);lastF=now;if(!S)return
  curWarn.forEach(o=>{const k=.55+.45*Math.sin(now/160);o.material.opacity=k;o.children[0].material.opacity=.06+.12*k});
  checkDone()}
 let aud=null;function beep(n=1){try{aud=aud||new (window.AudioContext||window.webkitAudioContext)();for(let i=0;i<n;i++){const o=aud.createOscillator(),g=aud.createGain();o.type='square';o.frequency.value=2200;g.gain.value=.04;o.connect(g);g.connect(aud.destination);const t0=aud.currentTime+i*.32;o.start(t0);o.stop(t0+.18)}}catch(_){}}
-function danger(title,text,why,key){closePop();if(key&&!S.ev['dz'+key]){S.ev['dz'+key]=1;S.flags.push('Tehlikeli hareket denendi (engellendi): '+title)}const d=$('#wdlg');$('#wT').textContent=title;$('#wP').innerHTML=text;$('#wW').innerHTML='<b>Neden?</b> '+why;$('#wNo').onclick=()=>d.close();beep(2);try{d.showModal()}catch(_){d.setAttribute('open','')}say('<b style="color:#E0403A">⚠ DİKKAT:</b> '+title+' Bu hareket engellendi.')}
+function danger(title,text,why,key){closePop();if(ot()){if(OT.tehlike.indexOf(title)<0)OT.tehlike.push(title);beep(2);return}if(key&&!S.ev['dz'+key]){S.ev['dz'+key]=1;S.flags.push('Tehlikeli hareket denendi (engellendi): '+title)}const d=$('#wdlg');$('#wT').textContent=title;$('#wP').innerHTML=text;$('#wW').innerHTML='<b>Neden?</b> '+why;$('#wNo').onclick=()=>d.close();beep(2);try{d.showModal()}catch(_){d.setAttribute('open','')}say('<b style="color:#E0403A">⚠ DİKKAT:</b> '+title+' Bu hareket engellendi.')}
+/* ===== serbest kullanım: sessiz kayıt ve değerlendirme raporu =====
+   Serbest kullanım bir degazlama sınavıdır: hazne boş, şişenin kapağı sıkı, süre 5 dk. Uyarı ve engelleme diyaloğu yoktur;
+   her ▶❚❚ başlatması bir kayıt açar, süre bitince ya da cihaz kapatılınca kapanır. ✅ İşi bitirdim ile rapor açılır. */
+let OT=null;
+const sessiz=()=>S&&S.task==='free'&&document.body.classList.contains('serbest');
+const ot=()=>sessiz()&&OT;
+function otBasla(){OT={t0:Date.now(),kayit:[],cur:null,tehlike:[]}}
+function otAc(){if(!ot())return;if(OT.cur)otKapat();OT.cur={tm:new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),lv:level(),tmin:S.tmin,sise:S.bot.in,sikiK:S.bot.in&&S.bot.cap==='tight',isi:S.set>30,azSu:level()<LMIN,gas0:S.bot.gas,bitti:false}}
+function otIzle(){const c=OT.cur;if(S.bot.in){c.sise=true;if(S.bot.cap==='tight')c.sikiK=true}if(S.set>30)c.isi=true;if(level()<LMIN)c.azSu=true}
+function otKapat(){if(!OT||!OT.cur)return;const c=OT.cur;c.gas=S.bot.gas;c.sure=c.tmin-Math.max(0,S.rem)/60;OT.kayit.push(c);OT.cur=null;if(window.__raporDugme)window.__raporDugme(raporAc)}
+function raporAc(){if(!OT)return;
+ const liste=OT.cur?OT.kayit.concat([Object.assign({},OT.cur,{gas:S.bot.gas,sure:OT.cur.tmin-Math.max(0,S.rem)/60})]):OT.kayit;
+ const kayitlar=liste.map(c=>{const k=[];let d=0;const e=(ok,iyi,kotu,ceza)=>{k.push([ok,iyi,kotu]);if(!ok)d+=ceza};
+  e(!c.azSu,'Hazne yeterince doluydu','Hazne yeterince dolu değilken ('+fmt(c.lv,1)+' L) ultrason çalıştırıldı: su az olunca enerji metalde kalır, dönüştürücüler ısınıp bozulur. Su, şişeyle birlikte 2/3 çizgisine (≈ 2,2 L) gelmeli.',30);
+  if(!c.azSu)e(c.lv<=LMAX,'Su seviyesi 2/3 çizgisindeydi (şişeyle birlikte)','Su 2/3 çizgisinin üstündeydi ('+fmt(c.lv,1)+' L): numune konunca taşabilir.',10);
+  e(c.sise,'Mobil faz şişesi sepetteydi','Banyo numunesiz çalıştırıldı: şişe sepette değildi, degazlama yapılmadı.',20);
+  if(c.sise)e(!c.sikiK,'Şişenin kapağı yarım tur gevşekti','Şişenin kapağı sıkıyken ultrason uygulandı: çıkan gaz kaçamaz, degazlama olmaz, şişede basınç birikir. Kapak yarım tur gevşetilir.',20);
+  e(!c.isi,'Isıtma yapılmadı','Banyo ısıtıldı (ayar 30 °C’nin üstünde): ısınan mobil fazdan çözücü buharlaşır, bileşimi değişir. Degazlama ısıtmasız yapılır.',15);
+  e(c.tmin>=10&&c.tmin<=15,'Süre 10–15 dakika ayarlandı','Süre '+c.tmin+' dakika ayarlandı: mobil faz degazlaması için 10–15 dakika gerekir.',10);
+  if(c.sise)e(c.bitti&&c.gas<=45,'Degazlama tamamlandı (çözünmüş gaz %'+fmt(c.gas)+')',!c.bitti?'Ultrason süre bitmeden durduruldu ('+fmt(Math.max(0,c.sure),1)+' / '+c.tmin+' dk).':'Degazlama yetersiz: çözünmüş gazın %'+fmt(c.gas)+'’i hâlâ çözeltide.',15);
+  return {ad:'Ultrason · '+c.tm,deger:c.tmin+' dk · '+fmt(c.lv,1)+' L',puan:Math.max(0,100-d),k}});
+ const bit=[];let bd=0;const b=(ok,iyi,kotu,ceza)=>{bit.push([ok,iyi,kotu]);if(!ok)bd+=ceza};
+ b(!S.bot.in,'Şişe banyodan çıkarıldı','Şişe banyoda bırakıldı: süre bitince şişe çıkarılır, dışı kurulanır.',5);
+ b(S.bot.cap==='tight','Şişenin kapağı sıkıca kapatıldı','Şişenin kapağı gevşek bırakıldı: degazlamadan sonra kapak sıkıca kapatılır, yoksa hava yeniden çözünür ve toz girer.',5);
+ b(!S.pow,'Cihaz kapatıldı','Cihaz açık bırakıldı: iş bitince ⏻ ile kapatılır.',5);
+ OT.tehlike.forEach(t=>{bit.push([false,'',t+' (cihaz izin vermedi)']);bd+=10});
+ const ort=kayitlar.length?kayitlar.reduce((a,x)=>a+x.puan,0)/kayitlar.length:0;
+ window.__raporGoster({baslik:'Serbest ultrasonik banyo · değerlendirme raporu',kayitAd:'Ultrason çalıştırmaları',kayitlar,bitirme:bit,puan:kayitlar.length?Math.max(0,Math.round(ort-bd)):0,sure:Math.round((Date.now()-OT.t0)/60000),
+  bos:'Ultrason hiç çalıştırılmadı: mobil faz şişesini degaze edin, sonra yeniden <b>✅ İşi bitirdim</b>’e basın.',
+  not:'Puanlama: her çalıştırma 100 üzerinden; az suyla çalıştırma −30, şişe sepette değil −20, kapak sıkı −20, ısıtma −15, süre 10–15 dk değil −10, su çizginin üstünde −10, degazlama tamamlanmadı −15. Çalıştırmaların ortalamasından işi bitirme eksikleri (her biri −5) ve engellenen tehlikeli girişimler (her biri −10) düşülür.',
+  yenileAd:'Yeniden başla',yenile:serbestYenile})}
+/* serbest kullanımın başlangıcı: hazne boş, şişe tezgâhta (kapak sıkı), süre 5 dk */
+function serbestIlk(){reset('free');S.mode='use';S.water=0;S.tmin=5;S.bot.out=true;S.bot.px=24;S.bot.pz=4}
+function serbestKur(){serbestIlk();otBasla();render()}
+function serbestYenile(){const o=OT;serbestIlk();OT=o;if(OT)OT.cur=null;render()}
+window.serbestRapor={ac:raporAc,ot:()=>OT};
 /* ---------- sürükle-bırak ---------- */
 const inBath=(x,z)=>Math.abs(x)<13&&Math.abs(z)<7.5;const base0=()=>15.5-10+.05;
 function dropAt(k){const d=S.drag;S.drag=null;if(!d){render();return}
@@ -368,16 +405,16 @@ function dropAt(k){const d=S.drag;S.drag=null;if(!d){render();return}
   else{if(b.in){b.in=false;say('Şişeyi banyodan çıkarıp tezgaha koydun; dışını kuru bir kağıtla sil.'+(S.ev.fin&&b.cap!=='tight'?' Şimdi <b>kapağı sıkıca kapat</b>: şişeye dokun.':''))}b.px=d.x;b.pz=Math.max(-14,d.z);b.out=true}render();return}
  if(k==='rack'){const r=S.rack;if(inBath(d.x,d.z)){if(!r.in){if(!rackOkIn()){render();return}r.in=true;r.out=true;say('Yüzer sporu suya bıraktın; tüpler dik duruyor ✓.'+(r.caps?'':' <b>Kapaklar açık!</b>'))}}else{if(r.in){r.in=false;say('Sporu banyodan çıkardın.')}r.px=d.x;r.pz=Math.max(-14,d.z);r.out=true}render()}}
 /* ---------- eylemler ---------- */
-function power(){if(S.mode!=='use')return;S.pow=!S.pow;if(!S.pow){S.run=false;S.pause=false;S.rem=0;say('Cihazı kapattın.'+(S.task!=='free'&&S.ev.fin?'':''));render();return}
+function power(){if(S.mode!=='use')return;S.pow=!S.pow;if(!S.pow){if(OT&&OT.cur)otKapat();S.run=false;S.pause=false;S.rem=0;say('Cihazı kapattın.'+(S.task!=='free'&&S.ev.fin?'':''));render();return}
  say(`Cihazı açtın: ekranda süre <b>${S.tmin} dk</b>, ayar <b>${S.set} °C</b>, su sıcaklığı <b>${fmt(S.act)} °C</b>.`+(S.task!=='free'?' Bu işte ısıtma gerekmez: ayar sıcaklığı oda sıcaklığında kalsın.':''));render()}
 function setTime(d){if(S.mode!=='use'||!S.pow){if(!S.pow)say('Önce cihazı <b>⏻</b> ile aç.');return}if(S.run&&!S.pause){say('Çalışırken süre değiştirilmez; önce <b>▶❚❚</b> ile duraklat.');return}S.tmin=Math.max(1,Math.min(99,S.tmin+d));if(S.pause)S.rem=S.tmin*60;
  if(S.task==='degas'&&S.tmin===10)say('Süre <b>10 dakika</b> ✓. Mobil faz degazlaması için 10–15 dakika yeterli.');if(S.task==='recon'&&S.tmin===5)say('Süre <b>5 dakika</b> ✓.');render()}
 function setTemp(d){if(S.mode!=='use'||!S.pow){if(!S.pow)say('Önce cihazı <b>⏻</b> ile aç.');return}S.set=Math.max(20,Math.min(80,S.set+d));
  if(S.task!=='free'&&S.set>30&&!S.ev.hot){S.ev.hot=1;say(S.task==='degas'?'<b>Not:</b> mobil fazı degaze ederken banyoyu ısıtma; ısınan çözeltinin bileşimi buharlaşmayla değişebilir.':'<b>Not:</b> yeniden çözmede ısıtma gerekmez; bazı analitler ısıyla bozulabilir.')}render()}
 function startPause(){if(S.mode!=='use'||!S.pow){if(!S.pow)say('Önce cihazı <b>⏻</b> ile aç.');return}
- if(!S.run&&level()<LMIN){danger('Banyo susuz ya da az suyla çalışmaz!',`Haznede yalnızca <b>${fmt(level(),1)} L</b> su var; 2/3 çizgisi ≈ 2,2 L.`,'Ultrasonik dönüştürücüler suya enerji verir; su yoksa enerji metalde kalır ve dönüştürücüler birkaç saniyede ısınıp bozulur. Önce haznenin <b>2/3’üne kadar su</b> koy.','dry');return}
+ if(!S.run&&level()<LMIN&&!sessiz()){danger('Banyo susuz ya da az suyla çalışmaz!',`Haznede yalnızca <b>${fmt(level(),1)} L</b> su var; 2/3 çizgisi ≈ 2,2 L.`,'Ultrasonik dönüştürücüler suya enerji verir; su yoksa enerji metalde kalır ve dönüştürücüler birkaç saniyede ısınıp bozulur. Önce haznenin <b>2/3’üne kadar su</b> koy.','dry');return}
  if(S.run){S.pause=!S.pause;say(S.pause?'Ultrasonu <b>duraklattın</b>.':'Ultrasona devam ediyor.');render();return}
- S.run=true;S.pause=false;S.rem=S.tmin*60;S.ev.start=1;
+ S.run=true;S.pause=false;S.rem=S.tmin*60;S.ev.start=1;otAc();
  say(`Ultrason başladı: <b>${S.tmin} dk</b>. Suyun yüzeyi titreşiyor, haznede kavitasyon kabarcıkları oluşuyor.`+(S.bot.in?' Şişenin içinden çözünmüş gaz kabarcıklar hâlinde yükseliyor.':'')+' (Simülasyonda 1 saniye = 1 dakika.)');render()}
 function onFinish(){if(S.task==='degas')say('Süre bitti, cihaz <b>bip</b> sesiyle durdu ✓. Şişedeki kabarcıklar azaldı. Şimdi <b>şişeyi çıkar</b>, kapağını <b>sıkıca kapat</b> ve cihazı kapat.');
  else if(S.task==='recon')say('5 dakika tamamlandı ✓. Kalıntı çözüldü. <b>Sporu çıkar</b>, tüpleri kısa santrifüj edip çözeltiyi vial’e aktar. Cihazı kapat.');else say('Süre bitti; cihaz durdu.');render()}
@@ -391,7 +428,7 @@ function bottlePop(e){if(S.mode!=='use')return;const b=S.bot;popAt(e,`<b>Mobil f
   if(!b.in&&!bottleOkIn())return;b.in=!b.in;b.out=true;S.ev.bIn=S.ev.bIn||b.in;
   say(b.in?'Şişeyi sepete koydun. '+(level()<LMIN?'Su seviyesi düşük: biraz su ekle.':level()>LMAX?'Su 2/3 çizgisinin üstünde.':'Su seviyesi şişeyle birlikte 2/3 çizgisinde ✓.')+(b.cap==='tight'?' <b>Kapak hâlâ sıkı!</b>':''):'Şişeyi banyodan çıkardın; dışını kuru bir kağıtla sil.');closePop();render()};$('#b3').onclick=closePop}
 function bottleOkIn(){const b=S.bot;if(S.run&&!S.pause){say('Çalışırken numuneyi koyma; önce duraklat.');closePop();return false}if(level()+.45>LOVER){danger('Banyo taşar!','Su zaten çok dolu; şişeyi koyarsan su tezgaha taşar.','Taşan su panelin içine kaçabilir; elektrikli cihazda kısa devre riski vardır. Önce biraz su boşalt.','ovB');return false}
- if(b.cap==='tight'&&S.task!=='free'||b.cap==='tight'&&S.task==='free'){danger('Kapağı sıkı şişe banyoya konmaz!','Mobil faz şişesinin kapağı <b>sıkıca kapalı</b>.','Ultrason çözünmüş gazı kabarcık hâlinde çıkarır; kapak sıkıysa gaz kaçamaz, degazlama olmaz ve ısınan şişede basınç birikir. Kapağı <b>yarım tur gevşet</b>, sonra şişeyi koy.','capT');return false}return true}
+ if(b.cap==='tight'&&!sessiz()){danger('Kapağı sıkı şişe banyoya konmaz!','Mobil faz şişesinin kapağı <b>sıkıca kapalı</b>.','Ultrason çözünmüş gazı kabarcık hâlinde çıkarır; kapak sıkıysa gaz kaçamaz, degazlama olmaz ve ısınan şişede basınç birikir. Kapağı <b>yarım tur gevşet</b>, sonra şişeyi koy.','capT');return false}return true}
 function rackOkIn(){const r=S.rack;if(S.run&&!S.pause){say('Çalışırken numuneyi koyma; önce duraklat.');return false}if(level()+.15>LOVER){danger('Banyo taşar!','Su çok dolu; sporu koyarsan su taşar.','Önce biraz su boşalt.','ovR');return false}return true}
 function rackPop(e){if(S.mode!=='use')return;const r=S.rack;popAt(e,`<b>Kuru ekstrakt tüpleri · 4 adet</b><small>kalıntı + 100 µL mobil faz · kapaklar ${r.caps?'kapalı':'açık'} · çözünme %${fmt(r.ext)}</small><button id="r1">${r.caps?'Kapakları aç':'Kapakları sıkıca kapat'}</button><button id="r2">${r.in?'Sporu banyodan çıkar':'Sporu banyoya yüzdür'}</button><button class="g" id="r3">Kapat</button>`);
  $('#r1').onclick=()=>{r.caps=!r.caps;if(!r.caps&&!S.ev.capOpen){S.ev.capOpen=1;say('<b>Dikkat:</b> kapaklar açıkken banyo suyu sıçrayıp tüpe girebilir, çözücü buharlaşır. Kapakları kapat.')}else say('Kapakları sıkıca kapattın ✓.');closePop();render()};
@@ -401,7 +438,7 @@ function bathPop(e){if(S.mode!=='use')return;popAt(e,`<b>Hazne · ${fmt(level(),
  $('#w1').onclick=()=>{water(.5);bathPop(e)};$('#w2').onclick=()=>{water(.1);bathPop(e)};$('#w3').onclick=()=>{water(-1);closePop()};$('#w4').onclick=closePop}
 function popAt(e,html){const el=$('#bpop'),rc=box.getBoundingClientRect();el.innerHTML=html;el.hidden=false;const ex=e&&e.clientX!=null?e.clientX-rc.left:rc.width/2,ey=e&&e.clientY!=null?e.clientY-rc.top:rc.height/2;el.style.left=Math.max(130,Math.min(rc.width-130,ex))+'px';el.style.top=Math.max(200,ey)+'px'}
 const closePop=()=>$('#bpop').hidden=true;
-function onHot(h,e){closePop();if(!h||S.mode!=='use')return;
+function onHot(h,e){closePop();if(!h||S.mode!=='use')return;if(window.__izin&&!window.__izin(h)){if(window.__izinUyari)window.__izinUyari(h);return}
  if(h.startsWith('key:')){const k=h.slice(4);({tUp:()=>setTime(1),tDn:()=>setTime(-1),go:startPause,sUp:()=>setTemp(5),sDn:()=>setTemp(-5),pw:power})[k]();beep(1);return}
  if(h==='part:jug'||h==='bath'||h==='part:mark'||h==='part:basket'||h==='part:tank'){bathPop(e);return}
  if(h==='bottle'){bottlePop(e);return}if(h==='rack'){rackPop(e);return}
@@ -416,9 +453,9 @@ function render(){if(S.mode!=='parts')hideTip();$('.rot').style.visibility=S.mod
 function live(){const use=S.mode==='use';$('#dsp').hidden=!use;const son=S.run&&!S.pause;
  $('#dSt').textContent=!S.pow?'KAPALI':son?'ULTRASON ÇALIŞIYOR':S.pause?'DURAKLATILDI':'HAZIR';$('#dSt').style.color=son?'#7CF2D8':!S.pow?'#9BB0B6':'#F2B632';
  $('#dR').innerHTML=S.pow?`${S.run||S.pause?String(Math.floor(S.rem/60)).padStart(2,'0')+':'+String(Math.floor(S.rem%60)).padStart(2,'0'):String(S.tmin).padStart(2,'0')+':00'}`:'—';
- $('#dT').textContent=`ayar ${S.set} °C · su ${fmt(S.act,1)} °C${heating()?' · ısıtıyor':''}`;const lv=level();$('#dV').textContent=`Hazne ${fmt(lv,1)} L ${lv<LMIN?'(az)':lv<=LMAX?'(2/3 ✓)':'(fazla)'}`;
+ $('#dT').textContent=`ayar ${S.set} °C · su ${fmt(S.act,1)} °C${heating()?' · ısıtıyor':''}`;const lv=level();$('#dV').textContent=sessiz()?`Hazne ${fmt(lv,1)} L`:`Hazne ${fmt(lv,1)} L ${lv<LMIN?'(az)':lv<=LMAX?'(2/3 ✓)':'(fazla)'}`;
  const p=S.task==='recon'||S.rack.in?S.rack.ext:100-S.bot.gas;$('#dB').textContent=S.task==='recon'||S.rack.in?`çözünme %${fmt(S.rack.ext)}`:`degazlama %${fmt(100-S.bot.gas)}`;$('#dBar').style.width=p+'%';
- const hd=$('#held');const w=!S.pow?'':son&&lv<LMIN?'⚠ SU AZ!':'';hd.hidden=!(use&&w);hd.textContent=w;hd.style.background='#C8443F'}
+ const hd=$('#held');const w=!S.pow||sessiz()?'':son&&lv<LMIN?'⚠ SU AZ!':'';hd.hidden=!(use&&w);hd.textContent=w;hd.style.background='#C8443F'}
 function panel(){const use=S.mode==='use';$('#mParts').classList.toggle('on',!use);$('#mUse').classList.toggle('on',use);$('#tName').textContent=T().t;
  $('#tasks').innerHTML=TASKS.map((x,i)=>`<button class="task${S.task===x.id?' on':''}${S.done[x.id]?' done':''}" data-t="${x.id}"><span>${S.done[x.id]?'✓':i+1}</span><div>${x.t}<small>${x.d}</small></div></button>`).join('');
  $('#tasks').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{$('#tdlg').close();reset(b.dataset.t);S.mode=b.dataset.t==='parts'?'parts':'use';render()});
@@ -471,7 +508,7 @@ $('#nB').onclick=e=>{if(S.task!=='degas'&&S.task!=='free')return;S.bot.out=true;
 reset('parts');
 try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 render();
-Object.assign(window,{reset,render,power,setTime,setTemp,startPause,water,onHot,dropAt,bottleOkIn});Object.defineProperty(window,'S',{get:()=>S});window.__ult=1;
+Object.assign(window,{serbestKur,reset,render,power,setTime,setTemp,startPause,water,onHot,dropAt,bottleOkIn});Object.defineProperty(window,'S',{get:()=>S});window.__ult=1;
 /* rehberli ders için: tıklanabilir parçanın (hot kimliği) ekrandaki yeri */
 window.scrOf=n=>{const b=new THREE.Box3();HOT.forEach(o=>{if(o.userData.hot===n){o.updateWorldMatrix(true,false);b.expandByObject(o,true)}});const v=(b.isEmpty()?K[n].getWorldPosition(new THREE.Vector3()):b.getCenter(new THREE.Vector3())).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};
 window.__tick=(sec)=>{const n=Math.ceil(sec/.1);for(let i=0;i<n;i++){lastF=performance.now()-100;step(performance.now())}};
