@@ -215,6 +215,12 @@ ter10:{ad:'10,00 mg referans standart tartımı',ozet:'Kayık, dara, spatulayla 
  ['Hedefe yaklaşınca nasıl eklenir?',['Spatulaya hafifçe vurarak az az','Bol miktarda, hızlıca','Kayığı sallayarak'],0,'Büyük adımlarla hedef kolayca aşılır.']],
  bitti:function(){S().done.w10=1}}
 };
+/* rehberli derste her adımda yalnız yönlendirilen parça etkileşimli (adım metnine göre) */
+['terkal','ter10'].forEach(function(id){DERS[id].adim.forEach(function(a){if(!a.ask||a.izin)return;var t=a.ask;
+ var M=[['ayağa','foot'],['Kabarcığı ortalayın','foot'],['<b>Ayarlar</b>','key:c'],['İç kalibrasyon','key:c'],['Kalibrasyon sürüyor',''],
+  ['tartım kayığına','item:al item:pl'],['tartım kefesine','sens pan'],['Dara</b>','sens key:t'],['spatula kabına','item:sh'],['Referans standart','item:vi'],
+  ['<b>kayığa</b>','sens pan'],['Az (hafif vur)','sens pan'],['Kaydet</b>','key:s'],['dolu kayığı','sens pan'],['balon jojeye','item:vol'],['sensör','sens']];
+ for(var k=0;k<M.length;k++)if(t.indexOf(M[k][0])>=0){a.izin=M[k][1]?M[k][1].split(' '):[];return}})});
 return {sayfa:'terazi_pilot.html',hazir:'__bal',ad:'ANALİTİK TERAZİ',model:'MY-Terazi µ6',adTam:'Analitik terazinin',
  acl:'Teraziyi üç kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 3–6 dakika sürer.',
  GM:{parts:'terani',level:'terkal',w10:'ter10',w5:'ter10'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['terani','terkal','ter10'],
@@ -471,8 +477,8 @@ var C=null;[vorteks,terazi,ultra,santrifuj].some(function(f){var c=f();if(c.sayf
 if(!C)return;
 /* serbest kullanımda canlı uyarı kuralları: yanlış giden şey kesin dille panelde gösterilir */
 var SK={
- 'terazi_pilot.html':{yerlesim:'kontrol',kural:function(s){if(!(s.boat||s.powder>0||s.held))return [];var t=window.tartimSorunlari?window.tartimSorunlari():[];
-  return t.filter(function(x){return !(/darası/.test(x)&&!(s.powder>0))&&!(/kalibrasyon/.test(x)&&!s.boat)})}},
+ /* terazi serbest kullanımı bir sınavdır: uyarı, halka ve not yok; yapılan her şey kaydedilir, ilk kayıttan sonra 📋 Rapor */
+ 'terazi_pilot.html':{yerlesim:'kontrol',sessiz:true,kur:function(){window.reset('free');var s=S();s.mode='use';s.lev={x:3,y:-1};s.cal=false;s.log=[];if(window.otBasla)window.otBasla();window.render()}},
  'vorteks_pilot.html':{yerlesim:'kontrol',html:'<div class="alt"><button class="is" id="dHold">✋ Tüpü bastırarak tut</button></div>',
   bagla:function(P){P.querySelector('#dHold').onclick=function(){window.holdToggle()}},
   yenile:function(P,s){var b=P.querySelector('#dHold');if(b){b.textContent=s.hold?'✋ Tüpü bırak':'✋ Tüpü bastırarak tut';b.disabled=!s.cupT}},
@@ -509,6 +515,7 @@ css.textContent=
 '#sbEk .sbUy{background:#3A1416;color:#FFE1E1;border-radius:10px;padding:8px 10px;border-left:4px solid #E5484D;font-size:12.5px}#sbEk .sbUy b.nm{display:block;font:700 10px "IBM Plex Mono",monospace;color:#FF8A8A;letter-spacing:.08em;margin-bottom:3px}#sbEk .sbUy ul{margin:0 0 0 16px;display:grid;gap:3px}'+
 '#sbEk .sbNot{background:#F1F6F7;color:#16242A;border-radius:10px;padding:8px 10px;border-left:4px solid #2BD9C0;font-size:12.5px;line-height:1.35}#sbEk .sbNot>b:first-child{display:block;font:600 10px "IBM Plex Mono",monospace;color:#1F9A97;letter-spacing:.08em;margin-bottom:2px}#sbEk [hidden]{display:none}'+
 'body.sbk .sbGizle{display:none!important}#sbEk .sbVent{background:#B7791F;color:#fff;font-weight:700}#sbEk .sbVent[hidden]{display:none}'+
+'#sbEk .sbSes{font-size:12px;color:#9BB0B6;line-height:1.35}'+
 '#sbEk .sbDers{border:0;background:none;color:#9BB0B6;font:600 12.5px "Source Sans 3",sans-serif;cursor:pointer;padding:4px}'+
 '@media (max-width:900px){body.cders.serbest.sbk.panel .stage{right:0;bottom:50dvh}body.cders.serbest.sbk.panel #cv3{width:100vw!important;height:50dvh!important}body.sbk #side{width:auto;max-height:50dvh}}'+
 'body.cders .dsp{pointer-events:auto!important;cursor:move;transform:scale(.8);transform-origin:top right;touch-action:none;user-select:none;-webkit-user-select:none}body.cders .dsp.tasindi{transform-origin:top left}body.cders .dsp.sur{box-shadow:0 0 0 2px #2BD9C0,0 10px 26px rgba(0,0,0,.45)}'+
@@ -596,7 +603,7 @@ function dspKur(){var e=document.getElementById('dsp');if(!e||e.dataset.sur)retu
  e.addEventListener('dblclick',function(){try{localStorage.removeItem(K2)}catch(_){}['left','top','right','bottom'].forEach(function(k){e.style.removeProperty(k)});e.classList.remove('tasindi')})}
 function kontrolEk(){var side=document.getElementById('side');if(!side||document.getElementById('sbEk'))return;var c=side.querySelector('.card')||side;var d=document.createElement('div');d.id='sbEk';
  var nl=C.serbest.numune||[];d.innerHTML=(nl.length?'<button class="bt sbNum" id="sbNumB">🧪 Numune seç ▾</button><div class="sbNumL" id="sbNumL" hidden>'+nl.map(function(n){return '<button class="bt" data-num="'+n[0]+'">'+n[1]+'</button>'}).join('')+'</div>':'')+
-  (C.serbest.ek||'')+'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div><button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
+  (C.serbest.ek||'')+(C.serbest.sessiz?'<div class="sbSes">Serbest kullanım: uyarı yok. Kendi bildiğin gibi çalış; ilk kayıttan sonra solda <b>📋 Rapor</b> çıkar.</div>':'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div>')+'<button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
  c.appendChild(d);var L2=d.querySelector('#sbNumL');
  if(L2)d.querySelector('#sbNumB').onclick=function(){L2.hidden=!L2.hidden};
  d.querySelectorAll('[data-num]').forEach(function(b){b.onclick=function(){var m=C.serbest.numuneSec(b.dataset.num);if(!m)L2.hidden=true;else{NOT=m;var n=document.getElementById('sbNot');n.querySelector('.nt').innerHTML=m;n.hidden=false}}});
