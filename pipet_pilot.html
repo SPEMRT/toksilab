@@ -65,7 +65,7 @@ dialog.tdlg::backdrop{background:rgba(5,10,12,.65)}dialog.tdlg h3{font:700 22px 
 .hot{cursor:pointer}.hot:hover .hl{stroke:#F2B632}
 .capg{cursor:grab}.capg:active{cursor:grabbing}
 .loupe{position:absolute;right:10px;top:10px;width:100px;background:rgba(30,42,48,.93);border-radius:14px;padding:8px 6px;display:grid;gap:4px;justify-items:center;z-index:3;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 6px 18px rgba(0,0,0,.3)}
-.loupe.left{right:auto;left:94px;top:10px}.loupe[hidden]{display:none}.loupe svg{width:84px;height:150px;cursor:pointer;touch-action:none}.loupe small{font:600 10px var(--f-mono);letter-spacing:.06em;color:#BFD6DB;text-align:center;line-height:1.3}
+.loupe .lhd{cursor:move;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.06)}.loupe.tasindi{transition:none}.loupe.sur{box-shadow:0 0 0 2px #2BD9C0,0 10px 26px rgba(0,0,0,.45)}.loupe.left{right:auto;left:94px;top:10px}.loupe[hidden]{display:none}.loupe svg{width:84px;height:150px;cursor:pointer;touch-action:none}.loupe small{font:600 10px var(--f-mono);letter-spacing:.06em;color:#BFD6DB;text-align:center;line-height:1.3}
 .lread{display:grid;justify-items:center;background:#0F1B1D;border-radius:8px;padding:4px 6px;width:100%}.lread span{font:600 9px var(--f-mono);color:#9BB0B6}.lread b{font:600 13px var(--f-mono);color:#7CF2D8}
 .sbub{position:absolute;left:10px;right:120px;bottom:10px;background:rgba(244,248,249,.96);color:#132228;border-radius:12px;padding:8px 10px;font-size:13.5px;line-height:1.35;z-index:3;display:none;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .sbub.parts{right:10px}
@@ -141,7 +141,7 @@ body.cders.serbest.sbk.panel .loupe:not(.left){right:310px}body.cders.serbest.sb
  <div class="grid">
   <div style="display:grid;gap:12px">
    <div class="stage"><nav class="snav" aria-label="Pipet menüsü"><button id="mHome" title="Laboratuvara dön"><span>⌂</span>Laboratuvar</button><button id="mTasks"><span>☰</span>Görevler</button><button id="mParts" class="on"><span>◫</span>Parçalar</button><button id="mUse"><span>✋</span>Kullanım</button><button id="mPanel"><span>⚙</span>Kontroller</button><button id="mReset"><span>↺</span>Sıfırla</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav><div id="cv3"><div class="tip" id="tip" hidden></div><div class="held" id="held" hidden></div><div class="kpop" id="vpop" hidden><b>Hacim (µL)</b><div><button id="vpM">−</button><span id="vpV"></span><button id="vpP">+</button></div></div><div class="rot">Sürükle: döndür · pipeti tutup taşı</div><div class="nogl" id="nogl" hidden>3B görüntü için tarayıcının WebGL desteği gerekiyor.</div></div>
-    <div class="loupe" id="loupe" hidden><small>PİSTON</small><svg id="lsv" viewBox="0 0 84 150" role="button" aria-label="Piston: dokun bas, basılı tut 2. durak, tekrar dokun bırak"></svg><small>Dokun: bas / bırak<br>Basılı tut: 2. durak</small><button class="bt" id="lej" style="width:100%;padding:6px 4px;font-size:11.5px;background:#3A4B53;border-color:#56686F">EJEKTÖR</button><div class="lread"><span>TARTI · DARA</span><b id="lread"></b></div></div>
+    <div class="loupe" id="loupe" hidden><small class="lhd" title="Sürükleyerek taşı · çift tıkla: yerine dön">⠿ PİSTON</small><svg id="lsv" viewBox="0 0 84 150" role="button" aria-label="Piston: dokun bas, basılı tut 2. durak, tekrar dokun bırak"></svg><small>Tıkla: bir durak bas<br>1. → 2. durak</small><button class="bt" id="lrel" style="width:100%;padding:6px 4px;font-size:11.5px;background:#2F7DE1;border-color:#2F7DE1">⬆ BIRAK</button><button class="bt" id="lej" style="width:100%;padding:6px 4px;font-size:11.5px;background:#F07C1F;border-color:#F07C1F;color:#fff">EJEKTÖR</button><div class="lread"><span>TARTI · DARA</span><b id="lread"></b></div></div>
     <div class="sbub" id="sbub"></div></div>
    <div class="mentor"><img id="av" alt=""><div><div class="nm">UZM. MY</div><p id="say"></p></div></div>
    <div id="res"></div>
@@ -183,8 +183,8 @@ const TASKS=[{id:'parts',t:'Parçaları tanı',d:'Fareyi parçaların üzerine g
  {id:'dcm',t:'100 µL organik çözücü (DCM) aktar',d:'Uçucu çözücü · ön ıslatma · hız',vol:100,liq:'dcm',pip:'P200',mode:'ileri'}];
 const PARTS=[['cap','Kontrol düğmesi (piston)','Pipetlemeyi yapar. 1. durak ayarlanan hacmi ölçer, 2. durak (boşaltma) uçta kalanı üfler. Rengi pipetin hacim aralığını gösterir.',0,11],
  ['ring','Hacim ayar halkası','Çevirerek hacmi ayarlarsın. Aralığın dışına zorlamak pipetin mekanizmasını bozar.',0,79],
- ['ej','Uç atma (ejektör) düğmesi','Ucu elle dokunmadan atar; kanlı uç doğrudan tıbbi atığa gider.',28,70],
- ['hook','Parmak dayanağı','İşaret parmağı buraya dayanır; pipet elde rahat durur, el yorulmaz.',-80,84],
+ ['ej','Uç atma (ejektör) düğmesi','Turuncu düğme. Ucu elle dokunmadan atar; kanlı uç doğrudan tıbbi atığa gider.',28,70],
+ ['hook','Parmak dayanağı','Turkuaz çıkıntı. İşaret parmağı buraya dayanır; pipet elde rahat durur, el yorulmaz.',-80,84],
  ['disp','Hacim göstergesi','Ayarlanan hacmi µL olarak gösterir. Okurken pencereye karşıdan bak.',5,161],
  ['cal','Kalibrasyon / ayar açıklığı','Yalnızca yetkili kişi kullanır; özel sıvılar için ayar yapılır. Pipetler düzenli olarak kalibre edilir.',16,285],
  ['sleeve','Ejektör kovanı ve uç konisi','Uç, koniye sıkıca takılır. Ejektöre basınca kovan aşağı iner ve ucu iter.',0,540],
@@ -198,7 +198,7 @@ function reset(task){const t=TASKS.find(x=>x.id===(task||'parts'));const keep=S&
 const say=t=>{$('#say').innerHTML=t;const b=$('#sbub');if(b)b.innerHTML=t};
 const P=()=>PIP[S.pip];const T=()=>TASKS.find(x=>x.id===S.task);
 function dispTxt(){const v=S.vol;return S.pip==='P10'?fmt(v,1):String(Math.round(v))}
-function drawLoupe(){const L=$('#loupe');L.hidden=S.mode!=='use';L.classList.toggle('left',narrow()&&(S.loc==='waste'||S.loc==='dst'));$('#sbub').classList.toggle('parts',S.mode!=='use');if(S.mode!=='use')return;const p=P(),d=S.depth,cy=12+d*45;
+function drawLoupe(){const L=$('#loupe');L.hidden=S.mode!=='use';L.classList.toggle('left',!L.classList.contains('tasindi')&&narrow()&&(S.loc==='waste'||S.loc==='dst'));$('#sbub').classList.toggle('parts',S.mode!=='use');if(S.mode!=='use')return;const p=P(),d=S.depth,cy=12+d*45;
  $('#lsv').innerHTML=`<defs><linearGradient id="lc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${p.col[1]}"/><stop offset=".45" stop-color="${p.col[0]}"/><stop offset="1" stop-color="${p.col[1]}"/></linearGradient><linearGradient id="lw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#B9C3C8"/><stop offset=".45" stop-color="#FFFFFF"/><stop offset="1" stop-color="#A9B4B9"/></linearGradient></defs>
   ${[[0,'0'],[1,'1'],[1.2,'2']].map(([v,l])=>`<line x1="66" y1="${12+v*45}" x2="80" y2="${12+v*45}" stroke="${Math.abs(d-v)<.03?'#F2B632':'#5E6C73'}" stroke-width="2"/><text x="83" y="${v===1.2?22+v*45:10+v*45}" font-size="9" fill="${Math.abs(d-v)<.03?'#F2B632':'#9BB0B6'}" font-family="IBM Plex Mono,monospace" text-anchor="end">${l}</text>`).join('')}
   <rect x="31" y="${cy+20}" width="14" height="${Math.max(0,90-(cy+20))}" fill="url(#lw)" stroke="#AEB8BD"/>
@@ -333,14 +333,24 @@ function serbestIs(id){if(S.tip)return 'Yeni işe geçmeden önce ucu atığa at
 function serbestKur(){VOL.src={su:1500,kan:1500,stok:1500,dcm:1500};VOL.tube={};reset('su');S.mode='use';otBasla();render()}
 function serbestYenile(){const o=OT;serbestKur();OT=o}
 window.serbestRapor={ac:raporAc,ot:()=>OT,is:()=>S&&ISAD[S.task]};
+/* piston paneli sürüklenerek taşınır; yeri hatırlanır, çift tıklayınca köşesine döner */
+function lupeTasi(){const e=$('#loupe'),hd=e.querySelector('.lhd'),K2='toksilab_lupe';let dr=null;
+ const koy=(fx,fy)=>{const par=e.offsetParent||e.parentElement;if(!par)return;const W=par.clientWidth,H=par.clientHeight;const x=Math.max(4,Math.min(W-e.offsetWidth-4,fx*W)),y=Math.max(4,Math.min(H-e.offsetHeight-4,fy*H));
+  e.style.setProperty('left',x+'px','important');e.style.setProperty('top',y+'px','important');e.style.setProperty('right','auto','important');e.classList.add('tasindi')};
+ const oku=()=>{try{return JSON.parse(localStorage.getItem(K2)||'null')}catch(_){return null}};
+ const uygula=()=>{const o=oku();if(o&&!e.hidden)koy(o.x,o.y)};new MutationObserver(uygula).observe(e,{attributes:true,attributeFilter:['hidden']});addEventListener('resize',uygula);setTimeout(uygula,500);
+ hd.addEventListener('pointerdown',ev=>{const r=e.getBoundingClientRect(),par=(e.offsetParent||e.parentElement).getBoundingClientRect();dr={dx:ev.clientX-r.left,dy:ev.clientY-r.top,par};e.classList.add('sur');try{hd.setPointerCapture(ev.pointerId)}catch(_){}ev.preventDefault();ev.stopPropagation()});
+ hd.addEventListener('pointermove',ev=>{if(!dr)return;koy((ev.clientX-dr.dx-dr.par.left)/dr.par.width,(ev.clientY-dr.dy-dr.par.top)/dr.par.height)});
+ const bit=()=>{if(!dr)return;dr=null;e.classList.remove('sur');const par=e.offsetParent||e.parentElement;try{localStorage.setItem(K2,JSON.stringify({x:parseFloat(e.style.left)/par.clientWidth,y:parseFloat(e.style.top)/par.clientHeight}))}catch(_){}};
+ hd.addEventListener('pointerup',bit);hd.addEventListener('pointercancel',bit);
+ hd.addEventListener('dblclick',()=>{try{localStorage.removeItem(K2)}catch(_){}['left','top','right'].forEach(k=>e.style.removeProperty(k));e.classList.remove('tasindi')})}
 /* sürükleme */
 function pressStart(e,ppu){if(S.mode!=='use')return;e.preventDefault();e.stopPropagation();if(!izin('piston'))return;const st={y0:e.clientY,d0:S.depth,moved:false,held:false,last:performance.now(),lastD:S.depth,v:0};
- st.timer=setTimeout(()=>{if(st.moved)return;st.held=true;clearInterval(relT);if(S.depth<.95)setDepth(1);setTimeout(()=>setDepth(1.2),140);if(navigator.vibrate)navigator.vibrate(18)},550);
  const mv=ev=>{const dy=ev.clientY-st.y0;if(!st.moved&&Math.abs(dy)>8){st.moved=true;clearTimeout(st.timer)}if(!st.moved)return;
   const raw=st.d0+dy/ppu;let d;if(st.d0>=1.05)d=Math.min(1.2,raw);else if(raw<=1)d=raw;else if(raw<=1.4)d=1;else d=Math.min(1.2,1+(raw-1.4));
   const now=performance.now(),dt=(now-st.last)/1000;if(dt>0){st.v=(d-st.lastD)/dt;st.last=now;st.lastD=d}setDepth(d,st.v<-3.5)};
- const up=()=>{clearTimeout(st.timer);window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);
-  if(!st.moved&&!st.held){if(S.depth<.05){clearInterval(relT);setDepth(1)}else slowRelease()}};
+ const up=()=>{window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);
+  if(!st.moved){clearInterval(relT);if(S.depth<.95)setDepth(1);else if(S.depth<1.15)setDepth(1.2)}};
  window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up)}
 let drag=null;
 function svgY(e){const pt=sv.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(sv.getScreenCTM().inverse()).y}
@@ -350,7 +360,7 @@ let relT=null;function slowRelease(){clearInterval(relT);relT=setInterval(()=>{c
 /* ================= 3B SAHNE ================= */
 const box=$('#cv3');let R3=null;const K={models:{},hot:[]};const HOT=[];
 const stageEl=document.querySelector('.stage');const narrow=()=>stageEl.clientWidth<600;
-const LOCX={rest:-16,tips:-5,src:4,dst:12,waste:21};const LZ=2;const TL={P10:3.0,P200:4.6,P1000:6.6};
+const LOCX={rest:-16,ready:-5,tips:-5,src:4,dst:12,waste:21};const LZ=2;const TL={P10:3.0,P200:4.6,P1000:6.6};
 const STAND={x:-16,z:-3,r:3.7};const SLOTS=['P10','P20','P100','P200','P1000','P5000'];
 const DECOR={P20:{col:['#E9ECEE','#9AA4A9'],n:'P20 · 2–20 µL'},P100:{col:['#FFE16B','#D9A800'],n:'P100 · 10–100 µL'},P5000:{col:['#A884E0','#6B3FB5'],n:'P5000 · 1–5 mL'}};
 const TIPC={P10:'#EEF4F6',P200:'#F7E79A',P1000:'#A9CCF4'};
@@ -373,10 +383,10 @@ function pipModel(name){const g=new THREE.Group();const fn=PIP[name]?'fn':'dec';
  const dc=document.createElement('canvas');dc.width=256;dc.height=128;const dt=new THREE.CanvasTexture(dc);dt.colorSpace=THREE.SRGBColorSpace;
  add(new THREE.BoxGeometry(1.25,.72,.12),M.dark,.1,13.7,.98,g,false);const disp=P(new THREE.PlaneGeometry(1.1,.58),new THREE.MeshBasicMaterial({map:dt,toneMapped:false}),.1,13.7,1.05,g,false);g.userData.dc=dc;g.userData.dt=dt;g.userData.dtxt='';
  const cal=P(new THREE.CircleGeometry(.24,20),new THREE.MeshStandardMaterial({color:'#D3D9DC'}),.45,8.4,1.01,g,false);
- const hook=new THREE.Group();hook.position.set(-.8,14.8,0);g.add(hook);P(new THREE.BoxGeometry(2.4,.45,.7),M.grey,-1.1,0,0,hook);const hk2=P(new THREE.CylinderGeometry(.3,.3,.7,16),M.grey,-2.3,-.15,0,hook);hk2.rotation.x=Math.PI/2;hook.rotation.z=-.18;
+ const hook=new THREE.Group();hook.position.set(-.8,14.8,0);g.add(hook);P(new THREE.BoxGeometry(2.4,.45,.7),M.hookC,-1.1,0,0,hook);const hk2=P(new THREE.CylinderGeometry(.3,.3,.7,16),M.hookC,-2.3,-.15,0,hook);hk2.rotation.x=Math.PI/2;hook.rotation.z=-.18;
  const ring=new THREE.Group();ring.position.y=16.1;g.add(ring);P(new THREE.CylinderGeometry(.86,.86,1.0,32),M.grey,0,0,0,ring);for(let i=0;i<20;i++){const a=i/20*Math.PI*2;P(new THREE.BoxGeometry(.08,.95,.08),M.dgrey,Math.cos(a)*.87,0,Math.sin(a)*.87,ring,false)}
  P(new THREE.CylinderGeometry(.7,.8,.4,24),M.white,0,16.8,0);
- const ej=new THREE.Group();ej.position.set(.62,17.3,0);g.add(ej);P(new THREE.BoxGeometry(.55,.9,.6),M.grey,0,0,0,ej);g.userData.ej=ej;
+ const ej=new THREE.Group();ej.position.set(.62,17.3,0);g.add(ej);P(new THREE.BoxGeometry(.55,.9,.6),M.ejC,0,0,0,ej);g.userData.ej=ej;
  const pl=new THREE.Group();g.add(pl);P(new THREE.CylinderGeometry(.26,.26,1.6,16),M.white,0,17.6,0,pl);P(new THREE.CylinderGeometry(.66,.62,.75,28),cm,0,18.55,0,pl);g.userData.pl=pl;
  /* uç */
  const tip=new THREE.Group();g.add(tip);g.userData.tip=tip;
@@ -406,7 +416,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  scene.add(new THREE.HemisphereLight('#EAF6FF','#6F7E84',.5));const sun=new THREE.DirectionalLight('#FFF2DF',2.0);sun.position.set(-20,55,40);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:10,far:150});sun.shadow.bias=-.0004;sun.shadow.radius=4;scene.add(sun);
  const fill=new THREE.DirectionalLight('#EAF4FF',.55);fill.position.set(35,25,30);scene.add(fill);
  R3={renderer,scene,cam,ctl,warn:[]};
- M={white:new THREE.MeshPhysicalMaterial({color:'#F3F5F6',roughness:.35,clearcoat:.5}),grey:new THREE.MeshStandardMaterial({color:'#B9C1C5',roughness:.4,metalness:.2}),dgrey:new THREE.MeshStandardMaterial({color:'#6E787D',roughness:.5}),
+ M={ejC:new THREE.MeshStandardMaterial({color:'#F07C1F',roughness:.45}),hookC:new THREE.MeshStandardMaterial({color:'#17A99B',roughness:.45}),white:new THREE.MeshPhysicalMaterial({color:'#F3F5F6',roughness:.35,clearcoat:.5}),grey:new THREE.MeshStandardMaterial({color:'#B9C1C5',roughness:.4,metalness:.2}),dgrey:new THREE.MeshStandardMaterial({color:'#6E787D',roughness:.5}),
   dark:new THREE.MeshStandardMaterial({color:'#262D31',roughness:.45}),alu:new THREE.MeshStandardMaterial({color:'#E6EAEC',metalness:.55,roughness:.26}),steel:new THREE.MeshStandardMaterial({color:'#C9CFD2',metalness:.9,roughness:.22}),
   graph:new THREE.MeshPhysicalMaterial({color:'#2E373C',roughness:.4,clearcoat:.5}),teal:new THREE.MeshPhysicalMaterial({color:'#2C9EA3',roughness:.32,clearcoat:.7}),
   glass:new THREE.MeshPhysicalMaterial({color:'#EAF6F8',roughness:.03,transparent:true,opacity:.3,clearcoat:1,envMapIntensity:2.4,depthWrite:false,side:THREE.DoubleSide}),
@@ -502,6 +512,7 @@ function standTap(n){if(!n&&S.mode==='use'&&S.loc!=='rest'){go('rest');return}if
 function pose(){if(S.mode==='parts')return {x:LOCX.src-1,y:3.4,z:LZ+3,rz:0,ry:0};if(S.drag)return {x:S.drag.x,y:S.drag.y,z:LZ,rz:0,ry:0};
  const tl=S.tip?TL[S.pip]:0;let tb;const L=S.loc;
  if(L==='rest')return null;
+ if(L==='ready')return {x:LOCX.tips,y:9.5,z:LZ,rz:0,ry:0};
  if(L==='tips'){const y=S.anim==='attach'?3.4:6.4;return {x:LOCX.tips,y,z:LZ,rz:0,ry:0}}
  if(L==='src')tb=S.imm==='deep'?Math.max(.35,srcTop()-2.2):S.imm==='sh'?Math.max(.3,srcTop()-.35):7.6;
  if(L==='dst')tb=S.imm?2.3:6.4;
@@ -590,7 +601,7 @@ function placeVpop(){const el=$('#vpop');if(!vOpen||S.mode!=='use'){el.hidden=tr
 const vStep=()=>P().step*(S.pip==='P10'?5:S.pip==='P200'?5:10);
 $('#vpM').onclick=()=>setVol(S.vol-vStep());$('#vpP').onclick=()=>setVol(S.vol+vStep());
 
-function choosePip(n){if(S.mode!=='use')return;if(S.tip){say('Pipet değiştirmeden önce ucu at.');return}if(n!==S.pip)S.loc='rest';S.pip=n;const p=P();S.vol=Math.min(p.max,Math.max(p.min,S.vol));checkSetup();
+function choosePip(n){if(S.mode!=='use')return;if(S.tip){say('Pipet değiştirmeden önce ucu at.');return}S.loc='ready';S.pip=n;const p=P();S.vol=Math.min(p.max,Math.max(p.min,S.vol));checkSetup();
  const t=T();if(t.vol){say(t.vol>p.max?`${S.pip} en fazla ${fmt(p.max)} µL çeker; ${t.vol} µL için daha büyük bir pipet gerek.`:t.vol<p.min?`${S.pip}’nin alt sınırı ${fmt(p.min,p.dp)} µL; ${t.vol} µL bu pipetle ölçülemez.`:S.pip===t.pip?`Doğru seçim: ${t.vol} µL, ${S.pip}’nin aralığında ve üst sınırına yakın; doğruluk en iyi bu bölgede. Şimdi hacmi ayarla.`:`${S.pip} bu hacmi çekebilir ama ${t.vol} µL aralığın alt kısmında kalır; doğruluk düşer. Daha küçük pipet var mı?`)}render()}
 /* girişler */
 $('#mTasks').onclick=$('#tOpen').onclick=()=>$('#tdlg').showModal();$('#tClose').onclick=()=>$('#tdlg').close();
@@ -604,7 +615,7 @@ $('#p1').onclick=()=>setDepth(1);$('#p2').onclick=()=>setDepth(1.2);$('#rS').onc
 $('#lT').onclick=()=>go('tips');$('#lS').onclick=()=>go('src');$('#lD').onclick=()=>go('dst');$('#lW').onclick=()=>go('waste');
 $('#refill').onclick=()=>{if(!S.src)return;if(S.loc==='src'&&S.imm){say('Önce ucu sıvıdan çıkar.');return}S.src.v=1500;say(`Kaynak tüpü taze ${LIQ[S.src.liq].n.toLowerCase()} ile doldurdun (1,5 mL).`);render()};
 $('#empty').onclick=()=>{if(S.loc==='dst'&&S.imm){say('Önce ucu sıvıdan çıkar.');return}const was=TUBE;TUBE=0;S.dst=0;say(was>0?`Hedef tüpteki ${fmt(was)} µL sıvıyı ${T().liq==='kan'?'<b>tıbbi atığa</b>':'atık kabına'} döktün. Tüp boş, terazi sıfırlandı.`:'Hedef tüp zaten boş.');render()};
-$('#lej').onclick=()=>{if(izin('ej'))eject()};
+$('#lej').onclick=()=>{if(izin('ej'))eject()};$('#lrel').onclick=()=>{if(S.mode==='use'&&S.depth>0&&izin('piston'))slowRelease()};lupeTasi();
 $('#iS').onclick=()=>immerse('sh');$('#iD').onclick=()=>immerse('deep');$('#iO').onclick=withdraw;$('#ej').onclick=eject;
 reset('parts');$('#lsv').addEventListener('pointerdown',e=>pressStart(e,45*$('#lsv').getBoundingClientRect().height/150));
 $('#pips').querySelectorAll('button').forEach(b=>b.onclick=()=>choosePip(b.dataset.p));

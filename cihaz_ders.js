@@ -482,6 +482,7 @@ var AD={'Kontrol düğmesi (piston)':'cap','Hacim ayar halkası':'ring','Uç atm
 var ADI={cap:'kontrol düğmesi (piston)',ring:'hacim ayar halkası',ej:'ejektör düğmesi',hook:'parmak dayanağı',disp:'hacim göstergesi',cal:'kalibrasyon açıklığı',sleeve:'ejektör kovanı',tip:'uç',body:'pipet gövdesi'};
 function H(id,dy,r){return ['hot:'+id,dy||0,r||46]}
 function lupHalka(){return ['#lsv',0,0]}
+function birakHalka(){return ['#lrel',0,0]}
 function hacimHalka(){var v=document.getElementById('vpop');return v&&!v.hidden?['#vpop',0,0]:H('ring',0,50)}
 function derinlik(s){return 'Piston: '+(s.depth<.05?'yukarıda (0)':s.depth<1.1?'1. durakta':'2. durakta')+' · uçta '+(s.tip&&s.tip.liq>0?Math.round(s.tip.liq)+' µL':'sıvı yok')}
 function teraziC(s){return 'Hedef tüp (terazi): '+(s.dst).toFixed(1).replace('.',',')+' µL'}
@@ -489,39 +490,39 @@ function teraziC(s){return 'Hedef tüp (terazi): '+(s.dst).toFixed(1).replace('.
 function aktarim(o){var P=o.pip,V=o.vol,ters=o.ters,hac=V+' µL';
  return [
  {bolum:'Hazırlık',ask:'Standdaki <b>'+P+'</b> pipetine ('+o.renk+' düğmeli) tıklayarak alın.',halka:H('body:'+P,0,60),izin:['body:'+P,'stand:'+P],ok:function(s){return s.pip===P},
-  b:P+' seçildi',html:'<p>'+hac+' '+P+'’nin aralığında ('+o.aralik+') ve üst sınırına yakın. Pipetin doğruluğu aralığın <b>üst kısmında</b> en iyidir.</p><p>Kural: hacmi ölçebilen <b>en küçük</b> pipet seçilir. Örneğin 150 µL, P1000 ile de çekilir ama aralığın en altında kaldığı için hata büyür.</p>'},
+  b:P+' seçildi',html:'<p>Pipet elinizde, <b>uç kutusunun üstünde</b> duruyor. Hacmi burada ayarlayıp sonra uç takacaksınız.</p><p>'+hac+' '+P+'’nin aralığında ('+o.aralik+') ve üst sınırına yakın. Pipetin doğruluğu aralığın <b>üst kısmında</b> en iyidir.</p><p>Kural: hacmi ölçebilen <b>en küçük</b> pipet seçilir. Örneğin 150 µL, P1000 ile de çekilir ama aralığın en altında kaldığı için hata büyür.</p>'},
  o.hacimAyar?{bolum:'Hazırlık',ask:'Pipetin üstündeki <b>hacim ayar halkasına</b> tıklayın. Açılan kutuda <b>−</b> ile hacmi <b>'+hac+'</b>’ye indirin.',halka:hacimHalka,izin:['ring'],canli:function(s){return 'Göstergede: '+(s.pip==='P10'?s.vol.toFixed(1).replace('.',','):Math.round(s.vol))+' µL · hedef '+hac},ok:function(s){return Math.abs(s.vol-V)<1e-6},
   hata:function(){var s=S();return s.vol<V?'Hacim '+Math.round(s.vol)+' µL oldu; <b>+</b> ile '+hac+'’ye çıkarın.':''},
   b:'Hacim: '+hac,html:'<p>Göstergedeki değeri <b>karşıdan</b> bakarak okuyun; yandan bakınca rakam kayar.</p><p>Halka yalnız pipetin aralığında döner. Aralığın dışına zorlamak mekanizmayı bozar ve kalibrasyonu kaydırır.</p>'}
  :{bolum:'Hazırlık',b:'Hacim: '+hac,html:'<p>'+P+' pipetinin göstergesinde zaten <b>'+hac+'</b> yazıyor; ayarlamaya gerek yok. Yine de her işten önce göstergeyi <b>karşıdan</b> okuyarak kontrol edin.</p>'},
- {bolum:'Hazırlık',ask:'<b>Uç kutusuna</b> tıklayın: pipet uca bastırılarak uç takılır.',halka:H('loc:tips',0,70),izin:['loc:tips'],ok:function(s){return !!s.tip&&!s.anim},
+ {bolum:'Hazırlık',ask:'<b>Uç kutusuna</b> tıklayın: pipet aşağı inip uca bastırılır ve uç takılır.',halka:H('loc:tips',0,70),izin:['loc:tips'],ok:function(s){return !!s.tip&&!s.anim},
   b:'Uç takıldı',html:'<p>Sıvı yalnız <b>uca</b> girer, pipetin gövdesine asla girmez. Her numune ve her çözelti için <b>yeni uç</b> takılır.</p><p>'+P+' için '+o.uc+' uçlar kullanılır.</p>'},
  ters?
- {bolum:'Çekme',ask:'Pistona havada <b>basılı tutun</b> (sağ üstteki PİSTON paneli): piston önce 1., sonra <b>2. durağa</b> iner.',halka:lupHalka,izin:['piston'],canli:derinlik,ok:function(s){return s.depth>=1.15&&!s.imm},
+ {bolum:'Çekme',ask:'PİSTON panelinde pistona havada <b>iki kez tıklayın</b>: önce 1., sonra <b>2. durağa</b> iner.',halka:lupHalka,izin:['piston'],canli:derinlik,ok:function(s){return s.depth>=1.15&&!s.imm},
   b:'Ters pipetaj: havada 2. durak',html:'<p>Kan gibi <b>viskoz</b> (koyu) sıvılar uç duvarında ince bir film bırakır. İleri pipetajla verilirse bu film hedefe gitmez ve hacim eksik kalır.</p><p><b>Ters pipetajda</b> havada 2. durağa basılır; böylece ayarlanandan biraz <b>fazla</b> çekilir. Hedefte yalnız 1. durağa basılır: tam ayarlanan hacim verilir, fazlası uçta kalır.</p>'}
- :{bolum:'Çekme',ask:'Pistona havada <b>bir kez dokunun</b> (sağ üstteki PİSTON paneli): piston <b>1. durağa</b> iner ve orada kalır.',halka:lupHalka,izin:['piston'],canli:derinlik,ok:function(s){return s.depth>=.95&&s.depth<1.15&&!s.imm},
-  hata:function(){var s=S();return s.depth>=1.15?'Piston 2. durağa indi. Pistona bir kez dokunarak bırakın, sonra yeniden <b>bir kez dokunun</b> (basılı tutmayın).':''},
+ :{bolum:'Çekme',ask:'PİSTON panelinde pistona havada <b>bir kez tıklayın</b>: piston <b>1. durağa</b> iner ve orada kalır.',halka:lupHalka,izin:['piston'],canli:derinlik,ok:function(s){return s.depth>=.95&&s.depth<1.15&&!s.imm},
+  hata:function(){var s=S();return s.depth>=1.15?'Piston 2. durağa indi. <b>⬆ BIRAK</b> ile bırakın, sonra pistona yalnız <b>bir kez</b> tıklayın.':''},
   b:'İleri pipetaj: havada 1. durak',html:'<p>Pistonda iki durak vardır:</p><ul><li><b>1. durak:</b> hafif bir dirençle durulan yer. Ayarlanan hacim kadar hava çıkar.</li><li><b>2. durak (boşaltma):</b> biraz daha bastırınca inilen en alt nokta. Uçta kalan son damlayı üflemek içindir.</li></ul><p>Pistona <b>daldırmadan önce, havada</b> basılır. Uç sıvıdayken basılırsa numuneye hava üflenir.</p>'},
  {bolum:'Çekme',ask:'<b>Kaynak tüpe</b> tıklayın: pipet tüpün üstüne gelir.',oto:1,halka:H('loc:src',0,60),izin:['loc:src'],ok:function(s){return s.loc==='src'}},
  {bolum:'Çekme',ask:'Kaynak tüpe <b>yeniden tıklayın</b>: uç sıvının 2–3 mm altına girer.',halka:H('loc:src',0,60),izin:['loc:src'],ok:function(s){return s.imm==='sh'},
   b:'Uç sıvıda',html:'<p>Uç yüzeyin yalnız <b>2–3 mm</b> altına daldırılır:</p><ul><li>Fazla derin: ucun dışına sıvı yapışır ve hedefe fazladan gider.</li><li>Fazla sığ: piston bırakılınca uç hava çeker.</li></ul><p>Pipet dik tutulur.</p>'},
- {bolum:'Çekme',ask:'Pistona <b>bir kez dokunun</b>: piston yavaşça bırakılır, sıvı uca çekilir.',halka:lupHalka,izin:['piston'],canli:derinlik,ok:function(s){return s.tip&&s.tip.liq>0&&s.depth<.05},
+ {bolum:'Çekme',ask:'PİSTON panelindeki <b>⬆ BIRAK</b> düğmesine basın: piston yavaşça bırakılır, sıvı uca çekilir.',halka:birakHalka,izin:['piston'],canli:derinlik,ok:function(s){return s.tip&&s.tip.liq>0&&s.depth<.05},
   b:'Sıvı uçta',html:'<p>Piston <b>yavaşça</b> bırakıldı. Hızlı bırakılırsa sıvı uca sıçrar, içeride hava kabarcığı kalır ve hacim eksik olur.</p>'+(ters?'<p>Ters pipetajda ayarlanandan biraz fazla çekildi; bu normaldir.</p>':'<p>Uç sıvıdan çıkarılmadan önce bir saniye beklenir; sıvı uçta yerine oturur.</p>')},
  {bolum:'Çekme',ask:'Kaynak tüpe tıklayarak <b>ucu sıvıdan çıkarın</b>.',oto:1,halka:H('loc:src',0,60),izin:['loc:src'],ok:function(s){return !s.imm}},
  {bolum:'Boşaltma',ask:'<b>Hedef tüpe</b> tıklayın (terazinin üstündeki tüp).',oto:1,halka:H('loc:dst',0,60),izin:['loc:dst'],ok:function(s){return s.loc==='dst'}},
  {bolum:'Boşaltma',ask:'Hedef tüpe <b>yeniden tıklayın</b>: uç tüpün iç duvarına değer.',halka:H('loc:dst',0,60),izin:['loc:dst'],ok:function(s){return !!s.imm},
   b:'Uç duvarda',html:'<p>Uç tüpün <b>iç duvarına</b>, hafif eğik değdirilir. Sıvı duvardan aşağı süzülür, son damla duvarda kalmaz.</p>'},
  ters?
- {bolum:'Boşaltma',ask:'Pistona <b>bir kez dokunun</b>: yalnız <b>1. durağa</b> iner. 2. durağa basmayın.',halka:lupHalka,izin:['piston'],canli:teraziC,ok:function(s){return s.tip&&s.tip.del>0&&s.depth>=.95&&s.depth<1.15},
+ {bolum:'Boşaltma',ask:'Pistona <b>bir kez tıklayın</b>: yalnız <b>1. durağa</b> iner. İkinci kez tıklamayın.',halka:lupHalka,izin:['piston'],canli:teraziC,ok:function(s){return s.tip&&s.tip.del>0&&s.depth>=.95&&s.depth<1.15},
   b:'Ayarlanan hacim verildi',html:'<p>1. durakta tam <b>'+hac+'</b> verildi; fazlası uçta kaldı. Ters pipetajda 2. durağa <b>basılmaz</b>: basılırsa fazlalık da hedefe gider.</p><p>Uçta kalan kan, uçla birlikte atılır.</p>'}
- :{bolum:'Boşaltma',ask:'Pistona <b>basılı tutun</b>: önce 1. durak (sıvı verilir), sonra 2. durak (son damla üflenir).',halka:lupHalka,izin:['piston'],canli:teraziC,ok:function(s){return s.tip&&s.tip.del>0&&s.depth>=1.15},
-  hata:function(){var s=S();return s.depth>=.95&&s.depth<1.15?'Piston 1. durakta. Şimdi pistona <b>basılı tutun</b>: 2. durağa insin.':''},
+ :{bolum:'Boşaltma',ask:'Pistona <b>iki kez tıklayın</b>: önce 1. durak (sıvı verilir), sonra 2. durak (son damla üflenir).',halka:lupHalka,izin:['piston'],canli:teraziC,ok:function(s){return s.tip&&s.tip.del>0&&s.depth>=1.15},
+  hata:function(){var s=S();return s.depth>=.95&&s.depth<1.15?'Piston 1. durakta. Pistona <b>bir kez daha</b> tıklayın: 2. durağa insin.':''},
   b:'Sıvı verildi',html:'<p>1. durakta sıvının büyük kısmı verildi; 2. durakta uçta kalan <b>son damla</b> da üflendi.</p><p>Şimdi piston <b>basılı kalırken</b> uç sıvıdan çıkarılacak. Piston uç sıvıdayken bırakılırsa sıvı uca geri çekilir.</p>'},
  {bolum:'Boşaltma',ask:'Piston basılıyken hedef tüpe tıklayarak <b>ucu çıkarın</b>.',oto:1,halka:H('loc:dst',0,60),izin:['loc:dst'],ok:function(s){return !s.imm}},
- {bolum:'Boşaltma',ask:'Şimdi pistonu bırakın: pistona <b>bir kez dokunun</b>.',halka:lupHalka,izin:['piston'],ok:function(s){return !!s.res},
+ {bolum:'Boşaltma',ask:'Şimdi pistonu bırakın: <b>⬆ BIRAK</b> düğmesine basın.',halka:birakHalka,izin:['piston'],ok:function(s){return !!s.res},
   b:'Sonuç',html:function(){var r=S().res;return r?'<p>Hedef tüp terazinin üstünde: teslim edilen hacim tartımla ölçüldü. Sol üstteki kartta sonucu görüyorsunuz.</p><p>Teslim: <b>'+r.D.toFixed(1).replace('.',',')+' µL</b> · hata <b>'+(r.err>0?'+':'')+r.err.toFixed(1).replace('.',',')+' %</b>. Kabul sınırı <b>±2 %</b>.</p>':''}},
  {bolum:'Bitirme',ask:'<b>Uç atığına</b> (kırmızı kap) tıklayın.',oto:1,halka:H('loc:waste',0,70),izin:['loc:waste'],ok:function(s){return s.loc==='waste'}},
- {bolum:'Bitirme',ask:'<b>Ejektöre</b> basın: piston panelindeki <b>EJEKTÖR</b> düğmesi (ya da pipetteki gri düğme).',halka:['#lej',0,0],izin:['ej'],ok:function(s){return !s.tip&&!s.ej},
+ {bolum:'Bitirme',ask:'<b>Ejektöre</b> basın: piston panelindeki turuncu <b>EJEKTÖR</b> düğmesi (ya da pipetteki turuncu düğme).',halka:['#lej',0,0],izin:['ej'],ok:function(s){return !s.tip&&!s.ej},
   b:'Uç atıldı',html:'<p>Uç ele dokunmadan, ejektörle doğrudan atığa atıldı. '+(o.pip&&V===200?'Kanlı uç <b>tıbbi atık</b> kabına gider.':'Kullanılmış uç bir daha kullanılmaz.')+'</p>'},
  {bolum:'Bitirme',ask:'Pipeti yerine asın: <b>pipet standına</b> tıklayın.',halka:H('stand',0,70),izin:['stand','body:'+P,'stand:'+P],ok:function(s){return s.loc==='rest'},
   b:'İş bitti',html:'<p>Kullanılmayan pipet standda <b>dik</b> durur. Yatırılırsa uçta kalan sıvı pipetin içine akar ve pistonu bozar.</p><p>Sırayı aklınızda tutun:</p><ul>'+o.ozet+'</ul>'},
@@ -534,15 +535,15 @@ piptani:{ad:'Cihazı tanıma',ozet:'Pipet nedir; piston ve iki durağı, hacim h
  {bolum:'Parçalar',ask:'Pipetin en üstündeki <b>kontrol düğmesine (piston)</b> tıklayın.',parca:['cap'],halka:H('cap',0,44),
   b:'Kontrol düğmesi (piston)',ne:'Başparmakla basılan düğmedir; rengi pipetin hacim aralığını gösterir.',neden:'Bastıkça içerideki piston hava iter. Bırakınca hava, dolayısıyla sıvı geri çekilir.',yanlis:'Piston her zaman <b>yavaşça</b> bırakılır. Hızlı bırakılırsa sıvı sıçrar, uca hava girer.'},
  {bolum:'Parçalar',b:'Pistonun iki durağı',
-  html:'<p>Pistona bastığınızda iki ayrı yerde durur:</p><ul><li><b>1. durak:</b> hafif bir dirençle hissedilir. Ayarlanan hacim burada ölçülür.</li><li><b>2. durak (boşaltma):</b> direnci aşıp biraz daha bastırınca inilen en alt nokta. Uçta kalan son damlayı üfler.</li></ul><p>Simülasyonda pistonu sağ üstteki <b>PİSTON</b> panelinden kullanacaksınız: <b>bir kez dokunmak</b> 1. durağa indirir, <b>basılı tutmak</b> 2. durağa indirir, yeniden dokunmak yavaşça bırakır.</p>'},
+  html:'<p>Pistona bastığınızda iki ayrı yerde durur:</p><ul><li><b>1. durak:</b> hafif bir dirençle hissedilir. Ayarlanan hacim burada ölçülür.</li><li><b>2. durak (boşaltma):</b> direnci aşıp biraz daha bastırınca inilen en alt nokta. Uçta kalan son damlayı üfler.</li></ul><p>Simülasyonda pistonu <b>PİSTON</b> panelinden kullanacaksınız:</p><ul><li>Pistona <b>bir kez tıklamak</b> 1. durağa indirir, <b>bir kez daha</b> tıklamak 2. durağa.</li><li><b>⬆ BIRAK</b> düğmesi pistonu yavaşça bırakır.</li><li>Panelin üstündeki <b>⠿ PİSTON</b> yazısından tutup paneli istediğiniz yere taşıyabilirsiniz.</li></ul>'},
  {bolum:'Parçalar',ask:'Pistonun altındaki <b>hacim ayar halkasına</b> tıklayın.',parca:['ring'],halka:H('ring',0,46),
   b:'Hacim ayar halkası',ne:'Çevirerek hacim ayarlanır.',neden:'Halka pistonun ne kadar yol alacağını, yani çekilecek hacmi belirler.',yanlis:'Pipetin aralığının dışına <b>zorlanmaz</b>: mekanizma bozulur, kalibrasyon kayar.'},
  {bolum:'Parçalar',ask:'Gövdedeki <b>hacim göstergesine</b> (rakamlı pencere) tıklayın.',parca:['disp'],halka:H('part:disp',0,44),
   b:'Hacim göstergesi',ne:'Ayarlanan hacmi µL olarak gösterir.',neden:'Her işten önce bakılır: yanlış hacimle çalışmak en sık yapılan hatadır.',yanlis:'Gösterge <b>karşıdan</b> okunur; yandan bakınca rakam kayar.'},
- {bolum:'Parçalar',ask:'Pistonun yanındaki <b>ejektör düğmesine</b> tıklayın.',parca:['ej'],halka:H('ej',0,40),
-  b:'Ejektör (uç atma) düğmesi',ne:'Basınca alttaki kovan aşağı iner ve ucu iter.',neden:'Uç ele dokunmadan atılır; kanlı uç doğrudan tıbbi atığa gider.',yanlis:'Uç her zaman <b>atık kabının üstünde</b> atılır; tüpe ya da tezgâha düşmemelidir.'},
- {bolum:'Parçalar',ask:'Gövdenin arkasındaki <b>parmak dayanağına</b> tıklayın.',parca:['hook'],halka:H('part:hook',0,44),
-  b:'Parmak dayanağı',ne:'İşaret parmağının dayandığı çıkıntıdır.',neden:'Pipet elde rahat durur, el yorulmaz.',yanlis:'Pipet avuçta sıkılmaz: elin sıcaklığı içerideki havayı ısıtır, hacim kayar.'},
+ {bolum:'Parçalar',ask:'Pistonun yanındaki turuncu <b>ejektör düğmesine</b> tıklayın.',parca:['ej'],halka:H('ej',0,40),
+  b:'Ejektör (uç atma) düğmesi',ne:'Pistonun yanındaki turuncu düğmedir. Basınca alttaki kovan aşağı iner ve ucu iter.',neden:'Uç ele dokunmadan atılır; kanlı uç doğrudan tıbbi atığa gider.',yanlis:'Uç her zaman <b>atık kabının üstünde</b> atılır; tüpe ya da tezgâha düşmemelidir.'},
+ {bolum:'Parçalar',ask:'Gövdenin yanındaki turkuaz <b>parmak dayanağına</b> tıklayın.',parca:['hook'],halka:H('part:hook',0,44),
+  b:'Parmak dayanağı',ne:'Gövdedeki turkuaz çıkıntıdır; işaret parmağı buraya dayanır.',neden:'Pipet elde rahat durur, el yorulmaz.',yanlis:'Pipet avuçta sıkılmaz: elin sıcaklığı içerideki havayı ısıtır, hacim kayar.'},
  {bolum:'Parçalar',ask:'Alttaki <b>ejektör kovanı ve uç konisine</b> tıklayın.',parca:['sleeve','tip'],halka:H('part:sleeve',0,44),
   b:'Uç konisi',ne:'Ucun takıldığı konik uçtur; üstündeki kovan ejektörle aşağı iner.',neden:'Uç koniye bastırılarak sıkıca takılır; gevşek uç hava kaçırır.',yanlis:'Uç elle takılmaz: pipet uç kutusundaki uca bastırılır.'},
  {bolum:'Parçalar',ask:'En alttaki <b>tek kullanımlık uca</b> tıklayın.',parca:['tip'],halka:H('part:tip',0,44),
