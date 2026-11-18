@@ -6,6 +6,7 @@
    terazi_pilot.html?ders=terani | terkal | ter10      (tanıma · seviye ve kalibrasyon · 10 mg tartım)
    ultra_pilot.html?ders=ulttani | ultdeg              (tanıma · mobil faz degazlama)
    pipet_pilot.html?ders=piptani | pipsu | pipkan       (tanıma · ileri pipetaj · ters pipetaj)
+   su_pilot.html?ders=sutani | sudol | susiz            (tanıma · 500 mL şişe · kartuş sızıntısı)
    Sayfanın 3B sahnesini ve kendi işlevlerini kullanır; sahneye ve fiziğe dokunmaz. */
 (function(){
 'use strict';
@@ -586,8 +587,111 @@ return {sayfa:'pipet_pilot.html',hazir:'__pip',sonucKarti:true,ad:'OTOMATİK Pİ
    return '<b>İş:</b> '+(is||'—')+' aktar (kaynak tüp → terazideki hedef tüp). İşi <b>🧪 Numune seç</b> ile değiştirebilirsin.<br>'+(n?'<b>'+n+' aktarım</b> kaydedildi. Bitirince <b>✅ İşi bitirdim</b>; raporu soldaki <b>📋 Rapor</b> ile yeniden açabilirsin.':'Uyarı yok, kendi bildiğin gibi çalış. Her aktarım kaydedilir. Bitirince <b>✅ İşi bitirdim</b>’e bas.')}}};
 }
 
+
+/* ---------- ultra saf su cihazı ---------- */
+function su(){
+var AD={'Dağıtım tabancası (el ünitesi)':'hand','Dağıtım tuşu (üstteki siyah tuş)':'trig','Ekran':'scr','Dağıtım düğmesi (kolba simgesi)':'btn','Yukarı / aşağı ve onay (↵) tuşları':'nav','Esnek kol':'arm','Son kullanım filtresi (POU, LC134)':'pou','Hijyen kapağı':'hyg','Kartuş kapakları (sağ ve sol yan)':'cart','Besleme ve atık hattı':'feed'};
+var ADI={hand:'dağıtım tabancası',trig:'dağıtım tuşu',scr:'ekran',btn:'kolba simgesi',nav:'yukarı / aşağı tuşları',arm:'esnek kol',pou:'son kullanım filtresi',hyg:'hijyen kapağı',cart:'kartuş kapakları',feed:'besleme ve atık hattı'};
+function H(id,dy,r){return ['hot:'+id,dy||0,r||46]}
+function popAcik(){var b=document.getElementById('bpop');return b&&!b.hidden}
+function pop(sec,yedek){return function(){return popAcik()&&document.querySelector(sec)?[sec,0,0]:yedek}}
+function f1(v){return v.toFixed(1).replace('.',',')}
+var EL=['part:hand','part:pou','part:scr','part:arm','sink'];
+function sise(s){return 'Şişede '+Math.round(s.bot.v)+' mL · direnç '+f1(s.R)+' MΩ·cm'}
+var DERS={
+sutani:{ad:'Cihazı tanıma',ozet:'Ultra saf su nedir; tabanca, dağıtım tuşu, ekran, filtre, hijyen kapağı, kartuşlar.',baslik:'ULTRA SAF SU · TANIMA',mod:'parts',gorev:'parts',
+ adim:[
+ {bolum:'Giriş',b:'Ultra saf su cihazı ne işe yarar?',
+  html:'<p>Musluk suyunda iyonlar, organik maddeler, partiküller ve bakteriler vardır. Bu cihaz suyu kartuşlardan (iyon değiştirici reçine, aktif karbon) ve filtrelerden geçirerek <b>ultra saf su</b> (Tip I) üretir.</p><p>Suyun saflığı <b>direnç</b> ile ölçülür: içinde iyon kalmamış suyun direnci <b>18,2 MΩ·cm</b>’dir (25 °C). Değer bunun altındaysa su ultra saf değildir.</p><p>Laboratuvarda çözelti, kalibratör ve LC-MS/MS mobil fazı hep bu suyla hazırlanır.</p><p>Sahneyi sürükleyerek döndürebilir, tekerlekle yakınlaştırabilirsiniz.</p>'},
+ {bolum:'Parçalar',ask:'Suyu veren <b>dağıtım tabancasına</b> (el ünitesi) tıklayın.',parca:['hand'],halka:H('part:hand',0,60),
+  b:'Dağıtım tabancası',ne:'Suyu verdiğiniz el ünitesidir; esnek bir kolla cihaza bağlıdır.',neden:'Tabanca lavaboya ya da şişenin ağzına götürülür; kol onu bırakılan yerde tutar.',yanlis:'Kullanılmadığında yerine (yuvasına) konur.'},
+ {bolum:'Parçalar',ask:'Tabancanın üstündeki <b>siyah dağıtım tuşuna</b> tıklayın.',parca:['trig'],halka:H('trig',0,40),
+  b:'Dağıtım tuşu',ne:'Bir kez basınca su akar, yeniden basınca durur.',neden:'Az miktar su almak ve bekleyen ilk suyu lavaboya atmak için kullanılır.',yanlis:'Tabancanın altında lavabo ya da açık şişe yoksa su verilmez.'},
+ {bolum:'Parçalar',ask:'Tabancadaki <b>ekrana</b> tıklayın.',parca:['scr'],halka:H('part:scr',0,44),
+  b:'Ekran',ne:'Suyun direncini (MΩ·cm) ve sıcaklığını gösterir.',neden:'Su alınmadan önce bakılır: direnç <b>18,2</b> olmadan su ultra saf değildir.',yanlis:'Cihaz bir süre beklemişse ilk su ultra saf değildir; önce lavaboya akıtılır.'},
+ {bolum:'Parçalar',ask:'Tabancadaki <b>kolba simgesine</b> (dağıtım düğmesi) tıklayın.',parca:['btn','nav'],halka:H('btn',0,40),
+  b:'Kolba simgesi',ne:'Belirli bir hacmi otomatik vermek için kullanılır.',neden:'Menüden hacim seçilir (ör. 500 mL), ▶ Başlat’a basılır; cihaz o hacmi verince kendiliğinden durur.',yanlis:'Dağıtım sürerken şişenin başından ayrılınmaz.'},
+ {bolum:'Parçalar',ask:'Tabancanın ucundaki <b>son kullanım filtresine</b> tıklayın.',parca:['pou','hyg'],halka:H('part:pou',0,44),
+  b:'Son kullanım filtresi',ne:'0,2 µm’lik membran filtredir.',neden:'Suya karışabilecek partikül ve bakterileri son anda tutar.',yanlis:'Ucuna elle dokunulmaz. Son kullanma tarihi geçince değiştirilir.'},
+ {bolum:'Parçalar',ask:'Filtrenin ucundaki <b>hijyen kapağına</b> tıklayın.',parca:['hyg'],halka:H('part:hyg',0,40),
+  b:'Hijyen kapağı',ne:'Filtrenin ucunu kapatan küçük kapaktır.',neden:'Kullanılmadığında filtre ucunu toza ve bakteriye karşı korur.',yanlis:'Su vermeden önce çıkarılır, iş bitince <b>hemen</b> geri takılır. Takılıyken su verilirse kapak dolar, su taşar.'},
+ {bolum:'Parçalar',ask:'Cihazın yanındaki <b>kartuş kapağına</b> tıklayın.',parca:['cart'],halka:H('door:R',0,60),
+  b:'Kartuş kapakları',ne:'İki yandaki kapakların arkasında saflaştırma kartuşları durur.',neden:'Kartuşlar suyu iyonlardan ve organik maddeden arındırır. Direnç düşmeye başlayınca kartuş değiştirilir.',yanlis:'Kartuş yuvasına tam oturmazsa conta sızdırır; cihaz alarm verip dağıtımı durdurur.'},
+ {bolum:'Parçalar',ask:'Arkadaki <b>besleme ve atık hortumlarına</b> tıklayın.',parca:['feed'],halka:H('part:feed',0,50),
+  b:'Besleme ve atık hattı',ne:'Sarı hortum ön arıtılmış suyu getirir; şeffaf hortum fazla suyu lavaboya boşaltır.',neden:'Cihaz ön arıtılmış (RO) suyu son kez saflaştırır.',yanlis:'Hortumlar bükülmez, ezilmez.'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Ultra saf suyun direnci ne olmalıdır?',['1,8 MΩ·cm','18,2 MΩ·cm','182 MΩ·cm'],1,'Direnç bunun altındaysa suda iyon kalmış demektir.'],
+ ['Cihaz bir süre beklemişse ilk su ne yapılır?',['Doğrudan şişeye alınır','Direnç 18,2 olana kadar lavaboya akıtılır','Kaynatılır'],1,'Borularda bekleyen su ultra saf değildir.'],
+ ['Hijyen kapağı ne zaman takılır?',['Hiç takılmaz','Yalnız akşamları','İş biter bitmez, hemen'],2,'Filtre ucu açıkta kalırsa toz ve bakteri bulaşır.']],
+ bitti:function(){S().done.parts=1}},
+sudol:{ad:'500 mL şişeye ultra saf su',ozet:'Hijyen kapağı, ilk suyu atma, şişeyi 3 kez çalkalama, 500 mL otomatik dağıtım.',baslik:'ULTRA SAF SU · ŞİŞE DOLDURMA',mod:'use',gorev:'man',
+ adim:[
+ {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>Temiz bir cam şişeye <b>500 mL</b> ultra saf su alacaksınız.</p><p>Cihaz bir süredir bekliyor: ekrandaki direnç <b>18,2’nin altında</b>. Borularda bekleyen su ultra saf değildir; önce lavaboya akıtılır.</p><p>Sıra: hijyen kapağı → ilk suyu at → şişeyi 3 kez çalkala → 500 mL al → kapat ve topla.</p>'},
+ {bolum:'Hazırlık',ask:'Tabancanın ucundaki <b>hijyen kapağına</b> tıklayın: kapak çıkarılır.',halka:H('part:hyg',0,40),izin:['part:hyg'],ok:function(s){return !s.hyg},
+  b:'Hijyen kapağı çıktı',html:'<p>Filtrenin ucu artık açık. Ucuna <b>dokunmayın</b>: elinizin değmesi suyu kirletir.</p>'},
+ {bolum:'İlk su',ask:'<b>Tabancaya</b> tıklayın: tabanca lavabonun üstüne gelir.',oto:1,halka:H('part:hand',0,60),izin:EL,ok:function(s){return s.hand==='sink'}},
+ {bolum:'İlk su',ask:'Tabancanın üstündeki <b>siyah tuşa</b> bir kez tıklayın: su lavaboya akar. Ekranda direnç <b>18,2</b> olana kadar bekleyin.',halka:H('trig',0,40),izin:['trig'],canli:function(s){return 'Direnç '+f1(s.R)+' MΩ·cm · lavaboya '+Math.round(s.toSink)+' mL'},ok:function(s){return !!s.ev.flushed},
+  b:'Su ultra saf',html:'<p>Direnç <b>18,2 MΩ·cm</b>’ye ulaştı: borularda bekleyen su atıldı, gelen su artık ultra saf.</p><p>Bekleyen su havadan CO₂ ve borudan iyon alır; bu suyla hazırlanan çözeltiler kirli olur.</p>'},
+ {bolum:'İlk su',ask:'Siyah tuşa <b>yeniden tıklayın</b>: akış durur.',oto:1,halka:H('trig',0,40),izin:['trig'],ok:function(s){return !s.flowing}},
+ {bolum:'Çalkalama',ask:'<b>Cam şişeye</b> tıklayın ve açılan kutudan <b>Kapağı aç</b>’ı seçin.',oto:1,halka:pop('#pp1',H('bottle',0,70)),izin:['bottle'],ok:function(s){return !s.bot.cap}},
+ {bolum:'Çalkalama',ask:'Şişeye yeniden tıklayın ve <b>Tabancayı şişeye götür</b>’ü seçin.',oto:1,halka:pop('#pp2',H('bottle',0,70)),izin:['bottle'],ok:function(s){return s.hand==='bottle'}},
+ {bolum:'Çalkalama',ask:'Siyah tuşa tıklayın, şişeye <b>30–50 mL</b> su alın, sonra yeniden tıklayıp durdurun.',halka:H('trig',0,40),izin:['trig'],canli:sise,ok:function(s){return s.bot.v>=15&&!s.flowing}},
+ {bolum:'Çalkalama',ask:'Şişeye tıklayın ve <b>Çalkala ve lavaboya dök</b>’ü seçin.',halka:pop('#pp3',H('bottle',0,70)),izin:['bottle'],ok:function(s){return s.bot.rinse>=1},
+  b:'Şişe çalkalandı (1/3)',html:'<p>Şişenin iç yüzeyinde toz, eski çözelti ya da deterjan kalıntısı olabilir. Aynı ultra saf suyla <b>3 kez</b> çalkalanırsa şişe bu suya “şartlanır”.</p><p>Çalkalama suyu lavaboya dökülür.</p>'},
+ {bolum:'Çalkalama',ask:'Çalkalamayı <b>2 kez daha</b> yapın: şişe → <b>Kapağı aç</b>, siyah tuşla biraz su al ve durdur, şişe → <b>Çalkala ve lavaboya dök</b>.',
+  halka:function(s){return s.bot.cap?pop('#pp1',H('bottle',0,70))():(s.bot.v<15||s.flowing)?H('trig',0,40):pop('#pp3',H('bottle',0,70))()},izin:['bottle','trig'],canli:function(s){return 'Çalkalama '+Math.min(3,s.bot.rinse)+' / 3 · '+sise(s)},ok:function(s){return s.bot.rinse>=3},
+  hata:function(){var s=S();return s.flowing&&s.bot.cap?'Şişenin kapağı kapalı: su tezgâha akıyor! Siyah tuşla durdurun, önce kapağı açın.':''},
+  b:'Şişe şartlandı',html:'<p>Şişe 3 kez çalkalandı. Artık doldurulabilir.</p>'},
+ {bolum:'Doldurma',ask:'Şişeye tıklayın ve <b>Kapağı aç</b>’ı seçin.',oto:1,halka:pop('#pp1',H('bottle',0,70)),izin:['bottle'],ok:function(s){return !s.bot.cap}},
+ {bolum:'Doldurma',ask:'Tabancadaki <b>kolba simgesine</b> tıklayın. Menüde <b>500 mL</b> seçili; <b>▶ Başlat</b>’a basın.',halka:pop('#np3',H('btn',0,40)),izin:['btn','nav'],ok:function(s){return !!s.ev.volStart},
+  hata:function(){var s=S();return s.volSet!==500?'Menüde '+s.volSet+' mL seçili; <b>500</b>’ü seçin.':''},
+  b:'Otomatik dağıtım',html:'<p>Cihaz 500 mL’yi ölçerek verir ve kendiliğinden durur. Bu sırada şişenin başında kalınır.</p>'},
+ {bolum:'Doldurma',ask:'Cihaz 500 mL verince kendiliğinden durur. Bekleyin…',bekle:1,izin:[],canli:sise,ok:function(s){return !s.volMode&&s.bot.v>=480},
+  b:'Şişe doldu',html:'<p>Şişede 500 mL ultra saf su var. Ultra saf su havayla temas ettikçe CO₂ ve toz alır; kapak hemen kapatılır.</p>'},
+ {bolum:'Bitirme',ask:'Şişeye tıklayın ve <b>Kapağı kapat</b>’ı seçin.',oto:1,halka:pop('#pp1',H('bottle',0,70)),izin:['bottle'],ok:function(s){return s.bot.cap}},
+ {bolum:'Bitirme',ask:'<b>Tabancaya</b> tıklayın: yerine (yuvasına) döner.',oto:1,halka:H('part:hand',0,60),izin:EL,ok:function(s){return s.hand==='dock'}},
+ {bolum:'Bitirme',ask:'<b>Hijyen kapağına</b> tıklayın: filtrenin ucuna takılır.',halka:H('part:hyg',0,40),izin:['part:hyg'],ok:function(s){return !!s.res},
+  b:'Ultra saf su hazır',html:'<p>Sol üstteki kartta sonucu görüyorsunuz.</p><p>Şişe etiketlenir (tarih, paraf). Ultra saf su uzun süre bekletilmez; aynı gün kullanılır.</p><p>Sırayı aklınızda tutun:</p><ul><li>Hijyen kapağını çıkar.</li><li>İlk suyu lavaboya at: direnç <b>18,2</b> olana kadar.</li><li>Şişeyi <b>3 kez</b> çalkala.</li><li>Hacmi kolba menüsünden ver.</li><li>Şişeyi kapat, tabancayı yerine koy, hijyen kapağını <b>tak</b>.</li></ul>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Şişeye su almadan önce ekranda ne görülmelidir?',['Direnç 18,2 MΩ·cm','Sıcaklık 40 °C','Hacim 0 mL'],0,'Direnç 18,2’nin altındaysa su ultra saf değildir.'],
+ ['Şişe neden 3 kez çalkalanır?',['Soğusun diye','Şişe aynı suyla şartlansın, kalıntı kalmasın diye','Su hızlı aksın diye'],1,'Çalkalama suyu lavaboya dökülür.'],
+ ['İş bitince en son ne yapılır?',['Hijyen kapağı takılır','Cihaz fişten çekilir','Kartuş kapağı açılır'],0,'Filtre ucu açıkta kalmamalıdır.']],
+ bitti:function(){S().done.man=1}},
+susiz:{ad:'Kartuş sızıntısı',ozet:'Sızıntı alarmı: tarafı bul, kartuşu yerine bastır, kapağı kapat, tezgâhı kurula.',baslik:'ULTRA SAF SU · SIZINTI',mod:'use',gorev:'leak',
+ adim:[
+ {bolum:'Giriş',b:'Ne oldu?',html:'<p>Cihazın yanından tezgâha <b>su sızıyor</b>. Ekranda sızıntı alarmı var ve cihaz dağıtımı <b>kilitledi</b>.</p><p>En sık neden: kartuş değiştirildikten sonra yuvasına tam oturmamıştır; conta sızdırır.</p><p>Tezgâhtaki suyun hangi taraftan geldiğine bakın.</p>'},
+ {bolum:'Sızıntı',ask:'Suyun geldiği taraftaki <b>kartuş kapağına</b> tıklayarak açın.',halka:function(s){return H('door:'+s.leak.side,0,60)},izin:['door:L','door:R'],ok:function(s){return !!s.door[s.leak.side]},
+  hata:function(){var s=S(),o=s.leak.side==='L'?'R':'L';return s.door[o]?'Bu taraftaki kartuş yerinde. Sızıntı <b>diğer taraftan</b> geliyor.':''},
+  b:'Kartuş yuvasından çıkmış',html:'<p>Kartuş yuvasına tam oturmamış; alt taraftaki conta sızdırıyor.</p>'},
+ {bolum:'Sızıntı',ask:'Yuvasından çıkmış <b>kartuşa</b> tıklayarak yerine bastırın.',halka:function(s){return H('cart:'+s.leak.side,0,60)},izin:['cart:L','cart:R'],ok:function(s){return s.leak.seated},
+  b:'Klik!',html:'<p>Kartuş yuvasına oturdu; sızıntı durdu, alarm söndü.</p><p>Kartuş değiştirildikten sonra her zaman <b>klik</b> sesi gelene kadar bastırılır.</p>'},
+ {bolum:'Toparlama',ask:'Kartuş kapağına tıklayarak <b>kapatın</b>.',oto:1,halka:function(s){return H('door:'+s.leak.side,0,60)},izin:['door:L','door:R'],ok:function(s){return !s.door.L&&!s.door.R}},
+ {bolum:'Toparlama',ask:'Tezgâhtaki <b>suya</b> tıklayın: kâğıt havluyla kurulayın.',halka:H('leakP',0,70),izin:['leakP'],ok:function(s){return !!s.res},
+  b:'Sızıntı giderildi',html:'<p>Kartuş yerine oturduktan sonra cihaz birkaç dakika çalıştırılır, ilk su lavaboya atılır ve direncin yeniden <b>18,2 MΩ·cm</b>’ye çıktığı görülür.</p><p>Sızıntı sürerse conta ya da kartuş değiştirilir.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Sızıntı alarmında cihaz ne yapar?',['Dağıtımı kilitler','Daha hızlı çalışır','Hiçbir şey'],0,'Sızıntı giderilmeden su verilmez.'],
+ ['Kartuş sızdırıyorsa en sık neden nedir?',['Su çok soğuk','Kartuş yuvasına tam oturmamış','Ekran bozuk'],1,'Kartuş klik sesi gelene kadar bastırılır.'],
+ ['Sızıntı giderildikten sonra ne kontrol edilir?',['Direncin yeniden 18,2 MΩ·cm’ye çıktığı','Şişenin rengi','Hortumun uzunluğu'],0,'Önce ilk su lavaboya atılır.']],
+ bitti:function(){S().done.leak=1}}
+};
+return {sayfa:'su_pilot.html',hazir:'__su',sonucKarti:true,ad:'ULTRA SAF SU CİHAZI',model:'ELGA PURELAB flex',adTam:'Ultra saf su cihazının',
+ acl:'Cihazı üç kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 3–6 dakika sürer.',
+ GM:{parts:'sutani',man:'sudol',leak:'susiz'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['sutani','sudol','susiz'],
+ senkron:function(s,o){if(o.sutani&&o.sutani.bitti)s.done.parts=1;if(o.sudol&&o.sudol.bitti)s.done.man=1;if(o.susiz&&o.susiz.bitti)s.done.leak=1},
+ /* serbest kullanım sessiz sınavdır: iş seçilir, her şişe kaydedilir, ✅ İşi bitirdim ile rapor */
+ serbest:{yerlesim:'kontrol',sessiz:true,kur:function(){if(window.serbestKur)window.serbestKur()},
+  numune:[['man','500 mL şişeye ultra saf su'],['vol','1000 mL mobil faz suyu']],
+  numuneSec:function(id){return window.serbestIs?window.serbestIs(id):''},
+  ek:'<button class="bt sbBitir" id="sbBitir">✅ İşi bitirdim · Raporu gör</button>',ekBagla:function(d){d.querySelector('#sbBitir').onclick=function(){if(window.serbestRapor)window.serbestRapor.ac()}},
+  ses:function(s){var o=window.serbestRapor&&window.serbestRapor.ot(),n=o?o.kayit.length:0,is=window.serbestRapor&&window.serbestRapor.is();
+   return '<b>İş:</b> '+(is||'—')+'. İşi <b>🧪 Numune seç</b> ile değiştirebilirsin.<br>'+(n?'<b>'+n+' şişe</b> kaydedildi. Bitirince <b>✅ İşi bitirdim</b>; raporu soldaki <b>📋 Rapor</b> ile yeniden açabilirsin.':'Uyarı yok, kendi bildiğin gibi çalış. Bitirince <b>✅ İşi bitirdim</b>’e bas.')}}};
+}
+
 /* ---------- sayfaya göre cihaz ---------- */
-var C=null;[vorteks,terazi,ultra,santrifuj,pipet].some(function(f){var c=f();if(c.sayfa===SAYFA){C=c;return true}});
+var C=null;[vorteks,terazi,ultra,santrifuj,pipet,su].some(function(f){var c=f();if(c.sayfa===SAYFA){C=c;return true}});
 if(!C)return;
 /* serbest kullanımda canlı uyarı kuralları: yanlış giden şey kesin dille panelde gösterilir */
 var SK={

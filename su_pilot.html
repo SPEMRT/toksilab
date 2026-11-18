@@ -101,6 +101,14 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
  .held{top:auto;bottom:calc(28vh + 20px);left:50%}.dsp{width:175px}
 }
 </style>
+<style id="dersOnCss">/* rehberli ders / serbest kullanım düzeni sayfa açılır açılmaz uygulanır: eski pilot arayüzü bir an bile görünmez (cihaz_ders.js yüklenince kendi stiline devreder) */
+html.dersOn .mentor,html.dersOn #stepc,html.dersOn #tband,html.dersOn #side,html.dersOn #res,html.dersOn .rot,html.dersOn #mTasks,html.dersOn #mParts,html.dersOn #mUse,html.dersOn #mPanel,html.dersOn #mReset,html.dersOn #egCubuk,html.dersOn #mHome,html.dersOn #hLab{display:none!important}
+html.dersOn #tip{visibility:hidden!important}
+html.dersOn .stage{right:390px}html.dersOn #cv3{width:calc(100vw - 390px)!important}
+html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;bottom:0;width:390px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
+@media (max-width:900px){html.dersOn .stage{right:0;bottom:46dvh}html.dersOn #cv3{width:100vw!important;height:54dvh!important}html.dersOn body::after{top:auto;left:0;width:auto;height:46dvh;border-radius:16px 16px 0 0}}
+</style>
+<script>document.documentElement.classList.add('dersOn');setTimeout(function(){if(!document.body||!document.body.classList.contains('cders'))document.documentElement.classList.remove('dersOn')},12000)</script>
 </head>
 <body>
 <style>
@@ -305,7 +313,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  const pickHit=e=>{setRay(e);const hs=ray.intersectObjects(HOT.filter(o=>visibleDeep(o)),false);if(!hs.length)return null;let h=hs[0];if(LOW.has(h.object.userData.hot)){const o=hs.find(x=>!LOW.has(x.object.userData.hot)&&x.distance<h.distance+1.6);if(o)h=o}return {id:h.object.userData.hot,point:h.point}};
  const pick=e=>{const h=pickHit(e);return h?h.id:null};
  const GRAB=new Set(['part:hand','part:scr','part:pou','part:hyg','btn','nav','trig']);window.__pick=(x,y)=>pickHit({clientX:x,clientY:y});window.__grab=()=>grab;let grab=null;const plane=new THREE.Plane(),q=new THREE.Vector3();
- renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};if(S.mode!=='use')return;const hh=pickHit(e);if(hh&&GRAB.has(hh.id)){grab={id:hh.id,off:hh.point.clone().sub(K.H.position),p0:hh.point.clone(),x:e.clientX,y:e.clientY,on:false};ctl.enabled=false;try{renderer.domElement.setPointerCapture(e.pointerId)}catch(_){}}});
+ renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};if(S.mode!=='use')return;const hh=pickHit(e);if(hh&&GRAB.has(hh.id)&&(!window.__izin||window.__izin('drag'))){grab={id:hh.id,off:hh.point.clone().sub(K.H.position),p0:hh.point.clone(),x:e.clientX,y:e.clientY,on:false};ctl.enabled=false;try{renderer.domElement.setPointerCapture(e.pointerId)}catch(_){}}});
  renderer.domElement.addEventListener('pointerup',e=>{if(grab){ctl.enabled=true;const g=grab;grab=null;if(g.on){down=null;dropHand();return}}if(!down)return;const m=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;if(m<7){const h=pick(e);if(S.mode==='parts'){tipAt(h,e);return}onHot(h,e)}});
  renderer.domElement.addEventListener('pointermove',e=>{if(grab){if(!grab.on&&Math.hypot(e.clientX-grab.x,e.clientY-grab.y)>6){grab.on=true;hideTip();$('#bpop').hidden=true;const n=cam.getWorldDirection(new THREE.Vector3()).setY(0).normalize();plane.setFromNormalAndCoplanarPoint(n,grab.p0);renderer.domElement.style.cursor='grabbing'}
    if(grab.on){setRay(e);if(ray.ray.intersectPlane(plane,q)){dragTo(q.clone().sub(grab.off))}}return}
@@ -314,7 +322,9 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  ctl.addEventListener('start',()=>{camAnim=null});
  animate()}
 const visibleDeep=o=>{while(o){if(o.visible===false)return false;o=o.parent}return true};
-function onHot(h,e){$('#bpop').hidden=true;if(!h)return;const [a,b]=h.split(':');
+/* rehberli derste yalnız o adımın gösterdiği parça çalışır (cihaz_ders.js karar verir) */
+function izin(h){if(!window.__izin||window.__izin(h))return true;if(window.__izinUyari)window.__izinUyari(h);return false}
+function onHot(h,e){$('#bpop').hidden=true;if(!h)return;if(!izin(h))return;const [a,b]=h.split(':');
  if(h==='trig')toggleFlow();else if(a==='door')toggleDoor(b);else if(a==='cart')seatCart(b);else if(h==='leakP')wipe();else if(h==='sink')moveHand('sink');else if(h==='bottle')bottlePop(e);else if(a==='part'&&b==='hyg')toggleHyg();else if(a==='part'&&(b==='hand'||b==='pou'||b==='scr'||b==='arm'))moveHand(S.hand==='dock'?'sink':'dock');else if(h==='nav'||h==='btn')navPop(e);else if(h==='body')moveHand('dock')}
 /* kamera */
 let camAnim=null;const camDir=new THREE.Vector3(.12,.38,1).normalize();
@@ -332,7 +342,7 @@ function hints(){if(!R3)return;const h=hint()||'';const key=h+'|'+S.hand+S.hyg;i
  const W={hyg:()=>warnBox(null,hand().add(V3(0,-20.5,0)),V3(6,6,6)),sink:()=>warnBox(K.sinkG),bottle:()=>warnBox(K.B),btn:()=>warnBox(null,hand().add(V3(0,1.1,2)),V3(4.4,2.6,2)),nav:()=>warnBox(null,hand().add(V3(0,-2.1,2)),V3(4.4,4.6,2)),dock:()=>warnBox(null,V3(DOCK.x,DOCK.y,DOCK.z),V3(6,26,5)),trig:()=>warnBox(null,hand().add(V3(0,12.6,0)),V3(5.6,3.2,4.8)),door:()=>warnBox(K.door[S.leak.side]),cartr:()=>warnBox(K.cart[S.leak.side]),wipe:()=>warnBox(K.leakP)}[h];
  if(W)curWarn=[W()];const bm={hyg:'#hCap',sink:'#hSink',bottle:'#hBot',btn:'#vGo',nav:'#vGo',trig:'#hDisp',dock:'#hDock',bcap:'#bCap',rinse:'#bRinse',vol:'#vP'}[h];if(bm)$(bm).classList.add('hw');
  if(h==='bcap'||h==='rinse')curWarn=[warnBox(K.B)];if(h==='vol')curWarn=[warnBox(null,hand().add(V3(0,-2.1,2)),V3(4.4,4.6,2))]}
-function hint(){if(S.mode!=='use'||S.res||S.task==='free')return null;const t=T(),b=S.bot,e=S.ev,fl=S.flowing||S.volMode;
+function hint(){if(document.body.classList.contains('cders'))return null;/* rehberli derste sarı halka, serbest kullanımda hiçbir ipucu */ if(S.mode!=='use'||S.res||S.task==='free')return null;const t=T(),b=S.bot,e=S.ev,fl=S.flowing||S.volMode;
  if(S.task==='leak'){const L=S.leak;if(!L.seated)return S.door[L.side]?'cartr':'door';if(S.door[L.side])return 'door';if(L.wet>.5)return 'wipe';return null}
  if(b.v>=t.tgt-t.tol||e.filled){if(fl)return S.flowing?'trig':null;if(!b.cap)return 'bcap';if(S.hand!=='dock')return 'dock';if(S.hyg)return null;return 'hyg'}
  if(S.hyg)return 'hyg';
@@ -456,7 +466,7 @@ function navPop(e){if(S.mode!=='use')return;const P=[50,100,250,500,1000];popAt(
 function render(){if(S.mode!=='parts')hideTip();$('.rot').style.visibility=S.mode==='parts'?'hidden':'visible';if(R3)marks();panel();live();lastHint=''}
 function live(){const use=S.mode==='use';$('#dsp').hidden=!use;const ok=S.R>=18.15;
  const al=S.leak.side&&!S.leak.seated;$('#dSt').textContent=al?'⚠ SIZINTI ALARMI':(S.flowing||S.volMode)?'DAĞITIM':'HAZIR';$('#dSt').style.color=al?'#FF5A5A':(S.flowing||S.volMode)?'#7CF2D8':'#9BB0B6';
- $('#dR').innerHTML=`<span style="color:${ok?'#2DBE5B':'#F2B632'}">${fmt(S.R,1)}</span> MΩ·cm`;$('#dT').textContent=`${fmt(S.Tw,1)} °C · ${ok?'ultra saf ✓':'bekleyen su — önce akıt'}`;
+ $('#dR').innerHTML=`<span style="color:${ok?'#2DBE5B':'#F2B632'}">${fmt(S.R,1)}</span> MΩ·cm`;$('#dT').textContent=sessiz()?`${fmt(S.Tw,1)} °C`:`${fmt(S.Tw,1)} °C · ${ok?'ultra saf ✓':'bekleyen su — önce akıt'}`;if(sessiz())$('#dR').firstChild.style.color='#EAF6F8';
  $('#dV').textContent=`Şişe: ${fmt(S.bot.v)} / ${fmt(S.bot.cap0)} mL`;$('#dB').textContent=`Çalkalama ${Math.min(3,S.bot.rinse)}/3`;$('#dBar').style.width=Math.min(100,S.bot.v/(T().tgt||S.bot.cap0)*100)+'%';
  const hd=$('#held');const hl={dock:'',sink:'Tabanca: lavabo üstünde',bottle:'Tabanca: şişenin ağzında',free:'Tabanca: altında kap yok'}[S.hand];hd.hidden=!(use&&hl);hd.textContent=hl;$('#vV').textContent=fmt(S.volSet)+' mL'}
 function panel(){const use=S.mode==='use';$('#mParts').classList.toggle('on',!use);$('#mUse').classList.toggle('on',use);$('#tName').textContent=T().t;
@@ -498,7 +508,7 @@ function volGo(){if(S.mode!=='use'||S.volMode)return;if(S.leak.side&&!S.leak.sea
  say(`Dağıtım başladı: <b>${fmt(S.volSet)} mL</b> verilecek; cihaz hacme ulaşınca kendiliğinden durur. Bu sırada şişenin başında kal.`+(S.bot.v+S.volSet>S.bot.cap0&&S.hand==='bottle'?' <b>Dikkat:</b> şişeye sığmayacak!':''));render()}
 function checkDone(){if(S.res||S.mode!=='use')return;const t=T();if(t.id==='leak'){const L=S.leak;if(L.seated&&!S.door.L&&!S.door.R&&L.wet<=.5)leakDone();return}if(!t.tgt)return;const b=S.bot;
  if(b.v>=t.tgt-t.tol*2&&b.cap&&S.hand==='dock'&&S.hyg&&!S.flowing&&!S.volMode&&b.v>0)evaluate()}
-function evaluate(){const t=T(),b=S.bot;const f=[...S.flags];
+function evaluate(){const t=T(),b=S.bot;const f=[...S.flags];if(ot()){otKaydet();return}
  if(b.rinse<3)f.push(`Şişe yalnız ${b.rinse} kez çalkalandı; en az 3 kez çalkalanmalı.`);
  if(!S.ev.flushed||b.lowR)f.push('Şişeye direnç 18,2 MΩ·cm’ye ulaşmadan su alındı (bekleyen su ultra saf değildir).');
  const err=b.v-t.tgt;if(Math.abs(err)>t.tol)f.push(`Hacim ${fmt(b.v)} mL; hedef ${fmt(t.tgt)} ± ${t.tol} mL.`);
@@ -508,6 +518,38 @@ function evaluate(){const t=T(),b=S.bot;const f=[...S.flags];
 function leakDone(){const t=T();S.res={ok:true};S.done[t.id]=1;
  $('#res').innerHTML=`<div class="card res ok"><b class="big">Sızıntı giderildi ✓</b><p class="sub" style="font-size:13px">Kartuş yerine oturmadığında conta sızdırır ve cihaz alarm verip dağıtımı durdurur. Kartuşu yerine bastırdıktan sonra cihazı birkaç dakika çalıştır, ilk suyu lavaboya at ve direncin yeniden 18,2 MΩ·cm’ye çıktığını gör. Sızıntı sürerse conta ya da kartuş değiştirilmeli.</p><button class="bt" id="again">Tekrar dene</button></div>`;
  $('#again').onclick=()=>{reset(t.id);S.mode='use';render()};say('Harika! Sızıntıyı buldun, kartuşu yerine bastırdın, kapağı kapattın ve tezgahı kuruladın.');render()}
+/* ===== serbest kullanım: sessiz kayıt ve değerlendirme raporu =====
+   Uyarı, ipucu ve sonuç kartı yoktur. Bir şişe tamamlanınca (kapak kapalı, tabanca yerinde, hijyen kapağı takılı) kaydedilir;
+   rapor açılırken yarım kalan şişe de o anki hâliyle rapora girer. ✅ İşi bitirdim ile rapor açılır. */
+let OT=null;
+const sessiz=()=>!!window.__serbest;
+const ot=()=>sessiz()&&OT;
+function otBasla(){OT={t0:Date.now(),kayit:[]}}
+function otSatir(acik){const t=T(),b=S.bot,fl=S.flags.join(' | '),k=[];let d=0;const e=(ok,iyi,kotu,ceza)=>{k.push([ok,iyi,kotu]);if(!ok)d+=ceza};
+ e(!fl.includes('Hijyen kapağı takılıyken'),'Hijyen kapağı su verilmeden önce çıkarıldı','Hijyen kapağı takılıyken su verildi: kapak suyla doldu, su filtre gövdesinden taştı. Kapak dağıtımdan önce çıkarılır.',15);
+ e(S.ev.flushed&&!b.lowR,'Bekleyen su lavaboya atıldı; şişeye 18,2 MΩ·cm su alındı',!S.ev.flushed?'Bekleyen (ilk) su lavaboya atılmadı: direnç 18,2 MΩ·cm’ye ulaşmadan su alındı. Önce tabanca lavaboya tutulup ekran 18,2 olana kadar akıtılır.':'Şişeye direnç 18,2 MΩ·cm’ye ulaşmadan su alındı (bekleyen su ultra saf değildir).',25);
+ e(b.rinse>=3,'Şişe aynı suyla 3 kez çalkalandı','Şişe '+b.rinse+' kez çalkalandı: doldurmadan önce en az 3 kez aynı ultra saf suyla çalkalanır.',15);
+ if(fl.includes('bekleyen (ilk) suyla çalkalandı'))e(false,'','Şişe bekleyen (ilk) suyla çalkalandı: çalkalama da 18,2 MΩ·cm suyla yapılır.',10);
+ e(Math.abs(b.v-t.tgt)<=t.tol,'Hacim hedefte ('+fmt(b.v)+' mL)','Şişede '+fmt(b.v)+' mL var; istenen '+fmt(t.tgt)+' ± '+t.tol+' mL.',20);
+ const dok=/tezgaha|taştı/.test(fl);e(!dok,'Tezgâha su dökülmedi',(fl.includes('taştı')?'Şişe taştı. ':'')+(/tezgaha aktı/.test(fl)?'Altında kap yokken ya da şişenin kapağı kapalıyken su verildi: su tezgâha aktı. ':'')+'Su yalnız lavaboya ya da açık şişeye verilir.',15);
+ return {ad:fmt(t.tgt)+' mL şişe · '+new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})+(acik?' (yarım)':''),deger:fmt(b.v)+' mL · '+fmt(S.R,1)+' MΩ·cm',puan:Math.max(0,100-d),k}}
+function otKaydet(){OT.kayit.push(otSatir(false));S.res={ok:true};if(window.__raporDugme)window.__raporDugme(raporAc)}
+function raporAc(){if(!OT)return;const L=OT.kayit.slice();if(!S.res&&(S.bot.v>0||S.ev.flushed||S.bot.rinse))L.push(otSatir(true));
+ const bit=[];let bd=0;const b=(ok,iyi,kotu,ceza)=>{bit.push([ok,iyi,kotu]);if(!ok)bd+=ceza};
+ b(!S.flowing&&!S.volMode,'Dağıtım durduruldu','Su akarken iş bırakıldı: dağıtım durdurulur.',5);
+ b(S.bot.cap,'Şişenin kapağı kapatıldı','Şişenin ağzı açık bırakıldı: ultra saf su havadan CO₂ ve toz alır. Kapak hemen kapatılır.',5);
+ b(S.hand==='dock','Tabanca yerine (yuvasına) kondu','Tabanca yerine konmadı.',5);
+ b(S.hyg,'Hijyen kapağı takıldı','Hijyen kapağı takılmadı: filtre ucu açıkta kaldı, toz ve bakteri bulaşır.',5);
+ const ort=L.length?L.reduce((a,x)=>a+x.puan,0)/L.length:0;
+ window.__raporGoster({baslik:'Serbest ultra saf su · değerlendirme raporu',kayitAd:'Doldurulan şişeler',kayitlar:L,bitirme:bit,puan:L.length?Math.max(0,Math.round(ort-bd)):0,sure:Math.round((Date.now()-OT.t0)/60000),
+  bos:'Hiç su alınmadı: işi yapın, sonra yeniden <b>✅ İşi bitirdim</b>’e basın.',
+  not:'Puanlama: her şişe 100 üzerinden; bekleyen su atılmadan alındı −25, hacim hedef dışında −20, hijyen kapağı takılıyken su verme −15, 3 kez çalkalanmadı −15, tezgâha su döküldü −15, bekleyen suyla çalkalama −10. Şişelerin ortalamasından işi bitirme eksikleri (her biri −5) düşülür.',
+  yenileAd:'Yeniden başla',yenile:serbestYenile})}
+const ISAD={man:'500 mL şişeye ultra saf su',vol:'1000 mL mobil faz suyu (1 L şişe)'};
+function serbestIs(id){if(S.flowing||S.volMode)return 'Dağıtım sürerken iş değiştirilmez.';reset(id);S.mode='use';render();return ''}
+function serbestKur(){reset('man');S.mode='use';otBasla();render()}
+function serbestYenile(){const o=OT;serbestKur();OT=o}
+window.serbestRapor={ac:raporAc,ot:()=>OT,is:()=>S&&ISAD[S.task]};
 /* ---------- girişler ---------- */
 function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
 $('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}
@@ -522,7 +564,13 @@ addEventListener('keydown',e=>{if(e.code==='Space'&&S.mode==='use'&&!e.repeat&&e
 reset('parts');
 try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 render();
-Object.assign(window,{reset,render,moveHand,toggleHyg,startFlow,stopFlow,bCap,rinse,setVol,volGo,navPop,toggleFlow,toggleDoor,seatCart,wipe,dragTo,dropHand});Object.defineProperty(window,'S',{get:()=>S});window.__su=1;window.__proj=(x,y,z)=>{const v=new THREE.Vector3(x,y,z).project(R3.cam);const r=box.getBoundingClientRect();return [r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height]};window.__H=()=>K.H.position.toArray();window.__cam=(p,t)=>{camAnim=null;R3.ctl.minDistance=5;R3.cam.position.set(...p);R3.ctl.target.set(...t);R3.ctl.update()};window.__tick=(sec)=>{const n=Math.ceil(sec/.1);for(let i=0;i<n;i++){lastF=performance.now()-100;step(performance.now())}};
+Object.assign(window,{serbestKur,serbestIs,reset,render,moveHand,toggleHyg,startFlow,stopFlow,bCap,rinse,setVol,volGo,navPop,toggleFlow,toggleDoor,seatCart,wipe,dragTo,dropHand});Object.defineProperty(window,'S',{get:()=>S});window.__su=1;const SCR_C={};window.scrOf=n=>{let o=null;if(n.indexOf('hot:')===0){const id=n.slice(4);const L=HOT.filter(x=>x.userData.hot===id&&visibleDeep(x));if(!L.length)throw 0;const r=box.getBoundingClientRect(),ek=v=>{v.project(R3.cam);return [r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height]};
+  /* halka, o parçayı gerçekten seçen bir noktaya konur (ince hortum gibi parçalarda kutunun ortası boşluğa düşebilir) */
+  const ck=SCR_C[id];if(ck&&performance.now()-ck.t<600)return ck.q;let bul=null;
+  const F=[0,-.25,.25,-.45,.45];
+  for(const o of L){if(bul)break;const b=new THREE.Box3().setFromObject(o,true),c=b.getCenter(new THREE.Vector3()),z=b.getSize(new THREE.Vector3());
+   for(const fx of F){if(bul)break;for(const fy of F){if(bul)break;for(const fz of F){const q=ek(new THREE.Vector3(c.x+fx*z.x,c.y+fy*z.y,c.z+fz*z.z));const h=window.__pick&&window.__pick(q[0],q[1]);if(h&&h.id===id){bul=q;break}}}}}
+  bul=bul||ek(new THREE.Box3().setFromObject(L[0],true).getCenter(new THREE.Vector3()));SCR_C[id]={q:bul,t:performance.now()};return bul}o=K[n];const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const r=box.getBoundingClientRect();return [r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height]};window.__proj=(x,y,z)=>{const v=new THREE.Vector3(x,y,z).project(R3.cam);const r=box.getBoundingClientRect();return [r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height]};window.__H=()=>K.H.position.toArray();window.__cam=(p,t)=>{camAnim=null;R3.ctl.minDistance=5;R3.cam.position.set(...p);R3.ctl.target.set(...t);R3.ctl.update()};window.__tick=(sec)=>{const n=Math.ceil(sec/.1);for(let i=0;i<n;i++){lastF=performance.now()-100;step(performance.now())}};
 
 /* tam sayfa yardımcıları */
 $('#mPanel').onclick=()=>{document.body.classList.toggle('panel');$('#mPanel').classList.toggle('on',document.body.classList.contains('panel'))};
@@ -534,5 +582,7 @@ new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.
 </script>
 
 <script src="anamenu.js" charset="utf-8" defer></script>
+<script>/* rehberli ders betiği: tarayıcı önbelleğinde eski sürüm kalmasın diye 5 dakikada bir yenilenen adresle yüklenir */
+(function(){var s=document.createElement('script');s.charset='utf-8';s.src='cihaz_ders.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})();</script>
 </body>
 </html>
