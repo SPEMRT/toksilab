@@ -7,6 +7,7 @@
    ultra_pilot.html?ders=ulttani | ultdeg              (tanıma · mobil faz degazlama)
    pipet_pilot.html?ders=piptani | pipsu | pipkan | pipstok | pipdcm  (tanıma · ileri · ters · 5 µL · DCM ön ıslatma)
    su_pilot.html?ders=sutani | sudol | susiz            (tanıma · 500 mL şişe · kartuş sızıntısı)
+   spe_pilot.html?ders=spetani | spesart | speyuk | speelu  (tanıma · şartlandırma · yükleme · yıkama, kurutma, elüsyon)
    Sayfanın 3B sahnesini ve kendi işlevlerini kullanır; sahneye ve fiziğe dokunmaz. */
 (function(){
 'use strict';
@@ -714,8 +715,154 @@ return {sayfa:'su_pilot.html',hazir:'__su',sonucKarti:true,ad:'ULTRA SAF SU CİH
    return '<b>İş:</b> '+(is||'—')+'. İşi <b>🧪 Numune seç</b> ile değiştirebilirsin.<br>'+(n?'<b>'+n+' şişe</b> kaydedildi. Bitirince <b>✅ İşi bitirdim</b>; raporu soldaki <b>📋 Rapor</b> ile yeniden açabilirsin.':'Uyarı yok, kendi bildiğin gibi çalış. Bitirince <b>✅ İşi bitirdim</b>’e bas.')}}};
 }
 
+/* ---------- katı faz ekstraksiyonu (SPE · CEREX 48) ---------- */
+function spe(){
+var AD={'Oasis HLB 3 cc kartuş kutusu: tıkla, bir kartuş al':'box','Kolon rafı: elindeki kartuşu bir deliğe yerleştir':'rack','48 pozisyonlu kolon rafı':'rack','Raf ön yüzü: tıkla, rafı öne çek / geri it':'rack',
+ 'Atık rafı ve beyaz atık teknesi':'waste','Atık sıvı':'waste','Toplama rafı (12 × 75 mm tüpler)':'coll','Toplama tüpü':'coll','Toplanan eluat':'coll',
+ 'Basınç kafası: indirmek için iki anahtara aynı anda bas':'platen','Silikon conta (kartuş üstlerine oturur)':'platen','Sıkıştırma bloğu':'platen','Kelebek civata':'platen','Gaz hortumu bağlantısı':'platen',
+ 'Sol baskı anahtarı: sağ anahtarla birlikte bas':'two','Sağ baskı anahtarı: sol anahtarla birlikte bas':'two','Mod seçici: sol ADJ · orta OFF · sağ MAX':'mode',
+ 'Ayarlanabilir akış manometresi (0–15 psi)':'adj','Ayarlanabilir akış regülatörü: tıkla ve + / − ile ayarla':'adj','Maksimum akış manometresi (0–60 psi)':'max','Maksimum akış regülatörü: tıkla ve + / − ile ayarla':'max',
+ 'Akış ölçer (rotametre)':'rm','Rotametre iğneli vanası':'rm','Kılavuz kolon':'post','Kılavuz burcu':'post','Mavi gaz hortumu':'gas','Arka gaz bağlantısı (hortum)':'gas','Arka gaz girişi (azot hattı)':'gas',
+ 'Bekleme standı: biten kartuşu buraya koy':'stand','Peçete kutusu: tıkla, peçete al':'tissue','Çöp kutusu: kullanılmış kartuşu ya da ıslak peçeteyi at':'bin','Ön kontrol paneli':'panel','Paslanmaz çelik gövde':'body'};
+['MeOH','Su','Su:MeOH 4:1','Elüsyon MeOH'].forEach(function(t){AD[t+' erleni: tıkla, pipetle 3 mL al']='erlen'});
+for(var j=1;j<=5;j++){AD['N'+j+' numune tüpü: tıkla, pipetle al']='tube';AD['Y'+j+': N'+j+' için yedek numune, tıkla, pipetle al']='tube'}
+var ADI={box:'kartuş kutusu',rack:'kolon rafı',waste:'atık rafı ve teknesi',coll:'toplama rafı',platen:'basınç kafası',two:'baskı anahtarı',mode:'mod seçici',adj:'ADJ (ayarlanabilir akış) regülatörü ve manometresi',max:'MAX (maksimum akış) regülatörü ve manometresi',rm:'rotametre (akış ölçer)',post:'kılavuz kolon',gas:'azot hattı',stand:'bekleme standı',erlen:'çözelti erleni',tube:'numune tüpü',tissue:'peçete kutusu',bin:'çöp kutusu',panel:'ön panel',body:'cihaz gövdesi'};
+function H(n,r){return [n,0,r||46]}
+var DG=['#dersP [data-dg="0"]',0,0];
+function E(){return window.carts||[]}
+function vol(c){return window.cartVol(c)}
+function f1(v){return v.toFixed(1).replace('.',',')}
+function rafta(){return E().filter(function(c){return c.k<2&&c.where==='rack'})}
+function akis(s){var r=rafta();return 'Basınç '+f1(s.p)+' psi · '+(r.length?r.map(function(c){return 'K'+(c.k+1)+' '+f1(vol(c))+' mL, '+f1(c.flow)+' mL/dk'}).join(' · '):'rafta kartuş yok')}
+var KAFA=['✋✋ İki anahtara birlikte bas',function(){window.ikiAnahtar()}];
+/* öğrencinin son protokol sapması derste hemen gösterilir */
+function sapma(){var s=S(),x=s.log[0];return x&&!x.info&&s.time-x.t<150?'⚠ '+x.msg:''}
+function koc(t,ask,b,kaynak,html){return {bolum:{0:'Şartlandırma',1:'Şartlandırma',2:'Yükleme',3:'Yıkama',4:'Yıkama',6:'Elüsyon'}[t],ask:ask,dugme:KAFA,
+ izin:kaynak.concat(['cart','stand','twoL','twoR','mode','knob','pull']),canli:function(){return 'Sıradaki: '+window.speKoc(t).is},halka:function(){return window.speKoc(t).h},
+ ok:function(){return !!window.speKoc(t).bitti},hata:sapma,b:b,html:html}}
+var DERS={
+spetani:{ad:'Cihazı tanıma',ozet:'SPE nedir; kartuş, kolon rafı, atık ve toplama rafı, basınç kafası, anahtarlar, mod seçici, ADJ / MAX, rotametre.',baslik:'SPE · TANIMA',mod:'parts',gorev:'parts',
+ adim:[
+ {bolum:'Giriş',b:'Katı faz ekstraksiyonu (SPE) nedir?',
+  html:'<p>Atık sudaki ilaç kalıntıları çok düşük derişimdedir ve suyun içindeki tuz, partikül gibi pek çok maddeyle karışıktır. Doğrudan cihaza verilemez.</p><p><b>SPE</b>’de numune, içi tanecikli bir dolgu maddesiyle (<b>sorbent</b>) dolu bir <b>kartuştan</b> geçirilir. Analitler sorbente tutunur, su ve kirlilikler geçip gider. Sonra az miktarda çözücüyle analitler sorbentten <b>geri alınır</b>: hem temizlenmiş hem derişmiş olur.</p><p>Her kartuşa sırayla: <b>şartlandırma → yükleme → yıkama → kurutma → elüsyon</b>.</p><p><b>CEREX 48</b>, kartuşlara üstten azot basarak sıvıları kartuştan iter (pozitif basınç). 48 kartuş aynı anda çalışabilir.</p><p>Sahneyi sürükleyerek döndürebilir, tekerlekle yakınlaştırabilirsiniz.</p>'},
+ {bolum:'Kartuş',ask:'<b>Kartuş kutusuna</b> tıklayın.',parca:['box'],halka:H('box',60),
+  b:'Oasis HLB 3 cc kartuş',ne:'İçinde 60 mg polimer sorbent bulunan 3 mL’lik plastik kartuştur. Sorbent hem suyu seven hem yağı seven gruplar taşır (HLB: hidrofilik-lipofilik denge).',neden:'Atık sudaki pek çok farklı ilacı aynı anda tutabilir.',yanlis:'Kartuşun alt ucuna elle dokunulmaz. Kullanılmış kartuş yeniden kullanılmaz.'},
+ {bolum:'Raflar',ask:'Kartuşların takıldığı <b>kolon rafına</b> tıklayın.',parca:['rack'],halka:H('rack',70),
+  b:'Kolon rafı',ne:'48 delikli rafdır; kartuşlar bu deliklere takılır.',neden:'Kartuşları basınç kafasının tam altında, düz ve sabit tutar.',yanlis:'Kartuşlar sırayla ve numune numarasıyla eşleşecek şekilde takılır (K1 ← N1). Karışırsa sonuç başka numuneye yazılır.'},
+ {bolum:'Raflar',ask:'Kolon rafının altındaki <b>atık rafına</b> (beyaz tekne) tıklayın.',parca:['waste'],halka:H('waste',60),
+  b:'Atık rafı ve teknesi',ne:'Kartuşlardan süzülen sıvıların toplandığı beyaz teknedir.',neden:'Şartlandırma, yükleme ve yıkama sıvıları atıktır; buraya akar.',yanlis:'Elüsyondan önce atık rafı <b>toplama rafıyla</b> değiştirilir; yoksa analitler atığa gider.'},
+ {bolum:'Raflar',ask:'Yanda bekleyen <b>toplama rafına</b> tıklayın.',parca:['coll'],halka:H('coll',70),
+  b:'Toplama rafı',ne:'Her kartuşun altına bir cam tüp (12 × 75 mm) getiren raftır.',neden:'Elüsyonda analitleri taşıyan çözücü (<b>eluat</b>) bu tüplerde toplanır.',yanlis:'Toplama rafına geçmeden önce basınç kafası kaldırılır.'},
+ {bolum:'Basınç',ask:'Üstteki siyah <b>basınç kafasına</b> tıklayın.',parca:['platen','post'],halka:H('platen',70),
+  b:'Basınç kafası',ne:'Kılavuz kolonlar üzerinde inip kalkan kafadır. Altındaki silikon conta her kartuşun ağzına oturur.',neden:'Azot her kartuşa ayrı ayrı verilir; sıvı kartuştan aşağı itilir.',yanlis:'Kartuş takarken ya da çözelti eklerken kafa yukarıda olmalıdır.'},
+ {bolum:'Basınç',ask:'Ön paneldeki <b>baskı anahtarlarından</b> birine tıklayın.',parca:['two'],halka:[H('two:L',40),H('two:R',40)],
+  b:'İki baskı anahtarı',ne:'Panelin iki yanındaki anahtarlardır. Kafa, ikisine <b>birlikte</b> basınca iner ya da kalkar.',neden:'İki el de anahtardayken kafa hareket eder: el kafanın altında kalıp sıkışmaz.',yanlis:'Raf öne çekiliyken kafa indirilmez.'},
+ {bolum:'Basınç',ask:'Panelin altındaki <b>mod seçiciye</b> tıklayın.',parca:['mode'],halka:H('mode',40),
+  b:'Mod seçici',ne:'Üç konumlu koldur: solda <b>ADJ</b>, ortada <b>OFF</b>, sağda <b>MAX</b>.',neden:'ADJ ile sıvılar ayarlı düşük basınçla geçirilir; MAX ile kartuşlar yüksek basınçla kurutulur. OFF gazı keser.',yanlis:'Kartuşlar boşalınca gaz hemen OFF’a alınır.'},
+ {bolum:'Basınç',ask:'Soldaki <b>ADJ manometresine</b> ya da altındaki düğmeye tıklayın.',parca:['adj'],halka:H('gauge:adj',44),
+  b:'ADJ: ayarlanabilir akış',ne:'0–15 psi arası düşük basınç verir. Düğmesiyle ayarlanır, manometresi basıncı gösterir.',neden:'Sıvıların kartuştan damla damla (yaklaşık 1–2 mL/dk) geçmesi için kullanılır.',yanlis:'Basınç yavaş yavaş artırılır. Hızlı akış analitlerin sorbente tutunmasına zaman bırakmaz.'},
+ {bolum:'Basınç',ask:'Sağdaki <b>MAX manometresine</b> ya da altındaki düğmeye tıklayın.',parca:['max'],halka:H('gauge:max',44),
+  b:'MAX: maksimum akış',ne:'0–60 psi arası yüksek basınç verir.',neden:'Yıkamadan sonra kartuşları azotla <b>kurutmak</b> için kullanılır (20 psi, 15 dk).',yanlis:'Sıvı geçirirken MAX kullanılmaz: akış çok hızlanır.'},
+ {bolum:'Basınç',ask:'Paneldeki cam tüplü <b>rotametreye</b> (akış ölçer) tıklayın.',parca:['rm'],halka:H('rm',50),
+  b:'Rotametre',ne:'İçindeki bilye gaz akışıyla yükselir; L/dk okunur.',neden:'Gazın gerçekten aktığını gösterir. Kartuşlar boşaldıkça akış artar.',yanlis:'Kafa kapalıyken bilye çok yükseliyorsa gaz boşalan kartuşlardan kaçıyordur.'},
+ {bolum:'Tezgâh',ask:'Öndeki <b>çözelti erlenlerinden</b> birine tıklayın.',parca:['erlen','tube'],halka:H('src:water',50),
+  b:'Çözeltiler ve numuneler',html:'<p>Erlenlerde: <b>MeOH</b> (şartlandırma), <b>su</b> (şartlandırma ve yıkama), <b>su:MeOH 4:1</b> (yıkama), <b>elüsyon MeOH</b>.</p><p>Sağdaki standda <b>N1–N5</b> atık su numuneleri (10’ar mL), arkada <b>Y1–Y5</b> yedekleri durur.</p><p>Çözeltiler Pasteur pipetiyle 3’er mL alınıp kartuşa eklenir. Pipet kartuşun üstündeyken sıkılır; başka yerde sıkılırsa sıvı dökülür.</p>'},
+ {bolum:'Tezgâh',ask:'<b>Bekleme standına</b> tıklayın.',parca:['stand'],halka:H('stand',60),
+  b:'Bekleme standı',ne:'Adımını erken bitiren kartuşların kondulduğu standdır.',neden:'Biten kartuş rafta kalırsa diğerleri akarken basınç altında boş kalır ve sorbent kurur. Kafa kaldırılıp biten kartuş standa alınır, hepsi bitince rafa geri takılır.',yanlis:'Şartlandırmadan yükleme sonuna kadar sorbent kurutulmaz.'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['SPE’de adımların doğru sırası hangisidir?',['Yükleme → şartlandırma → elüsyon → yıkama','Şartlandırma → yükleme → yıkama → kurutma → elüsyon','Elüsyon → yükleme → kurutma'],1,'Önce sorbent hazırlanır, sonra numune yüklenir, kirlilikler yıkanır, kurutulur ve analitler alınır.'],
+ ['Kafa neden iki anahtara birlikte basınca iner?',['Daha hızlı insin diye','İki el de anahtardayken el kafanın altında sıkışmasın diye','Gaz tasarrufu için'],1,'Bu bir iş güvenliği önlemidir.'],
+ ['Kartuşları kurutmak için hangi mod kullanılır?',['ADJ, 5 psi','OFF','MAX, 20 psi'],2,'ADJ en fazla 15 psi verir; kurutma için MAX ile 20 psi gerekir.']],
+ bitti:function(){S().done.parts=1}},
+spesart:{ad:'Kartuş takma ve şartlandırma',ozet:'İki kartuşu rafa tak; 3 mL MeOH ve 3 mL su ile şartlandır; kafa, ADJ basıncı, mod seçici.',baslik:'SPE · ŞARTLANDIRMA',mod:'use',gorev:'bos',
+ adim:[
+ {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>İki Oasis HLB kartuşunu rafa takıp <b>şartlandıracaksınız</b>: önce 3 mL metanol (MeOH), sonra 3 mL su.</p><p>Kuru sorbent sudaki analitleri iyi tutamaz. Metanol sorbenti ıslatıp gözeneklerini açar; su da metanolü uzaklaştırıp sorbenti sulu numuneye hazırlar.</p><p>Gerçek çalışmada beş numune için beş kartuş kullanılır; bu derste kısa olsun diye iki kartuşla çalışacaksınız.</p>'},
+ {bolum:'Kartuş',ask:'<b>Kartuş kutusuna</b> tıklayın: bir kartuş alın.',halka:H('box',60),izin:['box'],ok:function(s){return s.hand&&s.hand.type==='cart'},
+  b:'Kartuş elinizde',html:'<p>Kartuşları aldığınız sırayla <b>K1, K2</b> diye numaralanır. K1’e N1 numunesi, K2’ye N2 numunesi yüklenecek: numara her zaman eşleşir.</p><p>Kartuşun alt ucuna dokunmayın.</p>'},
+ {bolum:'Kartuş',ask:'Kolon rafında yanıp sönen <b>deliğe</b> tıklayın: kartuşu takın.',halka:H('hole:2',36),izin:['rackTop'],ok:function(){return rafta().length>=1},
+  b:'K1 rafta',html:'<p>Kartuşun ucu alttaki <b>atık teknesine</b> bakıyor. Şartlandırma, yükleme ve yıkama sıvıları oraya akacak.</p>'},
+ {bolum:'Kartuş',ask:'İkinci kartuşu da alın (kutuya tıklayın) ve yanındaki <b>deliğe</b> takın.',oto:1,halka:function(s){return s.hand&&s.hand.type==='cart'?H('hole:4',36):H('box',60)},izin:['box','rackTop'],ok:function(){return rafta().length>=2}},
+ {bolum:'MeOH',ask:'<b>MeOH erlenine</b> tıklayın: pipetle 3 mL metanol çekin.',halka:H('src:meoh',50),izin:['src:meoh'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.src.id==='meoh'},
+  b:'Pipette 3 mL MeOH',html:'<p>Pipeti kartuşun üstüne götürüp sıkacaksınız. Pipet başka bir yerde sıkılırsa çözelti tezgâha dökülür.</p>'},
+ {bolum:'MeOH',ask:'<b>K1</b> kartuşuna tıklayın: metanolü ekleyin.',oto:1,halka:H('cart:0',40),izin:['cart:0'],ok:function(){return E()[0].added>=2.98||E()[0].step>0}},
+ {bolum:'MeOH',ask:'<b>K2</b>’ye de 3 mL MeOH ekleyin: önce erlenden çekin, sonra K2’ye tıklayın.',halka:function(s){return s.hand&&s.hand.type==='pip'?H('cart:1',40):H('src:meoh',50)},izin:['src:meoh','cart:1'],ok:function(){return E()[1].added>=2.98||E()[1].step>0},hata:sapma,
+  b:'İki kartuşta da metanol var',html:'<p>Kartuş en fazla 3 mL alır. Şimdi metanolü basınçla kartuşlardan geçireceksiniz.</p>'},
+ {bolum:'Basınç',ask:'İki baskı anahtarına <b>birlikte</b> basın: basınç kafası iner. Panelde ✋✋ düğmesini kullanın (klavyede A ile L’ye birlikte de basabilirsiniz).',dugme:KAFA,halka:[DG,H('two:L',36),H('two:R',36)],izin:['twoL','twoR'],ok:function(s){return s.headDown&&s.headT>=.999},
+  b:'Kafa indi',ne:'Kafanın altındaki conta her kartuşun ağzına oturdu.',neden:'Azot her kartuşa ayrı verilir; her kartuş kendi hızında akar.',yanlis:'Kafa inmeden önce eller ve pipet kafanın altından çekilir.'},
+ {bolum:'Basınç',ask:'<b>ADJ düğmesine</b> tıklayın ve açılan kutuda <b>−</b> ile basıncı <b>5 psi</b> yapın.',halka:function(){var r=document.getElementById('regpop');return r&&!r.hidden?['#regMinus',0,0]:H('knob:adj',44)},izin:['knob:adj'],canli:function(s){return 'ADJ ayarı: '+s.adj+' psi'},ok:function(s){return s.adj>=4&&s.adj<=6},
+  b:'Basınç 5 psi',ne:'Sıvıların kartuştan geçiş hızını basınç belirler.',neden:'Hedef damla damla akıştır (yaklaşık 1–2 mL/dk): analitlerin sorbentle temas edip tutunmasına zaman kalır.',yanlis:'Basınç bir anda yükseltilmez. Akmayan kartuş olursa basınç birkaç psi artırılır.'},
+ {bolum:'Basınç',ask:'Mod seçicinin <b>sol</b> tarafına (ADJ) tıklayın: gaz açılır.',oto:1,halka:H('mode:adj',36),izin:['mode'],ok:function(s){return s.gm==='adj'},
+  hata:function(){return S().gm==='max'?'MAX seçildi: bu yüksek basınçtır. Mod seçicinin ortasına tıklayıp kapatın, sonra sol tarafına (ADJ) tıklayın.':''}},
+ {bolum:'Basınç',ask:'Metanol kartuşlardan damla damla geçiyor. Manometre basıncı, rotametre gaz akışını gösteriyor. Kartuşlar <b>boşalana</b> kadar bekleyin…',oto:1,izin:[],canli:akis,ok:function(){var r=rafta();return r.length===2&&r.every(function(c){return vol(c)<.002&&c.step>=1})}},
+ {bolum:'Basınç',ask:'Kartuşlar boşaldı: mod seçicinin <b>ortasına</b> tıklayın, gazı kapatın (OFF).',halka:H('mode',40),izin:['mode'],ok:function(s){return s.gm==='off'},hata:sapma,
+  b:'Sorbent ıslak kalmalı',html:'<p>Kartuş boşaldıktan sonra gaz açık kalırsa azot sorbentin içinden geçer ve sorbent <b>kurur</b>. Şartlandırmadan yükleme bitene kadar sorbent kurutulmaz; kuruyan sorbent analitleri iyi tutamaz.</p><p>Bu yüzden kartuşlar boşalınca gaz hemen kapatılır. Ders boyunca kartuş boşalmak üzereyken hız kendiliğinden <b>1×</b>’e iner.</p>'},
+ koc(1,'Şimdi her kartuşa <b>3 mL su</b> ekleyip aynı yolla geçirin: kafa yukarı → su ekle → kafa aşağı → ADJ → boşalınca OFF. Sıradaki işi sarı halka ve aşağıdaki yazı gösterir.',
+  'Şartlandırma tamam',['src:water'],
+  '<p>İki kartuş da şartlandırıldı: sorbent ıslak ve sulu numuneye hazır.</p><p>Bir kartuş diğerinden önce biterse, öteki akarken basınç altında boş kalmasın diye <b>bekleme standına</b> alınır; ikisi de bitince rafa geri takılır.</p><p>Sırayı aklınızda tutun:</p><ul><li>Kafa yukarıdayken çözelti ekle.</li><li>Kafayı indir, ADJ ile damla damla geçir.</li><li>Kartuş boşalınca gazı hemen kapat.</li></ul>'),
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Şartlandırmada önce hangi çözelti geçirilir?',['Su','Metanol (MeOH)','Numune'],1,'Metanol sorbenti ıslatır; ardından su metanolü uzaklaştırır.'],
+ ['Kartuş boşalınca ne yapılır?',['Gaz hemen kapatılır (OFF)','MAX’a alınır','Beklenir'],0,'Boş kartuştan geçen azot sorbenti kurutur.'],
+ ['Sıvılar kartuştan hangi hızda geçirilir?',['Olabildiğince hızlı','Damla damla, yaklaşık 1–2 mL/dk','Hiç basınç verilmeden'],1,'Analitlerin sorbente tutunmasına zaman kalmalıdır.']],
+ bitti:function(){S().done.sart=1}},
+speyuk:{ad:'Numune yükleme',ozet:'10 mL atık suyu kendi kartuşuna yükle (N1 → K1, N2 → K2); tıkanan kartuşta basıncı artır, erken biteni standa al.',baslik:'SPE · YÜKLEME',mod:'use',gorev:'sart',
+ adim:[
+ {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>İki kartuş rafta ve <b>şartlandırılmış</b>: sorbent ıslak.</p><p>Her tüpte <b>10 mL</b> atık su var. Kartuş 3 mL aldığı için numune parça parça yüklenir: <b>3 + 3 + 3 + 1 mL</b>. Her parça geçince sıradaki eklenir.</p><p><b>N1 → K1</b>, <b>N2 → K2</b>. Numune başka kartuşa giderse sonuç başka numuneye yazılır.</p><p>N2 bulanık: içindeki partiküller kartuşu yavaş yavaş tıkayabilir. ADJ basıncı 8 psi’ye ayarlı.</p>'},
+ {bolum:'Yükleme',ask:'<b>N1</b> numune tüpüne tıklayın: pipetle 3 mL çekin.',halka:H('src:n1',50),izin:['src:n1'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.src.id==='n1'},
+  b:'N1 numunesi pipette',html:'<p>Bu numune yalnız <b>K1</b> kartuşuna gider.</p>'},
+ {bolum:'Yükleme',ask:'<b>K1</b> kartuşuna tıklayın: numuneyi ekleyin.',oto:1,halka:H('cart:0',40),izin:['cart:0'],ok:function(){return E()[0].yuk>0}},
+ koc(2,'Kalan numuneyi yükleyin: K1’e <b>N1</b>’den, K2’ye <b>N2</b>’den toplam <b>10’ar mL</b>. Akmayan kartuş olursa ADJ basıncını yavaşça artırın. Sıradaki işi sarı halka gösterir.',
+  'Yükleme tamam',['src:n1','src:n2','src:y1','src:y2'],
+  function(){var c=E();return '<p>K1’e '+f1(c[0].yuk)+' mL, K2’ye '+f1(c[1].yuk)+' mL numune yüklendi. Analitler artık sorbente tutunmuş durumda.</p><p>Bulanık numuneler kartuşu tıkar: akış yavaşlar, sonunda durur. O zaman basınç birkaç psi artırılır (ADJ en fazla 15 psi).</p><p>Numune dökülürse eksik kalan hacim aynı numaralı <b>Y</b> yedek tüpünden tamamlanır.</p>'}),
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['10 mL numune 3 mL’lik kartuşa nasıl yüklenir?',['Hepsi birden dökülür','3 + 3 + 3 + 1 mL, her parça geçince sıradaki eklenir','Yalnız 3 mL yüklenir'],1,'Kartuş en fazla 3 mL alır.'],
+ ['Bir kartuş yüklemede akmıyorsa ne yapılır?',['MAX’a alınır','Basınç birkaç psi yavaşça artırılır','Kartuş atılır'],1,'Partiküller kartuşu tıkar; basınç yavaş yavaş artırılır.'],
+ ['N2 numunesi hangi kartuşa yüklenir?',['K1','Hangisi boşsa','K2'],2,'Numune ve kartuş numarası her zaman eşleşir.']],
+ bitti:function(){S().done.yuk=1}},
+speelu:{ad:'Yıkama, kurutma ve elüsyon',ozet:'3 × 3 mL su ve 3 mL su:MeOH 4:1 ile yıka; MAX 20 psi ile 15 dk kurut; toplama rafına geç; 3 mL MeOH ile elüe et.',baslik:'SPE · ELÜSYON',mod:'use',gorev:'yuk',
+ adim:[
+ {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>Numuneler yüklendi; analitler sorbentte. Şimdi:</p><ul><li><b>Yıkama:</b> 3 × 3 mL su (tuzlar ve suda çözünen kirlilikler), sonra 3 mL su:MeOH 4:1 (biraz daha az polar kirlilikler). Analitler sorbentte kalır.</li><li><b>Kurutma:</b> MAX, 20 psi, 15 dk. Sorbentteki su uzaklaşır.</li><li><b>Elüsyon:</b> toplama rafına geçilir, 3 mL MeOH analitleri sorbentten çözüp tüpe taşır.</li></ul><p>ADJ basıncı 8 psi’ye ayarlı.</p>'},
+ koc(3,'Kartuşları <b>3 × 3 mL su</b> ile yıkayın: her kartuşa 3 mL ekleyin, geçirin, üç kez tekrarlayın.','Su yıkaması tamam',['src:water'],
+  '<p>Su, sorbentte tutunmayan tuzları ve suda iyi çözünen kirlilikleri yıkadı. Analitler sorbente tutunduğu için suyla gitmez.</p>'),
+ koc(4,'Şimdi her kartuşa <b>3 mL su:MeOH 4:1</b> ekleyip geçirin.','Yıkama tamam',['src:mix'],
+  '<p>Az miktarda metanol içeren karışım, sudan daha güçlü bir yıkamadır: biraz daha az polar kirlilikleri de uzaklaştırır.</p><p>Metanol oranı yükselirse analitler de yıkanıp gider; bu yüzden yıkama çözeltisinin oranı metotta sabittir.</p>'),
+ {bolum:'Kurutma',ask:'Kafayı indirin: iki anahtara birlikte basın.',oto:1,dugme:KAFA,halka:DG,izin:['twoL','twoR'],ok:function(s){return s.headDown&&s.headT>=.999}},
+ {bolum:'Kurutma',ask:'Kurutma <b>MAX</b> ile yapılır; MAX düğmesi 20 psi’de. Mod seçicinin <b>sağ</b> tarafına (MAX) tıklayın.',halka:H('mode:max',36),izin:['mode','knob:max'],ok:function(s){return s.gm==='max'&&s.max>=18},
+  hata:function(){var s=S();return s.gm==='adj'?'ADJ seçildi: ADJ en fazla 15 psi verir, kurutmaya yetmez. Ortasına tıklayıp kapatın, sonra sağ tarafına (MAX) tıklayın.':s.gm==='max'&&s.max<18?'MAX ayarı '+s.max+' psi: düğmeye tıklayıp 20 psi yapın.':''},
+  b:'Kurutma başladı',ne:'Azot, boş kartuşların içinden geçerek sorbentteki suyu uzaklaştırır.',neden:'Elüsyon çözücüsü suyla seyrelmez; eluat sonra daha kısa sürede uçurulur.',yanlis:'Kurutma yalnız yıkamadan sonra yapılır. Şartlandırma ile yükleme arasında sorbent kurutulmaz.'},
+ {bolum:'Kurutma',ask:'Kurutma 15 dakika sürer. Beklemeyi kısaltmak için hızı <b>60×</b> yapın.',oto:1,dugme:[['⏩ Hızı 60× yap',function(){window.setSpeed(60)}]],halka:DG,izin:[],ok:function(s){return s.speed>=60}},
+ {bolum:'Kurutma',ask:'Kartuşlar kurutuluyor. Bekleyin…',oto:1,izin:[],canli:function(s){return 'Basınç '+f1(s.p)+' psi · '+rafta().map(function(c){return 'K'+(c.k+1)+' '+f1(Math.min(15,c.step>5?15:c.dry/60))+' / 15 dk'}).join(' · ')},ok:function(){return rafta().every(function(c){return c.step>=6})}},
+ {bolum:'Kurutma',ask:'Kurutma bitti: mod seçicinin <b>ortasına</b> tıklayın (OFF).',halka:H('mode',40),izin:['mode'],ok:function(s){return s.gm==='off'},
+  b:'Sorbent kuru',html:'<p>Kartuşlar kurudu. Analitler hâlâ sorbentte.</p>'},
+ {bolum:'Elüsyon',ask:'Kafayı kaldırın: iki anahtara birlikte basın.',oto:1,dugme:KAFA,halka:DG,izin:['twoL','twoR'],ok:function(s){return !s.headDown&&s.headT<=.001}},
+ {bolum:'Elüsyon',ask:'Kartuşların altına <b>toplama rafını</b> alın.',dugme:[['🔄 Toplama rafına geç',function(){window.setSpeed(10);window.swapRacks()}]],halka:DG,izin:[],ok:function(s){return s.collT>=1&&!s.busy},
+  b:'Toplama rafı yerinde',html:'<p>Atık rafı çıktı; her kartuşun altında artık bir <b>cam tüp</b> var.</p><p>Elüsyondan önce bu değişiklik yapılmazsa analitleri taşıyan metanol atık teknesine akar ve numune kaybolur.</p>'},
+ {bolum:'Elüsyon',ask:'Elüsyonda akış yavaş olmalı: <b>ADJ düğmesine</b> tıklayıp basıncı <b>3–5 psi</b> arasına indirin.',halka:function(){var r=document.getElementById('regpop');return r&&!r.hidden?['#regMinus',0,0]:H('knob:adj',44)},izin:['knob:adj'],canli:function(s){return 'ADJ ayarı: '+s.adj+' psi'},ok:function(s){return s.adj>=3&&s.adj<=5},
+  b:'Yavaş elüsyon',html:'<p>Metanolün sorbentle uzun temas etmesi analitlerin tamamen çözülüp tüpe geçmesini sağlar. Hızlı geçen metanol analitlerin bir kısmını kartuşta bırakır.</p>'},
+ koc(6,'Her kartuşa <b>3 mL elüsyon MeOH</b> ekleyip ADJ ile geçirin; eluat tüplere toplanır.','Elüsyon tamam',['src:elu'],
+  function(){var c=E();return '<p>Tüplerde eluat: K1 <b>'+f1(c[0].eluate)+' mL</b>, K2 <b>'+f1(c[1].eluate)+' mL</b>. Analitler bu metanolde.</p><p>Eluat sonra azotla uçurulur, az miktar çözücüde yeniden çözülür ve LC-MS/MS’e verilir.</p><p>Bütün sırayı serbest kullanımda beş numuneyle kendiniz deneyebilirsiniz.</p>'}),
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Yıkamada analitler neden kartuştan gitmez?',['Sorbente tutundukları için','Kartuş kapalı olduğu için','Yıkama yapılmadığı için'],0,'Yıkama çözeltisi analitleri sorbentten koparacak kadar güçlü değildir.'],
+ ['Elüsyondan önce ne yapılmalıdır?',['Atık rafı yerine toplama rafına geçilir','Kartuşlar atılır','Basınç 60 psi yapılır'],0,'Yoksa eluat atık teknesine akar.'],
+ ['Kurutma neden yapılır?',['Kartuş soğusun diye','Sorbentteki su uzaklaşsın, eluat suyla seyrelmesin diye','Numune yüklensin diye'],1,'Kurutma MAX modda 20 psi ile 15 dk yapılır.']],
+ bitti:function(){S().done.elu=1}}
+};
+return {sayfa:'spe_pilot.html',hazir:'__spe',tuval:'#c',ad:'SPE · CEREX 48',model:'Oasis HLB 3 cc',adTam:'SPE cihazının',
+ acl:'Cihazı dört kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 4–8 dakika sürer.',
+ GM:{parts:'spetani'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['spetani','spesart','speyuk','speelu'],
+ senkron:function(s,o){['spetani','spesart','speyuk','speelu'].forEach(function(k){if(o[k]&&o[k].bitti)s.done[k]=1})},
+ /* serbest kullanım sessiz sınavdır: beş numune, uyarı yok; ✅ İşi bitirdim ile kartuş kartuş rapor */
+ serbest:{yerlesim:'kontrol',sessiz:true,kur:function(){if(window.serbestKur)window.serbestKur()},
+  ek:'<button class="btn sbBitir" id="sbBitir">✅ İşi bitirdim · Raporu gör</button>',ekBagla:function(d){d.querySelector('#sbBitir').onclick=function(){if(window.serbestRapor)window.serbestRapor.ac()}},
+  ses:function(){var o=window.serbestRapor&&window.serbestRapor.ot(),n=o?o.kayit.length:0,b=o?o.biten:0;
+   return n?'<b>'+n+' kartuş</b> kullanıldı, <b>'+b+'</b> tanesi elüsyona kadar bitti. Bitirince <b>✅ İşi bitirdim</b>: değerlendirme raporun açılır. Raporu üstteki <b>📋 Rapor</b> ile yeniden açabilirsin.':'Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. Görev: N1–N5 atık su numunelerini Oasis HLB kartuşlarla ekstrakte et (şartlandırma → yükleme → yıkama → kurutma → elüsyon). Bitirince <b>✅ İşi bitirdim</b>’e bas.'}}};
+}
+
 /* ---------- sayfaya göre cihaz ---------- */
-var C=null;[vorteks,terazi,ultra,santrifuj,pipet,su].some(function(f){var c=f();if(c.sayfa===SAYFA){C=c;return true}});
+var C=null;[vorteks,terazi,ultra,santrifuj,pipet,su,spe].some(function(f){var c=f();if(c.sayfa===SAYFA){C=c;return true}});
 if(!C)return;
 /* serbest kullanımda canlı uyarı kuralları: yanlış giden şey kesin dille panelde gösterilir */
 var SK={
@@ -974,7 +1121,7 @@ function basla(){
  if(SERB){serbestBasla();return}
  if(!L){s.mode='parts';window.render();liste();dispatchEvent(new Event('resize'));return}
  if(L.once)L.once(s);window.reset(L.gorev||'free');s=S();s.mode=L.mod;if(L.kur)L.kur();window.render();
- var cv=document.querySelector('#cv3 canvas');if(cv)cv.addEventListener('pointerup',parcaTik);
+ var cv=document.querySelector(C.tuval||'#cv3 canvas');if(cv)cv.addEventListener('pointerup',parcaTik);
  git(0);setInterval(tik,120);requestAnimationFrame(halka);dispatchEvent(new Event('resize'))}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',basla);else basla();
 })();

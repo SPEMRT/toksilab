@@ -97,7 +97,7 @@ button:focus-visible, input:focus-visible, .lane:focus-visible { outline: 2px so
 .srcs .btn small, .samples .btn small { font: 500 10.5px var(--font-mono); color: var(--muted); }
 .sw { width: 10px; height: 10px; border-radius: 2px; flex: none; border: 1px solid var(--line); }
 .nm { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.samples { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.samples { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
 .samples .btn { padding: 6px 2px; display: flex; flex-direction: column; gap: 2px; align-items: center; }
 .lbl { font-size: 12.5px; margin-bottom: 5px; display: flex; justify-content: space-between; gap: 8px; }
 .seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
@@ -192,7 +192,33 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
 .labbtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .brand .my { font: 700 13px var(--font-display); letter-spacing: .02em; color: var(--muted); }
 .brand .my i { font-style: normal; color: var(--brand); }
+/* rehberli ders ve serbest kullanım (cihaz_ders.js) */
+.snav { display: flex; gap: 6px; }
+.snav:empty { display: none; }
+.snav button { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; padding: 7px 13px; font: 700 13.5px var(--font-body); background: var(--accent); color: #fff; cursor: pointer; }
+body.cders .left, body.cders #btnReset { display: none !important; }
+body.cders .app { grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "top top" "stage right" "dock dock"; }
+body.cders:not(.serbest) .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "stage" "dock"; margin-right: 390px; }
+body.cders.dk:not(.serbest) .app { margin-right: 0; }
+body.cders .stage { right: auto !important; bottom: auto !important; }
+body { margin: 0; }
+body.cders #statusBox { visibility: hidden; }
+body.cders #side { min-width: 0; overflow-x: hidden; }
+body.cders .hint { display: none; }
+body.cders .lane.gizli { display: none; }
+body.sbk #side { width: auto; }
+@media (max-width: 980px) {
+  body.cders .app, body.cders:not(.serbest) .app { grid-template-columns: 1fr; grid-template-areas: "top" "stage" "dock" "right"; margin-right: 0; }
+  body.cders:not(.serbest):not(.dk) .app { padding-bottom: 46dvh; }
+}
 </style>
+<style id="dersOnCss">/* rehberli ders düzeni sayfa açılır açılmaz uygulanır (cihaz_ders.js yüklenince kendi stiline devreder) */
+html.dersOn .left,html.dersOn #side,html.dersOn #hLab,html.dersOn #btnReset{display:none!important}
+html.dersOn .app{grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "stage" "dock";margin-right:390px}
+html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;bottom:0;width:390px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
+@media (max-width:980px){html.dersOn .app{margin-right:0;padding-bottom:46dvh}html.dersOn body::after{top:auto;left:0;width:auto;height:46dvh;border-radius:16px 16px 0 0}}
+</style>
+<script>(function(){document.documentElement.classList.add('dersOn');setTimeout(function(){if(!document.body||!document.body.classList.contains('cders'))document.documentElement.classList.remove('dersOn')},12000)})()</script>
 </head>
 <body>
 
@@ -206,6 +232,7 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
       <div class="ro"><div class="k">Saat</div><div class="v" id="roT">00:00</div></div>
       <div class="ro"><div class="k" id="roDk">Atık</div><div class="v" id="roD">0<small>mL</small></div></div>
     </div>
+    <div class="snav" id="snav"></div>
     <div class="status" id="statusBox"><span class="dot" id="dot"></span><span id="statusTxt"></span></div>
     <button class="btn" id="btnPerf" type="button" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer">⚡ Performans</button>
     <div class="speed">Hız
@@ -252,7 +279,7 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
     </div>
   </section>
 
-  <aside class="side right gut">
+  <aside class="side right gut" id="side">
     <section>
       <h2>Numune tüpleri (N) ve yedekler (Y) · 3 mL çek</h2>
       <div class="stack">
@@ -306,6 +333,9 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
 <script>
 (() => {
 const $ = s => document.querySelector(s);
+/* serbest kullanım sessiz sınavdır: protokol sapmaları uyarı olarak gösterilmez, yalnız rapora kaydedilir */
+const sessiz = () => !!window.__serbest;
+function izin(k) { if (window.__izin && !window.__izin(k)) { if (window.__izinUyari) window.__izinUyari(); return false; } return true; }
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const stage = $('#stage');
 const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -528,7 +558,7 @@ const knobL = makeKnob(480, 510, 'Ayarlanabilir akış regülatörü: tıkla ve 
 const knobR = makeKnob(830, 510, 'Maksimum akış regülatörü: tıkla ve + / − ile ayarla', 'knobR');
 const setKnob = (k, v, full = 60) => { k.rotation.z = 2.3 - v / full * 4.6; };
 
-const SEL_L = 'Mod seçici: ADJ / OFF / MAX (tıkla)';
+const SEL_L = 'Mod seçici: sol ADJ · orta OFF · sağ MAX';
 const sel = new THREE.Group(); sel.position.set(PX(655), PY(575), FZ);
 const selBase = mesh(cyl(0.11, 0.12, 0.05, 32), M.chrome, 0, 0, 0.025, SEL_L, 'mode'); selBase.rotation.x = Math.PI / 2; sel.add(selBase);
 const lever = new THREE.Group(); sel.add(lever);
@@ -811,7 +841,7 @@ const binSprite = labelPlane(BIN_L, 'trash', 0.3, 0.17, { r: 0.232, arc: 1.3 });
 
 /* ---------- state ---------- */
 const S = {
-  headDown: false, headT: 0, mode: 'off', adj: 10, max: 20, speed: 10, time: 0,
+  headDown: false, headT: 0, gm: 'off', mode: 'use', done: {}, nCart: 5, ders: false, hizOnce: 0, dok: [], adj: 10, max: 20, speed: 10, time: 0,
   wasteT: 1, collT: 0, colLift: 0, busy: false, p: 0, gaugeL: 0, gaugeR: 0, flow: 0,
   waste: 0, tubeVol: new Float32Array(48), hand: null, arm: { L: -1e9, R: -1e9 },
   log: [], logSet: new Set(), pulled: false, pullT: 0, spares: 5,
@@ -842,7 +872,7 @@ function freshCart(c, tight) {
   colRack.add(c.g);
   Object.assign(c, {
     where: 'box', hole: -1, lastHole: -1, layers: [], step: 0, added: 0, dry: 0, clog: 0, sorb: 0, eluate: 0, flow: 0,
-    dropAcc: 0, dropT: 0, status: 'none', overDry: 0, overDryTotal: 0, soonWarned: -1,
+    dropAcc: 0, dropT: 0, status: 'none', yuk: 0, overDry: 0, overDryTotal: 0, soonWarned: -1,
     C: 0.22 * (0.8 + Math.random() * 0.4) * (tight ? 0.6 : 1), Pth0: 0.5 + Math.random() * 1.2,
   });
   c.lbl.cls = null;
@@ -891,7 +921,7 @@ function log(msg) {
   const m = /^K(\d):/.exec(msg), k = m ? +m[1] - 1 : -1, gen = k >= 0 ? carts[k].gen : 0;
   const key = msg + '#' + gen;
   if (S.logSet.has(key)) return; S.logSet.add(key);
-  S.log.unshift({ t: S.time, msg, k, gen }); renderLog(); toast(msg);
+  S.log.unshift({ t: S.time, msg, k, gen }); renderLog(); if (!sessiz()) toast(msg);
 }
 function renderLog() {
   $('#log').innerHTML = S.log.map(e => `<li class="${e.info ? 'info' : e.fixed ? 'fixed' : 'err'}"><time>${fmtT(e.t)}</time><span>${e.msg}${e.fixed ? ' (kartuş yenilendi)' : ''}</span></li>`).join('');
@@ -904,7 +934,7 @@ const nextHole = () => SUGGEST.find(holeFree) ?? [...Array(48).keys()].find(hole
 
 function takeCart() {
   if (S.hand) return toast(S.hand.type === 'pip' ? 'Önce pipeti bırak.' : S.hand.type === 'tissue' ? 'Önce peçeteyi bırak.' : 'Elinde zaten bir kartuş var.');
-  const c = carts.find(c => c.where === 'box');
+  const c = carts.find(c => c.where === 'box' && c.k < S.nCart);
   if (!c) return toast('Kutuda kartuş kalmadı.');
   c.where = 'hand'; S.hand = { type: 'cart', k: c.k };
 }
@@ -918,7 +948,8 @@ function placeCart(hole) {
   c.g.position.set(holeX(hole % NX), 0, holeZ(Math.floor(hole / NX)));
   S.hand = null;
   const n = carts.filter(q => q.where !== 'box' && q.where !== 'hand').length;
-  if (!used(c)) toast(n < 5 ? `K${c.k + 1} yerleştirildi (${n}/5). Kutudan sıradakini al.` : 'Beş kartuş da rafta. Şartlandırmaya geç.', true);
+  if (sessiz()) toast(`K${c.k + 1} rafa takıldı.`, true);
+  else if (!used(c)) toast(n < S.nCart ? `K${c.k + 1} yerleştirildi (${n}/${S.nCart}). Kutudan sıradakini al.` : S.nCart === 5 ? 'Beş kartuş da rafta. Şartlandırmaya geç.' : 'Kartuşlar rafta.', true);
   else toast(`K${c.k + 1} rafa geri takıldı.`, true);
 }
 function placeNext() {
@@ -980,6 +1011,7 @@ function dispense(k) {
   }
   const last = c.layers[c.layers.length - 1];
   if (last && last.liq === src.liq && last.j === (src.j ?? -1)) last.v += v; else c.layers.push({ liq: src.liq, j: src.j ?? -1, v });
+  if (src.liq === 'sample' && src.j === k) c.yuk += v;
   c.overDry = 0;
   S.hand.vol -= v;
   const w = colRack.localToWorld(V3(holeX(c.hole % NX), 0.95, holeZ(Math.floor(c.hole / NX))));
@@ -992,6 +1024,7 @@ function spill(pt) {
   const h = S.hand; if (!h || h.type !== 'pip') return;
   const L = LIQ[h.src.liq], v = h.vol, from = handPos.clone();
   S.hand = null;
+  if (h.src.liq === 'sample') S.dok.push({ j: h.src.j, v });
   for (let i = 0; i < 10; i++) setTimeout(() => spawnDrop(from.x + (Math.random() - 0.5) * 0.01, from.y, from.z, pt.y + 0.01, L.color), i * 45);
   const m = new THREE.Mesh(new THREE.CircleGeometry(0.1 + 0.09 * Math.sqrt(v), 28), new THREE.MeshStandardMaterial({ color: L.color, transparent: true, opacity: 0.75, roughness: 0.05, depthWrite: false }));
   m.rotation.x = -Math.PI / 2; m.position.set(pt.x, pt.y + 0.004, pt.z); m.scale.setScalar(0.05); m.renderOrder = 1; bench.add(m);
@@ -1044,11 +1077,11 @@ async function swapRacks() {
   await tween(S, 'colLift', 0, 0.7);
   S.busy = false;
 }
-function setMode(m) { S.mode = m; document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m))); }
+function setMode(m) { S.gm = m; document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m))); }
 function setSpeed(v) { S.speed = v; document.querySelectorAll('#speedSeg button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.speed === v))); }
 function reset() {
   if (S.busy) return;
-  Object.assign(S, { pulled: false, pullT: 0, headDown: false, headT: 0, wasteT: 1, collT: 0, colLift: 0, time: 0, waste: 0, hand: null, log: [], logSet: new Set() });
+  Object.assign(S, { dok: [], hizOnce: 0, pulled: false, pullT: 0, headDown: false, headT: 0, wasteT: 1, collT: 0, colLift: 0, time: 0, waste: 0, hand: null, log: [], logSet: new Set() });
   S.tubeVol.fill(0); setMode('off'); tubLiqMat.color.setHex(0xcfe6f5);
   dropS.forEach(d => d.on = false);
   puddles.forEach(q => { bench.remove(q.m); }); puddles.length = 0;
@@ -1072,12 +1105,12 @@ $('#samples').innerHTML = SRC.filter(s => s.liq === 'sample').sort((a, b) => (a.
 document.querySelectorAll('[data-src]').forEach(b => b.onclick = () => aspirate(b.dataset.src));
 document.querySelectorAll('.lane').forEach(el => {
   const c = carts[+el.dataset.k];
-  const go = () => { if (c.where === 'rack') dispense(c.k); };
+  const go = () => { if (c.where === 'rack' && izin('cart:' + c.k)) dispense(c.k); };
   el.onclick = go; el.onkeydown = e => { if (e.target === el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); go(); } };
-  $('#lsA' + c.k).onclick = e => { e.stopPropagation(); if (c.where === 'rack') liftFromRack(c, true); else if (c.where === 'stand') returnToRack(c); };
+  $('#lsA' + c.k).onclick = e => { e.stopPropagation(); if (!izin('stand')) return; if (c.where === 'rack') liftFromRack(c, true); else if (c.where === 'stand') returnToRack(c); };
   const rb = $('#lsR' + c.k);
   rb.onclick = e => {
-    e.stopPropagation();
+    e.stopPropagation(); if (!izin('renew')) return;
     const now = performance.now();
     if (rb.dataset.at && now - +rb.dataset.at < 3000) { rb.dataset.at = ''; renewCart(c); }
     else { rb.dataset.at = now; rb.textContent = 'Emin misin?'; }
@@ -1099,7 +1132,7 @@ const KEYMAP = { a: 'L', l: 'R' };
 addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' && e.target.type !== 'range') return;
   const side = KEYMAP[e.key.toLowerCase()];
-  if (side) { e.preventDefault(); if (!held[side] && !e.repeat) { held[side] = true; pressSide(side); } return; }
+  if (side) { e.preventDefault(); if (!held[side] && !e.repeat && izin('two' + side)) { held[side] = true; pressSide(side); } return; }
   if (e.key === 'Escape') dropHand();
 });
 addEventListener('keyup', e => { const side = KEYMAP[e.key.toLowerCase()]; if (side) held[side] = false; });
@@ -1176,7 +1209,8 @@ const knobSide = a => a === 'knobL' ? 'adj' : a === 'knobR' ? 'max' : null;
 stage.addEventListener('pointerdown', e => {
   if (e.target !== renderer.domElement) return;
   const h = pick(e), side = knobSide(h.o && h.o.userData.action);
-  if (!side) return;
+  if (!side || S.mode === 'parts') return;
+  if (!izin('knob:' + side)) { e.stopPropagation(); down = null; return; }
   e.stopPropagation(); down = null;
   knobDrag = { side, x: e.clientX, y: e.clientY, v: S[side], moved: false };
   controls.enabled = false;
@@ -1209,30 +1243,35 @@ function placeReg() {
   const stop = () => { clearTimeout(regRep); clearInterval(regRep); regRep = null; };
   b.addEventListener('pointerdown', e => {
     e.preventDefault(); stop();
+    if (!izin('knob:' + regSide)) return;
     setReg(regSide, S[regSide] + d); syncReg();
     regRep = setTimeout(() => { regRep = setInterval(() => { setReg(regSide, S[regSide] + d); syncReg(); }, 90); }, 380);
   });
   ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, stop));
-  b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setReg(regSide, S[regSide] + d); syncReg(); } });
+  b.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && izin('knob:' + regSide)) { e.preventDefault(); setReg(regSide, S[regSide] + d); syncReg(); } });
 });
 $('#regClose').onclick = closeReg;
 renderer.domElement.addEventListener('pointerdown', () => { if (regSide && !knobDrag) closeReg(); });
 stage.addEventListener('wheel', e => {
   if (e.target !== renderer.domElement) return;
   const h = pick(e), side = knobSide(h.o && h.o.userData.action);
-  if (!side) return;
+  if (!side || S.mode === 'parts' || (window.__izin && !window.__izin('knob:' + side))) return;
   e.preventDefault(); e.stopPropagation();
   setReg(side, S[side] + (e.deltaY < 0 ? 1 : -1));
 }, { capture: true, passive: false });
 renderer.domElement.addEventListener('pointerdown', e => down = { x: e.clientX, y: e.clientY });
 renderer.domElement.addEventListener('pointerup', e => {
   if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) return;
-  const h = pick(e); aimHand(h);
+  const h = pick(e);
+  if (h.o) { tip.innerHTML = '<b></b>'; tip.firstChild.textContent = h.o.userData.label; tip.style.left = (e.clientX - h.r.left) + 'px'; tip.style.top = (e.clientY - h.r.top) + 'px'; tip.hidden = false; }
+  if (S.mode === 'parts') return;
+  aimHand(h);
   const isPip = S.hand && S.hand.type === 'pip';
-  if (!h.o) { if (isPip) spill(h.point); return; }
+  if (!h.o) { if (isPip && izin('bench')) spill(h.point); return; }
   const a = h.o.userData.action || '';
   const CONTROLS = ['twoL', 'twoR', 'mode', 'pull', 'platen', 'knobL', 'knobR'];
   if (knobSide(a)) return;
+  if ((a || isPip) && !izin(a || 'bench')) return;
   if (isPip && a === 'trash') { S.hand = null; return toast('Pipetteki sıvı atık olarak atıldı.'); }
   if (S.hand && S.hand.type === 'tissue' && !CONTROLS.includes(a)) {
     if (a === 'puddle') wipe(h.o.userData.pd);
@@ -1262,7 +1301,7 @@ renderer.domElement.addEventListener('pointerup', e => {
   }
   else if (a === 'twoL') pressSide('L');
   else if (a === 'twoR') pressSide('R');
-  else if (a === 'mode') setMode({ off: 'adj', adj: 'max', max: 'off' }[S.mode]);
+  else if (a === 'mode') setMode(S.gm !== 'off' ? 'off' : sel.worldToLocal(h.point.clone()).x > 0 ? 'max' : 'adj');
   else if (a === 'platen') toast('Kafayı indirmek ya da kaldırmak için sağ ve sol anahtarlara aynı anda bas.');
   else if (e.pointerType !== 'mouse') toast(h.o.userData.label);
 });
@@ -1319,8 +1358,8 @@ $('#btnPerf').onclick = () => {
 function perfTier(now, camMoved) {
   if (camMoved || now - PERF.lastIn < 1500 || tweens.length || camAnim || S.hand || (S.headT > 0 && S.headT < 1)
     || now - S.arm.L < 900 || now - S.arm.R < 900 || dropS.some(d => d.on) || carts.some(c => c.dropT > 0)
-    || puddles.some(q => q.wipe >= 0 || q.age < 1) || Math.abs(lever.rotation.z - modeAngle[S.mode]) > .01) return 2;
-  if (S.mode !== 'off' || S.p > .2 || S.flow > .2) return 1;
+    || puddles.some(q => q.wipe >= 0 || q.age < 1) || Math.abs(lever.rotation.z - modeAngle[S.gm]) > .01) return 2;
+  if (S.gm !== 'off' || S.p > .2 || S.flow > .2) return 1;
   return 0;
 }
 function perfShouldRender(now, camMoved) {
@@ -1354,7 +1393,7 @@ function frame(now) {
   placeRack(wasteRack, WASTE_PARK, S.wasteT);
   placeRack(collRack, COLL_PARK, S.collT);
   colRack.position.set(0, BASE + RACK_H + S.colLift * 0.45, pullZ);
-  lever.rotation.z = approach(lever.rotation.z, modeAngle[S.mode], dt * 12);
+  lever.rotation.z = approach(lever.rotation.z, modeAngle[S.gm], dt * 12);
   const armedL = now - S.arm.L < 900, armedR = now - S.arm.R < 900;
   rockerL.rotation.x = approach(rockerL.rotation.x, armedL ? 0.25 : -0.12, dt * 16);
   rockerR.rotation.x = approach(rockerR.rotation.x, armedR ? 0.25 : -0.12, dt * 16);
@@ -1364,15 +1403,15 @@ function frame(now) {
   /* pneumatics */
   const pl = placed();
   sealed = S.headT >= 1 && pl.length > 0 && (S.wasteT >= 1 || S.collT >= 1) && S.colLift <= 0 && S.pullT <= 0.001;
-  const set = S.mode === 'adj' ? S.adj : S.mode === 'max' ? S.max : 0;
+  const set = S.gm === 'adj' ? S.adj : S.gm === 'max' ? S.max : 0;
   const open = pl.filter(c => cartVol(c) < 0.002).length;
   const targetP = sealed ? set * (1 - 0.015 * open) : set * 0.05;
   S.p = approach(S.p, targetP, dt * 3);
-  flowOn = sealed && S.mode !== 'off' && S.p > 0.3;
-  const targetF = S.mode === 'off' ? 0 : sealed ? S.p * (0.02 * pl.length + 0.12 * open) : set * 0.48;
+  flowOn = sealed && S.gm !== 'off' && S.p > 0.3;
+  const targetF = S.gm === 'off' ? 0 : sealed ? S.p * (0.02 * pl.length + 0.12 * open) : set * 0.48;
   S.flow = approach(S.flow, Math.min(targetF, 30), dt * 2.5);
-  S.gaugeL = approach(S.gaugeL, S.mode === 'adj' ? S.p : 0, dt * 4);
-  S.gaugeR = approach(S.gaugeR, S.mode === 'max' ? S.p : 0, dt * 4);
+  S.gaugeL = approach(S.gaugeL, S.gm === 'adj' ? S.p : 0, dt * 4);
+  S.gaugeR = approach(S.gaugeR, S.gm === 'max' ? S.p : 0, dt * 4);
   setNeedle(needleL, S.gaugeL + (S.gaugeL > 1 ? Math.sin(now / 90) * 0.15 : 0), ADJ_MAX);
   setNeedle(needleR, S.gaugeR + (S.gaugeR > 1 ? Math.sin(now / 90) * 0.15 : 0));
   ball.position.y = PY(505 - (S.flow / 30) * 340) + (S.flow > 0.3 ? Math.sin(now / 70) * 0.006 : 0);
@@ -1442,12 +1481,19 @@ function frame(now) {
     else c.status = 'ok';
     if (c.status === 'soon' && c.soonWarned !== c.step) { c.soonWarned = c.step; soonNew = c; }
   }
-  if (soonNew) {
+  if (soonNew && !S.ders && !sessiz()) {
     const others = pl.filter(q => q !== soonNew && cartVol(q) > 0.5).length;
     if (others > 0) {
       const slowed = S.speed > 1; if (slowed) setSpeed(1);
       toast(`K${soonNew.k + 1} bitmek üzere, diğer ${others} kartuş hâlâ akıyor. Boşalınca kafayı kaldırıp K${soonNew.k + 1}'i bekleme standına al; yoksa basınç altında kurur.${slowed ? ' Hız 1×\'e alındı.' : ''}`);
     }
+  }
+
+  /* rehberli ders: kartuş boşalmak üzereyken hız 1×'e iner, gaz kapanınca eski hıza döner */
+  if (S.ders) {
+    const risk = pl.some(c => c.k < S.nCart && WET_STEPS.has(c.step) && flowOn && cartVol(c) < Math.max(0.05, c.flow * 0.3));
+    if (risk && S.speed > 1) { S.hizOnce = S.speed; setSpeed(1); toast('Kartuş boşalmak üzere: hız 1×’e alındı. Boşalınca gazı kapatın.'); }
+    else if (!flowOn && S.hizOnce) { setSpeed(S.hizOnce); S.hizOnce = 0; }
   }
 
   /* visuals for cartridges, tubes, tub */
@@ -1470,7 +1516,7 @@ function frame(now) {
   });
   tubLiq.visible = S.waste > 0.3;
   tubLiq.scale.y = Math.max(0.001, Math.min(1, S.waste / TUB_CAP) * (TH - 0.06));
-  const inBox = carts.filter(c => c.where === 'box').length;
+  const inBox = carts.filter(c => c.where === 'box' && c.k < S.nCart).length;
   boxCarts.forEach((g, i) => g.visible = i < Math.min(5, inBox + S.spares));
   SRC.filter(s => s.liq === 'sample').forEach(s => { s.liqMesh.visible = s.vol > 0.01; s.liqMesh.scale.y = Math.max(0.001, s.vol / 15 * 0.98); });
 
@@ -1551,11 +1597,13 @@ function updateUI() {
     el.stTxt.textContent = `${STAGE_TXT[9]} Toplanan eluat: ${elu}. Sapma sayısı: ${S.log.length}.`;
   } else el.stTxt.textContent = STAGE_TXT[gs];
 
+  const sz = sessiz();
   for (const c of carts) {
     const lane = document.querySelector(`.lane[data-k="${c.k}"]`);
+    lane.classList.toggle('gizli', c.k >= S.nCart);
     lane.classList.toggle('off', c.where !== 'rack');
-    lane.classList.toggle('alert', c.status === 'over' || c.status === 'stop');
-    lane.classList.toggle('soon', c.status === 'soon');
+    lane.classList.toggle('alert', !sz && (c.status === 'over' || c.status === 'stop'));
+    lane.classList.toggle('soon', !sz && c.status === 'soon');
     const exp = PROTO[c.step], v = cartVol(c);
     let t;
     if (c.where === 'box') t = 'Kutuda';
@@ -1563,14 +1611,16 @@ function updateUI() {
     else if (!exp) t = `Bitti · eluat ${c.eluate.toFixed(1)} mL`;
     else if (exp.dry) t = `Kurutma ${(c.dry / 60).toFixed(1)} / 15 dk`;
     else t = `${exp.short} ${Math.min(c.added, 99).toFixed(1)} / ${exp.ml} mL`;
+    if (sz && (c.where === 'rack' || c.where === 'stand')) t = v > 0.002 ? `İçinde ${v.toFixed(1)} mL ${LIQ[c.layers[c.layers.length - 1].liq].name}` : 'Boş' + (c.where === 'rack' && S.tubeVol[c.hole] > 0.005 ? ` · tüpte ${S.tubeVol[c.hole].toFixed(1)} mL` : '');
     $('#lsT' + c.k).textContent = t;
     $('#lsF' + c.k).innerHTML = c.where === 'rack' ? c.flow.toFixed(2) + '<small> mL/dk</small>' : '—';
     const bar = $('#lsB' + c.k); bar.style.width = (v / CART_CAP * 100).toFixed(0) + '%';
     bar.style.background = v > 0 ? hex(LIQ[c.layers[c.layers.length - 1].liq].color) : 'transparent';
-    const [lbl, cls] = STATUS[c.status];
+    const ds = sz && c.status === 'over' ? 'empty' : sz && c.status === 'soon' ? 'ok' : c.status;
+    const [lbl, cls0] = STATUS[ds], cls = sz && ds === 'stop' ? '' : cls0;
     const pill = $('#lsS' + c.k); pill.textContent = lbl; pill.className = 'pill ' + cls;
     const od = $('#lsO' + c.k);
-    od.textContent = c.overDryTotal > 1 ? `istenmeyen kuruma ${(c.overDryTotal / 60).toFixed(1)} dk` : '';
+    od.textContent = !sz && c.overDryTotal > 1 ? `istenmeyen kuruma ${(c.overDryTotal / 60).toFixed(1)} dk` : '';
     od.classList.toggle('hot', c.overDryTotal > 30);
     const act = $('#lsA' + c.k);
     act.hidden = !(c.where === 'rack' && used(c) && v < 0.02) && c.where !== 'stand';
@@ -1582,7 +1632,7 @@ function updateUI() {
   }
   SRC.forEach(s => { const e = $('#sv_' + s.id); if (e) e.textContent = s.vol.toFixed(s.cap > 20 ? 0 : 1) + ' mL'; });
   SRC.forEach(s => { if (Math.abs((s._shown ?? -1) - s.vol) > 0.05) { s._shown = s.vol; s.sprite.userData.draw(s.title, s.vol.toFixed(s.cap > 20 ? 0 : 1) + ' mL', hex(LIQ[s.liq].color)); } });
-  const boxN = carts.filter(c => c.where === 'box').length + S.spares;
+  const boxN = carts.filter(c => c.where === 'box' && c.k < S.nCart).length + S.spares;
   if (cbSprite.userData.n !== boxN) { cbSprite.userData.n = boxN; cbSprite.userData.draw('Oasis HLB 3 cc', boxN + ' kartuş'); }
 
   el.hand.hidden = !S.hand;
@@ -1598,8 +1648,8 @@ function updateUI() {
   const by = st => pl.filter(c => c.status === st), names = a => a.map(c => 'K' + (c.k + 1)).join(', ');
   const over = by('over'), soon = by('soon'), stopped = by('stop'), slow = by('slow'), running = pl.filter(c => ['ok', 'fast', 'slow', 'soon'].includes(c.status));
   let cls = '', msg;
-  if (S.pullT > 0.001 && S.mode !== 'off') { cls = 'warn'; msg = 'Raf öne çekili: basınç verilemez. Rafı kafanın altına it.'; }
-  else if (S.mode !== 'off' && !sealed && S.headT < 1) { cls = 'warn'; msg = 'Kafa kapalı değil: basınç oluşmuyor, gaz kaçıyor.'; }
+  if (S.pullT > 0.001 && S.gm !== 'off') { cls = 'warn'; msg = 'Raf öne çekili: basınç verilemez. Rafı kafanın altına it.'; }
+  else if (S.gm !== 'off' && !sealed && S.headT < 1) { cls = 'warn'; msg = 'Kafa kapalı değil: basınç oluşmuyor, gaz kaçıyor.'; }
   else if (over.length && over.length === pl.length) { cls = 'bad'; msg = 'Tüm kartuşlar boş ve basınç altında: sorbent kuruyor. Kafayı hemen kaldır.'; }
   else if (over.length) { cls = 'bad'; msg = `${names(over)} boşaldı ve kuruyor. Kafayı kaldırıp standa al.`; }
   else if (soon.length) { cls = 'warn'; msg = `${names(soon)} bitmek üzere. Boşalınca kafayı kaldır ve standa al.`; }
@@ -1607,10 +1657,10 @@ function updateUI() {
   else if (stopped.length) { cls = 'warn'; msg = `Hiçbir kartuş akmıyor (${S.p.toFixed(1)} psi). Basıncı artır.`; }
   else if (running.length) { cls = 'run'; msg = `${running.length} kartuş akıyor${slow.length ? `, ${names(slow)} yavaş` : ''}.`; }
   else if (pl.some(c => c.status === 'dry')) { cls = 'run'; msg = 'Kartuşlar kurutuluyor.'; }
-  else if (gs === 6 && sealed && S.mode !== 'off' && S.p < 18) { cls = 'warn'; msg = `Kurutma için basınç düşük (${S.p.toFixed(1)} psi). MAX modda 20 psi'ye ayarla.`; }
+  else if (gs === 6 && sealed && S.gm !== 'off' && S.p < 18) { cls = 'warn'; msg = `Kurutma için basınç düşük (${S.p.toFixed(1)} psi). MAX modda 20 psi'ye ayarla.`; }
   else if (puddles.some(q => q.wipe < 0)) { cls = 'warn'; msg = 'Tezgâhta dökülmüş sıvı var. Peçete kutusundan peçete alıp kurula.'; }
   else if (gs === 9) { cls = 'ok'; msg = 'Protokol tamamlandı.'; }
-  else if (sealed && S.mode === 'off') msg = 'Kafa kapalı. Mod seçiciyle gazı aç.';
+  else if (sealed && S.gm === 'off') msg = 'Kafa kapalı. Mod seçiciyle gazı aç.';
   else msg = `Sıradaki: ${stepsList[gs]}.`;
   el.dot.className = 'dot ' + cls; el.st.textContent = msg;
   el.stBox.className = 'status' + (cls === 'warn' ? ' warn' : cls === 'bad' ? ' bad' : '');
@@ -1627,8 +1677,163 @@ $('#hLab').onclick = goLab;
 reset();
 new ResizeObserver(resize).observe(stage); resize(); perfApply();
 requestAnimationFrame(frame);
+
+/* ===================== rehberli ders ve serbest kullanım (cihaz_ders.js) ===================== */
+const HOLES = [2, 4, 6, 8, 10];
+function cartKur(c, hole, step, o) {
+  colRack.add(c.g); c.where = 'rack'; c.hole = c.lastHole = hole; c.dropT = 0;
+  c.g.position.set(holeX(hole % NX), 0, holeZ(Math.floor(hole / NX)));
+  Object.assign(c, { step, added: 0 }, o || {});
+}
+/* g: 'parts' (tanıma) · 'bos' (kartuşlar kutuda) · 'sart' (şartlandırılmış, rafta) · 'yuk' (numune yüklenmiş) · 'free' (serbest) */
+function dersReset(g) {
+  if (S.busy) { tweens.length = 0; S.busy = false; }
+  reset();
+  S.ders = !!g && g !== 'free'; S.nCart = S.ders ? 2 : 5; S.hizOnce = 0;
+  setSpeed(10); setMode('off'); setReg('max', 20);
+  if (S.ders) {
+    carts.forEach(c => { freshCart(c, false); c.gen = 0; c.Pth0 = 0.8; c.C = 0.22; });
+    S.spares = 1;
+    srcById.n1.dirt = 0.04; srcById.n2.dirt = 0.45;
+    setReg('adj', g === 'sart' || g === 'yuk' ? 5 : 10);
+    if (g === 'sart') carts.slice(0, 2).forEach((c, i) => cartKur(c, HOLES[i], 2));
+    if (g === 'yuk') carts.slice(0, 2).forEach((c, i) => { cartKur(c, HOLES[i], 3, { sorb: 1, yuk: 10, clog: i ? 2.2 : 0.4 }); srcById['n' + (i + 1)].vol = 0; });
+  } else setReg('adj', 10);
+  render();
+}
+function render() { updateUI(); }
+function ikiAnahtar() { pressSide('L'); pressSide('R'); }
+
+/* sahnedeki bir parçanın ekrandaki yeri (yanıp sönen halka için) */
+function dunyaNoktasi(n) {
+  const [ad, x] = n.split(':');
+  if (ad === 'box') return CB.localToWorld(V3(0, 0.36, 0.1));
+  if (ad === 'hole') { const h = +x; return colRack.localToWorld(V3(holeX(h % NX), 0.42, holeZ(Math.floor(h / NX)))); }
+  if (ad === 'cart') { const c = carts[+x]; if (!c.g.visible) throw 0; return c.g.localToWorld(V3(0, 0.75, 0)); }
+  if (ad === 'src') { const q = srcById[x]; return q.sprite.localToWorld(V3(0, 0, 0)); }
+  if (ad === 'two') return (x === 'L' ? rockerL : rockerR).localToWorld(V3(0, 0, 0.03));
+  if (ad === 'mode') return sel.localToWorld(V3(x === 'adj' ? -0.07 : x === 'max' ? 0.07 : 0, 0.02, 0.1));
+  if (ad === 'knob') return (x === 'max' ? knobR : knobL).localToWorld(V3(0, 0, 0.2));
+  if (ad === 'gauge') return (x === 'max' ? needleR : needleL).parent.localToWorld(V3(0, 0, 0.08));
+  if (ad === 'rm') return rmTube.localToWorld(V3(0, 0, 0));
+  if (ad === 'platen') return platen.localToWorld(V3(0, 0.3, 0.8));
+  if (ad === 'post') return V3(POST_X, (POST_TOP + DECK) / 2 + 0.6, POST_Z);
+  if (ad === 'pull') return colRack.localToWorld(V3(0.6, 0.27, 0.46));
+  if (ad === 'rack') return colRack.localToWorld(V3(-0.5, 0.42, 0));
+  if (ad === 'stand') return STAND.localToWorld(V3(0, 0.3, 0.05));
+  if (ad === 'waste') return wasteRack.localToWorld(V3(0.6, 0.45, 0.4));
+  if (ad === 'coll') return collRack.localToWorld(V3(0, 0.82, 0.3));
+  if (ad === 'gas') return platen.localToWorld(V3(0.32, 0.44, -0.6));
+  if (ad === 'tissue') return TIS.localToWorld(V3(0, 0.25, 0));
+  if (ad === 'bin') return BIN.localToWorld(V3(0, 0.4, 0));
+  throw 0;
+}
+function scrOf(n) {
+  const v = dunyaNoktasi(n.indexOf('hot:') === 0 ? n.slice(4) : n).project(camera), r = renderer.domElement.getBoundingClientRect();
+  if (v.z > 1) throw 0;
+  return [r.left + (v.x + 1) / 2 * r.width, r.top + (1 - v.y) / 2 * r.height];
+}
+
+/* rehberli dersin yardımcısı: bir protokol adımında (t) öğrencinin sıradaki işi ve halkanın yeri */
+const KAYNAK = { 0: 'meoh', 1: 'water', 3: 'water', 4: 'mix', 6: 'elu' };
+const kaynak = (c, t) => t !== 2 ? KAYNAK[t] : srcById['n' + (c.k + 1)].vol > 0.01 ? 'n' + (c.k + 1) : 'y' + (c.k + 1);
+function speKoc(t) {
+  const L = carts.filter(c => c.k < S.nCart), P = PROTO[t];
+  const need = c => c.step < t || (c.step === t && c.added < P.ml - 0.02);
+  const dolu = c => cartVol(c) > 0.002, ad = c => 'K' + (c.k + 1);
+  const rack = L.filter(c => c.where === 'rack'), stand = L.filter(c => c.where === 'stand');
+  const H = (n, r) => [n, 0, r || 46], DG = ['#dersP [data-dg="0"]', 0, 0];
+  if (L.every(c => c.step > t) && S.gm === 'off' && !stand.length && !S.hand) return { is: 'Bu adım tamam.', h: null, bitti: true };
+  if (S.hand && S.hand.type === 'cart') return { is: `Elinizde ${ad(carts[S.hand.k])} var: bekleme standına tıklayıp bırakın.`, h: H('stand', 60) };
+  if (S.gm !== 'off') {
+    if (!sealed) return { is: 'Gaz açık ama kafa kapalı değil: mod seçicinin ortasına tıklayıp gazı kapatın (OFF).', h: H('mode', 40) };
+    const bos = rack.filter(c => !dolu(c));
+    if (bos.length === rack.length) return { is: 'Kartuşlar boşaldı: gazı hemen kapatın (mod seçicinin ortası, OFF).', h: H('mode', 40) };
+    if (bos.length) {
+      const c = bos[0];
+      return { is: need(c) ? `${ad(c)} boşaldı, diğeri hâlâ akıyor: gazı kapatın (OFF); sonra ${ad(c)}’e sıradaki çözeltiyi ekleyeceksiniz.` : `${ad(c)} bu adımı bitirdi, diğeri hâlâ akıyor: gazı kapatın (OFF); ${ad(c)} basınç altında boş kalırsa kurur.`, h: H('mode', 40) };
+    }
+    const dur = rack.filter(c => c.status === 'stop'), yav = rack.filter(c => c.status === 'slow');
+    if (dur.length) return { is: `${dur.map(ad).join(', ')} bu basınçta akmıyor: ${S.gm === 'adj' ? 'ADJ' : 'MAX'} düğmesine tıklayıp + ile basıncı yavaş yavaş artırın.`, h: !regpop.hidden ? ['#regPlus', 0, 0] : H('knob:' + S.gm, 44) };
+    return { is: `Kartuşlar akıyor (${rack.map(c => ad(c) + ' ' + c.flow.toFixed(1).replace('.', ',')).join(' · ')} mL/dk). Bekleyin…` + (yav.length ? ` ${yav.map(ad).join(', ')} yavaş akıyor; basıncı birkaç psi artırabilirsiniz.` : ''), h: null };
+  }
+  if (S.headDown) {
+    if (!rack.some(dolu)) return { is: 'Kartuşlar boş: kafayı kaldırın (paneldeki ✋✋ düğmesi).', h: DG };
+    if (S.headT < 0.999) return { is: 'Kafa iniyor…', h: null };
+    return { is: 'Kafa kapalı: mod seçicinin sol tarafına (ADJ) tıklayıp gazı açın.', h: H('mode:adj', 36) };
+  }
+  if (S.headT > 0.001) return { is: 'Kafa kalkıyor…', h: null };
+  const bekleyen = rack.filter(c => need(c) && !dolu(c)), bitmis = rack.filter(c => !need(c) && !dolu(c)), suren = rack.filter(c => need(c) || dolu(c));
+  if (bitmis.length && suren.length && !S.hand) {
+    const c = bitmis[0];
+    return { is: `${ad(c)} bu adımı bitirdi, diğeri sürüyor: ${ad(c)} basınç altında boş kalmasın; alttaki ${ad(c)} kartında “Standa al”a basın.`, h: ['#lsA' + c.k, 0, 0] };
+  }
+  if (stand.length && !suren.length && !S.hand) { const c = stand[0]; return { is: `Diğer kartuş da bitti: ${ad(c)}’i rafa geri takın (alttaki kartta “Rafa tak”).`, h: ['#lsA' + c.k, 0, 0] }; }
+  const hp = S.hand && S.hand.type === 'pip' ? S.hand : null;
+  if (hp) {
+    const hedef = bekleyen.find(c => kaynak(c, t) === hp.src.id);
+    if (hedef) return { is: `Pipette ${hp.vol.toFixed(1).replace('.', ',')} mL ${hp.src.title}: ${ad(hedef)} kartuşuna tıklayıp ekleyin.`, h: H('cart:' + hedef.k, 40) };
+    return { is: `Pipetteki ${hp.src.title} şimdi kullanılmıyor: geri bırakmak için kendi kabına tıklayın.`, h: H('src:' + hp.src.id, 50) };
+  }
+  if (bekleyen.length) {
+    const c = bekleyen[0], q = srcById[kaynak(c, t)];
+    return { is: `${ad(c)} için ${q.liq === 'sample' ? q.title + ' tüpünden' : q.title + ' erleninden'} pipetle çekin.`, h: H('src:' + q.id, 50) };
+  }
+  if (rack.some(dolu)) {
+    if (S.pullT > 0.001) return { is: 'Rafı kafanın altına geri itin: rafın ön yüzüne tıklayın.', h: H('pull', 50) };
+    return { is: 'Kartuşlar dolu: kafayı indirin, iki anahtara birlikte basın (paneldeki ✋✋ düğmesi).', h: DG };
+  }
+  return { is: 'Bu adım tamam.', h: null, bitti: L.every(c => c.step > t) };
+}
+
+/* ---------- serbest kullanım: sessiz kayıt ve değerlendirme raporu ----------
+   Uyarı, ipucu ve protokol listesi yoktur. Her kartuş protokolün sonunda (ya da rapor açıldığında o anki hâliyle) değerlendirilir. */
+let OT = null;
+function otKartus(c) {
+  const k = []; let d = 0;
+  const e = (ok, iyi, kotu, ceza) => { k.push([ok, iyi, kotu]); if (!ok) d += ceza; };
+  const L = S.log.filter(x => x.k === c.k && x.gen === c.gen && !x.info).map(x => x.msg).join(' | ');
+  const st = c.step, f1 = v => v.toFixed(1).replace('.', ',');
+  if (!used(c)) return { ad: `K${c.k + 1} · N${c.k + 1}`, deger: 'kullanılmadı', puan: 0, k: [[false, '', `N${c.k + 1} numunesi işlenmedi: K${c.k + 1} kartuşu hiç kullanılmadı.`]] };
+  e(st >= 2, 'Şartlandırma: 3 mL MeOH, ardından 3 mL su', st >= 1 ? 'Şartlandırma eksik: MeOH’tan sonra 3 mL su geçirilmedi.' : 'Şartlandırma yapılmadı: önce 3 mL MeOH, sonra 3 mL su geçirilir.', 15);
+  const kar = /Numuneler karıştı/.test(L);
+  e(c.yuk >= 9.9 && !kar, `Numune tam yüklendi: N${c.k + 1} → K${c.k + 1}, ${f1(c.yuk)} mL`, kar ? `Numuneler karıştı: K${c.k + 1} kartuşuna başka tüpün numunesi eklendi.` : `Numune eksik yüklendi: ${f1(c.yuk)} / 10 mL. Dökülen numune Y yedek tüpünden tamamlanır.`, kar ? 30 : 20);
+  e(c.overDryTotal <= 30, 'Sorbent, şartlandırmadan sonra boş hâlde basınç altında bırakılmadı', `Sorbent basınç altında boş kaldı ve kurudu (${f1(c.overDryTotal / 60)} dk). Biten kartuş, kafa kaldırılıp bekleme standına alınır.`, 15);
+  e(st >= 5, 'Yıkama: 3 × 3 mL su, ardından 3 mL su:MeOH 4:1', 'Yıkama tamamlanmadı (3 × 3 mL su, ardından 3 mL su:MeOH 4:1).', 10);
+  e(st >= 6 && !/kurutma bitmeden/.test(L), 'Kurutma: MAX modda 20 psi, 15 dk', st >= 6 ? 'Kurutma bitmeden elüsyon çözeltisi eklendi.' : 'Kurutma yapılmadı: elüsyondan önce MAX modda 20 psi ile 15 dk kurutulur.', 10);
+  const kayip = /atık teknesine aktı/.test(L);
+  e(c.eluate >= 2.7 && !kayip, `Elüsyon: tüpte ${f1(c.eluate)} mL eluat`, kayip ? 'Elüsyon MeOH’u atık teknesine aktı, eluat kayboldu: elüsyondan önce toplama rafına geçilir.' : `Elüsyon eksik: tüpte ${f1(c.eluate)} mL eluat var (3 mL MeOH ile elüe edilir).`, 25);
+  e(!/toplama tüpüne aktı/.test(L), 'Eluat temiz: toplama tüpüne yalnız elüsyon çözeltisi aktı', 'Eluat kontamine: elüsyon dışında bir çözelti toplama tüpüne aktı.', 20);
+  const sira = [[/beklenen:/, 10, 'Bir adımda beklenmeyen çözelti eklendi (adım sırası bozuldu).'], [/tamamen geçmeden/, 5, 'Önceki çözelti kartuştan tamamen geçmeden yenisi eklendi.'], [/fazla hacim/, 5, 'Bir adımda fazla hacim eklendi.'], [/protokol bittikten sonra/, 5, 'Protokol bittikten sonra kartuşa çözelti eklendi.']].filter(q => q[0].test(L));
+  e(!sira.length, 'Adımlar doğru sırada ve doğru hacimle yapıldı', sira.map(q => q[2]).join(' '), sira.reduce((a, q) => a + q[1], 0));
+  if (c.gen) k.push([true, `Bozulan kartuş yenilendi (${c.gen} kez); değerlendirme son kartuşa göre yapıldı`, '']);
+  return { ad: `K${c.k + 1} · N${c.k + 1}`, deger: st >= PROTO.length ? `eluat ${f1(c.eluate)} mL` : `${PROTO[st].short} adımında kaldı`, puan: Math.max(0, 100 - d), k };
+}
+function raporAc() {
+  if (!OT) return;
+  if (window.__raporDugme) window.__raporDugme(raporAc);
+  const L = carts.some(used) ? carts.map(otKartus) : [];
+  const bit = []; let bd = 0;
+  const b = (ok, iyi, kotu, ceza) => { bit.push([ok, iyi, kotu]); if (!ok) bd += ceza; };
+  b(S.gm === 'off', 'Gaz kapatıldı (mod seçici OFF)', 'Gaz açık bırakıldı: iş bitince mod seçici OFF’a alınır.', 5);
+  b(!puddles.some(q => q.wipe < 0), 'Tezgâhta döküntü kalmadı', 'Dökülen sıvı kurulanmadı: peçeteyle kurulanır, peçete çöpe atılır.', 5);
+  b(!S.hand, 'Elde pipet ya da kartuş bırakılmadı', 'İş bitince elde pipet ya da kartuş kaldı.', 0);
+  const ort = L.length ? L.reduce((a, x) => a + x.puan, 0) / L.length : 0;
+  window.__raporGoster({ baslik: 'Serbest SPE · değerlendirme raporu', kayitAd: 'Kartuşlar (N1–N5 atık su numuneleri)', kayitlar: L, bitirme: bit,
+    puan: L.length ? Math.max(0, Math.round(ort - bd)) : 0, sure: Math.round((Date.now() - OT.t0) / 60000),
+    bos: 'Hiçbir kartuş kullanılmadı: işi yapın, sonra yeniden <b>✅ İşi bitirdim</b>’e basın.',
+    not: 'Puanlama: her kartuş 100 üzerinden; numuneler karıştı −30, elüsyon eksik ya da eluat kayıp −25, numune eksik −20, eluat kontamine −20, şartlandırma eksik −15, sorbent kurudu −15, yıkama eksik −10, kurutma eksik −10, sıra/hacim hataları −5 ile −10. Beş kartuşun ortalamasından işi bitirme eksikleri (her biri −5) düşülür.',
+    yenileAd: 'Yeni deneme', yenile: serbestKur });
+}
+function serbestKur() { dersReset('free'); S.mode = 'use'; OT = { t0: Date.now() }; render(); }
+window.serbestRapor = { ac: raporAc, ot: () => OT && { kayit: carts.filter(used), biten: carts.filter(c => c.step >= PROTO.length).length } };
+
+Object.assign(window, { reset: dersReset, render, scrOf, speKoc, ikiAnahtar, swapRacks, setSpeed, setMode, serbestKur, carts, PROTO, cartVol });
+Object.defineProperty(window, 'S', { get: () => S });
+window.__spe = 1;
 })();
 </script>
 <script src="anamenu.js" charset="utf-8" defer></script>
+<script>(function(){var s=document.createElement('script');s.charset='utf-8';s.src='cihaz_ders.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})();</script>
 </body>
 </html>
