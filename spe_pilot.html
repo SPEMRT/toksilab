@@ -1692,10 +1692,10 @@ function dersReset(g) {
   S.ders = !!g && g !== 'free'; S.nCart = S.ders ? 2 : 5; S.hizOnce = 0;
   setSpeed(10); setMode('off'); setReg('max', 20);
   if (S.ders) {
-    carts.forEach(c => { freshCart(c, false); c.gen = 0; c.Pth0 = 0.8; c.C = 0.22; });
+    carts.forEach(c => { freshCart(c, false); c.gen = 0; c.Pth0 = 0.8; c.C = 0.3; });
     S.spares = 1;
-    srcById.n1.dirt = 0.04; srcById.n2.dirt = 0.45;
-    setReg('adj', g === 'sart' || g === 'yuk' ? 8 : 10);
+    srcById.n1.dirt = 0.04; srcById.n2.dirt = 0.35;
+    setReg('adj', g === 'sart' || g === 'yuk' ? 5 : 10);
     if (g === 'sart') carts.slice(0, 2).forEach((c, i) => cartKur(c, HOLES[i], 2));
     if (g === 'yuk') carts.slice(0, 2).forEach((c, i) => { cartKur(c, HOLES[i], 3, { sorb: 1, yuk: 10, clog: i ? 2.2 : 0.4 }); srcById['n' + (i + 1)].vol = 0; });
   } else setReg('adj', 10);

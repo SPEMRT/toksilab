@@ -808,7 +808,7 @@ spesart:{ad:'Kartuş takma ve şartlandırma',ozet:'İki kartuşu rafa tak; 3 mL
  bitti:function(){S().done.sart=1}},
 speyuk:{ad:'Numune yükleme',ozet:'10 mL atık suyu kendi kartuşuna yükle (N1 → K1, N2 → K2); tıkanan kartuşta basıncı artır, erken biteni standa al.',baslik:'SPE · YÜKLEME',mod:'use',gorev:'sart',
  adim:[
- {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>İki kartuş rafta ve <b>şartlandırılmış</b>: sorbent ıslak.</p><p>Her tüpte <b>10 mL</b> atık su var. Kartuş 3 mL aldığı için numune parça parça yüklenir: <b>3 + 3 + 3 + 1 mL</b>. Her parça geçince sıradaki eklenir.</p><p><b>N1 → K1</b>, <b>N2 → K2</b>. Numune başka kartuşa giderse sonuç başka numuneye yazılır.</p><p>N2 bulanık: içindeki partiküller kartuşu yavaş yavaş tıkayabilir. ADJ basıncı 8 psi’ye ayarlı.</p>'},
+ {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>İki kartuş rafta ve <b>şartlandırılmış</b>: sorbent ıslak.</p><p>Her tüpte <b>10 mL</b> atık su var. Kartuş 3 mL aldığı için numune parça parça yüklenir: <b>3 + 3 + 3 + 1 mL</b>. Her parça geçince sıradaki eklenir.</p><p><b>N1 → K1</b>, <b>N2 → K2</b>. Numune başka kartuşa giderse sonuç başka numuneye yazılır.</p><p>N2 bulanık: içindeki partiküller kartuşu yavaş yavaş tıkayabilir. ADJ basıncı 5 psi’ye ayarlı.</p>'},
  {bolum:'Yükleme',ask:'<b>N1</b> numune tüpüne tıklayın: pipetle 3 mL çekin.',halka:H('src:n1',50),izin:['src:n1'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.src.id==='n1'},
   b:'N1 numunesi pipette',html:'<p>Bu numune yalnız <b>K1</b> kartuşuna gider.</p>'},
  {bolum:'Yükleme',ask:'<b>K1</b> kartuşuna tıklayın: numuneyi ekleyin.',oto:1,halka:H('cart:0',40),izin:['cart:0'],ok:function(){return E()[0].yuk>0}},
@@ -823,7 +823,7 @@ speyuk:{ad:'Numune yükleme',ozet:'10 mL atık suyu kendi kartuşuna yükle (N1 
  bitti:function(){S().done.yuk=1}},
 speelu:{ad:'Yıkama, kurutma ve elüsyon',ozet:'3 × 3 mL su ve 3 mL su:MeOH 4:1 ile yıka; MAX 20 psi ile 15 dk kurut; toplama rafına geç; 3 mL MeOH ile elüe et.',baslik:'SPE · ELÜSYON',mod:'use',gorev:'yuk',
  adim:[
- {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>Numuneler yüklendi; analitler sorbentte. Şimdi:</p><ul><li><b>Yıkama:</b> 3 × 3 mL su (tuzlar ve suda çözünen kirlilikler), sonra 3 mL su:MeOH 4:1 (biraz daha az polar kirlilikler). Analitler sorbentte kalır.</li><li><b>Kurutma:</b> MAX, 20 psi, 15 dk. Sorbentteki su uzaklaşır.</li><li><b>Elüsyon:</b> toplama rafına geçilir, 3 mL MeOH analitleri sorbentten çözüp tüpe taşır.</li></ul><p>ADJ basıncı 8 psi’ye ayarlı.</p>'},
+ {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>Numuneler yüklendi; analitler sorbentte. Şimdi:</p><ul><li><b>Yıkama:</b> 3 × 3 mL su (tuzlar ve suda çözünen kirlilikler), sonra 3 mL su:MeOH 4:1 (biraz daha az polar kirlilikler). Analitler sorbentte kalır.</li><li><b>Kurutma:</b> MAX, 20 psi, 15 dk. Sorbentteki su uzaklaşır.</li><li><b>Elüsyon:</b> toplama rafına geçilir, 3 mL MeOH analitleri sorbentten çözüp tüpe taşır.</li></ul><p>ADJ basıncı 5 psi’ye ayarlı.</p>'},
  koc(3,'Kartuşları <b>3 × 3 mL su</b> ile yıkayın: her kartuşa 3 mL ekleyin, geçirin, üç kez tekrarlayın.','Su yıkaması tamam',['src:water'],
   '<p>Su, sorbentte tutunmayan tuzları ve suda iyi çözünen kirlilikleri yıkadı. Analitler sorbente tutunduğu için suyla gitmez.</p>'),
  koc(4,'Şimdi her kartuşa <b>3 mL su:MeOH 4:1</b> ekleyip geçirin.','Yıkama tamam',['src:mix'],
