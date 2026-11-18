@@ -279,8 +279,15 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  KEYDEF.forEach(([k,,x,r])=>{const g=new THREE.Group();g.position.set(x,7.85,16.2);C.add(g);const m=add(new THREE.CylinderGeometry(r,r,.35,28),new THREE.MeshPhysicalMaterial({color:k==='start'?'#D23A3A':'#D5DEE2',roughness:.35,clearcoat:.8}),0,0,.15,g);m.rotation.x=Math.PI/2;hot(m,'key:'+k);K.keys[k]=g});
  {const g=new THREE.Group();g.position.set(9.6,8.7,16.2);C.add(g);const k=add(new THREE.CylinderGeometry(1.35,1.45,1.1,40),new THREE.MeshPhysicalMaterial({color:'#1E5F63',roughness:.4,clearcoat:.6}),0,0,.5,g);k.rotation.x=Math.PI/2;hot(k,'key:knob');K.keys.knob=g}
  /* kapak */
- {const g=new THREE.Group();g.position.set(0,14.4,-10);C.add(g);K.lid=g;const l=hot(add(RB(24.8,1.6,24.6,.7),M.white,0,.8,12.3,g),'lid');add(new THREE.PlaneGeometry(23,22.6),M.lidIn,0,-.02,12.3,g,false).rotation.x=Math.PI/2;
-  add(new THREE.CircleGeometry(9.2,48),new THREE.MeshStandardMaterial({color:'#7FA3A7',roughness:.5}),0,-.03,8,g,false).rotation.x=Math.PI/2;add(new THREE.CylinderGeometry(.9,.9,.3,24),M.steel,0,-.15,8,g,false);K.lidH=new THREE.Object3D();K.lidH.position.set(0,.8,24.2);g.add(K.lidH)}
+ {const g=new THREE.Group();g.position.set(0,14.4,-10);C.add(g);K.lid=g;/* kapakta rotorun tam üstünde yuvarlak gözetleme penceresi: dönerken kovaların yatay açıldığı görülür */
+  const WR=7.4,WZ=8,yuv=(w,d,r,y0)=>{const sh=new THREE.Shape(),x0=-w/2,x1=w/2,ya=y0,yb=y0+d;sh.moveTo(x0+r,ya);sh.lineTo(x1-r,ya);sh.quadraticCurveTo(x1,ya,x1,ya+r);sh.lineTo(x1,yb-r);sh.quadraticCurveTo(x1,yb,x1-r,yb);sh.lineTo(x0+r,yb);sh.quadraticCurveTo(x0,yb,x0,yb-r);sh.lineTo(x0,ya+r);sh.quadraticCurveTo(x0,ya,x0+r,ya);return sh};
+  const ust=yuv(24.8,24.6,1.2,-24.6);{const h=new THREE.Path();h.absarc(0,-WZ,WR,0,Math.PI*2,true);ust.holes.push(h)}
+  const lg=new THREE.ExtrudeGeometry(ust,{depth:1.6,bevelEnabled:true,bevelThickness:.25,bevelSize:.25,bevelSegments:3,curveSegments:48});lg.rotateX(-Math.PI/2);const l=hot(add(lg,M.white,0,0,0,g),'lid');
+  const alt=yuv(23,22.6,1,1);{const h=new THREE.Path();h.absarc(0,WZ,WR+.4,0,Math.PI*2,true);alt.holes.push(h)}
+  const ag=new THREE.ShapeGeometry(alt,48);ag.rotateX(Math.PI/2);add(ag,M.lidIn,0,-.02,0,g,false);
+  add(new THREE.TorusGeometry(WR+.15,.32,10,64),M.steel,0,1.65,WZ,g,false).rotation.x=Math.PI/2;
+  const cam=new THREE.Mesh(new THREE.CircleGeometry(WR+.2,64),new THREE.MeshPhysicalMaterial({color:'#CFE6EA',roughness:.05,metalness:0,transparent:true,opacity:.18,depthWrite:false,side:THREE.DoubleSide}));cam.rotation.x=-Math.PI/2;cam.position.set(0,1.2,WZ);cam.renderOrder=2;g.add(cam);
+  K.icIsik=new THREE.PointLight('#FFF4E0',0,26,1.2);K.icIsik.position.set(RC.x,RC.y+5.5,RC.z);C.add(K.icIsik);K.lidH=new THREE.Object3D();K.lidH.position.set(0,.8,24.2);g.add(K.lidH)}
  /* rotorlar */
  const Y=new THREE.Vector3(0,1,0);
  function rotor(type){const g=new THREE.Group();g.position.copy(RC);C.add(g);K.rotorG[type]=g;const N=ROTORS[type].N;
@@ -358,7 +365,7 @@ function onHot(h){if(window.__izin&&!window.__izin(h)){if(window.__izinUyari)win
  if(a==='lid')toggleLid();else if(a==='key')devBtn(b);else if(a==='slot')slot(+b);else if(a==='tube'){const t=S.tray.find(x=>x.id===b);if(t)pickTube(b)}else if(a==='rack'&&S.sel)S.sel=null,render()}
 /* kamera */
 let camAnim=null;const camDir=new THREE.Vector3(.28,.78,1).normalize();
-function camGoal(){const nar=box.clientWidth<600;const close=S.mode==='use'&&S.lid==='open';const dir=close?new THREE.Vector3(.35,1.45,1).normalize():camDir;const c=close?(nar?new THREE.Vector3(4,9,2):new THREE.Vector3(8,9,1)):nar?new THREE.Vector3(6,8,4):new THREE.Vector3(9,8,3);const rad=close?(nar?20:25):nar?28:31;
+function camGoal(){const nar=box.clientWidth<600;if(S.mode==='use'&&S.lid!=='open'&&S.phase!=='idle'){const c=new THREE.Vector3(RC.x,RC.y+2,RC.z+1),dir=new THREE.Vector3(.12,1.9,1).normalize(),rad=nar?13:15;const asp=box.clientWidth/Math.max(1,box.clientHeight),v=THREE.MathUtils.degToRad(30)/2,hf=Math.atan(Math.tan(v)*asp);const d=rad/Math.sin(Math.min(v,hf));return {t:c,p:c.clone().add(dir.multiplyScalar(d))}}const close=S.mode==='use'&&S.lid==='open';const dir=close?new THREE.Vector3(.35,1.45,1).normalize():camDir;const c=close?(nar?new THREE.Vector3(4,9,2):new THREE.Vector3(8,9,1)):nar?new THREE.Vector3(6,8,4):new THREE.Vector3(9,8,3);const rad=close?(nar?20:25):nar?28:31;
  const asp=box.clientWidth/Math.max(1,box.clientHeight),v=THREE.MathUtils.degToRad(30)/2,hf=Math.atan(Math.tan(v)*asp);const d=rad/Math.sin(Math.min(v,hf));return {t:c,p:c.clone().add(dir.clone().multiplyScalar(d))}}
 function goCam(){if(!R3)return;const g=camGoal();camAnim={p0:R3.cam.position.clone(),t0:R3.ctl.target.clone(),p:g.p,t:g.t,s:performance.now()}}let camKey='';
 function fit(){if(!R3)return;const w=box.clientWidth,h=box.clientHeight;R3.renderer.setSize(w,h,false);R3.cam.aspect=w/h;R3.cam.updateProjectionMatrix();const g=camGoal();R3.cam.position.copy(g.p);R3.ctl.target.copy(g.t);R3.ctl.update()}
@@ -415,7 +422,7 @@ function perfShouldRender(){const now=performance.now();if(!PERF.applied)perfApp
  return true}
 {const b=document.getElementById('mPerf');if(b)b.onclick=()=>{PERF.on=!PERF.on;try{localStorage.setItem('toksilab_perf',PERF.on?'1':'0')}catch(e){}perfApply();
  if(typeof say==='function')say(PERF.on?'<b>Performans modu açık</b>: gölgeler kapandı, çözünürlük ve kare hızı düşürüldü. Ayar laboratuvarda ve diğer cihaz sayfalarında da geçerli.':'Performans modu kapandı.')}}
-function animate(t){requestAnimationFrame(animate);if(!R3)return;const ck=S.mode+S.lid;if(ck!==camKey){if(camKey)goCam();camKey=ck}
+function animate(t){requestAnimationFrame(animate);if(!R3)return;const ck=S.mode+S.lid+(S.phase!=='idle');if(K.icIsik)K.icIsik.intensity=S.lid==='open'?0:S.phase!=='idle'?60:25;if(ck!==camKey){if(camKey)goCam();camKey=ck}
  if(camAnim){const k=Math.min(1,(performance.now()-camAnim.s)/800),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;R3.cam.position.lerpVectors(camAnim.p0,camAnim.p,e);R3.ctl.target.lerpVectors(camAnim.t0,camAnim.t,e);if(k>=1)camAnim=null}PERF.mv=R3.ctl.update();sync(t||0);hints();if(perfShouldRender())R3.renderer.render(R3.scene,R3.cam)}
 /* açıklama */
 function partOf(h){if(!h)return null;const [a,b]=h.split(':');if(a==='part')return b;if(a==='key')return b==='knob'?'knob':'k_'+b;if(a==='slot')return 'rotor';if(a==='tube')return 'T:'+b;return a}
