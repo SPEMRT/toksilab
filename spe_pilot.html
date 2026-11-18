@@ -1695,7 +1695,7 @@ function dersReset(g) {
     carts.forEach(c => { freshCart(c, false); c.gen = 0; c.Pth0 = 0.8; c.C = 0.22; });
     S.spares = 1;
     srcById.n1.dirt = 0.04; srcById.n2.dirt = 0.45;
-    setReg('adj', g === 'sart' || g === 'yuk' ? 5 : 10);
+    setReg('adj', g === 'sart' || g === 'yuk' ? 8 : 10);
     if (g === 'sart') carts.slice(0, 2).forEach((c, i) => cartKur(c, HOLES[i], 2));
     if (g === 'yuk') carts.slice(0, 2).forEach((c, i) => { cartKur(c, HOLES[i], 3, { sorb: 1, yuk: 10, clog: i ? 2.2 : 0.4 }); srcById['n' + (i + 1)].vol = 0; });
   } else setReg('adj', 10);
@@ -1773,7 +1773,7 @@ function speKoc(t) {
   if (stand.length && !suren.length && !S.hand) { const c = stand[0]; return { is: `Diğer kartuş da bitti: ${ad(c)}’i rafa geri takın (alttaki kartta “Rafa tak”).`, h: ['#lsA' + c.k, 0, 0] }; }
   const hp = S.hand && S.hand.type === 'pip' ? S.hand : null;
   if (hp) {
-    const hedef = bekleyen.find(c => kaynak(c, t) === hp.src.id);
+    const hedef = bekleyen.find(c => t === 2 ? hp.src.liq === 'sample' && hp.src.j === c.k : hp.src.id === KAYNAK[t]);
     if (hedef) return { is: `Pipette ${hp.vol.toFixed(1).replace('.', ',')} mL ${hp.src.title}: ${ad(hedef)} kartuşuna tıklayıp ekleyin.`, h: H('cart:' + hedef.k, 40) };
     return { is: `Pipetteki ${hp.src.title} şimdi kullanılmıyor: geri bırakmak için kendi kabına tıklayın.`, h: H('src:' + hp.src.id, 50) };
   }
