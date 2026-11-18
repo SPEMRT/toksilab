@@ -205,6 +205,7 @@ body { margin: 0; }
 body.cders #statusBox { visibility: hidden; }
 body.cders #side { min-width: 0; overflow-x: hidden; }
 body.cders .hint { display: none; }
+#raporK h2 { color: #16242A; text-transform: none; letter-spacing: .01em; }
 body.cders .lane.gizli { display: none; }
 body.sbk #side { width: auto; }
 @media (max-width: 980px) {
@@ -1421,7 +1422,7 @@ function frame(now) {
   for (const c of pl) {
     const vol = cartVol(c);
     if (vol < 0.002) {
-      c.flow = 0;
+      c.flow = 0; c.layers.length = 0;
       const exp = PROTO[c.step];
       if (exp && exp.dry && flowOn && S.p >= 18) c.dry += sdt;
       if (WET_STEPS.has(c.step) && flowOn) {
