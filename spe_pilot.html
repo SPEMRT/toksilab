@@ -1758,7 +1758,9 @@ function speKoc(t) {
     return { is: `Kartuşlar akıyor (${rack.map(c => ad(c) + ' ' + c.flow.toFixed(1).replace('.', ',')).join(' · ')} mL/dk). Bekleyin…` + (yav.length ? ` ${yav.map(ad).join(', ')} yavaş akıyor; basıncı birkaç psi artırabilirsiniz.` : ''), h: null };
   }
   if (S.headDown) {
-    if (!rack.some(dolu)) return { is: 'Kartuşlar boş: kafayı kaldırın (paneldeki ✋✋ düğmesi).', h: DG };
+    const bosRaf = rack.filter(c => !dolu(c));
+    if (bosRaf.length === rack.length) return { is: 'Kartuşlar boş: kafayı kaldırın (paneldeki ✋✋ düğmesi).', h: DG };
+    if (bosRaf.length) return { is: `${bosRaf.map(ad).join(', ')} boş: kafayı kaldırın (paneldeki ✋✋ düğmesi); ${need(bosRaf[0]) ? 'sıradaki çözeltiyi ekleyeceksiniz' : 'biten kartuşu bekleme standına alacaksınız'}.`, h: DG };
     if (S.headT < 0.999) return { is: 'Kafa iniyor…', h: null };
     return { is: 'Kafa kapalı: mod seçicinin sol tarafına (ADJ) tıklayıp gazı açın.', h: H('mode:adj', 36) };
   }
