@@ -323,7 +323,7 @@ function kapat_(){return {bolum:'Çalıştırma',ask:'Kapağın ön kenarına t�
 function start_(){return {bolum:'Çalıştırma',ask:'Kırmızı <b>START/STOP</b> tuşuna basın.',halka:['keys.start',0,40],izin:['key:start'],ok:function(s){return s.phase!=='idle'||!!s.result},
   hata:function(){var s=S();return s.msg==='Err'?'Cihaz başlamadı: hız, takılı rotorun sınırının üstünde. Hızı düşürün.':s.msg==='LId'?'Kapak açık; cihaz çalışmaz. Önce kapağı kapatın.':''},
   b:'Santrifüj hızlanıyor',html:'<p>Rotor birkaç saniyede ayarlanan hıza çıkar; o sırada cihaz dengesizliği de ölçer. Dengesizlik sınırı aşılırsa kendini durdurur.</p><p>Süre, rotor <b>ayarlanan hıza ulaştığında</b> saymaya başlar. Simülasyonda süre hızlandırılmıştır.</p>'}}
-function bekle_(){return {bolum:'Çalıştırma',ask:'Santrifüj çalışıyor. Rotor <b>tamamen durana</b> kadar bekleyin.',bekle:1,izin:[],canli:calisma,ok:function(s){return s.phase==='idle'&&!!s.result},
+function bekle_(){return {bolum:'Çalıştırma',ask:'Santrifüj çalışıyor. Kapaktaki <b>pencereden</b> rotoru izleyin; rotor <b>tamamen durana</b> kadar bekleyin.',bekle:1,izin:[],canli:calisma,ok:function(s){return s.phase==='idle'&&!!s.result},
   b:'Rotor durdu',html:'<p>Süre doldu, rotor yavaşladı ve durdu; ekranda <b>End</b> yazıyor. Kapak kilidi ancak şimdi açılır.</p><p>Bitince tüpler <b>sarsılmadan</b> alınır: ayrılan tabakalar yeniden karışmasın.</p>'}}
 function sonuc_(ok,kotu){return {bolum:'Sonuç',ask:'<b>Kapağı açın</b> ve tüplere bakın.',halka:KAPAK,izin:['lid'],ok:function(s){return s.f.done},
   b:function(){var k=S().tray.filter(function(t){return t.st}).map(function(t){return t.st}),w=k.indexOf('bad')>=0?'bad':k.indexOf('mid')>=0?'mid':'ok';return w==='ok'?'Ayrım tamam ✓':'Ayrım yetersiz'},
