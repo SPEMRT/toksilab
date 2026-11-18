@@ -120,6 +120,20 @@ body.panel #side{transform:none}body.panel .mentor{left:294px;transform:none;wid
 @keyframes hwP{0%,100%{box-shadow:0 0 0 2px #E5484D}50%{box-shadow:0 0 0 4px #FF1F1F,0 0 16px rgba(255,40,40,.85)}}.hw{animation:hwP 1s infinite}
 @media (max-width:900px){.rot{display:none}.held{top:auto;bottom:calc(28vh + 20px)}}
 </style>
+<style id="dersOnCss">/* rehberli ders / serbest kullanım düzeni sayfa açılır açılmaz uygulanır: eski pilot arayüzü bir an bile görünmez (cihaz_ders.js yüklenince kendi stiline devreder) */
+html.dersOn .mentor,html.dersOn #stepc,html.dersOn #tband,html.dersOn #side,html.dersOn #res,html.dersOn .rot,html.dersOn #mTasks,html.dersOn #mParts,html.dersOn #mUse,html.dersOn #mPanel,html.dersOn #mReset,html.dersOn #egCubuk,html.dersOn #mHome,html.dersOn #hLab{display:none!important}
+html.dersOn #tip{visibility:hidden!important}
+html.dersOn .stage{right:390px}html.dersOn #cv3{width:calc(100vw - 390px)!important}
+html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;bottom:0;width:390px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
+@media (max-width:900px){html.dersOn .stage{right:0;bottom:46dvh}html.dersOn #cv3{width:100vw!important;height:54dvh!important}html.dersOn body::after{top:auto;left:0;width:auto;height:46dvh;border-radius:16px 16px 0 0}}
+/* piston paneli ders / serbest kullanım panellerinin altında kalmasın */
+body.cders .loupe:not(.left){right:400px}body.cders.dk .loupe:not(.left){right:10px}
+body.cders.serbest.sbk.panel .loupe:not(.left){right:310px}body.cders.serbest.sbk:not(.panel) .loupe:not(.left){right:10px}
+@media (max-width:900px){body.cders .loupe:not(.left),body.cders.serbest.sbk.panel .loupe:not(.left){right:8px}}
+/* derste sonuç kartı sol altta: sol üstteki pipet standını örtmesin */
+@media (min-width:901px){body.cders.resOk:not(.serbest) #res:not(:empty):not([hidden]){top:auto!important;bottom:12px!important}}
+</style>
+<script>document.documentElement.classList.add('dersOn');setTimeout(function(){if(!document.body||!document.body.classList.contains('cders'))document.documentElement.classList.remove('dersOn')},12000)</script>
 </head>
 <body>
 <div class="wrap">
@@ -192,7 +206,7 @@ function drawLoupe(){const L=$('#loupe');L.hidden=S.mode!=='use';L.classList.tog
   <rect x="12" y="108" width="52" height="42" rx="8" fill="url(#lw)" stroke="#AEB8BD"/><rect x="20" y="118" width="36" height="16" rx="3" fill="#2C3A40"/><text x="38" y="130" text-anchor="middle" font-size="10" font-weight="700" fill="#EAF6F8" font-family="IBM Plex Mono,monospace">${dispTxt()}</text>
   <rect x="10" y="${cy}" width="56" height="22" rx="10" fill="url(#lc)" stroke="${p.col[1]}"/><ellipse cx="38" cy="${cy+5}" rx="18" ry="3.5" fill="#fff" opacity=".35"/>`;
  $('#lread').textContent=`${fmt(S.dst,S.task==='stok'?2:1)} µL`}
-function hint(){if(S.mode!=='use'||S.task==='parts'||S.anim)return null;const e=S.ev,t=S.tip;
+function hint(){if(document.body.classList.contains('cders'))return null;/* rehberli derste sarı halka, serbest kullanımda hiçbir ipucu */ if(S.mode!=='use'||S.task==='parts'||S.anim)return null;const e=S.ev,t=S.tip;
  if(!e.pip)return 'pip';if(!e.vol)return 'vol';
  if(!t)return S.res&&e.ejt?null:'tips';
  if(S.res)return S.loc==='waste'?'ej':'waste';
@@ -239,7 +253,7 @@ function immerse(kind){if(!S.tip){say('Uç takmadan sıvıya girme!');return}if(
  else say(S.tip.liq>0?`Ucu hedef tüpün iç duvarına değdirdin. Şimdi ${T().mode==='ters'?'<b>yalnız 1. durağa</b>':'<b>1. durağa</b>, ardından <b>2. durağa</b>'} bas.`:'Uçta sıvı yok.');
  render()}
 function withdraw(){if(!S.imm)return;S.imm=null;if(S.loc==='dst'&&S.tip&&S.tip.del>0&&S.depth>0)say('Ucu pistonu bırakmadan çıkardın, çok iyi. Şimdi pistona dokunarak bırak.');render()}
-function eject(){if(!S.tip)return;S.ej=1;render();setTimeout(()=>{S.ej=0;const ok=S.loc==='waste';S.tip=null;if(ok){S.ev.ejt=true;say(S.res?'Ucu ejektörle doğrudan atığa attın. Görev tamamlandı! Başka bir görev seçebilirsin.':'Ucu atığa attın.');finishIfDone()}else{S.flags.push('Uç atık kabının dışına atıldı.');say(`<b>Uç ${S.loc==='src'?'kaynak tüpe':S.loc==='dst'?'hedef tüpe':'tezgaha'} düştü!</b> Ucu her zaman atık kabının üstünde at.`)}render()},350)}
+function eject(){if(!S.tip)return;S.ej=1;render();setTimeout(()=>{S.ej=0;const ok=S.loc==='waste';S.tip=null;if(ok){S.ev.ejt=true;say(S.res?'Ucu ejektörle doğrudan atığa attın. Görev tamamlandı! Başka bir görev seçebilirsin.':'Ucu atığa attın.');finishIfDone()}else{S.flags.push('Uç atık kabının dışına atıldı.');if(ot())OT.disari++;say(`<b>Uç ${S.loc==='src'?'kaynak tüpe':S.loc==='dst'?'hedef tüpe':'tezgaha'} düştü!</b> Ucu her zaman atık kabının üstünde at.`)}render()},350)}
 /* ---------- piston ---------- */
 function setDepth(d,fast){const prev=S.depth;d=Math.max(0,Math.min(1.2,d));if(Math.abs(d-prev)<.001)return;S.depth=d;
  if(d>prev){if(!S.press){S.press={max:d,imm:S.imm,loc:S.loc};if(S.loc==='src'&&S.imm&&S.tip&&!S.tip.liq){S.flags.push('Uç numunedeyken pistona basıldı: numuneye hava üflendi.');say('<b>Hata:</b> uç numunedeyken pistona bastın; numuneye hava kabarcığı üfledin. Pistona daldırmadan <b>önce</b> basılır.')}}
@@ -267,7 +281,7 @@ function dispense(){const t=S.tip,m=S.press.max,Sv=S.vol,blood=t.kind==='kan',re
   if(m>=1.15&&prevSayKey!=='bo'){prevSayKey='bo';say(rev?'<b>Dikkat:</b> ters pipetajda 2. durağa basmazsın; fazladan çekilen sıvı da hedefe gitti.':'2. durağa bastın; uçta kalan son damla da üflendi. Şimdi pistonu basılı tutarak hedef tüpe tekrar dokun ve <b>ucu çıkar</b>.')}
   else if(m>=.95&&m<1.15&&prevSayKey!=='fs'){prevSayKey='fs';say(rev?'1. durağa bastın; ayarlanan hacim tam olarak verildi, fazlası uçta kaldı. Pistonu basılı tutarak hedef tüpe tekrar dokun ve <b>ucu çıkar</b>.':blood?'1. durağa bastın. Uç duvarında ince bir <b>kan filmi</b> kaldığını görüyor musun? Şimdi pistonu <b>basılı tut</b>: 2. durak.':'1. durağa bastın. Şimdi pistonu <b>basılı tut</b> (2. durak) ve son damlayı üfle.')}}}
 let prevSayKey='';
-function evaluate(){const t=T(),D=S.dst,err=(D-t.vol)/t.vol*100;const f=[...S.flags];
+function evaluate(){const t=T(),D=S.dst,err=(D-t.vol)/t.vol*100;const f=[...S.flags];if(ot()){otKaydet(t,D,err);return}
  if(S.pip!==t.pip)f.push(`${t.vol} µL için en uygun pipet ${t.pip}; ${S.pip} ${PIP[S.pip].max<t.vol?'bu hacmi çekemez':'ile doğruluk düşer'}.`);
  if(S.tip&&S.tip.film)f.push('Kan ileri pipetajla aktarıldı: uç duvarında kalan film hacmi azalttı. Viskoz sıvılarda ters pipetaj kullanılır.');
  if(S.tip&&S.tip.arm>=1.15&&S.tip.liq<.01)f.push('Ters pipetajda 2. durağa basılıp fazlalık da verildi.');
@@ -279,8 +293,48 @@ function evaluate(){const t=T(),D=S.dst,err=(D-t.vol)/t.vol*100;const f=[...S.fl
  say(ok?'Mükemmel! Şimdi <b>uç atığına</b> dokun ve pipetin <b>ejektör düğmesine</b> basarak ucu at.':'Sonuç kabul sınırının dışında ya da teknikte hata var. Aşağıdaki notları oku; önce ucu atığa at, sonra tekrar dene.')}
 function finishIfDone(){}
 function checkSetup(){const t=T();if(!t.vol)return;S.ev.pip=S.pip===t.pip;S.ev.vol=Math.abs(S.vol-t.vol)<1e-6}
+/* ===== serbest kullanım: sessiz kayıt ve değerlendirme raporu =====
+   Uyarı, ipucu ve sonuç kartı yoktur. Her tamamlanan aktarım (hedefte boşaltılıp piston bırakılınca) kaydedilir. ✅ İşi bitirdim ile rapor açılır. */
+let OT=null;
+const sessiz=()=>!!window.__serbest;
+const ot=()=>sessiz()&&OT;
+function otBasla(){OT={t0:Date.now(),kayit:[],tehlike:[],disari:0}}
+const vf=v=>fmt(v,v<10?1:0);
+function otKaydet(t,D,err){const tp=S.tip||{},fl=S.flags.join(' | '),k=[];let d=0;const e=(ok,iyi,kotu,ceza)=>{k.push([ok,iyi,kotu]);if(!ok)d+=ceza};
+ const ters=(tp.arm||0)>=1.15;
+ e(S.pip===t.pip,'Uygun pipet seçildi ('+S.pip+')',vf(t.vol)+' µL için '+S.pip+' seçildi; uygun pipet '+t.pip+'. Hacim pipetin aralığının üst kısmında olmalı, doğruluk orada en iyidir.',15);
+ e(Math.abs(S.vol-t.vol)<1e-6,'Hacim doğru ayarlandı ('+vf(S.vol)+' µL)','Hacim '+vf(S.vol)+' µL ayarlandı; istenen '+vf(t.vol)+' µL.',20);
+ e(!fl.includes('Kullanılmış uçla'),'Her aktarımda yeni uç kullanıldı','Kullanılmış uçla kaynağa girildi: numune kontamine olur. Her aktarımda yeni uç takılır.',15);
+ if(t.mode==='ters')e(ters,'Viskoz numunede ters pipetaj kullanıldı (havada 2. durak)','Kan ileri pipetajla aktarıldı: uç duvarında kalan kan filmi hacmi azaltır. Viskoz numunede ters pipetaj kullanılır: havada 2. durağa basılır, hedefte yalnız 1. durağa.',15);
+ else e(!ters,'İleri pipetaj kullanıldı (havada 1. durak)','Havada 2. durağa basıldı (ters pipetaj): bu sıvı için ileri pipetaj kullanılır, havada yalnız 1. durağa basılır.',10);
+ if(ters)e(!((tp.liq||0)<.01),'Hedefte yalnız 1. durağa basıldı; fazlası uçta kaldı','Ters pipetajda hedefte 2. durağa basıldı: fazladan çekilen sıvı da hedefe gitti.',10);
+ e(!fl.includes('numunedeyken pistona'),'Pistona sıvıya girmeden, havada basıldı','Uç numunedeyken pistona basıldı: numuneye hava üflendi. Pistona daldırmadan önce basılır.',10);
+ e(!fl.includes('1. durağa kadar basılmadı'),'Çekerken piston 1. durağa kadar basılmıştı','Piston 1. durağa kadar basılmadan çekildi: eksik hacim.',10);
+ e(!fl.includes('hızlı bırakıldı'),'Piston yavaşça bırakıldı','Piston hızlı bırakıldı: uca hava kabarcığı girdi, hacim eksik. Piston her zaman yavaş bırakılır.',10);
+ e(!S.deepSrc,'Uç sıvıya 2–3 mm daldırıldı','Uç sıvıya derin daldırıldı: dışına yapışan sıvı hedefe fazladan gitti.',5);
+ e(!fl.includes('sıvıdayken bırakıldı'),'Piston, uç sıvıdan çıktıktan sonra bırakıldı','Piston uç hâlâ hedefteki sıvıdayken bırakıldı: sıvının bir kısmı uca geri çekildi. Önce uç çıkarılır, sonra piston bırakılır.',10);
+ if(t.liq==='dcm')e(!tp.dripped,(tp.pw||0)>=2?'Uç ön ıslatıldı; çözücü damlamadı':'Çözücü damlamadan hızlı aktarıldı','Organik çözücü uçtan damladı: hacim kaybı. Uç 2–3 kez ön ıslatılır ve hızlı çalışılır.',10);
+ e(Math.abs(err)<=2,'Teslim edilen hacim kabul sınırında (±2 %)','Teslim edilen '+fmt(D,t.vol<10?2:1)+' µL; hata '+(err>0?'+':'')+fmt(err,1)+' % (kabul sınırı ±2 %).',20);
+ OT.kayit.push({ad:LIQ[t.liq].n+' · '+vf(t.vol)+' µL · '+new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),deger:fmt(D,t.vol<10?2:1)+' µL ('+(err>0?'+':'')+fmt(err,1)+' %)',puan:Math.max(0,100-d),k});
+ S.res={D,err,ok:!d};S.flags=[];S.deepSrc=false;S.tip&&(S.tip.used=true);if(window.__raporDugme)window.__raporDugme(raporAc)}
+function raporAc(){if(!OT)return;const bit=[];let bd=0;const b=(ok,iyi,kotu,ceza)=>{bit.push([ok,iyi,kotu]);if(!ok)bd+=ceza};
+ b(!S.tip,'Son uç atıldı','Pipette uç takılı bırakıldı: iş bitince uç ejektörle atığa atılır.',5);
+ b(!OT.disari,'Uçlar atık kabına atıldı',OT.disari+' kez uç atık kabının dışına (tüpe ya da tezgâha) atıldı. Uç her zaman atık kabının üstünde, ejektörle atılır.',5);
+ b(S.loc==='rest'&&!S.tip,'Pipet standa dik asıldı','Pipet standa asılmadı: kullanılmayan pipet standda dik durur, böylece uçta kalan sıvı pipetin içine akmaz.',5);
+ OT.tehlike.forEach(t=>{bit.push([false,'',t+' (pipet izin vermedi)']);bd+=10});
+ const K2=OT.kayit,ort=K2.length?K2.reduce((a,x)=>a+x.puan,0)/K2.length:0;
+ window.__raporGoster({baslik:'Serbest pipet kullanımı · değerlendirme raporu',kayitAd:'Aktarımlar',kayitlar:K2,bitirme:bit,puan:K2.length?Math.max(0,Math.round(ort-bd)):0,sure:Math.round((Date.now()-OT.t0)/60000),
+  bos:'Hiç aktarım tamamlanmadı: bir iş seçin, sıvıyı hedef tüpe aktarın, sonra yeniden <b>✅ İşi bitirdim</b>’e basın.',
+  not:'Puanlama: her aktarım 100 üzerinden; yanlış hacim −20, kabul sınırı dışı (±2 %) −20, uygun olmayan pipet −15, kullanılmış uç −15, yanlış teknik −10 / −15, piston hataları her biri −10, derin daldırma −5. Aktarımların ortalamasından işi bitirme eksikleri (her biri −5) ve zorlanan hacim halkası (−10) düşülür.',
+  yenileAd:'Yeniden başla',yenile:serbestYenile})}
+const ISAD={su:'150 µL Tip I su',kan:'200 µL tam kan',stok:'5 µL ara stok',dcm:'100 µL diklorometan (DCM)'};
+/* iş değiştir: uç takılıyken ya da uç sıvıdayken değiştirilmez */
+function serbestIs(id){if(S.tip)return 'Yeni işe geçmeden önce ucu atığa at.';VOL.tube[id]=0;VOL.src[id]=1500;const pip=S.pip,vol=S.vol;reset(id);S.pip=pip;S.vol=vol;S.ev={};S.mode='use';render();return ''}
+function serbestKur(){VOL.src={su:1500,kan:1500,stok:1500,dcm:1500};VOL.tube={};reset('su');S.mode='use';otBasla();render()}
+function serbestYenile(){const o=OT;serbestKur();OT=o}
+window.serbestRapor={ac:raporAc,ot:()=>OT,is:()=>S&&ISAD[S.task]};
 /* sürükleme */
-function pressStart(e,ppu){if(S.mode!=='use')return;e.preventDefault();e.stopPropagation();const st={y0:e.clientY,d0:S.depth,moved:false,held:false,last:performance.now(),lastD:S.depth,v:0};
+function pressStart(e,ppu){if(S.mode!=='use')return;e.preventDefault();e.stopPropagation();if(!izin('piston'))return;const st={y0:e.clientY,d0:S.depth,moved:false,held:false,last:performance.now(),lastD:S.depth,v:0};
  st.timer=setTimeout(()=>{if(st.moved)return;st.held=true;clearInterval(relT);if(S.depth<.95)setDepth(1);setTimeout(()=>setDepth(1.2),140);if(navigator.vibrate)navigator.vibrate(18)},550);
  const mv=ev=>{const dy=ev.clientY-st.y0;if(!st.moved&&Math.abs(dy)>8){st.moved=true;clearTimeout(st.timer)}if(!st.moved)return;
   const raw=st.d0+dy/ppu;let d;if(st.d0>=1.05)d=Math.min(1.2,raw);else if(raw<=1)d=raw;else if(raw<=1.4)d=1;else d=Math.min(1.2,1+(raw-1.4));
@@ -425,7 +479,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  const plane=new THREE.Plane(new THREE.Vector3(0,0,1),-LZ),hitP=new THREE.Vector3();
  renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};if(S.mode!=='use'||S.anim)return;const h=pick(e);
   if(h==='cap'){ctl.enabled=false;pressStart(e,70);const re=()=>{ctl.enabled=true;removeEventListener('pointerup',re)};addEventListener('pointerup',re);down=null;return}
-  if(h&&h.startsWith('body:')&&h.slice(5)===S.pip&&S.loc!=='rest'){setPtr(e);if(!ray.ray.intersectPlane(plane,hitP))return;ctl.enabled=false;const q=pose();if(S.imm)S.imm=null;S.drag={x:q.x,y:q.y,ox:hitP.x-q.x,oy:hitP.y-q.y,moved:false,sx:e.clientX,sy:e.clientY};
+  if(h&&h.startsWith('body:')&&h.slice(5)===S.pip&&S.loc!=='rest'){if(!izin('drag'))return;setPtr(e);if(!ray.ray.intersectPlane(plane,hitP))return;ctl.enabled=false;const q=pose();if(S.imm)S.imm=null;S.drag={x:q.x,y:q.y,ox:hitP.x-q.x,oy:hitP.y-q.y,moved:false,sx:e.clientX,sy:e.clientY};
    const mv=ev=>{setPtr(ev);if(!ray.ray.intersectPlane(plane,hitP))return;if(Math.hypot(ev.clientX-S.drag.sx,ev.clientY-S.drag.sy)>6)S.drag.moved=true;S.drag.x=Math.max(-20,Math.min(25,hitP.x-S.drag.ox));S.drag.y=Math.max((S.tip?TL[S.pip]:0)+.2,Math.min(20,hitP.y-S.drag.oy))};
    const upf=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',upf);ctl.enabled=true;const d=S.drag;S.drag=null;down=null;if(!d.moved){render();return}
     const loc=nearLoc(d.x),tipY=d.y-(S.tip?TL[S.pip]:0);if(!loc){say('Pipeti bir kutunun, tüpün, atığın üstüne ya da <b>standa</b> bırak.');render();return}
@@ -439,7 +493,9 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  animate()}
 const visibleDeep=o=>{while(o){if(o.visible===false)return false;o=o.parent}return true};
 function nearLoc(x){let best=null,bd=3.6;if(Math.abs(x-LOCX.rest)<5.5)return 'rest';for(const k of ['tips','src','dst','waste']){const d=Math.abs(LOCX[k]-x);if(d<bd){bd=d;best=k}}return best}
-function onHot(h){const [a,b]=h.split(':');
+/* rehberli derste yalnız o adımın gösterdiği parça çalışır (cihaz_ders.js karar verir) */
+function izin(h){if(!window.__izin||window.__izin(h))return true;if(window.__izinUyari)window.__izinUyari(h);return false}
+function onHot(h){if(!izin(h))return;const [a,b]=h.split(':');
  if(a==='loc')tapLoc(b);else if(a==='ej')eject();else if(a==='ring')showVpop();else if(a==='stand'||(a==='body'&&(S.loc==='rest'||b!==S.pip)))standTap(b)}
 function standTap(n){if(!n&&S.mode==='use'&&S.loc!=='rest'){go('rest');return}if(!n||!PIP[n]){say(n&&DECOR[n]?`Bu <b>${DECOR[n].n}</b> pipeti; bu görevlerde kullanmıyoruz. Görevine uygun pipeti seç: P10, P200 ya da P1000.`:'Döner pipet standı: pipetler kullanılmadığında dik asılı durur; böylece uçta kalan sıvı pipetin içine akmaz.');return}choosePip(n)}
 /* poz */
@@ -541,14 +597,14 @@ $('#mTasks').onclick=$('#tOpen').onclick=()=>$('#tdlg').showModal();$('#tClose')
 function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
 $('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}$('#mReset').onclick=()=>{VOL.src={su:1500,kan:1500,stok:1500,dcm:1500};VOL.tube={};S.done={};S.seen={};reset('parts');S.mode='parts';render()};
 $('#mParts').onclick=()=>{if(S.task!=='parts')reset('parts');S.mode='parts';render()};$('#mUse').onclick=()=>{if(S.task==='parts'){reset('su')}S.mode='use';render()};
-function setVol(v){const p=P();if(v>p.max+1e-9||v<p.min-1e-9){say(`<b>Dur!</b> ${S.pip}’nin aralığı ${fmt(p.min,p.dp)}–${fmt(p.max)} µL. Halkayı aralığın dışına zorlamak pipetin mekanizmasını bozar ve kalibrasyonu kaydırır.`);v=Math.min(p.max,Math.max(p.min,v))}S.vol=Math.round(v/p.step)*p.step;checkSetup();if(S.ev.vol)say(`Hacim ${fmt(S.vol,p.dp)} µL. Göstergeyi karşıdan okuyarak kontrol ettin. Şimdi <b>uç kutusuna</b> git ve uç tak.`);render()}
+function setVol(v){const p=P();if(v>p.max+1e-9||v<p.min-1e-9){if(ot()){const m=S.pip+' hacim halkası aralığının ('+fmt(p.min,p.dp)+'–'+fmt(p.max)+' µL) dışına zorlandı';if(OT.tehlike.indexOf(m)<0)OT.tehlike.push(m)}say(`<b>Dur!</b> ${S.pip}’nin aralığı ${fmt(p.min,p.dp)}–${fmt(p.max)} µL. Halkayı aralığın dışına zorlamak pipetin mekanizmasını bozar ve kalibrasyonu kaydırır.`);v=Math.min(p.max,Math.max(p.min,v))}S.vol=Math.round(v/p.step)*p.step;checkSetup();if(S.ev.vol)say(`Hacim ${fmt(S.vol,p.dp)} µL. Göstergeyi karşıdan okuyarak kontrol ettin. Şimdi <b>uç kutusuna</b> git ve uç tak.`);render()}
 $('#vM').onclick=()=>setVol(S.vol-P().step*(S.pip==='P10'?5:S.pip==='P200'?5:10));$('#vP').onclick=()=>setVol(S.vol+P().step*(S.pip==='P10'?5:S.pip==='P200'?5:10));
 $('#vI').onchange=e=>{const v=parseFloat(String(e.target.value).replace(',','.'));if(!isNaN(v))setVol(v);else render()};
 $('#p1').onclick=()=>setDepth(1);$('#p2').onclick=()=>setDepth(1.2);$('#rS').onclick=slowRelease;$('#rF').onclick=()=>{clearInterval(relT);setDepth(0,true)};
 $('#lT').onclick=()=>go('tips');$('#lS').onclick=()=>go('src');$('#lD').onclick=()=>go('dst');$('#lW').onclick=()=>go('waste');
 $('#refill').onclick=()=>{if(!S.src)return;if(S.loc==='src'&&S.imm){say('Önce ucu sıvıdan çıkar.');return}S.src.v=1500;say(`Kaynak tüpü taze ${LIQ[S.src.liq].n.toLowerCase()} ile doldurdun (1,5 mL).`);render()};
 $('#empty').onclick=()=>{if(S.loc==='dst'&&S.imm){say('Önce ucu sıvıdan çıkar.');return}const was=TUBE;TUBE=0;S.dst=0;say(was>0?`Hedef tüpteki ${fmt(was)} µL sıvıyı ${T().liq==='kan'?'<b>tıbbi atığa</b>':'atık kabına'} döktün. Tüp boş, terazi sıfırlandı.`:'Hedef tüp zaten boş.');render()};
-$('#lej').onclick=eject;
+$('#lej').onclick=()=>{if(izin('ej'))eject()};
 $('#iS').onclick=()=>immerse('sh');$('#iD').onclick=()=>immerse('deep');$('#iO').onclick=withdraw;$('#ej').onclick=eject;
 reset('parts');$('#lsv').addEventListener('pointerdown',e=>pressStart(e,45*$('#lsv').getBoundingClientRect().height/150));
 $('#pips').querySelectorAll('button').forEach(b=>b.onclick=()=>choosePip(b.dataset.p));
@@ -562,11 +618,13 @@ if(innerWidth>900)$('#stepc').classList.remove('col');
 new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')}).observe($('#say'),{childList:true,characterData:true,subtree:true});
 {const rs=$('#res');new MutationObserver(()=>{if(rs.innerHTML&&!rs.querySelector('.resX')){const b=document.createElement('button');b.className='resX';b.textContent='✕';b.onclick=()=>{rs.hidden=true};rs.prepend(b);rs.hidden=false}}).observe(rs,{childList:true})}
 
-Object.assign(window,{reset,render,tapLoc,go,immerse,withdraw,eject,setDepth,slowRelease,setVol,choosePip,standTap,onHot,pose});Object.defineProperty(window,'S',{get:()=>S});window.scrOf=n=>{const o=K.models[n]||K[n];const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};window.__pip=1;window.__pk=(x,y)=>{const r=R3.renderer.domElement.getBoundingClientRect();const ptr=new THREE.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);const rc=new THREE.Raycaster();rc.setFromCamera(ptr,R3.cam);const h=rc.intersectObjects(HOT.filter(o=>visibleDeep(o)),false)[0];return h?h.object.userData.hot:null};
+Object.assign(window,{serbestKur,serbestIs,reset,render,tapLoc,go,immerse,withdraw,eject,setDepth,slowRelease,setVol,choosePip,standTap,onHot,pose});Object.defineProperty(window,'S',{get:()=>S});window.scrOf=n=>{if(n.indexOf('hot:')===0){const id=n.slice(4),L=HOT.filter(o=>o.userData.hot===id&&visibleDeep(o));if(!L.length)throw 0;const pm=K.models[S.pip];const inP=o=>{for(let q=o;q;q=q.parent)if(q===pm)return true;return false};const o=L.find(inP)||L[0];const b=new THREE.Box3().setFromObject(o,true);const v=b.getCenter(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]}const o=K.models[n]||K[n];const v=o.getWorldPosition(new THREE.Vector3()).project(R3.cam);const rc=box.getBoundingClientRect();return [rc.left+(v.x+1)/2*rc.width,rc.top+(1-v.y)/2*rc.height]};window.__pip=1;window.__pk=(x,y)=>{const r=R3.renderer.domElement.getBoundingClientRect();const ptr=new THREE.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1);const rc=new THREE.Raycaster();rc.setFromCamera(ptr,R3.cam);const h=rc.intersectObjects(HOT.filter(o=>visibleDeep(o)),false)[0];return h?h.object.userData.hot:null};
 window.TL_GOREV=()=>S&&S.done; /* eğitim çubuğu için (salt okunur) */
 </script>
 
 <script src="egitim_cubugu.js" charset="utf-8" defer></script>
 <script src="anamenu.js" charset="utf-8" defer></script>
+<script>/* rehberli ders betiği: tarayıcı önbelleğinde eski sürüm kalmasın diye 5 dakikada bir yenilenen adresle yüklenir */
+(function(){var s=document.createElement('script');s.charset='utf-8';s.src='cihaz_ders.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})();</script>
 </body>
 </html>
