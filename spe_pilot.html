@@ -204,7 +204,12 @@ body.cders .left, body.cders #btnReset { display: none !important; }
 .mlz button:hover { border-color: var(--brand); }
 body.cders:not(.serbest) .mlz { display: none; }
 body.cders .app { grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "top top" "stage right" "dock dock"; }
-body.cders:not(.serbest) .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "stage" "dock"; margin-right: 390px; }
+body.cders:not(.serbest) .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "stage" "dock"; margin-right: 330px; }
+body.cders #dersK { width: 330px !important; padding: 12px !important; }
+#dersP .anim canvas { width: 100%; display: block; border-radius: 10px; background: #F4F8F9; }
+#dersP .anim .ak { display: flex; gap: 4px; margin-top: 6px; }
+#dersP .anim .ak button { flex: 1; padding: 6px 2px; font-size: 11.5px; background: #33444C; }
+#dersP .anim .ak button.on { background: #2BD9C0; color: #062126; }
 body.cders.dk:not(.serbest) .app { margin-right: 0; }
 body.cders .stage { right: auto !important; bottom: auto !important; }
 body { margin: 0; }
@@ -217,12 +222,13 @@ body.cders.sbk #side { width: auto !important; box-sizing: border-box; }
 @media (max-width: 980px) {
   body.cders .app, body.cders:not(.serbest) .app { grid-template-columns: 1fr; grid-template-areas: "top" "stage" "dock" "right"; margin-right: 0; }
   body.cders:not(.serbest):not(.dk) .app { padding-bottom: 46dvh; }
+  body.cders #dersK { width: auto !important; }
 }
 </style>
 <style id="dersOnCss">/* rehberli ders düzeni sayfa açılır açılmaz uygulanır (cihaz_ders.js yüklenince kendi stiline devreder) */
 html.dersOn .left,html.dersOn #side,html.dersOn #hLab,html.dersOn #btnReset{display:none!important}
-html.dersOn .app{grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "stage" "dock";margin-right:390px}
-html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;bottom:0;width:390px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
+html.dersOn .app{grid-template-columns:minmax(0,1fr);grid-template-areas:"top" "stage" "dock";margin-right:330px}
+html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;bottom:0;width:330px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
 @media (max-width:980px){html.dersOn .app{margin-right:0;padding-bottom:46dvh}html.dersOn body::after{top:auto;left:0;width:auto;height:46dvh;border-radius:16px 16px 0 0}}
 </style>
 <script>(function(){document.documentElement.classList.add('dersOn');setTimeout(function(){if(!document.body||!document.body.classList.contains('cders'))document.documentElement.classList.remove('dersOn')},12000)})()</script>
@@ -598,7 +604,7 @@ const vKnob = mesh(cyl(0.065, 0.075, 0.16, 18), M.black, PX(257), PY(575), FZ + 
 
 /* ---------- geometry of the stack ---------- */
 const RACK_H = 0.8, COL_TOP = 0.84;
-const HEAD_DOWN = BASE + RACK_H + COL_TOP, HEAD_UP = HEAD_DOWN + 0.75, POST_TOP = HEAD_UP + 0.75;
+const HEAD_DOWN = BASE + RACK_H + COL_TOP, HEAD_UP = HEAD_DOWN + 0.55, POST_TOP = HEAD_UP + 0.4;
 
 /* posts & platen */
 const POST_X = 1.55, POST_Z = -0.55;
@@ -851,10 +857,10 @@ const binSprite = labelPlane(BIN_L, 'trash', 0.3, 0.17, { r: 0.232, arc: 1.3 });
    Her malzemenin tezgâhta işaretli, sabit bir yeri var. Tezgâha getirilmeyen malzemenin yeri boş çerçeve olarak görünür;
    üst çubuktaki 🧰 Tezgâh düğmeleriyle ya da boş yere tıklayarak getirilir. Derslerde dersin malzemeleri kendiliğinden gelir. */
 const MLZ = [
-  { id: 'kutu', ad: 'Kartuş kutusu', o: CB, w: 1.25, d: 0.8, lw: 1.5 },
-  { id: 'stand', ad: 'Bekleme standı', o: STAND, w: 1.25, d: 0.6, lw: 1.5 },
-  ...['meoh', 'water', 'mix', 'elu'].map(id => ({ id, ad: srcById[id].title, o: srcById[id].sprite.parent, w: 1.0, d: 1.0, lw: 1.05 })),
-  { id: 'num', ad: 'Numune tüpleri', o: STR, w: 2.0, d: 0.7, lw: 1.8 },
+  { id: 'kutu', ad: 'Kartuş kutusu', o: CB, w: 1.25, d: 0.8, lw: 1.35 },
+  { id: 'stand', ad: 'Bekleme standı', o: STAND, w: 1.25, d: 0.6, lw: 1.35 },
+  ...['meoh', 'water', 'mix', 'elu'].map(id => ({ id, ad: srcById[id].title, o: srcById[id].sprite.parent, w: 1.0, d: 1.0, lw: 0.95 })),
+  { id: 'num', ad: 'Numune tüpleri', o: STR, w: 2.0, d: 0.7, lw: 1.7 },
 ];
 const MLZ_BY = Object.fromEntries(MLZ.map(m => [m.id, m]));
 MLZ.forEach(m => {
@@ -863,11 +869,14 @@ MLZ.forEach(m => {
   m.yer.rotation.x = -Math.PI / 2; m.yer.position.set(p.x, 0.004, p.z); bench.add(m.yer);
   const e = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(m.w, m.d)), new THREE.LineBasicMaterial({ color: 0x2f7de1, transparent: true, opacity: 0.55 }));
   e.rotation.x = -Math.PI / 2; e.position.set(p.x, 0.006, p.z); bench.add(e);
-  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96;
-  const g = cv.getContext('2d'); let f = 58; g.font = `bold ${f}px Arial`; while (g.measureText(m.ad).width > 490 && f > 20) { f -= 2; g.font = `bold ${f}px Arial`; }
-  g.fillStyle = '#1d58b8'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(m.ad, 256, 50);
-  const t = new THREE.Mesh(new THREE.PlaneGeometry(m.lw, m.lw * 96 / 512), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false }));
-  t.rotation.x = -Math.PI / 2; t.position.set(p.x, 0.008, p.z + m.d / 2 + 0.16); bench.add(t);
+  const sat = m.lw < 1.2 && m.ad.length > 9 && m.ad.includes(' ') ? [m.ad.slice(0, m.ad.lastIndexOf(' ')), m.ad.slice(m.ad.lastIndexOf(' ') + 1)] : [m.ad];
+  const ch = sat.length === 1 ? 120 : 200, cv = document.createElement('canvas'); cv.width = 512; cv.height = ch;
+  const g = cv.getContext('2d'); g.textAlign = 'center'; g.textBaseline = 'middle';
+  let f = 84; const sig = () => sat.every(x => g.measureText(x).width < 496); g.font = `bold ${f}px Arial`; while (!sig() && f > 30) { f -= 2; g.font = `bold ${f}px Arial`; }
+  rrect(g, 4, 4, 504, ch - 8, 24); g.fillStyle = 'rgba(255,255,255,0.88)'; g.fill(); g.lineWidth = 5; g.strokeStyle = '#2f7de1'; g.stroke();
+  g.fillStyle = '#123a7a'; sat.forEach((x, i) => g.fillText(x, 256, sat.length === 1 ? 62 : 56 + i * 88));
+  const t = new THREE.Mesh(new THREE.PlaneGeometry(m.lw, m.lw * ch / 512), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false }));
+  t.rotation.x = -1.0; t.position.set(p.x, 0.12, p.z + m.d / 2 + (sat.length === 1 ? 0.22 : 0.3)); bench.add(t);
 });
 function mlzGoster(id, on, sessizce) {
   const m = MLZ_BY[id]; if (!m) return;
@@ -938,7 +947,7 @@ function renewCart(c) {
   freshCart(c, false); c.gen = gen;
   S.log.unshift({ t: S.time, msg: `K${c.k + 1} yenilendi: eski kartuş çöpe atıldı, kutudan yenisi alındı. MeOH şartlandırmasından başla.`, k: c.k, gen, info: true });
   renderLog();
-  if (hole >= 0 && holeFree(hole) && canTouch()) { c.where = 'hand'; S.hand = { type: 'cart', k: c.k }; placeCart(hole); }
+  if (hole >= 0 && holeFree(hole) && canTouch() && rafOnde()) { c.where = 'hand'; S.hand = { type: 'cart', k: c.k }; placeCart(hole); }
   else toast(`K${c.k + 1} yenilendi. Yeni kartuşu kutudan alıp rafa tak.`, true);
 }
 function resetSamples() {
@@ -970,6 +979,8 @@ function renderLog() {
   $('#log').innerHTML = S.log.map(e => `<li class="${e.info ? 'info' : e.fixed ? 'fixed' : 'err'}"><time>${fmtT(e.t)}</time><span>${e.msg}${e.fixed ? ' (kartuş yenilendi)' : ''}</span></li>`).join('');
   $('#logEmpty').hidden = S.log.length > 0;
 }
+const rafOnde = () => S.pulled && S.pullT >= 0.999;
+const ONE = 'Önce rafı öne çek: rafın ön yüzüne tıkla. Kafanın altında kartuş takılmaz, çözelti eklenmez.';
 const canTouch = () => S.headT <= 0.001 && S.colLift <= 0.001 && !S.busy;
 const holeFree = h => h >= 0 && !carts.some(c => c.where === 'rack' && c.hole === h);
 const SUGGEST = [2, 4, 6, 8, 10];
@@ -985,6 +996,7 @@ function takeCart() {
 function placeCart(hole) {
   if (!S.hand || S.hand.type !== 'cart') return;
   if (!canTouch()) return toast('Kartuş takmak için kafanın yukarıda olması gerekir.');
+  if (!rafOnde()) return toast(ONE);
   if (!holeFree(hole)) return toast('Bu delik dolu. Başka bir delik seç.');
   const c = carts[S.hand.k];
   colRack.add(c.g);
@@ -1009,6 +1021,7 @@ function putOnStand(c) {
 function liftFromRack(c, toStand) {
   if (S.hand && !toStand) return toast('Elin dolu. Önce elindekini bırak.');
   if (!canTouch()) return toast('Kartuşu çıkarmak için önce kafayı kaldır (iki anahtar birlikte).');
+  if (!rafOnde()) return toast(ONE);
   if (cartVol(c) > 0.02) return toast(`K${c.k + 1} içinde hâlâ sıvı var; akması bitmeden çıkarma.`);
   c.hole = -1;
   if (toStand) { putOnStand(c); toast(`K${c.k + 1} bekleme standına alındı. Diğerleri bitince geri tak.`, true); }
@@ -1017,6 +1030,7 @@ function liftFromRack(c, toStand) {
 function returnToRack(c) {
   if (S.hand) return toast('Elin dolu. Önce elindekini bırak.');
   if (!canTouch()) return toast('Kartuş takmak için kafanın yukarıda olması gerekir.');
+  if (!rafOnde()) return toast(ONE);
   c.where = 'hand'; S.hand = { type: 'cart', k: c.k };
   placeCart(holeFree(c.lastHole) ? c.lastHole : nextHole());
 }
@@ -1039,6 +1053,7 @@ function dispense(k) {
   if (c.where !== 'rack') return toast(`K${k + 1} rafta değil.`);
   if (!S.hand || S.hand.type !== 'pip') return toast('Önce bir erlenden ya da numune tüpünden pipetle çözelti çek.');
   if (!canTouch()) return toast('Kartuşlara çözelti eklemek için kafayı kaldır.');
+  if (!rafOnde()) return toast(ONE);
   const room = CART_CAP - cartVol(c);
   if (room < 0.02) return toast(`K${k + 1} dolu (3 mL). Akmasını bekle.`);
   const src = S.hand.src, v = Math.min(room, S.hand.vol), L = LIQ[src.liq];
@@ -1361,7 +1376,7 @@ renderer.domElement.addEventListener('pointerup', e => {
 
 /* ---------- loop ---------- */
 const approach = (v, target, rate) => v + (target - v) * Math.min(1, rate);
-const PULL_D = 0.75;
+const PULL_D = 1.05; /* öne çekilen raftaki kartuşlar kafanın altından tamamen çıkar */
 const WASTE_PARK = V3(6.6, 0, -1.3), COLL_PARK = V3(4.1, 0, -1.3), RACK_IN = V3(0, BASE, RZ), RACK_OUT = V3(0, BASE, RZ + 1.95);
 function placeRack(g, park, t) {
   const u = 1 - t;
@@ -1817,12 +1832,15 @@ function speKoc(t) {
   }
   if (S.headT > 0.001) return { is: 'Kafa kalkıyor…', h: null };
   const bekleyen = rack.filter(c => need(c) && !dolu(c)), bitmis = rack.filter(c => !need(c) && !dolu(c)), suren = rack.filter(c => need(c) || dolu(c));
+  if (!S.hand && !rafOnde() && (bekleyen.length || (bitmis.length && suren.length) || (stand.length && !suren.length))) return { is: 'Rafı öne çekin: rafın ön yüzüne tıklayın. Kartuşlara kafanın altında dokunulmaz.', h: H('pull', 50) };
   if (bitmis.length && suren.length && !S.hand) {
     const c = bitmis[0];
     return { is: `${ad(c)} bu adımı bitirdi, diğeri sürüyor: ${ad(c)} basınç altında boş kalmasın; alttaki ${ad(c)} kartında “Standa al”a basın.`, h: ['#lsA' + c.k, 0, 0] };
   }
   if (stand.length && !suren.length && !S.hand) { const c = stand[0]; return { is: `Diğer kartuş da bitti: ${ad(c)}’i rafa geri takın (alttaki kartta “Rafa tak”).`, h: ['#lsA' + c.k, 0, 0] }; }
   const hp = S.hand && S.hand.type === 'pip' ? S.hand : null;
+  if (S.busy) return { is: 'Raf hareket ediyor…', h: null };
+  if (hp && !rafOnde()) return { is: 'Çözelti eklemek için rafı öne çekin: rafın ön yüzüne tıklayın.', h: H('pull', 50) };
   if (hp) {
     const hedef = bekleyen.find(c => t === 2 ? hp.src.liq === 'sample' && hp.src.j === c.k : hp.src.id === KAYNAK[t]);
     if (hedef) return { is: `Pipette ${hp.vol.toFixed(1).replace('.', ',')} mL ${hp.src.title}: ${ad(hedef)} kartuşuna tıklayıp ekleyin.`, h: H('cart:' + hedef.k, 40) };
