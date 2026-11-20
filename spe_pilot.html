@@ -1364,6 +1364,7 @@ renderer.domElement.addEventListener('pointerup', e => {
     if (c.where === 'rack') { if (S.hand && S.hand.type === 'pip') dispense(c.k); else if (!S.hand) liftFromRack(c, false); }
     else if (c.where === 'stand') { if (!S.hand) { c.where = 'hand'; S.hand = { type: 'cart', k: c.k }; } else toast('Elin dolu.'); }
   }
+  else if (a === 'pull') togglePull();
   else if (a === 'twoL') pressSide('L');
   else if (a === 'twoR') pressSide('R');
   else if (a === 'mode') setMode(S.gm !== 'off' ? 'off' : sel.worldToLocal(h.point.clone()).x > 0 ? 'max' : 'adj');
