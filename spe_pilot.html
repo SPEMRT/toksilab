@@ -1529,7 +1529,7 @@ function frame(now) {
   for (const c of carts) {
     if (c.where !== 'rack') { c.status = c.where === 'box' ? 'none' : c.where; continue; }
     const exp = PROTO[c.step], vol = cartVol(c);
-    const tubeEmpty = exp && exp.liq === 'sample' && c.added > 0 && srcById['n' + (c.k + 1)].vol < 0.01 && srcById['y' + (c.k + 1)].vol < 0.01;
+    const tubeEmpty = exp && exp.liq === 'sample' && c.added > 0 && srcById['n' + (c.k + 1)].vol < 0.01 && srcById['y' + (c.k + 1)].vol < 0.01 && !(S.hand && S.hand.type === 'pip' && S.hand.src.liq === 'sample' && S.hand.src.j === c.k);
     if (exp && exp.ml && (c.added >= exp.ml - 0.02 || tubeEmpty) && vol < 0.002) { c.step++; c.added = 0; c.dry = 0; }
     else if (exp && exp.dry && c.dry >= exp.dry * 60) { c.step++; c.dry = 0; }
     const wet = c.step <= 4;
