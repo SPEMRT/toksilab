@@ -872,6 +872,7 @@ spesart:{ad:'Kartuş takma ve şartlandırma',ozet:'İki kartuşu rafa tak; 3 mL
 speyuk:{ad:'Numune yükleme',ozet:'10 mL numuneyi kendi kartuşuna yükle (N1 → K1, N2 → K2); tıkanan kartuşta basıncı artır, erken biteni standa al.',baslik:'SPE · YÜKLEME',mod:'use',gorev:'sart',
  adim:[
  {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>İki kartuş rafta ve <b>şartlandırılmış</b>: sorbent ıslak.</p><p>Her tüpte <b>10 mL</b> numune var. Kartuş 3 mL aldığı için numune parça parça yüklenir: <b>3 + 3 + 3 + 1 mL</b>. Her parça geçince sıradaki eklenir.</p><p><b>N1 → K1</b>, <b>N2 → K2</b>. Numune başka kartuşa giderse sonuç başka numuneye yazılır.</p><p>N2 bulanık: içindeki partiküller kartuşu yavaş yavaş tıkayabilir. ADJ basıncı 5 psi’ye ayarlı.</p>'},
+ {bolum:'Yükleme',ask:'Kolon rafının <b>ön yüzüne</b> tıklayın: raf öne gelir, kartuşlara numune eklenebilir.',oto:1,halka:H('pull',50),izin:['pull'],ok:function(s){return s.pulled&&s.pullT>=.999}},
  {bolum:'Yükleme',ask:'<b>N1</b> numune tüpüne tıklayın: pipetle 3 mL çekin.',halka:H('src:n1',50),izin:['src:n1'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.src.id==='n1'},
   b:'N1 numunesi pipette',html:'<p>Bu numune yalnız <b>K1</b> kartuşuna gider.</p>'},
  {bolum:'Yükleme',ask:'<b>K1</b> kartuşuna tıklayın: numuneyi ekleyin.',oto:1,halka:H('cart:0',40),izin:['cart:0'],ok:function(){return E()[0].yuk>0}},
