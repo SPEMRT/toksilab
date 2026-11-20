@@ -1810,7 +1810,11 @@ function speKoc(t) {
   const dolu = c => cartVol(c) > 0.002, ad = c => 'K' + (c.k + 1);
   const rack = L.filter(c => c.where === 'rack'), stand = L.filter(c => c.where === 'stand');
   const H = (n, r) => [n, 0, r || 46], DG = ['#dersP [data-dg="0"]', 0, 0];
-  if (L.every(c => c.step > t) && S.gm === 'off' && !stand.length && !S.hand) return { is: 'Bu adım tamam.', h: null, bitti: true };
+  if (L.every(c => c.step > t) && S.gm === 'off' && !stand.length && !S.hand) {
+    if (S.busy) return { is: 'Raf hareket ediyor…', h: null };
+    if (S.pulled || S.pullT > 0.001) return { is: 'Kartuşların hepsi bu adımı bitirdi: rafı kafanın altına geri itin (rafın ön yüzüne tıklayın).', h: H('pull', 50) };
+    return { is: 'Bu adım tamam.', h: null, bitti: true };
+  }
   if (S.hand && S.hand.type === 'cart') return { is: `Elinizde ${ad(carts[S.hand.k])} var: bekleme standına tıklayıp bırakın.`, h: H('stand', 60) };
   if (S.gm !== 'off') {
     if (!sealed) return { is: 'Gaz açık ama kafa kapalı değil: mod seçicinin ortasına tıklayıp gazı kapatın (OFF).', h: H('mode', 40) };
