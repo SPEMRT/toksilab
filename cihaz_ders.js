@@ -16,7 +16,7 @@ if(!Q)return;
 var SERB=Q.get('serbest')==='1'||Q.get('gorev')==='free',NOT='';
 var SAYFA=location.pathname.split('/').pop()||'';
 var LS='toksilab_ders_v1';
-var P,i=0,gecti=false,uyari='',puan=0,sn=0,cevap=null,hataM='',SONP=null;
+var P,i=0,UST=0,ustG=false,gecti=false,uyari='',puan=0,sn=0,cevap=null,hataM='',SONP=null;
 function S(){return window.S}
 function adres(d){var q=new URLSearchParams(location.search);q.delete('gorev');q.delete('serbest');if(d)q.set('ders',d);else q.delete('ders');var s=q.toString();return location.pathname+(s?'?'+s:'')}
 function ac(d){location.href=adres(d==='liste'?'':d)}
@@ -729,7 +729,7 @@ AD['Uç kutusu (5 mL pipet uçları): tıkla, pipete yeni uç tak']='tipbox';AD[
 for(var j=1;j<=5;j++){AD['N'+j+' numune tüpü: tıkla, pipetle al']='tube';AD['Y'+j+': N'+j+' için yedek numune, tıkla, pipetle al']='tube'}
 var ADI={disp:'şişe başı dispenser',pip:'otomatik pipet',tipbox:'uç kutusu',tipwaste:'uç atık kutusu',box:'kartuş kutusu',rack:'kolon rafı',waste:'atık rafı ve teknesi',coll:'toplama rafı',platen:'basınç kafası',two:'baskı anahtarı',mode:'mod seçici',adj:'ADJ (ayarlanabilir akış) regülatörü ve manometresi',max:'MAX (maksimum akış) regülatörü ve manometresi',rm:'rotametre (akış ölçer)',post:'kılavuz kolon',gas:'azot hattı',stand:'bekleme standı',erlen:'çözelti erleni',tube:'numune tüpü',tissue:'peçete kutusu',bin:'çöp kutusu',panel:'ön panel',body:'cihaz gövdesi'};
 function H(n,r){return [n,0,r||46]}
-var DG=['#dersP [data-dg="0"]',0,0];
+var DG=['#dersP [data-dg="0"]',0,0],ODAK_SON=null;
 function E(){return window.carts||[]}
 function vol(c){return window.cartVol(c)}
 function f1(v){return v.toFixed(1).replace('.',',')}
@@ -863,6 +863,11 @@ speelu:{ad:'Yıkama, kurutma ve elüsyon',ozet:'3 × 3 mL su ve 3 mL su:MeOH 4:1
 return {sayfa:'spe_pilot.html',hazir:'__spe',tuval:'#c',ad:'SPE · CEREX 48',model:'Oasis HLB 3 cc',adTam:'SPE cihazının',
  acl:'Cihazı dört kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 4–8 dakika sürer.',
  GM:{parts:'spetani'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['spetani','spesart','speyuk','speelu'],
+ /* derste sarı halkanın gösterdiği yere göre kamera kendiliğinden odaklanır (yalnız görünüm değişince) */
+ odak:function(ad){var s=S();if(!s||s.mode!=='use'||!window.speOdak)return;var k=null;
+  ad.some(function(n){if(n.charAt(0)==='#')return false;var p=n.split(':')[0];
+   k=p==='box'||p==='stand'||p==='disp'?'sol':p==='hole'?'raf':p==='cart'?(s.hand&&s.hand.type==='pip'?'sag':'sol'):p==='src'||p==='pipstand'||p==='tipbox'||p==='tipwaste'?'sag':p==='two'||p==='knob'||p==='mode'?'on':null;return !!k});
+  if(k&&k!==ODAK_SON){ODAK_SON=k;window.speOdak(k)}},
  senkron:function(s,o){['spetani','spesart','speyuk','speelu'].forEach(function(k){if(o[k]&&o[k].bitti)s.done[k]=1})},
  /* serbest kullanım sessiz sınavdır: beş numune, uyarı yok; ✅ İşi bitirdim ile kartuş kartuş rapor */
  serbest:{yerlesim:'kontrol',sessiz:true,kur:function(){if(window.serbestKur)window.serbestKur()},
@@ -1087,8 +1092,12 @@ function test(){
  return h}
 /* geri: cihazın durumu adım adım geri sarılamadığı için bir önceki açıklama gösterilir */
 function geri(){if(i<=0)return;var k=i-1;while(k>0&&ADIM[k].oto)k--;i=k;gecti=!!ADIM[i].ask;uyari='';hataM='';ciz()}
-function git(n){if(n<0||n>=ADIM.length)return;i=n;gecti=false;uyari='';hataM='';SONP=null;ciz()}
-function tamam(){var a=ADIM[i];if(a.oto){git(i+1);return}gecti=true;uyari='';ciz()}
+/* Geri ile dönülen adımlar yalnızca okunur: cihaz geri sarılamadığı için yapılmış işler yeniden istenmez.
+   Devam, ulaşılan en ileri adıma (UST) kadar açıklamalı adımlar üzerinden ilerler. */
+function git(n){if(n<0||n>=ADIM.length)return;
+ if(n<=UST&&i<UST){while(n<UST&&ADIM[n].oto)n++;i=n;gecti=n<UST?!!ADIM[n].ask:ustG;uyari='';hataM='';ciz();return}
+ i=n;UST=Math.max(UST,n);ustG=false;gecti=false;uyari='';hataM='';SONP=null;ciz()}
+function tamam(){var a=ADIM[i];if(a.oto){git(i+1);return}gecti=true;if(i===UST)ustG=true;uyari='';ciz()}
 function tik(){
  if(SERB)return;var a=ADIM[i],s=S();if(!s||!a||a.test)return;
  if(s.mode!==L.mod){s.mode=L.mod;window.render()}
@@ -1106,6 +1115,7 @@ function halka(){
  var a=L&&ADIM[i],y=null;
  if(!SERB&&a&&a.halka&&a.ask&&!gecti&&window.scrOf){try{y=typeof a.halka==='function'?a.halka(S()):a.halka}catch(e){y=null}}
  var liste=!y?[]:Array.isArray(y[0])?y:[y];
+ if(C.odak&&liste.length)try{C.odak(liste.map(function(q){return q[0]}))}catch(e){}
  while(HK.length<liste.length){var e=document.createElement('div');e.className='dersHalka2';e.style.cssText='position:fixed;z-index:12;pointer-events:none;border:4px solid #F2B632;box-shadow:0 0 0 3px rgba(242,182,50,.25),0 0 22px rgba(242,182,50,.9);transform:translate(-50%,-50%);animation:dersHal 1.1s infinite;display:none';document.body.appendChild(e);HK.push(e)}
  HK.forEach(function(h,k){var q=liste[k];if(!q){h.style.display='none';return}
   try{var p,w,hh;if(q[0].charAt(0)==='#'){var r=document.querySelector(q[0]).getBoundingClientRect();if(!r.width)throw 0;p=[r.left+r.width/2,r.top+r.height/2];w=r.width+16;hh=r.height+16}else{p=window.scrOf(q[0]);w=hh=q[2]}
