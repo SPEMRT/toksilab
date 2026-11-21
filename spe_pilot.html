@@ -195,6 +195,8 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
 /* rehberli ders ve serbest kullanım (cihaz_ders.js) */
 .snav { display: flex; gap: 6px; }
 .snav:empty { display: none; }
+.kicBtn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #2BD9C0; border-radius: 999px; padding: 7px 13px; font: 700 13.5px var(--font-body); background: transparent; color: #7CF2D8; cursor: pointer; white-space: nowrap; }
+.kicBtn:hover { background: rgba(43,217,192,.12); }
 .snav button { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; padding: 7px 13px; font: 700 13.5px var(--font-body); background: var(--accent); color: #fff; cursor: pointer; }
 body.cders .left, body.cders #btnReset { display: none !important; }
 .mlz { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
@@ -245,6 +247,7 @@ html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;botto
       <div class="ro"><div class="k">Saat</div><div class="v" id="roT">00:00</div></div>
       <div class="ro"><div class="k" id="roDk">Atık</div><div class="v" id="roD">0<small>mL</small></div></div>
     </div>
+    <button type="button" class="kicBtn" id="btnAnim" title="Kartuşun içinde SPE adımlarını gösteren canlandırma">🔬 Kartuşun içi</button>
     <div class="snav" id="snav"></div>
     <div class="mlz" id="mlz" role="group" aria-label="Tezgâh malzemeleri"><span>🧰 Tezgâh</span></div>
     <div class="status" id="statusBox"><span class="dot" id="dot"></span><span id="statusTxt"></span></div>
@@ -1910,6 +1913,7 @@ window.__spe = 1;
 })();
 </script>
 <script src="anamenu.js" charset="utf-8" defer></script>
+<script>(function(){var a=document.createElement('script');a.charset='utf-8';a.src='spe_anim.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(a);document.getElementById('btnAnim').onclick=function(){if(window.speAnim)window.speAnim()}})();</script>
 <script>(function(){var s=document.createElement('script');s.charset='utf-8';s.src='cihaz_ders.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})();</script>
 </body>
 </html>
