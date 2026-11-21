@@ -41,16 +41,6 @@ const COZUM = [
     if (!document.getElementById('fpT').textContent.startsWith(g[0] === 'L' ? 'Sol' : 'Sağ')) return 'halka';
     document.getElementById(g[1] > 0 ? 'fpCW' : 'fpCCW').click();
   } },
-  { sayfa: 'vorteks_pilot.html', ask: /(\d+)\. kademeye/, fn: () => {
-    // Kutu kapalıysa halka (hız düğmesi) açar; açıksa + / − ile hedef kademeye git.
-    const m = (document.querySelector('#dersP .ask') || {}).innerText?.match(/(\d+)\. kademeye/);
-    if (!m) return;
-    const hedef = +m[1];
-    const k = document.getElementById('kpop');
-    if (!k || k.hidden) return 'halka';
-    const v = window.S.lvl;
-    if (v !== hedef) document.getElementById(v < hedef ? 'kpP' : 'kpM').click();
-  } },
   { sayfa: 'santrifuj_pilot.html', ask: /yerleştirin|karşısına \(8 yuva/i, degil: /denge (mikro)?tüpü hazırlayın/i, fn: () => {
     // Aynı tür tüpleri karşılıklı diz; tek kalanı boş bir çiftin bir yarısına koy.
     const s = window.S, N = s.slots.length, h = N / 2;
