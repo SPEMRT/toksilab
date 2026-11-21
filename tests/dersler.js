@@ -126,7 +126,8 @@ async function dersOynat(tarayici, port, hedef) {
       else if (d.ileri) await sayfa.click('#dIleri');
       // Son tıklamadan sonra canlı gösterge değiştiyse işlem sürüyor: yeniden tıklama, bekle.
       else if (sonTik && d.canli !== canliTik && Date.now() - sonTik < 60000) { canliTik = d.canli; sonTik = Date.now(); }
-      else if (Date.now() - sonTik > 1500) {
+      // Ders düğmeleri bütün bir işlemi başlatır (kafa iner, raf değişir): sonrasında daha uzun bekle.
+      else if (Date.now() - sonTik > (d.dugme ? 8000 : 1500)) {
         canliTik = d.canli;
         // Adım öğrenciden bir işlem bekliyor: düğme, basılı tutma ya da halkaya tıklama.
         sonTik = Date.now(); deneme++;
