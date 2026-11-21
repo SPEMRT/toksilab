@@ -85,7 +85,10 @@ async function dersOynat(tarayici, port, hedef) {
   const sonuc = { hedef, tamam: false, adim: '', hatalar, uyarilar: [], kayma: '', sure: 0 };
   const t0 = Date.now();
   try {
-    await sayfa.goto(`http://localhost:${port}/${hedef}`, { waitUntil: 'domcontentloaded', timeout: 90000 });
+    for (let k = 0; ; k++) { // yük altında sayfa geç açılabilir: bir kez daha dene
+      try { await sayfa.goto(`http://localhost:${port}/${hedef}`, { waitUntil: 'domcontentloaded', timeout: 90000 }); break; }
+      catch (e) { if (k) throw e; }
+    }
     await sayfa.waitForSelector('#dersP .ust', { timeout: 90000 });
     let canliTik = '', sonCanli = '', sonAnahtar = '', adimBasi = Date.now(), sonTik = 0, deneme = 0;
     while (true) {
