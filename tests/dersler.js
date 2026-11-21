@@ -24,6 +24,14 @@ function dersListesi() {
 // Halkanın göstermediği, öğrencinin kendi karar verdiği adımlar için doğru davranış.
 // Her çözüm sayfanın içinde çalışır; adım metni (ask) desene uyunca halka yerine çağrılır.
 const COZUM = [
+  { sayfa: 'pipet_pilot.html', ask: /hacmi ([\d,]+) µL/, fn: () => {
+    // Kutu kapalıysa halka (hacim halkası) açar; açıksa − / + ile hedef hacme git.
+    const hedef = parseFloat(document.querySelector('#dersP .ask').innerText.match(/hacmi ([\d,]+) µL/)[1].replace(',', '.'));
+    const v = document.getElementById('vpop');
+    if (!v || v.hidden) return 'halka';
+    for (let n = 0; n < 400 && Math.abs(window.S.vol - hedef) > 1e-6; n++)
+      document.getElementById(window.S.vol < hedef ? 'vpP' : 'vpM').click();
+  } },
   { sayfa: 'terazi_pilot.html', ask: /Kabarcığı ortalayın/, fn: () => {
     // Canlı ipucunu uygula: doğru ayağın kutusu açıksa ↻ / ↺; değilse halka (ayak) açar.
     const g = window.sugg(), f = document.getElementById('fpop');
