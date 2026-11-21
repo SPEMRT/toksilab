@@ -120,7 +120,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
 .hand button { font: 600 12px var(--font-body); background: var(--chip); color: var(--fg); border: 0; border-radius: 4px; padding: 5px 8px; cursor: pointer; }
 .tip { position: absolute; pointer-events: none; transform: translate(12px, 12px); background: var(--fg); color: var(--bg); font: 500 12px var(--font-body); padding: 5px 8px; border-radius: 5px; max-width: 240px; z-index: 3; }
 .regpop {
-  position: absolute; z-index: 5; transform: translate(-50%, calc(-100% - 18px)); display: flex; align-items: center; gap: 6px;
+  position: absolute; z-index: 5; transform: translate(-50%, 0); display: flex; align-items: center; gap: 6px;
   background: var(--panel); border: 1px solid var(--accent); border-radius: 8px; padding: 6px 8px; box-shadow: 0 6px 20px rgb(0 0 0 / .18);
 }
 .regpop span { font: 600 11px var(--font-body); color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin-right: 2px; }
@@ -1012,7 +1012,7 @@ function toast(msg, good) {
   toastEl.textContent = msg; toastEl.hidden = false;
   const yer = sonTik && performance.now() - sonTik.t < 1500;
   toastEl.className = 'toast' + (good ? ' good' : '') + (yer ? ' yer' : '');
-  if (yer) { const W = stage.clientWidth, w = Math.min(340, W - 24) / 2; toastEl.style.left = Math.max(12 + w, Math.min(W - 12 - w, sonTik.x)) + 'px'; toastEl.style.top = Math.max(90, sonTik.y - 18) + 'px'; }
+  if (yer) { const W = stage.clientWidth, w = Math.min(340, W - 24) / 2; toastEl.style.left = Math.max(12 + w, Math.min(W - 12 - w, sonTik.x)) + 'px'; toastEl.style.top = Math.max(90, sonTik.y - 62) + 'px'; }
   else { toastEl.style.left = ''; toastEl.style.top = ''; }
   clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.hidden = true, 3600);
 }
@@ -1389,10 +1389,10 @@ function closeReg() { regSide = null; regpop.hidden = true; }
 function syncReg() { if (regSide) $('#regVal').textContent = S[regSide] + ' psi'; }
 function placeReg() {
   if (!regSide) return;
-  const w = (regSide === 'adj' ? knobL : knobR).localToWorld(V3(0, 0.18, 0.2)).project(camera);
+  const w = (regSide === 'adj' ? knobL : knobR).localToWorld(V3(0, -0.2, 0.2)).project(camera);
   const r = renderer.domElement;
   regpop.style.left = Math.min(r.clientWidth - 120, Math.max(120, (w.x + 1) / 2 * r.clientWidth)) + 'px';
-  regpop.style.top = Math.max(70, (1 - w.y) / 2 * r.clientHeight) + 'px';
+  regpop.style.top = Math.min(r.clientHeight - 60, (1 - w.y) / 2 * r.clientHeight + 8) + 'px';
 }
 [['regMinus', -1], ['regPlus', 1]].forEach(([id, d]) => {
   const b = $('#' + id);
@@ -1800,7 +1800,7 @@ function updateUI() {
   const boxN = carts.filter(c => c.where === 'box' && c.k < S.nCart).length + S.spares;
   if (cbSprite.userData.n !== boxN) { cbSprite.userData.n = boxN; cbSprite.userData.draw('Oasis HLB 3 cc', boxN + ' kartuş'); }
 
-  el.hand.hidden = !S.hand;
+  el.hand.hidden = !S.hand || S.hand.type === 'disp';
   const hk = S.hand && S.hand.type === 'cart';
   $('#btnHPlace').hidden = !hk;
   $('#btnDrop').textContent = hk ? (used(carts[S.hand.k]) ? 'Standa koy' : 'Kutuya bırak') : S.hand && S.hand.type === 'pip' ? 'Standa koy' : 'Bırak';
