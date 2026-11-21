@@ -7,8 +7,12 @@ const { KOK, sunucuAc, tarayiciAc, yonlendir } = require('./ortak');
 
 (async () => {
   const { sunucu, port } = await sunucuAc();
-  const sayfalar = process.argv.slice(2).length ? process.argv.slice(2)
-    : fs.readdirSync(KOK).filter(f => f.endsWith('.html')).sort();
+  // Kapsam: ana sayfa, lab turu, temel beceri cihazları ve SPE. Hepsi için: --tum
+  const KAPSAM = ['index.html', 'lab_giris.html', 'terazi_pilot.html', 'pipet_pilot.html', 'vorteks_pilot.html',
+    'santrifuj_pilot.html', 'ultra_pilot.html', 'su_pilot.html', 'spe_pilot.html'];
+  const arg = process.argv.slice(2);
+  const sayfalar = arg.includes('--tum') ? fs.readdirSync(KOK).filter(f => f.endsWith('.html')).sort()
+    : arg.length ? arg : KAPSAM;
   const ekranDir = path.join(__dirname, 'ekran');
   fs.mkdirSync(ekranDir, { recursive: true });
 

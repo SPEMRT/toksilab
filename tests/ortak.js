@@ -5,7 +5,7 @@ const path = require('path');
 
 const KOK = path.resolve(__dirname, '..');
 const NM = path.join(__dirname, 'node_modules');
-const TURLER = { '.html': 'text/html', '.js': 'text/javascript', '.jpg': 'image/jpeg',
+const TURLER = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.jpg': 'image/jpeg',
   '.png': 'image/png', '.mp4': 'video/mp4', '.vtt': 'text/vtt', '.css': 'text/css' };
 
 function sunucuAc() {
