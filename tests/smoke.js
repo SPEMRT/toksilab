@@ -1,0 +1,77 @@
+// Tüm sayfaları gerçek bir tarayıcıda açar; JS hatası, konsol hatası ve
+// yüklenemeyen dosya var mı kontrol eder. Kullanım: node tests/smoke.js [sayfa.html ...]
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const { chromium } = require('playwright');
+
+const KOK = path.resolve(__dirname, '..');
+const TURLER = { '.html': 'text/html', '.js': 'text/javascript', '.jpg': 'image/jpeg',
+  '.png': 'image/png', '.mp4': 'video/mp4', '.vtt': 'text/vtt', '.css': 'text/css' };
+
+const sunucu = http.createServer((req, res) => {
+  const yol = path.join(KOK, decodeURIComponent(req.url.split('?')[0]));
+  if (!yol.startsWith(KOK) || !fs.existsSync(yol) || fs.statSync(yol).isDirectory()) {
+    res.writeHead(404); return res.end();
+  }
+  res.writeHead(200, { 'Content-Type': TURLER[path.extname(yol)] || 'application/octet-stream' });
+  fs.createReadStream(yol).pipe(res);
+});
+
+(async () => {
+  await new Promise(r => sunucu.listen(0, r));
+  const port = sunucu.address().port;
+  const sayfalar = process.argv.slice(2).length ? process.argv.slice(2)
+    : fs.readdirSync(KOK).filter(f => f.endsWith('.html')).sort();
+  const ekranDir = path.join(KOK, 'tests', 'ekran');
+  fs.mkdirSync(ekranDir, { recursive: true });
+
+  const vekil = process.env.HTTPS_PROXY || process.env.https_proxy;
+  const tarayici = await chromium.launch({ ...(vekil ? { proxy: { server: vekil, bypass: 'localhost,127.0.0.1' } } : {}), args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
+  // CDN kapalıysa (ör. kısıtlı ağ) three.js'i tests/node_modules'tan sun.
+  const NM = path.join(__dirname, 'node_modules');
+  const yerelCdn = url => {
+    let m;
+    if ((m = url.match(/cdn\.jsdelivr\.net\/npm\/three@0\.160\.0\/(.+)$/))) return path.join(NM, 'three160', m[1]);
+    if ((m = url.match(/cdn\.jsdelivr\.net\/npm\/three@0\.128\.0\/(.+)$/))) return path.join(NM, 'three128', m[1]);
+    if (/cdnjs\.cloudflare\.com\/ajax\/libs\/three\.js\/r128\/three\.min\.js$/.test(url)) return path.join(NM, 'three128', 'build', 'three.min.js');
+    return null;
+  };
+  const yerelVar = fs.existsSync(NM);
+  let hataliSayfa = 0;
+  for (const ad of sayfalar) {
+    const sayfa = await tarayici.newPage({ viewport: { width: 1280, height: 800 } });
+    const hatalar = [];
+    // Sitenin kendi tam adresleri (spemrt.github.io/toksilab/...) → depodaki dosya.
+    await sayfa.route(/^https:\/\/spemrt\.github\.io\/toksilab\//, async r => {
+      const ad = decodeURIComponent(new URL(r.request().url()).pathname.replace(/^\/toksilab\//, ''));
+      const dosya = path.join(KOK, ad);
+      if (dosya.startsWith(KOK) && fs.existsSync(dosya)) return r.fulfill({ path: dosya });
+      return r.fulfill({ status: 404 });
+    });
+    if (yerelVar) await sayfa.route(/^https:\/\/(cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com)\//, async r => {
+      const dosya = yerelCdn(r.request().url());
+      if (dosya && fs.existsSync(dosya)) return r.fulfill({ path: dosya, contentType: 'text/javascript' });
+      return r.continue();
+    });
+    sayfa.on('pageerror', e => hatalar.push('JS hatası: ' + e.message));
+    sayfa.on('console', m => { if (m.type() === 'error') hatalar.push('Konsol: ' + m.text()); });
+    sayfa.on('response', r => { if (r.status() >= 400) hatalar.push(`Yüklenemedi (${r.status()}): ${r.url()}`); });
+    sayfa.on('requestfailed', r => hatalar.push('İstek başarısız: ' + r.url() + ' ' + (r.failure()?.errorText || '')));
+    try {
+      await sayfa.goto(`http://localhost:${port}/${ad}`, { waitUntil: 'load', timeout: 30000 });
+      await sayfa.waitForTimeout(2500);
+      await sayfa.screenshot({ path: path.join(ekranDir, ad.replace('.html', '.png')) });
+    } catch (e) { hatalar.push('Açılamadı: ' + e.message); }
+    // Medya dosyalarının yarıda kesilmesi (ERR_ABORTED) normaldir, sayma.
+    const gercek = hatalar.filter(h => !/ERR_ABORTED/.test(h));
+    console.log(`${gercek.length ? '✗' : '✓'} ${ad}`);
+    gercek.forEach(h => console.log('    ' + h));
+    if (gercek.length) hataliSayfa++;
+    await sayfa.close();
+  }
+  await tarayici.close();
+  sunucu.close();
+  console.log(`\n${sayfalar.length - hataliSayfa}/${sayfalar.length} sayfa temiz. Ekran görüntüleri: tests/ekran/`);
+  process.exit(hataliSayfa ? 1 : 0);
+})();
