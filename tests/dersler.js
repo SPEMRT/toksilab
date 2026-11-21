@@ -24,6 +24,14 @@ function dersListesi() {
 // Halkanın göstermediği, öğrencinin kendi karar verdiği adımlar için doğru davranış.
 // Her çözüm sayfanın içinde çalışır; adım metni (ask) desene uyunca halka yerine çağrılır.
 const COZUM = [
+  { sayfa: 'vorteks_pilot.html', ask: /(\d+)\. kademeye getirin/, fn: () => {
+    // Kutu kapalıysa halka (hız düğmesi) açar; açıksa + / − ile hedef kademeye git.
+    const hedef = +document.querySelector('#dersP .ask').innerText.match(/(\d+)\. kademeye/)[1];
+    const k = document.getElementById('kpop');
+    if (!k || k.hidden) return 'halka';
+    const v = window.S.lvl;
+    if (v !== hedef) document.getElementById(v < hedef ? 'kpP' : 'kpM').click();
+  } },
   { sayfa: 'santrifuj_pilot.html', ask: /yerleştirin|karşısına \(8 yuva/i, degil: /denge (mikro)?tüpü hazırlayın/i, fn: () => {
     // Aynı tür tüpleri karşılıklı diz; tek kalanı boş bir çiftin bir yarısına koy.
     const s = window.S, N = s.slots.length, h = N / 2;
@@ -105,7 +113,8 @@ async function dersOynat(tarayici, port, hedef) {
         sonTik = Date.now(); deneme++;
         const sayfaAdi = hedef.split('?')[0];
         const coz = COZUM.find(c => c.sayfa === sayfaAdi && c.ask.test(d.ask) && !(c.degil && c.degil.test(d.ask)));
-        if (coz) await sayfa.evaluate(coz.fn);
+        if (coz && (await sayfa.evaluate(coz.fn)) !== 'halka') { /* çözüm uygulandı */ }
+        else if (coz) { const [x, y] = d.halkalar[0] || []; if (x != null) await sayfa.mouse.click(x, y); }
         else if (d.dugme) await sayfa.click(`#dersP [data-dg="${(deneme - 1) % d.dugme}"]`);
         else if (d.tut) {
           const b = await sayfa.locator('#dTut').boundingBox();
