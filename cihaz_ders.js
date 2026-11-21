@@ -865,8 +865,8 @@ return {sayfa:'spe_pilot.html',hazir:'__spe',tuval:'#c',ad:'SPE · CEREX 48',mod
  GM:{parts:'spetani'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['spetani','spesart','speyuk','speelu'],
  /* derste sarı halkanın gösterdiği yere göre kamera kendiliğinden odaklanır (yalnız görünüm değişince) */
  odak:function(ad){var s=S();if(!s||s.mode!=='use'||!window.speOdak)return;var k=null;
-  ad.some(function(n){if(n.charAt(0)==='#')return false;var p=n.split(':')[0];
-   k=p==='box'||p==='stand'||p==='disp'?'sol':p==='hole'?'raf':p==='cart'?(s.hand&&s.hand.type==='pip'?'sag':'sol'):p==='src'||p==='pipstand'||p==='tipbox'||p==='tipwaste'?'sag':p==='two'||p==='knob'||p==='mode'?'on':null;return !!k});
+  ad.some(function(n){if(n.charAt(0)==='#'){k=n.indexOf('data-dg')>=0?'on':n.indexOf('#lsA')===0?'sol':n.indexOf('#reg')===0?'on':null;return !!k}var p=n.split(':')[0];
+   k=p==='box'||p==='stand'||p==='disp'?'sol':p==='hole'||p==='pull'?'raf':p==='cart'?(s.hand&&s.hand.type==='pip'?'sag':'sol'):p==='src'||p==='pipstand'||p==='tipbox'||p==='tipwaste'?'sag':p==='two'||p==='knob'||p==='mode'||p==='gauge'?'on':p==='coll'||p==='waste'?'genel':null;return !!k});
   if(k&&k!==ODAK_SON){ODAK_SON=k;window.speOdak(k)}},
  senkron:function(s,o){['spetani','spesart','speyuk','speelu'].forEach(function(k){if(o[k]&&o[k].bitti)s.done[k]=1})},
  /* serbest kullanım sessiz sınavdır: beş numune, uyarı yok; ✅ İşi bitirdim ile kartuş kartuş rapor */
