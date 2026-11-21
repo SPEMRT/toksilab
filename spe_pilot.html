@@ -114,7 +114,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
 .views { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); bottom: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
 .hint { position: absolute; top: 10px; left: max(12px, env(safe-area-inset-left, 0px)); font: 500 11.5px var(--font-mono); color: var(--muted); }
 .hand {
-  position: absolute; top: 8px; right: 10px; display: flex; align-items: center; gap: 8px; z-index: 2;
+  position: absolute; top: 10px; left: 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; z-index: 4;
   background: var(--panel); border: 1px solid var(--accent); border-radius: 6px; padding: 5px 5px 5px 10px; font-size: 12.5px; max-width: calc(100% - 20px);
 }
 .hand button { font: 600 12px var(--font-body); background: var(--chip); color: var(--fg); border: 0; border-radius: 4px; padding: 5px 8px; cursor: pointer; }
@@ -128,9 +128,9 @@ input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
 .regpop button { font: 600 18px/1 var(--font-body); width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--line); background: var(--chip); color: var(--fg); cursor: pointer; touch-action: none; }
 .regpop #regClose { width: 26px; height: 26px; font-size: 15px; background: transparent; border: 0; color: var(--muted); }
 .toast {
-  position: absolute; left: 50%; top: 46px; transform: translateX(-50%); z-index: 4;
-  background: var(--panel); border: 1px solid var(--warn); color: var(--fg);
-  font: 500 13px var(--font-body); padding: 8px 12px; border-radius: 6px; max-width: calc(100% - 24px);
+  position: absolute; left: 50%; top: 56px; transform: translateX(-50%); z-index: 5; pointer-events: none;
+  background: #0E1518; border: 1px solid var(--warn); color: var(--fg); box-shadow: 0 8px 22px rgba(0,0,0,.35);
+  font: 500 13.5px var(--font-body); line-height: 1.35; padding: 8px 12px; border-radius: 8px; max-width: min(340px, calc(100% - 24px));
 }
 .toast.good { border-color: var(--ok); }
 .tags { position: absolute; inset: 0; pointer-events: none; }
@@ -183,7 +183,10 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
 .btn:hover:not(:disabled), .seg button:hover:not(:disabled), .views button:hover { background: #2E3F47; }
 .card { background: #1E2A30; }
 .lane.off { opacity: .5; }
-.hand, .regpop, .toast { background: #1E2A30; }
+.hand, .regpop { background: #1E2A30; }
+.toast.yer { transform: translate(-50%, -100%); }
+.toast.yer::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 10px; height: 10px; background: #0E1518; border-right: 1px solid var(--warn); border-bottom: 1px solid var(--warn); transform: translateX(-50%) rotate(45deg); }
+.toast.yer.good::after { border-color: var(--ok); }
 .tip { background: rgba(18, 28, 32, .95); color: var(--fg); border-left: 4px solid var(--brand); }
 .status { background: #1E2A30; }
 .hint { color: #24343A; }
@@ -207,7 +210,7 @@ body.cders .left, body.cders #btnReset { display: none !important; }
 body.cders:not(.serbest) .mlz { display: none; }
 body.cders .app { grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "top top" "stage right" "dock dock"; }
 body.cders:not(.serbest) .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "stage" "dock"; margin-right: 330px; }
-body.cders #dersK { width: 330px !important; padding: 12px !important; }
+body.cders #dersK { width: 330px !important; padding: 12px !important; box-sizing: border-box; }
 #dersP .anim canvas { width: 100%; display: block; border-radius: 10px; background: #F4F8F9; }
 #dersP .anim .ak { display: flex; gap: 4px; margin-top: 6px; }
 #dersP .anim .ak button { flex: 1; padding: 6px 2px; font-size: 11.5px; background: #33444C; }
@@ -278,7 +281,7 @@ html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;botto
   <section class="stage" id="stage">
     <canvas id="c" tabindex="0" aria-label="CEREX 48 ve laboratuvar tezgâhının etkileşimli 3D modeli"></canvas>
     <div class="hint">Sürükle: döndür · Kaydır: yakınlaş · Nesneye tıkla</div>
-    <div class="hand" id="hand" hidden><span id="handTxt"></span><button type="button" id="btnDrop">Bırak</button></div>
+    <div class="hand" id="hand" hidden><span id="handTxt"></span><button type="button" id="btnHPlace" hidden>Rafa yerleştir</button><button type="button" id="btnDrop">Bırak</button></div>
     <div class="views" role="group" aria-label="Kamera açısı">
       <button id="vIso" type="button">Tezgâh</button>
       <button id="vFront" type="button">Ön panel</button>
@@ -1004,7 +1007,15 @@ const tween = (obj, k, to, dur) => new Promise(res => tweens.push({ obj, k, from
 
 /* ---------- actions ---------- */
 const toastEl = $('#toast'); let toastTimer;
-function toast(msg, good) { toastEl.textContent = msg; toastEl.className = 'toast' + (good ? ' good' : ''); toastEl.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.hidden = true, 3600); }
+let sonTik = null; /* bilgi mesajı tıklanan nesnenin hemen üstünde çıkar (tıklamadan 1,5 s içinde gelirse) */
+function toast(msg, good) {
+  toastEl.textContent = msg; toastEl.hidden = false;
+  const yer = sonTik && performance.now() - sonTik.t < 1500;
+  toastEl.className = 'toast' + (good ? ' good' : '') + (yer ? ' yer' : '');
+  if (yer) { const W = stage.clientWidth, w = Math.min(340, W - 24) / 2; toastEl.style.left = Math.max(12 + w, Math.min(W - 12 - w, sonTik.x)) + 'px'; toastEl.style.top = Math.max(90, sonTik.y - 18) + 'px'; }
+  else { toastEl.style.left = ''; toastEl.style.top = ''; }
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.hidden = true, 3600);
+}
 const fmtT = s => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60; return (h ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
 function log(msg) {
   const m = /^K(\d):/.exec(msg), k = m ? +m[1] - 1 : -1, gen = k >= 0 ? carts[k].gen : 0;
@@ -1029,6 +1040,7 @@ function takeCart() {
   const c = carts.find(c => c.where === 'box' && c.k < S.nCart);
   if (!c) return toast('Kutuda kartuş kalmadı.');
   c.where = 'hand'; S.hand = { type: 'cart', k: c.k };
+  toast(`K${c.k + 1} kartuşu elinde: rafta bir deliğe tıkla ya da “Rafa yerleştir”e bas.`, true);
 }
 function placeCart(hole) {
   if (!S.hand || S.hand.type !== 'cart') return;
@@ -1155,6 +1167,7 @@ function dispense(k) {
   const w = colRack.localToWorld(V3(holeX(c.hole % NX), 0.95, holeZ(Math.floor(c.hole / NX))));
   for (let i = 0; i < 6; i++) setTimeout(() => spawnDrop(w.x, w.y + 0.1, w.z, w.y - 0.5, L.color), i * 60);
   if (!dsp && hh.vol > 0.01) toast(`K${k + 1} doldu; pipette ${hh.vol.toFixed(1)} mL kaldı.`);
+  else toast(`K${k + 1} kartuşuna ${v.toFixed(1).replace('.', ',')} mL ${src.title} verildi.`, true);
   if (!dsp && hh.vol < 0.01) hh.vol = 0;
 }
 const puddles = [];
@@ -1202,6 +1215,7 @@ async function togglePull() {
   if (S.busy) return;
   if (S.headT > 0.001) return toast('Rafı çekmek için önce kafayı kaldır (iki anahtar birlikte).');
   S.busy = true; S.pulled = !S.pulled;
+  toast(S.pulled ? 'Raf öne çekildi: kartuş takabilir, kartuşlara çözelti verebilirsin.' : 'Raf kafanın altına itildi: kafa indirilebilir.', true);
   await tween(S, 'pullT', S.pulled ? 1 : 0, 0.8);
   S.busy = false;
 }
@@ -1259,7 +1273,8 @@ $('#mlz').insertAdjacentHTML('beforeend', MLZ.map(m => `<button type="button" da
 document.querySelectorAll('[data-mlz]').forEach(b => b.onclick = () => { const id = b.dataset.mlz; if (izin('mlz:' + id)) mlzGoster(id, !mlzVar(id)); });
 $('#btnTake').onclick = takeCart;
 $('#btnPlace').onclick = placeNext;
-$('#btnDrop').onclick = dropHand;
+$('#btnDrop').onclick = () => { if (izin('box')) dropHand(); };
+$('#btnHPlace').onclick = () => { if (izin('rackTop')) placeNext(); };
 $('#btnRack').onclick = swapRacks;
 $('#btnReset').onclick = reset;
 $('#btnPull').onclick = togglePull;
@@ -1404,6 +1419,7 @@ renderer.domElement.addEventListener('pointerdown', e => down = { x: e.clientX, 
 renderer.domElement.addEventListener('pointerup', e => {
   if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5) return;
   const h = pick(e);
+  sonTik = { x: e.clientX - h.r.left, y: e.clientY - h.r.top, t: performance.now() };
   if (h.o) { tip.innerHTML = '<b></b>'; tip.firstChild.textContent = h.o.userData.label; tip.style.left = (e.clientX - h.r.left) + 'px'; tip.style.top = (e.clientY - h.r.top) + 'px'; tip.hidden = false; }
   if (S.mode === 'parts') return;
   aimHand(h);
@@ -1785,7 +1801,10 @@ function updateUI() {
   if (cbSprite.userData.n !== boxN) { cbSprite.userData.n = boxN; cbSprite.userData.draw('Oasis HLB 3 cc', boxN + ' kartuş'); }
 
   el.hand.hidden = !S.hand;
-  if (S.hand) el.handTxt.textContent = S.hand.type === 'cart' ? `Elinde: K${S.hand.k + 1}. Rafta bir deliğe ya da bekleme standına tıkla` : S.hand.type === 'tissue' ? 'Elinde peçete. Dökülen sıvıya tıkla' : S.hand.type === 'disp' ? `Dispenser: ${S.hand.src.title} (3 mL). Kartuşa tıkla; bırakmak için şişeye yeniden tıkla` : !S.hand.uc ? 'Otomatik pipet (P5000), uç yok. Uç kutusundan yeni uç tak' : S.hand.vol > 0.005 ? `Otomatik pipet: ${S.hand.vol.toFixed(1)} mL ${S.hand.src.title}. Kendi kartuşuna tıkla` : S.hand.uc.j == null ? 'Otomatik pipet, yeni uç takılı. Numune tüpüne tıkla' : `Otomatik pipet, N${S.hand.uc.j + 1} ucu takılı. Aynı numuneden çek ya da ucu at`;
+  const hk = S.hand && S.hand.type === 'cart';
+  $('#btnHPlace').hidden = !hk;
+  $('#btnDrop').textContent = hk ? (used(carts[S.hand.k]) ? 'Standa koy' : 'Kutuya bırak') : S.hand && S.hand.type === 'pip' ? 'Standa koy' : 'Bırak';
+  if (S.hand) el.handTxt.textContent = S.hand.type === 'cart' ? `Elinde: K${S.hand.k + 1} kartuşu. Rafta bir deliğe tıkla ya da` : S.hand.type === 'tissue' ? 'Elinde peçete. Dökülen sıvıya tıkla' : S.hand.type === 'disp' ? `Dispenser: ${S.hand.src.title} (3 mL). Kartuşa tıkla; bırakmak için şişeye yeniden tıkla` : !S.hand.uc ? 'Otomatik pipet (P5000), uç yok. Uç kutusundan yeni uç tak' : S.hand.vol > 0.005 ? `Otomatik pipet: ${S.hand.vol.toFixed(1)} mL ${S.hand.src.title}. Kendi kartuşuna tıkla` : S.hand.uc.j == null ? 'Otomatik pipet, yeni uç takılı. Numune tüpüne tıkla' : `Otomatik pipet, N${S.hand.uc.j + 1} ucu takılı. Aynı numuneden çek ya da ucu at`;
   el.bRack.textContent = S.wasteT > 0.5 ? 'Toplama rafına geç' : 'Atık rafına geç';
   el.bRack.disabled = S.busy;
   const bp = $('#btnPull'); bp.textContent = S.pulled ? 'Rafı kafanın altına it' : 'Rafı öne çek'; bp.disabled = S.busy;
