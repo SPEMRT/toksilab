@@ -24,6 +24,13 @@ function dersListesi() {
 // Halkanın göstermediği, öğrencinin kendi karar verdiği adımlar için doğru davranış.
 // Her çözüm sayfanın içinde çalışır; adım metni (ask) desene uyunca halka yerine çağrılır.
 const COZUM = [
+  { sayfa: 'terazi_pilot.html', ask: /Kabarcığı ortalayın/, fn: () => {
+    // Canlı ipucunu uygula: doğru ayağın kutusu açıksa ↻ / ↺; değilse halka (ayak) açar.
+    const g = window.sugg(), f = document.getElementById('fpop');
+    if (!g || !f || f.hidden) return 'halka';
+    if (!document.getElementById('fpT').textContent.startsWith(g[0] === 'L' ? 'Sol' : 'Sağ')) return 'halka';
+    document.getElementById(g[1] > 0 ? 'fpCW' : 'fpCCW').click();
+  } },
   { sayfa: 'vorteks_pilot.html', ask: /(\d+)\. kademeye getirin/, fn: () => {
     // Kutu kapalıysa halka (hız düğmesi) açar; açıksa + / − ile hedef kademeye git.
     const hedef = +document.querySelector('#dersP .ask').innerText.match(/(\d+)\. kademeye/)[1];
