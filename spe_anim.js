@@ -74,6 +74,9 @@ window.speAnim = function () {
   let damT = 0, damlar = [];
   const secim = FAZ.map(z => z.vs);
   const hizliMi = () => W.querySelector('#saFast').checked;
+  /* uyarılı seçenek hatadır: o adımın sonucu gösterilir ama sonraki adıma geçilmez */
+  const hatali = k => k === 1 ? hizliMi() : ((FAZ[k].not || {})[secim[k]] || '').charAt(0) === '!';
+  const acik = k => { for (let j = 0; j < k; j++) if (hatali(j)) return false; return true; };
   const sayac = () => { const o = { bed: 0, atikA: 0, tupA: 0, tupK: 0 }; P.forEach(p => { if (p.t === 'analit') { if (p.s === 'bed') o.bed++; if (p.s === 'out' && p.v === 'atik') o.atikA++; if (p.s === 'out' && p.v === 'tup') o.tupA++; } else if (p.s === 'out' && p.v === 'tup') o.tupK++; }); return o; };
   const fit = () => { const r = cv.getBoundingClientRect(); cv.width = cv.height = Math.round(r.width * 2); };
   const hareketli = () => P.some(p => p.s === 'flow' || p.s === 'tip' || p.s === 'dusus' || p.s === 'col');
@@ -157,15 +160,16 @@ window.speAnim = function () {
     return null;
   }
   function ui() {
-    W.querySelector('#saF').innerHTML = FAZ.map((z, k) => `<button data-f="${k}" style="${BT_}flex:1;min-width:110px;background:${k === f ? '#2BD9C0' : bitti[k] ? '#1F7A3D' : '#33444C'};color:${k === f ? '#062126' : '#EAF2F3'}">${k + 1}. ${z.ad}</button>`).join('');
+    W.querySelector('#saF').innerHTML = FAZ.map((z, k) => { const kilit = k !== f && !acik(k); return `<button data-f="${k}"${kilit ? ' disabled title="Önceki adımı doğru seçenekle tamamlayın"' : ''} style="${BT_}flex:1;min-width:110px;background:${k === f ? '#2BD9C0' : bitti[k] && !hatali(k) ? '#1F7A3D' : '#33444C'};color:${k === f ? '#062126' : '#EAF2F3'};${kilit ? 'opacity:.45;cursor:not-allowed' : ''}">${kilit ? '🔒 ' : ''}${k + 1}. ${z.ad}</button>`; }).join('');
     W.querySelector('#saS').innerHTML = FAZ[f].sec.map(([id, ad]) => `<button data-s="${id}" style="${BT_}background:${secim[f] === id ? '#2F7DE1' : '#25333A'}">${ad}</button>`).join('');
     W.querySelector('#saHz').style.display = f === 1 ? 'flex' : 'none';
-    W.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { oto = false; run = false; hazirla(+b.dataset.f); });
+    W.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { const k = +b.dataset.f; if (k !== f && !acik(k)) return; oto = false; run = false; hazirla(k); });
     W.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { secim[f] = b.dataset.s; run = false; hazirla(f); });
     const z = FAZ[f], notlar = f === 1 ? [MAT[secim[1]].not].concat(hizliMi() ? [HIZLI_NOT] : []) : [z.not[secim[f]]];
     const kutu = n => n.charAt(0) === '!' ? `<div class="saUy"><b class="nm">⚠ DİKKAT</b>${n.slice(1)}</div>` : `<div class="saNt">${n}</div>`;
     const oz = ozet();
-    W.querySelector('#saD').innerHTML = `<div style="font:700 12px 'IBM Plex Mono',monospace;color:#2BD9C0;letter-spacing:.08em">ADIM ${f + 1} / 5</div><div style="font:700 26px 'Barlow Condensed',sans-serif;color:#EAF2F3;margin-bottom:4px">${z.ad}</div>${z.ana}${notlar.map(kutu).join('')}${oz ? `<div class="saSn${oz[1] ? ' kot' : ''}"><b>Sonuç:</b> ${oz[0]}</div>` : ''}`;
+    W.querySelector('#saD').innerHTML = `<div style="font:700 12px 'IBM Plex Mono',monospace;color:#2BD9C0;letter-spacing:.08em">ADIM ${f + 1} / 5</div><div style="font:700 26px 'Barlow Condensed',sans-serif;color:#EAF2F3;margin-bottom:4px">${z.ad}</div>${z.ana}${notlar.map(kutu).join('')}${oz ? `<div class="saSn${oz[1] ? ' kot' : ''}"><b>Sonuç:</b> ${oz[0]}</div>` : ''}${bitti[f] && hatali(f) ? `<div class="saUy"><b class="nm">🔒 SONRAKİ ADIM KİLİTLİ</b>Bu hatalı seçimle ${f < 4 ? 'bir sonraki adıma geçilmez' : 'iş bitmiş sayılmaz'}. Doğru seçeneği seçip adımı yeniden çalıştırın.</div>` : ''}${bitti[f] && !hatali(f) && f < 4 ? '<div style="margin-top:10px"><button id="saNx" style="' + BT_ + 'background:#2DBE5B">Sonraki adım: ' + FAZ[f + 1].ad + ' ›</button></div>' : ''}`;
+    const nx = W.querySelector('#saNx'); if (nx) nx.onclick = () => { oto = false; f++; ui(); };
     W.querySelector('#saGo').textContent = run ? '⏸ Çalışıyor…' : bitti[f] ? '↻ Bu adımı yeniden çalıştır' : '▶ Bu adımı çalıştır';
   }
   function ciz() {
@@ -214,7 +218,7 @@ window.speAnim = function () {
     const dt = Math.min(0.05, (now - son) / 1000) * spd; son = now;
     if (run) {
       const k = ilerle(dt);
-      if (k) { run = false; bitti[f] = true; if (oto && f < 4) { f++; baslat(); } else oto = false; ui(); }
+      if (k) { run = false; bitti[f] = true; if (oto && f < 4 && !hatali(f)) { f++; baslat(); } else oto = false; ui(); }
     }
     ciz(); requestAnimationFrame(kare);
   }
