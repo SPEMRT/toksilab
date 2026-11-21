@@ -863,6 +863,7 @@ for (let i = 0; i < 5; i++) for (let j = 0; j < 3; j++) { const t = mesh(cyl(0.0
 PIPG.add(mesh(box(0.42, 0.04, 0.32), M.alu, 1.1, 0.02, 0, PS_L, 'pipstand'));
 PIPG.add(mesh(cyl(0.025, 0.025, 1.0, 10), M.alu, 1.1, 0.52, -0.1, PS_L, 'pipstand'));
 PIPG.add(mesh(box(0.14, 0.04, 0.12), M.alu, 1.1, 0.98, -0.04, PS_L, 'pipstand'));
+PIPG.add(mesh(box(0.46, 1.1, 0.4), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }), 1.1, 0.55, 0, PS_L, 'pipstand')); /* pipet eldeyken de standa tıklanabilsin */
 const pipStandModel = p5Model(PS_L, 'pipstand'); pipStandModel.position.set(1.1, 0.06, 0.02); PIPG.add(pipStandModel);
 PIPG.add(mesh(new THREE.CylinderGeometry(0.18, 0.15, 0.36, 22, 1, true), new THREE.MeshStandardMaterial({ color: 0xf2c14e, roughness: 0.6, side: THREE.DoubleSide }), 0, 0.18, 0, TW_L, 'tipwaste'));
 PIPG.add(mesh(cyl(0.15, 0.15, 0.02, 22), M.black, 0, 0.01, 0, TW_L, 'tipwaste'));
