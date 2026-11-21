@@ -724,70 +724,12 @@ var AD={'Oasis HLB 3 cc kartuş kutusu: tıkla, bir kartuş al':'box','Kolon raf
  'Ayarlanabilir akış manometresi (0–15 psi)':'adj','Ayarlanabilir akış regülatörü: tıkla ve + / − ile ayarla':'adj','Maksimum akış manometresi (0–60 psi)':'max','Maksimum akış regülatörü: tıkla ve + / − ile ayarla':'max',
  'Akış ölçer (rotametre)':'rm','Rotametre iğneli vanası':'rm','Kılavuz kolon':'post','Kılavuz burcu':'post','Mavi gaz hortumu':'gas','Arka gaz bağlantısı (hortum)':'gas','Arka gaz girişi (azot hattı)':'gas',
  'Bekleme standı: biten kartuşu buraya koy':'stand','Peçete kutusu: tıkla, peçete al':'tissue','Çöp kutusu: kullanılmış kartuşu ya da ıslak peçeteyi at':'bin','Ön kontrol paneli':'panel','Paslanmaz çelik gövde':'body'};
-['MeOH','Su','Su:MeOH 4:1','Elüsyon MeOH'].forEach(function(t){AD[t+' erleni: tıkla, pipetle 3 mL al']='erlen'});
+['MeOH','Su','Su:MeOH 4:1','Elüsyon MeOH'].forEach(function(t){AD[t+' şişesi ve dispenseri: tıkla, dispenseri seç (3 mL)']='erlen';AD[t+' dispenseri (3 mL): tıkla, dispenseri seç']='disp'});
+AD['Uç kutusu (5 mL pipet uçları): tıkla, pipete yeni uç tak']='tipbox';AD['Otomatik pipet (P5000, 3 mL): tıkla, pipeti al ya da standa koy']='pip';AD['Uç atık kutusu: kullanılmış ucu at']='tipwaste';
 for(var j=1;j<=5;j++){AD['N'+j+' numune tüpü: tıkla, pipetle al']='tube';AD['Y'+j+': N'+j+' için yedek numune, tıkla, pipetle al']='tube'}
-var ADI={box:'kartuş kutusu',rack:'kolon rafı',waste:'atık rafı ve teknesi',coll:'toplama rafı',platen:'basınç kafası',two:'baskı anahtarı',mode:'mod seçici',adj:'ADJ (ayarlanabilir akış) regülatörü ve manometresi',max:'MAX (maksimum akış) regülatörü ve manometresi',rm:'rotametre (akış ölçer)',post:'kılavuz kolon',gas:'azot hattı',stand:'bekleme standı',erlen:'çözelti erleni',tube:'numune tüpü',tissue:'peçete kutusu',bin:'çöp kutusu',panel:'ön panel',body:'cihaz gövdesi'};
+var ADI={disp:'şişe başı dispenser',pip:'otomatik pipet',tipbox:'uç kutusu',tipwaste:'uç atık kutusu',box:'kartuş kutusu',rack:'kolon rafı',waste:'atık rafı ve teknesi',coll:'toplama rafı',platen:'basınç kafası',two:'baskı anahtarı',mode:'mod seçici',adj:'ADJ (ayarlanabilir akış) regülatörü ve manometresi',max:'MAX (maksimum akış) regülatörü ve manometresi',rm:'rotametre (akış ölçer)',post:'kılavuz kolon',gas:'azot hattı',stand:'bekleme standı',erlen:'çözelti erleni',tube:'numune tüpü',tissue:'peçete kutusu',bin:'çöp kutusu',panel:'ön panel',body:'cihaz gövdesi'};
 function H(n,r){return [n,0,r||46]}
 var DG=['#dersP [data-dg="0"]',0,0];
-/* SPE'nin beş adımını gösteren kısa canlandırma (tanıma dersi). Kartuş kesiti: sorbent, aradığımız maddeler (kırmızı), kirlilikler (kahverengi). */
-var AN={f:0,t:0,dur:5200,run:true,son:0,raf:0};
-var AF=[['Şartlandırma','MeOH ve ardından su sorbenti ıslatır. Kuru sorbent maddeleri iyi tutamaz.','#BFE0FF','Atık'],
- ['Yükleme','Numune kartuştan geçer. Aradığımız maddeler sorbente tutunur, kirliliklerin çoğu akıp gider.','#D9B98A','Atık'],
- ['Yıkama','Su, sorbentte kalan kirlilikleri yıkar. Aradığımız maddeler tutunmaya devam eder.','#CDEBF7','Atık'],
- ['Kurutma','Azot sorbentin içinden geçer ve kalan suyu uzaklaştırır.',null,'Atık'],
- ['Elüsyon','Altına temiz tüp konur. Az miktar MeOH tutunan maddeleri çözüp tüpe taşır: temiz ve derişik.','#D6C6FF','Toplama tüpü']];
-function cl(v){return v<0?0:v>1?1:v}
-function yol(P,u){u=cl(u);var n=P.length-1,k=Math.min(n-1,Math.floor(u*n)),r=u*n-k;return [P[k][0]+(P[k+1][0]-P[k][0])*r,P[k][1]+(P[k+1][1]-P[k][1])*r]}
-function animHtml(){setTimeout(animBasla,0);
- return '<div class="anim"><canvas id="speAn" width="600" height="500"></canvas><div class="ak">'+AF.map(function(a,i){return '<button data-an="'+i+'" title="'+a[0]+'">'+(i+1)+'</button>'}).join('')+'</div>'+
-  '<div class="ak"><button id="anOy">⏸ Durdur</button></div></div><p>Sonraki bölümlerde bu adımları cihazda kendiniz yapacaksınız.</p>'}
-function animBasla(){var cv=document.getElementById('speAn');if(!cv)return;AN.f=0;AN.t=0;AN.run=true;AN.son=performance.now();
- cv.parentNode.querySelectorAll('[data-an]').forEach(function(b){b.onclick=function(){AN.f=+b.dataset.an;AN.t=0;AN.run=true;dug()}});
- var oy=document.getElementById('anOy');oy.onclick=function(){AN.run=!AN.run;AN.son=performance.now();dug()};
- cancelAnimationFrame(AN.raf);AN.raf=requestAnimationFrame(animKare);dug()}
-function dug(){var oy=document.getElementById('anOy');if(oy)oy.textContent=AN.run?'⏸ Durdur':'▶ Oynat';document.querySelectorAll('[data-an]').forEach(function(b){b.classList.toggle('on',+b.dataset.an===AN.f)})}
-function animKare(now){var cv=document.getElementById('speAn');if(!cv)return;
- if(AN.run){AN.t+=(now-AN.son)/AN.dur;if(AN.t>=1){AN.t=0;AN.f=(AN.f+1)%5;dug()}}AN.son=now;
- animCiz(cv.getContext('2d'),AN.f,AN.t);AN.raf=requestAnimationFrame(animKare)}
-function animCiz(g,f,t){g.setTransform(2,0,0,2,0,0);g.clearRect(0,0,300,250);
- var X0=40,X1=110,BT=118,BB=162,a=AF[f];
- /* alttaki kap */
- if(f<4){g.fillStyle='#DDE3E6';g.fillRect(18,212,114,32);g.strokeStyle='#8A979D';g.lineWidth=1.5;g.strokeRect(18,212,114,32)}
- else{g.fillStyle='#EEF3F6';g.beginPath();g.moveTo(61,210);g.lineTo(61,232);g.arc(75,232,14,Math.PI,0,true);g.lineTo(89,210);g.fill();g.strokeStyle='#8A979D';g.lineWidth=1.5;g.stroke();
-  if(t>.3){var h=Math.min(18,(t-.3)*36);g.fillStyle='#D6C6FF';g.fillRect(62.5,244-h,25,h)}}
- g.fillStyle='#4A5B62';g.font='600 10.5px Arial';g.textAlign='left';g.fillText(a[3],f<4?24:96,f<4?240:238);
- /* kartuş gövdesi ve ucu */
- g.fillStyle='rgba(240,244,246,.9)';g.fillRect(X0,14,X1-X0,156);g.strokeStyle='#5F6E74';g.lineWidth=2;g.strokeRect(X0,14,X1-X0,156);
- g.beginPath();g.moveTo(X0,170);g.lineTo(70,188);g.lineTo(80,188);g.lineTo(X1,170);g.fillStyle='#E4E9EC';g.fill();g.stroke();
- /* sıvı */
- var akan=f!==3,lv=30+(BT-30)*cl(t/.8);
- if(akan&&t<.8){g.fillStyle=a[2];g.globalAlpha=.85;g.fillRect(X0+1,lv,X1-X0-2,BT-lv);g.globalAlpha=1}
- /* sorbent */
- var isl=f===0?cl(t*1.3):f===3?1-cl(t):f===4?Math.max(.15,cl(t*1.5)):1;
- var r1=[232,223,200],r2=[185,165,122],sc=r1.map(function(v,i){return Math.round(v+(r2[i]-v)*isl)});
- g.fillStyle='rgb('+sc+')';for(var yy=0;yy<5;yy++)for(var xx=0;xx<8;xx++){g.beginPath();g.arc(X0+5+xx*8.6+(yy%2)*3,BT+5+yy*8.8,3.6,0,7);g.fill()}
- g.strokeStyle='#9AA6AB';g.lineWidth=1;[BT-1,BB+1].forEach(function(y){g.beginPath();g.moveTo(X0+1,y);g.lineTo(X1-1,y);g.stroke()});
- /* damlalar */
- if(akan&&t<.9)for(var d=0;d<3;d++){var u=(t*6+d/3)%1;g.fillStyle=f===4?'#B9A0FF':a[2];g.beginPath();g.arc(75,190+u*(f<4?20:18),2.4,0,7);g.fill()}
- /* azot okları */
- if(f===3)for(var k=0;k<6;k++){var ya=20+((t*1.6+k/6)%1)*165,xa=52+(k%3)*18;g.strokeStyle='rgba(47,125,225,.75)';g.lineWidth=2;g.beginPath();g.moveTo(xa-4,ya-5);g.lineTo(xa,ya);g.lineTo(xa+4,ya-5);g.stroke()}
- /* kirlilikler (kahverengi) */
- for(var j=0;j<8;j++){var tak=j===2||j===5,bas=[48+(j*17)%55,34+j*10],orta=[48+(j*9)%55,140],tep=[75,186],tep2=[75,198],tab=[60+j*9,226+(j%2)*8],tut=[50+j*4,150],p=null;
-  if(f===1){var uu=cl(t*1.3-j*.04);p=tak?yol([bas,tut],uu):yol([bas,orta,tep,tep2,tab],uu)}
-  else if(f===2&&tak)p=yol([tut,tep,tep2,tab],cl(t*1.4));
-  else if(f===2||f===3)p=tab;
-  if(p){g.fillStyle='#8B5A2B';g.beginPath();g.arc(p[0],p[1],3.4,0,7);g.fill()}}
- /* aradığımız maddeler (kırmızı) */
- for(var i=0;i<6;i++){var st=[47+i*11,124+(i%2)*7],b0=[50+(i*13)%50,40+i*12],q=null;
-  if(f===1)q=yol([b0,st],cl(t*1.6-i*.05));else if(f===2||f===3)q=st;
-  else if(f===4)q=yol([st,[75,186],[75,200],[68+(i%3)*7,238-Math.floor(i/3)*7]],cl(t*1.4-i*.06));
-  if(q){g.fillStyle='#E5484D';g.beginPath();g.arc(q[0],q[1],3.8,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=1;g.stroke()}}
- /* yazılar */
- g.textAlign='left';g.fillStyle='#1F9A97';g.font='700 11px Arial';g.fillText('ADIM '+(f+1)+' / 5',132,26);
- g.fillStyle='#16242A';g.font='700 17px Arial';g.fillText(a[0],132,46);
- g.font='13px Arial';g.fillStyle='#2B3A40';var sz=a[1].split(' '),sat='',y=68;sz.forEach(function(w){var dn=sat?sat+' '+w:w;if(g.measureText(dn).width>160){g.fillText(sat,132,y);y+=17;sat=w}else sat=dn});if(sat)g.fillText(sat,132,y);
- var lg=[['#E5484D','Aradığımız madde'],['#8B5A2B','Kirlilik'],['rgb(185,165,122)','Sorbent']];g.font='11.5px Arial';
- lg.forEach(function(l,k){g.fillStyle=l[0];g.beginPath();g.arc(138,160+k*16,4,0,7);g.fill();g.fillStyle='#4A5B62';g.fillText(l[1],148,164+k*16)})}
 function E(){return window.carts||[]}
 function vol(c){return window.cartVol(c)}
 function f1(v){return v.toFixed(1).replace('.',',')}
@@ -797,14 +739,14 @@ var KAFA=['✋✋ İki anahtara birlikte bas',function(){window.ikiAnahtar()}];
 /* öğrencinin son protokol sapması derste hemen gösterilir */
 function sapma(){var s=S(),x=s.log[0];return x&&!x.info&&s.time-x.t<150?'⚠ '+x.msg:''}
 function koc(t,ask,b,kaynak,html){return {bolum:{0:'Şartlandırma',1:'Şartlandırma',2:'Yükleme',3:'Yıkama',4:'Yıkama',6:'Elüsyon'}[t],ask:ask,dugme:KAFA,
- izin:kaynak.concat(['cart','stand','twoL','twoR','mode','knob','pull']),canli:function(){return 'Sıradaki: '+window.speKoc(t).is},halka:function(){return window.speKoc(t).h},
+ izin:kaynak.concat(['cart','stand','twoL','twoR','mode','knob','pull','pipstand','tipbox','tipwaste']),canli:function(){return 'Sıradaki: '+window.speKoc(t).is},halka:function(){return window.speKoc(t).h},
  ok:function(){return !!window.speKoc(t).bitti},hata:sapma,b:b,html:html}}
 var DERS={
 spetani:{ad:'Cihazı tanıma',ozet:'SPE nedir; kartuş, kolon rafı, atık ve toplama rafı, basınç kafası, anahtarlar, mod seçici, ADJ / MAX, rotametre.',baslik:'SPE · TANIMA',mod:'parts',gorev:'parts',
  adim:[
  {bolum:'Giriş',b:'Katı faz ekstraksiyonu (SPE) nedir?',
   html:'<p>Bir numunede aradığımız maddeler (<b>analitler</b>) çoğu zaman çok azdır ve başka pek çok maddeyle karışıktır; bu hâliyle cihaza verilemez.</p><p><b>SPE</b> bu maddeleri numuneden ayırır, temizler ve derişik hâle getirir:</p><ul><li>Numune, içi dolgu maddesiyle (<b>sorbent</b>) dolu küçük bir <b>kartuştan</b> geçirilir.</li><li>Aradığımız maddeler sorbente tutunur, geri kalanı akıp gider.</li><li>Sonra az miktar çözücüyle tutunan maddeler geri alınır.</li></ul><p><b>CEREX 48</b> sıvıları kartuşlardan azotla iterek geçirir; aynı anda 48 kartuş çalışabilir.</p><p>Sahneyi sürükleyerek döndürebilir, tekerlekle yakınlaştırabilirsiniz.'},
- {bolum:'Giriş',b:'SPE beş adımda',html:animHtml},
+ {bolum:'Giriş',b:'SPE adım adım: kartuşun içi',html:'<p>Şimdi kartuşun içine bakalım. Açılan pencerede beş adımı tek tek ya da baştan sona oynatabilirsiniz.</p><ul><li>Her adımda farklı çözücü ve numune seçip sonucu görün.</li><li>Yanlış seçimleri de deneyin: analitlerin nasıl kaybolduğunu görün. Hatalı adımdan sonra ilerlenmez.</li><li>İleri seviye: <b>Oasis MCX</b> kartuşunda aynı işlemin nasıl farklı sonuç verdiğini karşılaştırın.</li></ul><button class="p" style="width:100%" onclick="window.speAnim&&window.speAnim()">▶ Kartuşun içini aç</button><p style="font-size:13.5px;color:#9BB0B6">Canlandırmayı istediğiniz an üst çubuktaki <b>🔬 Kartuşun içi</b> düğmesiyle yeniden açabilirsiniz.</p>'},
  {bolum:'Kartuş',ask:'<b>Kartuş kutusuna</b> tıklayın.',parca:['box'],halka:H('box',60),
   b:'Oasis HLB 3 cc kartuş',ne:'İçinde 60 mg polimer sorbent bulunan 3 mL’lik plastik kartuştur. Sorbent hem suyu seven hem yağı seven gruplar taşır (HLB: hidrofilik-lipofilik denge).',neden:'Farklı yapıdaki pek çok maddeyi aynı anda tutabilir.',yanlis:'Kartuşun alt ucuna elle dokunulmaz. Kullanılmış kartuş yeniden kullanılmaz.'},
  {bolum:'Raflar',ask:'Kartuşların takıldığı <b>kolon rafına</b> tıklayın.',parca:['rack'],halka:H('rack',70),
@@ -825,8 +767,10 @@ spetani:{ad:'Cihazı tanıma',ozet:'SPE nedir; kartuş, kolon rafı, atık ve to
   b:'MAX: maksimum akış',ne:'0–60 psi arası yüksek basınç verir.',neden:'Yıkamadan sonra kartuşları azotla <b>kurutmak</b> için kullanılır (20 psi, 15 dk).',yanlis:'Sıvı geçirirken MAX kullanılmaz: akış çok hızlanır.'},
  {bolum:'Basınç',ask:'Paneldeki cam tüplü <b>rotametreye</b> (akış ölçer) tıklayın.',parca:['rm'],halka:H('rm',50),
   b:'Rotametre',ne:'İçindeki bilye gaz akışıyla yükselir; L/dk okunur.',neden:'Gazın gerçekten aktığını gösterir. Kartuşlar boşaldıkça akış artar.',yanlis:'Kafa kapalıyken bilye çok yükseliyorsa gaz boşalan kartuşlardan kaçıyordur.'},
- {bolum:'Tezgâh',ask:'Arkadaki <b>çözelti erlenlerinden</b> birine tıklayın.',parca:['erlen','tube'],halka:H('src:water',50),
-  b:'Çözeltiler ve numuneler',html:'<p>Erlenlerde: <b>MeOH</b> (şartlandırma), <b>su</b> (şartlandırma ve yıkama), <b>su:MeOH 4:1</b> (yıkama), <b>elüsyon MeOH</b>.</p><p>Sağdaki standda <b>N1–N5</b> numune tüpleri (10’ar mL) durur.</p><p>Her malzemenin tezgâhta işaretli bir yeri vardır; böylece tezgâh hep aynı düzende kalır.</p><p>Çözeltiler Pasteur pipetiyle 3’er mL alınıp kartuşa eklenir. Pipet kartuşun üstündeyken sıkılır; başka yerde sıkılırsa sıvı dökülür.</p>'},
+ {bolum:'Tezgâh',ask:'Arkadaki şişelerin üstündeki <b>dispenserlerden</b> birine tıklayın.',parca:['disp','erlen'],halka:H('disp:water',44),
+  b:'Şişe başı dispenser',html:'<p>Çözücü şişeleri: <b>MeOH</b> (şartlandırma), <b>su</b> (şartlandırma ve yıkama), <b>su:MeOH 4:1</b> (yıkama), <b>elüsyon MeOH</b>.</p><p>Her şişenin üstünde <b>3 mL’ye ayarlı</b> bir dispenser vardır: dispenser seçilir, her kartuşa bir basışta 3 mL verilir.</p><ul><li>Hacim her seferinde aynıdır.</li><li>Şişeye pipet ya da uç girmez: çözücü <b>kontamine olmaz</b>.</li></ul>'},
+ {bolum:'Tezgâh',ask:'Numune rafının arkasındaki <b>otomatik pipete</b> tıklayın.',parca:['pip','tipbox','tipwaste'],halka:H('pipstand',50),
+  b:'Otomatik pipet ve uçlar',html:'<p>Numuneler (<b>N1–N5</b>, 10’ar mL) <b>otomatik pipetle</b> (P5000, 3 mL’ye ayarlı) alınır.</p><ul><li>Pipete uç kutusundan <b>yeni uç</b> takılır.</li><li>Aynı numunenin sonraki porsiyonları aynı uçla alınabilir.</li><li>Numune değişince uç <b>mutlaka</b> uç atık kutusuna atılır ve yeni uç takılır.</li></ul><p>Bir numunenin ucuyla başka numunenin tüpüne girilirse <b>çapraz kontaminasyon</b> olur: sonuç yanlış kişiye ait bir maddeyi gösterebilir.</p>'},
  {bolum:'Tezgâh',ask:'<b>Bekleme standına</b> tıklayın.',parca:['stand'],halka:H('stand',60),
   b:'Bekleme standı',ne:'Kartuş kutusunun yanındaki küçük standdır; adımını erken bitiren kartuşlar buraya konur.',neden:'Biten kartuş rafta kalırsa diğerleri akarken basınç altında boş kalır ve sorbent kurur. Kafa kaldırılıp biten kartuş standa alınır, hepsi bitince rafa geri takılır.',yanlis:'Şartlandırmadan yükleme sonuna kadar sorbent kurutulmaz.'},
  {bolum:'Kontrol',test:1}],
@@ -845,10 +789,10 @@ spesart:{ad:'Kartuş takma ve şartlandırma',ozet:'İki kartuşu rafa tak; 3 mL
  {bolum:'Kartuş',ask:'Kolon rafında yanıp sönen <b>deliğe</b> tıklayın: kartuşu takın.',halka:H('hole:2',36),izin:['rackTop'],ok:function(){return rafta().length>=1},
   b:'K1 rafta',html:'<p>Kartuşun ucu alttaki <b>atık teknesine</b> bakıyor. Şartlandırma, yükleme ve yıkama sıvıları oraya akacak.</p>'},
  {bolum:'Kartuş',ask:'İkinci kartuşu da alın (kutuya tıklayın) ve yanındaki <b>deliğe</b> takın.',oto:1,halka:function(s){return s.hand&&s.hand.type==='cart'?H('hole:4',36):H('box',60)},izin:['box','rackTop'],ok:function(){return rafta().length>=2}},
- {bolum:'MeOH',ask:'<b>MeOH erlenine</b> tıklayın: pipetle 3 mL metanol çekin.',halka:H('src:meoh',50),izin:['src:meoh'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.src.id==='meoh'},
-  b:'Pipette 3 mL MeOH',html:'<p>Pipeti kartuşun üstüne götürüp sıkacaksınız. Pipet başka bir yerde sıkılırsa çözelti tezgâha dökülür.</p>'},
- {bolum:'MeOH',ask:'<b>K1</b> kartuşuna tıklayın: metanolü ekleyin.',oto:1,halka:H('cart:0',40),izin:['cart:0'],ok:function(){return E()[0].added>=2.98||E()[0].step>0}},
- {bolum:'MeOH',ask:'<b>K2</b>’ye de 3 mL MeOH ekleyin: önce erlenden çekin, sonra K2’ye tıklayın.',halka:function(s){return s.hand&&s.hand.type==='pip'?H('cart:1',40):H('src:meoh',50)},izin:['src:meoh','cart:1'],ok:function(){return E()[1].added>=2.98||E()[1].step>0},hata:sapma,
+ {bolum:'MeOH',ask:'MeOH şişesinin üstündeki <b>dispensere</b> tıklayın: dispenser seçilir.',halka:H('disp:meoh',44),izin:['src:meoh'],ok:function(s){return s.hand&&s.hand.type==='disp'&&s.hand.src.id==='meoh'},
+  b:'MeOH dispenseri seçildi',html:'<p>Dispenser <b>3 mL’ye ayarlı</b>. Bir kartuşa tıkladığınızda o kartuşa 3 mL MeOH verilir; dispenser siz bırakana kadar seçili kalır.</p><p>Şişeye pipet girmediği için çözücü kontamine olmaz.</p>'},
+ {bolum:'MeOH',ask:'<b>K1</b> kartuşuna tıklayın: 3 mL MeOH verilir.',oto:1,halka:H('cart:0',40),izin:['cart:0'],ok:function(){return E()[0].added>=2.98||E()[0].step>0}},
+ {bolum:'MeOH',ask:'<b>K2</b> kartuşuna da tıklayın: dispenser yeniden 3 mL verir.',halka:function(s){return s.hand&&s.hand.type==='disp'?H('cart:1',40):H('disp:meoh',44)},izin:['src:meoh','cart:1'],ok:function(){return E()[1].added>=2.98||E()[1].step>0},hata:sapma,
   b:'İki kartuşta da metanol var',html:'<p>Kartuş en fazla 3 mL alır. Şimdi metanolü basınçla kartuşlardan geçireceksiniz.</p>'},
  {bolum:'Basınç',ask:'Rafın <b>ön yüzüne</b> yeniden tıklayın: raf kafanın altına geri gider.',oto:1,halka:H('pull',50),izin:['pull'],ok:function(s){return !s.pulled&&s.pullT<=.001&&!s.busy}},
  {bolum:'Basınç',ask:'İki baskı anahtarına <b>birlikte</b> basın: basınç kafası iner. Panelde ✋✋ düğmesini kullanın (klavyede A ile L’ye birlikte de basabilirsiniz).',dugme:KAFA,halka:[DG,H('two:L',36),H('two:R',36)],izin:['twoL','twoR'],ok:function(s){return s.headDown&&s.headT>=.999},
@@ -872,7 +816,12 @@ spesart:{ad:'Kartuş takma ve şartlandırma',ozet:'İki kartuşu rafa tak; 3 mL
 speyuk:{ad:'Numune yükleme',ozet:'10 mL numuneyi kendi kartuşuna yükle (N1 → K1, N2 → K2); tıkanan kartuşta basıncı artır, erken biteni standa al.',baslik:'SPE · YÜKLEME',mod:'use',gorev:'sart',
  adim:[
  {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>İki kartuş rafta ve <b>şartlandırılmış</b>: sorbent ıslak.</p><p>Her tüpte <b>10 mL</b> numune var. Kartuş 3 mL aldığı için numune parça parça yüklenir: <b>3 + 3 + 3 + 1 mL</b>. Her parça geçince sıradaki eklenir.</p><p><b>N1 → K1</b>, <b>N2 → K2</b>. Numune başka kartuşa giderse sonuç başka numuneye yazılır.</p><p>N2 bulanık: içindeki partiküller kartuşu yavaş yavaş tıkayabilir. ADJ basıncı 5 psi’ye ayarlı.</p>'},
- {bolum:'Yükleme',ask:'<b>N1</b> numune tüpüne tıklayın: pipetle 3 mL çekin.',halka:H('src:n1',50),izin:['src:n1'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.src.id==='n1'},
+ {bolum:'Yükleme',ask:'Kolon rafının <b>ön yüzüne</b> tıklayın: raf öne gelir, kartuşlara numune eklenebilir.',oto:1,halka:H('pull',50),izin:['pull'],ok:function(s){return s.pulled&&s.pullT>=.999}},
+ {bolum:'Yükleme',ask:'Pipet standındaki <b>otomatik pipeti</b> (P5000) alın.',halka:H('pipstand',50),izin:['pipstand'],ok:function(s){return s.hand&&s.hand.type==='pip'},
+  b:'Otomatik pipet elinizde',html:'<p>Pipet <b>3 mL’ye ayarlı</b>. Numuneler pipetle alınır; çözücüler gibi dispenserle verilmez, çünkü her numune ayrı bir kişiye ya da örneğe aittir.</p>'},
+ {bolum:'Yükleme',ask:'<b>Uç kutusuna</b> tıklayın: pipete yeni uç takın.',halka:H('tipbox',50),izin:['tipbox'],ok:function(s){return s.hand&&s.hand.type==='pip'&&!!s.hand.uc},
+  b:'Yeni uç takıldı',html:'<p><b>Her numuneye yeni uç.</b> N1’in porsiyonları bu uçla alınabilir; N2’ye geçmeden önce uç atık kutusuna atılır ve yeni uç takılır.</p><p>Aynı uçla başka numunenin tüpüne girilirse <b>çapraz kontaminasyon</b> olur.</p>'},
+ {bolum:'Yükleme',ask:'<b>N1</b> numune tüpüne tıklayın: pipetle 3 mL çekin.',halka:H('src:n1',50),izin:['src:n1'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.vol>0&&s.hand.src&&s.hand.src.id==='n1'},
   b:'N1 numunesi pipette',html:'<p>Bu numune yalnız <b>K1</b> kartuşuna gider.</p>'},
  {bolum:'Yükleme',ask:'<b>K1</b> kartuşuna tıklayın: numuneyi ekleyin.',oto:1,halka:H('cart:0',40),izin:['cart:0'],ok:function(){return E()[0].yuk>0}},
  koc(2,'Kalan numuneyi yükleyin: K1’e <b>N1</b>’den, K2’ye <b>N2</b>’den toplam <b>10’ar mL</b>. Akmayan kartuş olursa ADJ basıncını yavaşça artırın. Sıradaki işi sarı halka gösterir.',
