@@ -1945,9 +1945,12 @@ function speKoc(t) {
       const c = bos[0];
       return { is: need(c) ? `${ad(c)} boşaldı, diğeri hâlâ akıyor: gazı kapatın (OFF); sonra ${ad(c)}’e sıradaki çözeltiyi ekleyeceksiniz.` : `${ad(c)} bu adımı bitirdi, diğeri hâlâ akıyor: gazı kapatın (OFF); ${ad(c)} basınç altında boş kalırsa kurur.`, h: H('mode', 40) };
     }
-    const dur = rack.filter(c => c.status === 'stop'), yav = Math.abs(S.p - (S.gm === 'adj' ? S.adj : S.max)) < 0.6 ? rack.filter(c => c.status === 'slow' && c.flow < 0.5) : [];
+    const dur = rack.filter(c => c.status === 'stop'), yav = Math.abs(S.p - (S.gm === 'adj' ? S.adj : S.max)) < 0.6 ? rack.filter(c => c.status === 'slow' && c.flow < 0.5 && c.clog > 1) : [];
     if (dur.length) return { is: `${dur.map(ad).join(', ')} bu basınçta akmıyor: ${S.gm === 'adj' ? 'ADJ' : 'MAX'} düğmesine tıklayıp + ile basıncı yavaş yavaş artırın.`, h: !regpop.hidden ? ['#regPlus', 0, 0] : H('knob:' + S.gm, 44) };
-    return { is: `Kartuşlar akıyor (${rack.map(c => ad(c) + ' ' + c.flow.toFixed(1).replace('.', ',')).join(' · ')} mL/dk). Bekleyin…` + (yav.length ? ` ${yav.map(ad).join(', ')} yavaş akıyor; basıncı birkaç psi artırabilirsiniz.` : ''), h: null };
+    /* tıkanan kartuş çok yavaşsa beklemek yetmez: basınç sınırına kadar halka ADJ / MAX düğmesini gösterir */
+    const sinir = S.gm === 'adj' ? 15 : 30, ayar = S.gm === 'adj' ? S.adj : S.max;
+    if (yav.length && ayar < sinir) return { is: `${yav.map(ad).join(', ')} tıkanıyor, çok yavaş akıyor (${yav.map(c => c.flow.toFixed(1).replace('.', ',')).join(' · ')} mL/dk): ${S.gm === 'adj' ? 'ADJ' : 'MAX'} düğmesine tıklayıp + ile basıncı 1–2 psi artırın.`, h: !regpop.hidden ? ['#regPlus', 0, 0] : H('knob:' + S.gm, 44) };
+    return { is: `Kartuşlar akıyor (${rack.map(c => ad(c) + ' ' + c.flow.toFixed(1).replace('.', ',')).join(' · ')} mL/dk). Bekleyin…`, h: null };
   }
   if (S.headDown) {
     const bosRaf = rack.filter(c => !dolu(c));
