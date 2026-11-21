@@ -128,9 +128,11 @@ async function dersOynat(tarayici, port, hedef) {
       sonuc.adim = `${d.no} ${d.ask}`.trim();
       if (Date.now() - adimBasi > ADIM_SURESI) { hatalar.push('Adımda takıldı: ' + sonuc.adim); break; }
 
-      if (d.cevaplandi) await sayfa.click('#dSoru');
-      else if (d.secenek) await sayfa.click('#dersP [data-c]');
-      else if (d.ileri) await sayfa.click('#dIleri');
+      // Panel sık yeniden çizilir; düğmeye sayfanın içinden tıkla.
+      const bas = sec => sayfa.evaluate(x => { const e = document.querySelector(x); if (e) e.click(); }, sec);
+      if (d.cevaplandi) await bas('#dSoru');
+      else if (d.secenek) await bas('#dersP [data-c]');
+      else if (d.ileri) await bas('#dIleri');
       // Son tıklamadan sonra canlı gösterge değiştiyse işlem sürüyor: yeniden tıklama, bekle.
       else if (sonTik && d.canli !== canliTik && Date.now() - sonTik < 60000) { canliTik = d.canli; sonTik = Date.now(); }
       // Ders düğmeleri bütün bir işlemi başlatır (kafa iner, raf değişir): sonrasında daha uzun bekle.
@@ -142,7 +144,7 @@ async function dersOynat(tarayici, port, hedef) {
         const coz = COZUM.find(c => c.sayfa === sayfaAdi && c.ask.test(d.ask) && !(c.degil && c.degil.test(d.ask)));
         if (coz && (await sayfa.evaluate(coz.fn)) !== 'halka') { /* çözüm uygulandı */ }
         else if (coz) { const [x, y] = d.halkalar[0] || []; if (x != null) await sayfa.mouse.click(x, y); }
-        else if (d.dugme) await sayfa.click(`#dersP [data-dg="${(deneme - 1) % d.dugme}"]`);
+        else if (d.dugme) await bas(`#dersP [data-dg="${(deneme - 1) % d.dugme}"]`);
         else if (d.tut) {
           const b = await sayfa.locator('#dTut').boundingBox();
           await sayfa.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
