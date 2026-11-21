@@ -87,7 +87,7 @@ async function dersOynat(tarayici, port, hedef) {
   try {
     await sayfa.goto(`http://localhost:${port}/${hedef}`, { waitUntil: 'domcontentloaded', timeout: 90000 });
     await sayfa.waitForSelector('#dersP .ust', { timeout: 90000 });
-    let sonCanli = '', sonAnahtar = '', adimBasi = Date.now(), sonTik = 0, deneme = 0;
+    let canliTik = '', sonCanli = '', sonAnahtar = '', adimBasi = Date.now(), sonTik = 0, deneme = 0;
     while (true) {
       if (hatalar.length) break;
       const d = await sayfa.evaluate(() => {
@@ -113,6 +113,7 @@ async function dersOynat(tarayici, port, hedef) {
       if (d.bitti) { sonuc.tamam = true; break; }
       const anahtar = d.no + '|' + d.ask + '|' + d.cevaplandi + '|' + d.ileri;
       if (anahtar !== sonAnahtar) {
+        sonTik = Date.now() - 700; canliTik = d.canli; // kamera yerine otursun diye ilk tıklamadan önce kısa bekleme
         if (sonuc.kayma && d.ileri) { sonuc.uyarilar.push('Halkanın ortası tutmadı, kenarına tıklayınca geçti: ' + sonuc.kayma); }
         sonuc.kayma = ''; sonAnahtar = anahtar; adimBasi = Date.now(); deneme = 0; if (process.env.AYRINTI) console.log('   ·', anahtar, JSON.stringify(d.halkalar), d.dugme, d.tut); }
       // Canlı gösterge değişiyorsa (rotor dönüyor, sıvı akıyor) adım ilerliyor demektir; takılmış sayma.
@@ -123,7 +124,10 @@ async function dersOynat(tarayici, port, hedef) {
       if (d.cevaplandi) await sayfa.click('#dSoru');
       else if (d.secenek) await sayfa.click('#dersP [data-c]');
       else if (d.ileri) await sayfa.click('#dIleri');
+      // Son tıklamadan sonra canlı gösterge değiştiyse işlem sürüyor: yeniden tıklama, bekle.
+      else if (sonTik && d.canli !== canliTik && Date.now() - sonTik < 60000) { canliTik = d.canli; sonTik = Date.now(); }
       else if (Date.now() - sonTik > 1500) {
+        canliTik = d.canli;
         // Adım öğrenciden bir işlem bekliyor: düğme, basılı tutma ya da halkaya tıklama.
         sonTik = Date.now(); deneme++;
         const sayfaAdi = hedef.split('?')[0];
