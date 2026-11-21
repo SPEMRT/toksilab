@@ -76,6 +76,11 @@ const COZUM = [
   } },
 ];
 
+// Yavaş makinede uzun beklemeleri kısaltmak için sayfanın kendi hız ayarı (öğrenci de kullanabilir).
+const HIZLANDIR = {
+  'spe_pilot.html': () => { if (window.S && window.setSpeed && window.S.speed !== 60) window.setSpeed(60); },
+};
+
 // Halka ekran dışında kalırsa testin devam edebilmesi için sayfanın kendi işlevi.
 const EKRAN_DISI = {
   'santrifuj_pilot.html': () => window.toggleLid(),
@@ -97,6 +102,7 @@ async function dersOynat(tarayici, port, hedef) {
     let canliTik = '', sonCanli = '', sonAnahtar = '', adimBasi = Date.now(), sonTik = 0, deneme = 0;
     while (true) {
       if (hatalar.length) break;
+      const hz = HIZLANDIR[hedef.split('?')[0]]; if (hz) await sayfa.evaluate(hz).catch(() => {});
       const d = await sayfa.evaluate(() => {
         const P = document.getElementById('dersP');
         const q = s => P.querySelector(s);
