@@ -39,7 +39,7 @@ const COZUM = [
     if (!document.getElementById('fpT').textContent.startsWith(g[0] === 'L' ? 'Sol' : 'Sağ')) return 'halka';
     document.getElementById(g[1] > 0 ? 'fpCW' : 'fpCCW').click();
   } },
-  { sayfa: 'vorteks_pilot.html', ask: /(\d+)\. kademeye getirin/, fn: () => {
+  { sayfa: 'vorteks_pilot.html', ask: /(\d+)\. kademeye/, fn: () => {
     // Kutu kapalıysa halka (hız düğmesi) açar; açıksa + / − ile hedef kademeye git.
     const hedef = +document.querySelector('#dersP .ask').innerText.match(/(\d+)\. kademeye/)[1];
     const k = document.getElementById('kpop');
