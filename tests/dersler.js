@@ -29,7 +29,7 @@ const COZUM = [
     const hedef = parseFloat(document.querySelector('#dersP .ask').innerText.match(/hacmi ([\d,]+) µL/)[1].replace(',', '.'));
     const v = document.getElementById('vpop');
     if (!v || v.hidden) return 'halka';
-    for (let n = 0; n < 400 && Math.abs(window.S.vol - hedef) > 1e-6; n++)
+    for (let n = 0; n < 400 && Math.abs(window.S.vol - hedef) > 1e-3; n++)
       document.getElementById(window.S.vol < hedef ? 'vpP' : 'vpM').click();
   } },
   { sayfa: 'terazi_pilot.html', ask: /Kabarcığı ortalayın/, fn: () => {
