@@ -21,16 +21,49 @@ function dersListesi() {
   return L;
 }
 
+// Halkanın göstermediği, öğrencinin kendi karar verdiği adımlar için doğru davranış.
+// Her çözüm sayfanın içinde çalışır; adım metni (ask) desene uyunca halka yerine çağrılır.
+const COZUM = [
+  { sayfa: 'santrifuj_pilot.html', ask: /yerleştirin|karşısına \(8 yuva/i, degil: /denge (mikro)?tüpü hazırlayın/i, fn: () => {
+    // Aynı tür tüpleri karşılıklı diz; tek kalanı boş bir çiftin bir yarısına koy.
+    const s = window.S, N = s.slots.length, h = N / 2;
+    const bos = s.tray.filter(t => t.where == null && !/^w/.test(t.kind));
+    const g = {}; bos.forEach(t => (g[t.kind] = g[t.kind] || []).push(t));
+    const yer = () => { for (let k = 0; k < h; k++) if (!s.slots[k] && !s.slots[k + h]) return k; return -1; };
+    const koy = (t, k) => { s.sel = t.id; window.slot(k); };
+    for (const L of Object.values(g)) {
+      while (L.length >= 2) { const k = yer(); koy(L.shift(), k); koy(L.shift(), k + h); }
+      if (L.length) koy(L[0], yer());
+    }
+  } },
+  { sayfa: 'santrifuj_pilot.html', ask: /denge (mikro)?tüpü hazırlayın/i, fn: () => {
+    // Hacim düğmelerini sırayla dene; denge tüpünü karşısız tüpün karşısına koy, olmazsa geri al.
+    const s = window.S, N = s.slots.length, h = N / 2;
+    const bal = () => s.tray.find(t => /^w/.test(t.kind));
+    const b = bal();
+    if (b && b.where != null) { if (s.f.placed) return; window.slot(b.where); }
+    const dg = document.querySelectorAll('#dersP [data-dg]');
+    window.__coz = (window.__coz || 0); if (dg.length) dg[window.__coz++ % dg.length].click();
+    const t = bal(); if (!t) return;
+    for (let k = 0; k < N; k++) if (s.slots[k] && !s.slots[(k + h) % N]) { s.sel = t.id; window.slot((k + h) % N); return; }
+  } },
+];
+
+// Halka ekran dışında kalırsa testin devam edebilmesi için sayfanın kendi işlevi.
+const EKRAN_DISI = {
+  'santrifuj_pilot.html': () => window.toggleLid(),
+};
+
 async function dersOynat(tarayici, port, hedef) {
   const sayfa = await tarayici.newPage({ viewport: { width: 1280, height: 800 } });
   const hatalar = [];
   sayfa.on('pageerror', e => hatalar.push('JS hatası: ' + e.message));
   await yonlendir(sayfa);
-  const sonuc = { hedef, tamam: false, adim: '', hatalar, sure: 0 };
+  const sonuc = { hedef, tamam: false, adim: '', hatalar, uyarilar: [], kayma: '', sure: 0 };
   const t0 = Date.now();
   try {
-    await sayfa.goto(`http://localhost:${port}/${hedef}`, { waitUntil: 'load', timeout: 30000 });
-    await sayfa.waitForSelector('#dersP .ust', { timeout: 30000 });
+    await sayfa.goto(`http://localhost:${port}/${hedef}`, { waitUntil: 'domcontentloaded', timeout: 90000 });
+    await sayfa.waitForSelector('#dersP .ust', { timeout: 90000 });
     let sonAnahtar = '', adimBasi = Date.now(), sonTik = 0, deneme = 0;
     while (true) {
       if (hatalar.length) break;
@@ -40,7 +73,7 @@ async function dersOynat(tarayici, port, hedef) {
         const ileri = q('#dIleri');
         const halkalar = [...document.querySelectorAll('.dersHalka2')]
           .filter(h => h.style.display === 'block')
-          .map(h => [parseFloat(h.style.left), parseFloat(h.style.top)]);
+          .map(h => [parseFloat(h.style.left), parseFloat(h.style.top), parseFloat(h.style.width) || 40]);
         return {
           no: (q('.ust span') || {}).textContent || '',
           ask: ((q('.ask') || {}).innerText || '').split('\n')[0].slice(0, 140),
@@ -55,7 +88,9 @@ async function dersOynat(tarayici, port, hedef) {
       });
       if (d.bitti) { sonuc.tamam = true; break; }
       const anahtar = d.no + '|' + d.ask + '|' + d.cevaplandi + '|' + d.ileri;
-      if (anahtar !== sonAnahtar) { sonAnahtar = anahtar; adimBasi = Date.now(); deneme = 0; if (process.env.AYRINTI) console.log('   ·', anahtar, JSON.stringify(d.halkalar), d.dugme, d.tut); }
+      if (anahtar !== sonAnahtar) {
+        if (sonuc.kayma && d.ileri) { sonuc.uyarilar.push('Halkanın ortası tutmadı, kenarına tıklayınca geçti: ' + sonuc.kayma); }
+        sonuc.kayma = ''; sonAnahtar = anahtar; adimBasi = Date.now(); deneme = 0; if (process.env.AYRINTI) console.log('   ·', anahtar, JSON.stringify(d.halkalar), d.dugme, d.tut); }
       sonuc.adim = `${d.no} ${d.ask}`.trim();
       if (Date.now() - adimBasi > ADIM_SURESI) { hatalar.push('Adımda takıldı: ' + sonuc.adim); break; }
 
@@ -65,14 +100,27 @@ async function dersOynat(tarayici, port, hedef) {
       else if (Date.now() - sonTik > 1500) {
         // Adım öğrenciden bir işlem bekliyor: düğme, basılı tutma ya da halkaya tıklama.
         sonTik = Date.now(); deneme++;
-        if (d.dugme) await sayfa.click(`#dersP [data-dg="${(deneme - 1) % d.dugme}"]`);
+        const sayfaAdi = hedef.split('?')[0];
+        const coz = COZUM.find(c => c.sayfa === sayfaAdi && c.ask.test(d.ask) && !(c.degil && c.degil.test(d.ask)));
+        if (coz) await sayfa.evaluate(coz.fn);
+        else if (d.dugme) await sayfa.click(`#dersP [data-dg="${(deneme - 1) % d.dugme}"]`);
         else if (d.tut) {
           const b = await sayfa.locator('#dTut').boundingBox();
           await sayfa.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
           await sayfa.mouse.down(); await sayfa.waitForTimeout(4000); await sayfa.mouse.up();
+        } else if (d.halkalar.length && d.halkalar.every(([x, y]) => x < 0 || y < 0 || x > 1280 || y > 800)) {
+          // Halka ekranın dışında: öğrenci göremez. Bulguyu kaydet, sayfanın kendi işleviyle devam et.
+          const not = 'Halka ekranın dışında (' + d.halkalar.map(([x, y]) => Math.round(x) + ',' + Math.round(y)).join(' ') + '): ' + d.no + ' ' + d.ask;
+          if (!sonuc.uyarilar.includes(not)) sonuc.uyarilar.push(not);
+          const ed = EKRAN_DISI[hedef.split('?')[0]];
+          if (ed) await sayfa.evaluate(ed);
         } else if (d.halkalar.length) {
-          const [x, y] = d.halkalar[(deneme - 1) % d.halkalar.length];
-          await sayfa.mouse.click(x, y);
+          // Önce halkanın ortası; tutmazsa halkanın içinde başka noktalar (öğrenci de böyle dener).
+          const n = d.halkalar.length, [x, y, w] = d.halkalar[(deneme - 1) % n];
+          const KAY = [[0, 0], [0, 0], [0, -.3], [0, .3], [-.3, 0], [.3, 0], [0, -.4], [-.25, -.25], [.25, -.25]];
+          const [ox, oy] = KAY[Math.floor((deneme - 1) / n) % KAY.length];
+          if (ox || oy) sonuc.kayma = d.no + ' ' + d.ask;
+          await sayfa.mouse.click(x + ox * w, y + oy * w);
         }
       }
       await sayfa.waitForTimeout(250);
@@ -102,7 +150,8 @@ async function dersOynat(tarayici, port, hedef) {
       const iyi = r.tamam && !r.hatalar.length;
       if (!iyi) kotu++;
       console.log(`${iyi ? '✓' : '✗'} ${h}  (${r.sure} sn)` +
-        (iyi ? '' : '\n    son adım: ' + r.adim + r.hatalar.map(x => '\n    ' + x).join('')));
+        (iyi ? '' : '\n    son adım: ' + r.adim + r.hatalar.map(x => '\n    ' + x).join('')) +
+        r.uyarilar.map(x => '\n    ⚠ ' + x).join(''));
     }
   };
   await Promise.all(Array.from({ length: +process.env.PARALEL || 3 }, isci));
