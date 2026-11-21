@@ -24,6 +24,17 @@ function dersListesi() {
 // Halkanın göstermediği, öğrencinin kendi karar verdiği adımlar için doğru davranış.
 // Her çözüm sayfanın içinde çalışır; adım metni (ask) desene uyunca halka yerine çağrılır.
 const COZUM = [
+  { sayfa: 'terazi_pilot.html', ask: /aralığına getirin/, fn: () => {
+    // Canlı göstergeden kayıktaki maddeyi oku: azsa "Az" modunda kayığa vur, fazlaysa "Fazlayı al".
+    const t = (document.getElementById('dCanli') || {}).textContent || '';
+    const m = t.match(/≈\s*([\d,]+)\s*mg/); if (!m) return 'halka';
+    const mg = parseFloat(m[1].replace(',', '.'));
+    const dg = [...document.querySelectorAll('#dersP [data-dg]')];
+    const dugme = ad => dg.find(b => b.textContent.includes(ad));
+    if (mg > 10.1) { dugme('Fazlayı')?.click(); return; }
+    if (!/mod: Az/.test(t)) { dugme('Az')?.click(); return; }
+    return 'halka';
+  } },
   { sayfa: 'pipet_pilot.html', ask: /hacmi ([\d,]+) µL/, fn: () => {
     // Kutu kapalıysa halka (hacim halkası) açar; açıksa − / + ile hedef hacme git.
     const m = (document.querySelector('#dersP .ask') || {}).innerText?.match(/hacmi ([\d,]+) µL/);
