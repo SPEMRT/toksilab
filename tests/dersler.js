@@ -132,7 +132,11 @@ async function dersOynat(tarayici, port, hedef) {
       // Canlı gösterge değişiyorsa (rotor dönüyor, sıvı akıyor) adım ilerliyor demektir; takılmış sayma.
       if (d.canli !== sonCanli) { sonCanli = d.canli; adimBasi = Date.now(); }
       sonuc.adim = `${d.no} ${d.ask}`.trim();
-      if (Date.now() - adimBasi > ADIM_SURESI) { hatalar.push('Adımda takıldı: ' + sonuc.adim); break; }
+      if (Date.now() - adimBasi > ADIM_SURESI) {
+        hatalar.push('Adımda takıldı: ' + sonuc.adim);
+        if (process.env.AYRINTI) console.log('   durum:', await sayfa.evaluate(() => { const s = window.S || {}; const o = {}; for (const k in s) if (typeof s[k] !== 'object' && typeof s[k] !== 'function') o[k] = s[k]; return JSON.stringify(o).slice(0, 1500); }));
+        break;
+      }
 
       // Panel sık yeniden çizilir; düğmeye sayfanın içinden tıkla.
       const bas = sec => sayfa.evaluate(x => { const e = document.querySelector(x); if (e) e.click(); }, sec);
