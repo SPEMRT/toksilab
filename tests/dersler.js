@@ -26,7 +26,9 @@ function dersListesi() {
 const COZUM = [
   { sayfa: 'pipet_pilot.html', ask: /hacmi ([\d,]+) µL/, fn: () => {
     // Kutu kapalıysa halka (hacim halkası) açar; açıksa − / + ile hedef hacme git.
-    const hedef = parseFloat(document.querySelector('#dersP .ask').innerText.match(/hacmi ([\d,]+) µL/)[1].replace(',', '.'));
+    const m = (document.querySelector('#dersP .ask') || {}).innerText?.match(/hacmi ([\d,]+) µL/);
+    if (!m) return; // adım tam bu sırada geçti
+    const hedef = parseFloat(m[1].replace(',', '.'));
     const v = document.getElementById('vpop');
     if (!v || v.hidden) return 'halka';
     for (let n = 0; n < 400 && Math.abs(window.S.vol - hedef) > 1e-3; n++)
@@ -41,7 +43,9 @@ const COZUM = [
   } },
   { sayfa: 'vorteks_pilot.html', ask: /(\d+)\. kademeye/, fn: () => {
     // Kutu kapalıysa halka (hız düğmesi) açar; açıksa + / − ile hedef kademeye git.
-    const hedef = +document.querySelector('#dersP .ask').innerText.match(/(\d+)\. kademeye/)[1];
+    const m = (document.querySelector('#dersP .ask') || {}).innerText?.match(/(\d+)\. kademeye/);
+    if (!m) return;
+    const hedef = +m[1];
     const k = document.getElementById('kpop');
     if (!k || k.hidden) return 'halka';
     const v = window.S.lvl;
