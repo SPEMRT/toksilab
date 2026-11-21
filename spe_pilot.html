@@ -301,7 +301,7 @@ html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;botto
       <h2>Numune tüpleri (N1–N5) · 3 mL çek</h2>
       <div class="stack">
         <div class="samples" id="samples"></div>
-        <p class="note">Çözeltiler için 3D sahnede erlenlere tıkla. Dökülen sıvıya tıklayıp kurula.</p>
+        <p class="note">Çözücüler için şişelerin dispenserine tıkla. Numune için önce pipet standından pipeti al, uç kutusundan yeni uç tak. Dökülen sıvıya tıklayıp kurula.</p>
       </div>
     </section>
     <section>
@@ -765,13 +765,22 @@ const erlenGeo = new THREE.LatheGeometry(erlenProfile, 40);
 const ERLEN_FILL = 0.48, rAt = y => 0.41 - (y - 0.1) / 0.85 * 0.27;
 const erlenLiqGeo = new THREE.LatheGeometry([[0.001, 0.02], [0.385, 0.02], [0.395, 0.1], [rAt(ERLEN_FILL) - 0.01, ERLEN_FILL], [0.001, ERLEN_FILL]].map(([r, y]) => new THREE.Vector2(r, y)), 40);
 SRC.filter(s => !s.j && s.j !== 0).forEach(s => {
-  const a = 'src:' + s.id, l = `${s.title} erleni: tıkla, pipetle 3 mL al`;
+  const a = 'src:' + s.id, l = `${s.title} şişesi ve dispenseri: tıkla, dispenseri seç (3 mL)`;
   const g = new THREE.Group(); g.position.set(s.x, 0, -0.8);
   const e = mesh(erlenGeo, M.glass, 0, 0, 0, l, a); e.renderOrder = 6; e.castShadow = false; g.add(e);
   const lm = mesh(erlenLiqGeo, new THREE.MeshStandardMaterial({ color: LIQ[s.liq].color, roughness: 0.1, transparent: true, opacity: 0.75 }), 0, 0, 0, l, a);
   lm.renderOrder = 2; g.add(lm);
   const sp = labelPlane(l, a, 0.56, 0.31); sp.position.set(0, 0.4, rAt(0.4) + 0.012); sp.rotation.x = -Math.atan(0.27 / 0.85); g.add(sp);
   sp.userData.draw(s.title, `${s.cap} mL`, hex(LIQ[s.liq].color));
+  /* şişe başı dispenser: 3 mL'ye ayarlı; şişeye hiçbir şey girmez */
+  const dl = `${s.title} dispenseri (3 mL): tıkla, dispenseri seç`, dm = new THREE.MeshStandardMaterial({ color: 0xf4f6f7, roughness: 0.35 }), dmb = new THREE.MeshStandardMaterial({ color: 0x2f6fd1, roughness: 0.4 });
+  const dg = new THREE.Group(); dg.position.y = 1.28; g.add(dg);
+  dg.add(mesh(cyl(0.15, 0.15, 0.07, 24), dmb, 0, 0.035, 0, dl, a));
+  dg.add(mesh(cyl(0.075, 0.075, 0.34, 18), dm, 0, 0.24, 0, dl, a));
+  dg.add(mesh(cyl(0.1, 0.1, 0.06, 20), dmb, 0, 0.44, 0, dl, a));
+  dg.add(mesh(box(0.035, 0.035, 0.3), dm, 0, 0.33, 0.17, dl, a));
+  dg.add(mesh(cyl(0.012, 0.018, 0.09, 10), dm, 0, 0.29, 0.31, dl, a));
+  s.disp = dg;
   s.sprite = sp; bench.add(g);
 });
 // sample tube rack
@@ -782,7 +791,7 @@ function tubeStand(x, z, label) {
   [-0.86, 0.86].forEach(x => g.add(mesh(box(0.04, 0.62, 0.42), M.alu, x, 0.31, 0, label)));
   return g;
 }
-const STR = tubeStand(4.0, 2.2, 'Numune tüp standı');
+const STR = tubeStand(4.1, 1.45, 'Numune tüp standı');
 const STR2 = tubeStand(4.0, 1.2, 'Yedek numune standı'); STR2.visible = false; /* yedek numune şimdilik kullanılmıyor */
 const sTubeGeo = cyl(0.085, 0.085, 1.0, 18), sConeGeo = cyl(0.085, 0.015, 0.16, 18);
 const sLiqGeo = cyl(0.078, 0.078, 1, 16); sLiqGeo.translate(0, 0.5, 0);
@@ -808,17 +817,27 @@ for (let k = 0; k < 5; k++) { const { g } = cartMesh(CB_L, 'box'); g.position.se
 const cbSprite = labelPlane(CB_L, 'box', 0.8, 0.24); cbSprite.position.set(0, 0.15, 0.266); cbSprite.userData.draw('Oasis HLB 3 cc', 'Kartuş kutusu'); CB.add(cbSprite);
 
 /* ---------- held objects ---------- */
+/* otomatik pipet P5000: gövde, tutamak, piston; uç ayrı (takılıysa görünür) */
+function p5Model(label, action) {
+  const g = new THREE.Group(), gri = new THREE.MeshStandardMaterial({ color: 0xd9dde0, roughness: 0.4 }), mavi = new THREE.MeshStandardMaterial({ color: 0x2f6fd1, roughness: 0.45 });
+  g.add(mesh(cyl(0.045, 0.038, 0.5, 16), gri, 0, 0.5, 0, label, action));
+  g.add(mesh(cyl(0.052, 0.05, 0.14, 16), mavi, 0, 0.82, 0, label, action));
+  g.add(mesh(cyl(0.016, 0.016, 0.12, 10), gri, 0, 0.95, 0, label, action));
+  g.add(mesh(cyl(0.032, 0.032, 0.03, 14), mavi, 0, 1.02, 0, label, action));
+  g.add(mesh(box(0.025, 0.12, 0.05), new THREE.MeshStandardMaterial({ color: 0xf07c1f, roughness: 0.5 }), 0.045, 0.78, 0, label, action));
+  g.add(mesh(cyl(0.022, 0.03, 0.12, 12), gri, 0, 0.2, 0, label, action));
+  return g;
+}
+const tipGeoP = cyl(0.03, 0.008, 0.32, 14);
+const P5 = { tipMat: new THREE.MeshStandardMaterial({ color: 0xf2f5f7, roughness: 0.2, transparent: true, opacity: 0.6, depthWrite: false }) };
 const handObj = new THREE.Group(); handObj.visible = false; scene.add(handObj);
 const heldCart = cartMesh(); handObj.add(heldCart.g); heldCart.g.position.y = 0;
 const tissue = mesh(new THREE.IcosahedronGeometry(0.09, 1), M.white, 0, 0.05, 0); tissue.scale.set(1.5, 0.55, 1.2); handObj.add(tissue);
 const pip = new THREE.Group(); handObj.add(pip);
-pip.add(mesh(cyl(0.006, 0.012, 0.55, 10), M.glass, 0, 0.275, 0));
-pip.add(mesh(cyl(0.032, 0.012, 0.08, 14), M.glass, 0, 0.59, 0));
-pip.add(mesh(cyl(0.032, 0.032, 0.5, 14), M.glass, 0, 0.88, 0));
-pip.add(mesh(new THREE.SphereGeometry(0.06, 16, 12), new THREE.MeshStandardMaterial({ color: 0xd9472b, roughness: 0.6 }), 0, 1.2, 0));
-pip.add(mesh(cyl(0.035, 0.035, 0.08, 14), new THREE.MeshStandardMaterial({ color: 0xd9472b, roughness: 0.6 }), 0, 1.13, 0));
+const pipBody = p5Model(); pipBody.position.y = 0.16; pip.add(pipBody);
+const pipTip = new THREE.Mesh(tipGeoP, P5.tipMat); pipTip.position.y = 0.14; pipTip.renderOrder = 6; pip.add(pipTip);
 const pipLiqMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, transparent: true, opacity: 0.9 });
-const pipLiq = mesh(cyl(0.028, 0.028, 1, 12).translate(0, 0.5, 0), pipLiqMat, 0, 0.64, 0); pipLiq.renderOrder = 2; pip.add(pipLiq);
+const pipLiq = mesh(cyl(0.02, 0.006, 1, 12).translate(0, 0.5, 0), pipLiqMat, 0, -0.02, 0); pipLiq.renderOrder = 2; pip.add(pipLiq);
 handObj.children.forEach(o => o.traverse(m => { if (m.isMesh) m.castShadow = false; }));
 const handTarget = V3(0, 3, 2), handPos = V3(0, 3, 2);
 
@@ -835,6 +854,18 @@ function spawnDrop(x, y, z, floor, color) {
 }
 
 /* ---------- holding stand for finished cartridges ---------- */
+/* pipet istasyonu: uç kutusu · P5000 standı · uç atık kutusu (numune rafının arkasında) */
+const PIPG = new THREE.Group(); PIPG.position.set(4.35, 0, 2.75); bench.add(PIPG);
+const TB_L = 'Uç kutusu (5 mL pipet uçları): tıkla, pipete yeni uç tak', PS_L = 'Otomatik pipet (P5000, 3 mL): tıkla, pipeti al ya da standa koy', TW_L = 'Uç atık kutusu: kullanılmış ucu at';
+PIPG.add(mesh(box(0.7, 0.18, 0.45), new THREE.MeshStandardMaterial({ color: 0x2f6fd1, roughness: 0.5 }), -1.1, 0.09, 0, TB_L, 'tipbox'));
+PIPG.add(mesh(box(0.66, 0.02, 0.41), M.white, -1.1, 0.19, 0, TB_L, 'tipbox'));
+for (let i = 0; i < 5; i++) for (let j = 0; j < 3; j++) { const t = mesh(cyl(0.022, 0.022, 0.06, 10), M.white, -1.34 + i * 0.12, 0.22, -0.12 + j * 0.12, TB_L, 'tipbox'); PIPG.add(t); }
+PIPG.add(mesh(box(0.42, 0.04, 0.32), M.alu, 1.1, 0.02, 0, PS_L, 'pipstand'));
+PIPG.add(mesh(cyl(0.025, 0.025, 1.0, 10), M.alu, 1.1, 0.52, -0.1, PS_L, 'pipstand'));
+PIPG.add(mesh(box(0.14, 0.04, 0.12), M.alu, 1.1, 0.98, -0.04, PS_L, 'pipstand'));
+const pipStandModel = p5Model(PS_L, 'pipstand'); pipStandModel.position.set(1.1, 0.06, 0.02); PIPG.add(pipStandModel);
+PIPG.add(mesh(new THREE.CylinderGeometry(0.18, 0.15, 0.36, 22, 1, true), new THREE.MeshStandardMaterial({ color: 0xf2c14e, roughness: 0.6, side: THREE.DoubleSide }), 0, 0.18, 0, TW_L, 'tipwaste'));
+PIPG.add(mesh(cyl(0.15, 0.15, 0.02, 22), M.black, 0, 0.01, 0, TW_L, 'tipwaste'));
 const STAND = new THREE.Group(); STAND.position.set(-3.1, 0, 1.3); bench.add(STAND);
 const STAND_L = 'Bekleme standı: biten kartuşu buraya koy';
 STAND.add(mesh(box(1.0, 0.3, 0.3), M.alu, 0, 0.15, 0, STAND_L, 'stand'));
@@ -864,6 +895,7 @@ const MLZ = [
   { id: 'stand', ad: 'Bekleme standı', o: STAND, w: 1.25, d: 0.6, lw: 1.35 },
   ...['meoh', 'water', 'mix', 'elu'].map(id => ({ id, ad: srcById[id].title, o: srcById[id].sprite.parent, w: 1.0, d: 1.0, lw: 0.95 })),
   { id: 'num', ad: 'Numune tüpleri', o: STR, w: 2.0, d: 0.7, lw: 1.7 },
+  { id: 'pip', ad: 'Pipet ve uçlar', o: PIPG, w: 2.9, d: 0.7, lw: 1.7 },
 ];
 const MLZ_BY = Object.fromEntries(MLZ.map(m => [m.id, m]));
 MLZ.forEach(m => {
@@ -884,7 +916,8 @@ MLZ.forEach(m => {
 function mlzGoster(id, on, sessizce) {
   const m = MLZ_BY[id]; if (!m) return;
   if (!on && id === 'stand' && carts.some(c => c.where === 'stand')) return toast('Standda kartuş var: önce kartuşları rafa tak.');
-  if (!on && S.hand && S.hand.type === 'pip' && (S.hand.src.id === id || (id === 'num' && S.hand.src.liq === 'sample'))) return toast('Pipette bu kaptan çekilmiş çözelti var: önce kullan ya da geri bırak.');
+  if (!on && id === 'pip' && S.hand && S.hand.type === 'pip') return toast('Pipet elinde: önce ucu at, pipeti standa koy.');
+  if (!on && S.hand && S.hand.type === 'pip' && S.hand.src && S.hand.vol > 0.005 && (S.hand.src.id === id || (id === 'num' && S.hand.src.liq === 'sample'))) return toast('Pipette bu kaptan çekilmiş çözelti var: önce kullan ya da geri bırak.');
   m.o.visible = on; S.mlz[id] = on;
   m.yer.userData = on ? {} : { label: `${m.ad}: tezgâha getirmek için tıkla`, action: 'mlz:' + id };
   m.yer.material.opacity = on ? 0.05 : 0.16;
@@ -1031,35 +1064,75 @@ function liftFromRack(c, toStand) {
   else { c.where = 'hand'; S.hand = { type: 'cart', k: c.k }; }
 }
 function returnToRack(c) {
-  if (S.hand) return toast('Elin dolu. Önce elindekini bırak.');
+  if (S.hand && S.hand.type === 'cart') return toast('Elin dolu. Önce elindekini bırak.');
   if (!canTouch()) return toast('Kartuş takmak için kafanın yukarıda olması gerekir.');
   if (!rafOnde()) return toast(ONE);
-  c.where = 'hand'; S.hand = { type: 'cart', k: c.k };
+  const once = S.hand; S.hand = { type: 'cart', k: c.k };
   placeCart(holeFree(c.lastHole) ? c.lastHole : nextHole());
+  S.hand = once;
 }
+/* çözücüler şişe başı dispenserle (seçilir, her kartuş tıklamasında 3 mL), numuneler otomatik pipetle ve her numuneye yeni uçla alınır */
 function aspirate(id) {
-  const s = srcById[id];
-  if (S.hand && S.hand.type === 'cart') return toast('Önce elindeki kartuşu yerine koy.');
-  if (S.hand && S.hand.type === 'tissue') return toast('Önce peçeteyi bırak.');
-  if (S.hand && S.hand.type === 'pip' && S.hand.vol > 0.005) {
-    if (S.hand.src === s) { s.vol += S.hand.vol; S.hand = null; return toast(`Pipetteki ${s.title} geri bırakıldı.`); }
-    return toast(`Pipette ${S.hand.vol.toFixed(1)} mL ${S.hand.src.title} var. Önce bir kartuşa ekle ya da bırak.`);
+  const s = srcById[id], h = S.hand;
+  if (h && h.type === 'cart') return toast('Önce elindeki kartuşu yerine koy.');
+  if (h && h.type === 'tissue') return toast('Önce peçeteyi bırak.');
+  if (s.liq !== 'sample') {
+    if (h && h.type === 'pip') return toast('Çözücüler şişe başı dispenserle verilir. Önce pipetin ucunu at ve pipeti standına koy.');
+    if (!mlzVar(s.id)) return toast(`${s.title} tezgâhta değil: üstteki 🧰 Tezgâh düğmelerinden getir.`);
+    if (h && h.type === 'disp' && h.src === s) { S.hand = null; return toast(`${s.title} dispenseri bırakıldı.`); }
+    if (s.vol < 0.01) return toast(`${s.title} boş.`);
+    S.hand = { type: 'disp', src: s };
+    return toast(`${s.title} dispenseri seçildi: kartuşa tıklayınca 3 mL verir.`, true);
   }
-  if (!mlzVar(s.liq === 'sample' ? 'num' : s.id)) return toast(`${s.liq === 'sample' ? 'Numune tüpleri' : s.title} tezgâhta değil: üstteki 🧰 Tezgâh düğmelerinden getir.`);
+  if (!h || h.type !== 'pip') return toast('Numune otomatik pipetle alınır: önce pipet standındaki P5000’i al.');
+  if (!h.uc) return toast('Pipette uç yok: önce uç kutusundan yeni uç tak.');
+  if (h.vol > 0.005) {
+    if (h.src === s) { s.vol += h.vol; h.vol = 0; return toast(`Pipetteki ${s.title} tüpüne geri bırakıldı.`); }
+    return toast(`Pipette ${h.vol.toFixed(1)} mL ${h.src.title} var. Önce kartuşa ver ya da kendi tüpüne geri bırak.`);
+  }
+  if (!mlzVar('num')) return toast('Numune tüpleri tezgâhta değil: üstteki 🧰 Tezgâh düğmelerinden getir.');
+  if (h.uc.j != null && h.uc.j !== s.j) {
+    if (S.ders) return toast(`Bu uç N${h.uc.j + 1} numunesine girdi: N${s.j + 1} tüpüne girerse çapraz kontaminasyon olur. Ucu uç atık kutusuna at, yeni uç tak.`);
+    log(`K${s.j + 1}: N${h.uc.j + 1} numunesinin ucuyla N${s.j + 1} tüpüne girildi (çapraz kontaminasyon).`);
+  }
   if (s.vol < 0.01) return toast(`${s.title} boş.`);
   const v = Math.min(3, s.vol); s.vol -= v;
-  S.hand = { type: 'pip', src: s, vol: v };
+  h.src = s; h.vol = v; h.uc.j = s.j;
   pipLiqMat.color.setHex(LIQ[s.liq].color);
+}
+function pipetAl() {
+  const h = S.hand;
+  if (!mlzVar('pip')) return toast('Pipet tezgâhta değil: üstteki 🧰 Tezgâh düğmelerinden getir.');
+  if (!h || h.type === 'disp') { S.hand = { type: 'pip', src: null, vol: 0, uc: null }; return toast('Otomatik pipet (P5000, 3 mL) elinde. Uç kutusundan yeni uç tak.', true); }
+  if (h.type !== 'pip') return toast('Elin dolu. Önce elindekini bırak.');
+  if (h.vol > 0.005) return toast('Pipette numune var: önce kartuşa ver.');
+  if (h.uc) return toast('Önce kullanılmış ucu uç atık kutusuna at, sonra pipeti standa koy.');
+  S.hand = null; toast('Pipet standına kondu.', true);
+}
+function ucTak() {
+  const h = S.hand;
+  if (!h || h.type !== 'pip') return toast('Önce pipet standından otomatik pipeti al.');
+  if (h.uc) return toast(h.uc.j == null ? 'Pipette zaten yeni bir uç var.' : 'Pipette kullanılmış uç var: önce uç atık kutusuna at.');
+  h.uc = { j: null }; toast('Yeni uç takıldı.', true);
+}
+function ucAt() {
+  const h = S.hand;
+  if (!h || h.type !== 'pip' || !h.uc) return toast('Atılacak uç yok.');
+  if (h.vol > 0.005) return toast('Uçta numune var: önce kartuşa ver.');
+  h.uc = null; h.src = null; toast('Uç atıldı.', true);
 }
 function dispense(k) {
   const c = carts[k];
   if (c.where !== 'rack') return toast(`K${k + 1} rafta değil.`);
-  if (!S.hand || S.hand.type !== 'pip') return toast('Önce bir erlenden ya da numune tüpünden pipetle çözelti çek.');
+  const hh = S.hand, dsp = hh && hh.type === 'disp';
+  if (!hh || (hh.type !== 'pip' && !dsp)) return toast('Önce bir şişenin dispenserini seç ya da pipetle numune çek.');
+  if (!dsp && hh.vol < 0.005) return toast('Pipet boş: önce numune tüpünden çek.');
+  if (dsp && hh.src.vol < 0.01) return toast(`${hh.src.title} bitti.`);
   if (!canTouch()) return toast('Kartuşlara çözelti eklemek için kafayı kaldır.');
   if (!rafOnde()) return toast(ONE);
   const room = CART_CAP - cartVol(c);
   if (room < 0.02) return toast(`K${k + 1} dolu (3 mL). Akmasını bekle.`);
-  const src = S.hand.src, v = Math.min(room, S.hand.vol), L = LIQ[src.liq];
+  const src = hh.src, v = Math.min(room, dsp ? Math.min(3, src.vol) : hh.vol), L = LIQ[src.liq];
   let exp = PROTO[c.step];
   if (exp && exp.ml && c.added >= exp.ml - 0.02 && PROTO[c.step + 1] && PROTO[c.step + 1].liq === src.liq) {
     if (cartVol(c) > 0.02 && exp.liq !== src.liq) log(`K${k + 1}: önceki çözelti (${LIQ[exp.liq].name}) tamamen geçmeden ${L.name} eklendi.`);
@@ -1077,17 +1150,17 @@ function dispense(k) {
   if (last && last.liq === src.liq && last.j === (src.j ?? -1)) last.v += v; else c.layers.push({ liq: src.liq, j: src.j ?? -1, v });
   if (src.liq === 'sample' && src.j === k) c.yuk += v;
   c.overDry = 0;
-  S.hand.vol -= v;
+  if (dsp) src.vol -= v; else hh.vol -= v;
   const w = colRack.localToWorld(V3(holeX(c.hole % NX), 0.95, holeZ(Math.floor(c.hole / NX))));
   for (let i = 0; i < 6; i++) setTimeout(() => spawnDrop(w.x, w.y + 0.1, w.z, w.y - 0.5, L.color), i * 60);
-  if (S.hand.vol < 0.01) S.hand = null;
-  else toast(`K${k + 1} doldu; pipette ${S.hand.vol.toFixed(1)} mL kaldı.`);
+  if (!dsp && hh.vol > 0.01) toast(`K${k + 1} doldu; pipette ${hh.vol.toFixed(1)} mL kaldı.`);
+  if (!dsp && hh.vol < 0.01) hh.vol = 0;
 }
 const puddles = [];
 function spill(pt) {
-  const h = S.hand; if (!h || h.type !== 'pip') return;
+  const h = S.hand; if (!h || h.type !== 'pip' || h.vol < 0.005) return;
   const L = LIQ[h.src.liq], v = h.vol, from = handPos.clone();
-  S.hand = null;
+  h.vol = 0;
   if (h.src.liq === 'sample') S.dok.push({ j: h.src.j, v });
   for (let i = 0; i < 10; i++) setTimeout(() => spawnDrop(from.x + (Math.random() - 0.5) * 0.01, from.y, from.z, pt.y + 0.01, L.color), i * 45);
   const m = new THREE.Mesh(new THREE.CircleGeometry(0.1 + 0.09 * Math.sqrt(v), 28), new THREE.MeshStandardMaterial({ color: L.color, transparent: true, opacity: 0.75, roughness: 0.05, depthWrite: false }));
@@ -1106,7 +1179,8 @@ function wipe(pd) {
 function dropHand() {
   if (!S.hand) return;
   if (S.hand.type === 'tissue') { S.hand = null; return; }
-  if (S.hand.type === 'pip') S.hand.src.vol += S.hand.vol;
+  if (S.hand.type === 'pip') { if (S.hand.src && S.hand.vol > 0.005) S.hand.src.vol += S.hand.vol; }
+  else if (S.hand.type === 'disp') { }
   else { const c = carts[S.hand.k]; if (used(c)) putOnStand(c); else c.where = 'box'; }
   S.hand = null;
 }
@@ -1254,7 +1328,7 @@ function aimHand(h) {
     const hole = holeAt(h.point);
     if (hole >= 0) { handTarget.copy(colRack.localToWorld(V3(holeX(hole % NX), 0.75, holeZ(Math.floor(hole / NX))))); return; }
   }
-  if (S.hand.type === 'pip' && a.startsWith('cart:')) {
+  if ((S.hand.type === 'pip' || S.hand.type === 'disp') && a.startsWith('cart:')) {
     const c = carts[+a.slice(5)];
     if (c.where === 'rack') { handTarget.copy(colRack.localToWorld(V3(holeX(c.hole % NX), 0.98, holeZ(Math.floor(c.hole / NX))))); return; }
   }
@@ -1332,7 +1406,7 @@ renderer.domElement.addEventListener('pointerup', e => {
   if (h.o) { tip.innerHTML = '<b></b>'; tip.firstChild.textContent = h.o.userData.label; tip.style.left = (e.clientX - h.r.left) + 'px'; tip.style.top = (e.clientY - h.r.top) + 'px'; tip.hidden = false; }
   if (S.mode === 'parts') return;
   aimHand(h);
-  const isPip = S.hand && S.hand.type === 'pip';
+  const isPip = S.hand && S.hand.type === 'pip' && S.hand.vol > 0.005;
   if (!h.o) { if (isPip && izin('bench')) spill(h.point); return; }
   const a = h.o.userData.action || '';
   const CONTROLS = ['twoL', 'twoR', 'mode', 'pull', 'platen', 'knobL', 'knobR'];
@@ -1353,6 +1427,9 @@ renderer.domElement.addEventListener('pointerup', e => {
     if (used(hc)) renewCart(hc); else toast('Kullanılmamış kartuşu kutuya geri koy.');
     return;
   }
+  if (a === 'pipstand') { pipetAl(); return; }
+  if (a === 'tipbox') { ucTak(); return; }
+  if (a === 'tipwaste') { ucAt(); return; }
   if (isPip && !a.startsWith('src:') && !CONTROLS.includes(a) && !(a.startsWith('cart:') && carts[+a.slice(5)].where === 'rack')) { spill(h.point); return; }
   const held = S.hand && S.hand.type === 'cart' ? carts[S.hand.k] : null;
   if (a.startsWith('src:')) aspirate(a.slice(4));
@@ -1364,8 +1441,8 @@ renderer.domElement.addEventListener('pointerup', e => {
   else if (a === 'rackTop') { if (held) { const hole = holeAt(h.point); if (hole >= 0) placeCart(hole); } else if (S.hand) toast('Pipetteki çözeltiyi bir kartuşa ekle.'); else toast('Önce kutudan bir kartuş al.'); }
   else if (a.startsWith('cart:')) {
     const c = carts[+a.slice(5)];
-    if (c.where === 'rack') { if (S.hand && S.hand.type === 'pip') dispense(c.k); else if (!S.hand) liftFromRack(c, false); }
-    else if (c.where === 'stand') { if (!S.hand) { c.where = 'hand'; S.hand = { type: 'cart', k: c.k }; } else toast('Elin dolu.'); }
+    if (c.where === 'rack') { if (S.hand && (S.hand.type === 'pip' || S.hand.type === 'disp')) dispense(c.k); else if (!S.hand) liftFromRack(c, false); }
+    else if (c.where === 'stand') { if (!S.hand || S.hand.type === 'disp') { c.where = 'hand'; S.hand = { type: 'cart', k: c.k }; } else toast('Elin dolu.'); }
   }
   else if (a === 'pull') togglePull();
   else if (a === 'twoL') pressSide('L');
@@ -1532,7 +1609,7 @@ function frame(now) {
   for (const c of carts) {
     if (c.where !== 'rack') { c.status = c.where === 'box' ? 'none' : c.where; continue; }
     const exp = PROTO[c.step], vol = cartVol(c);
-    const tubeEmpty = exp && exp.liq === 'sample' && c.added > 0 && srcById['n' + (c.k + 1)].vol < 0.01 && srcById['y' + (c.k + 1)].vol < 0.01 && !(S.hand && S.hand.type === 'pip' && S.hand.src.liq === 'sample' && S.hand.src.j === c.k);
+    const tubeEmpty = exp && exp.liq === 'sample' && c.added > 0 && srcById['n' + (c.k + 1)].vol < 0.01 && srcById['y' + (c.k + 1)].vol < 0.01 && !(S.hand && S.hand.type === 'pip' && S.hand.vol > 0.005 && S.hand.src && S.hand.src.liq === 'sample' && S.hand.src.j === c.k);
     if (exp && exp.ml && (c.added >= exp.ml - 0.02 || tubeEmpty) && vol < 0.002) { c.step++; c.added = 0; c.dry = 0; }
     else if (exp && exp.dry && c.dry >= exp.dry * 60) { c.step++; c.dry = 0; }
     const wet = c.step <= 4;
@@ -1592,11 +1669,13 @@ function frame(now) {
   /* held object */
   heldCart.g.visible = !!S.hand && S.hand.type === 'cart';
   pip.visible = !!S.hand && S.hand.type === 'pip';
+  pipStandModel.visible = !pip.visible;
+  if (pip.visible) pipTip.visible = !!S.hand.uc;
   tissue.visible = !!S.hand && S.hand.type === 'tissue';
   if (S.hand) {
     if (!handObj.visible) handPos.copy(handTarget);
     handPos.lerp(handTarget, Math.min(1, dt * 14)); handObj.position.copy(handPos);
-    if (pip.visible) { pipLiq.visible = S.hand.vol > 0.01; pipLiq.scale.y = Math.max(0.001, S.hand.vol / 3 * 0.46); }
+    if (pip.visible) { pipLiq.visible = S.hand.vol > 0.01; pipLiq.scale.y = Math.max(0.001, S.hand.vol / 3 * 0.24); }
   }
   handObj.visible = !!S.hand;
 
@@ -1705,7 +1784,7 @@ function updateUI() {
   if (cbSprite.userData.n !== boxN) { cbSprite.userData.n = boxN; cbSprite.userData.draw('Oasis HLB 3 cc', boxN + ' kartuş'); }
 
   el.hand.hidden = !S.hand;
-  if (S.hand) el.handTxt.textContent = S.hand.type === 'cart' ? `Elinde: K${S.hand.k + 1}. Rafta bir deliğe ya da bekleme standına tıkla` : S.hand.type === 'tissue' ? 'Elinde peçete. Dökülen sıvıya tıkla' : `Pasteur pipeti: ${S.hand.vol.toFixed(1)} mL ${S.hand.src.title}. Bir kartuşa tıkla`;
+  if (S.hand) el.handTxt.textContent = S.hand.type === 'cart' ? `Elinde: K${S.hand.k + 1}. Rafta bir deliğe ya da bekleme standına tıkla` : S.hand.type === 'tissue' ? 'Elinde peçete. Dökülen sıvıya tıkla' : S.hand.type === 'disp' ? `Dispenser: ${S.hand.src.title} (3 mL). Kartuşa tıkla; bırakmak için şişeye yeniden tıkla` : !S.hand.uc ? 'Otomatik pipet (P5000), uç yok. Uç kutusundan yeni uç tak' : S.hand.vol > 0.005 ? `Otomatik pipet: ${S.hand.vol.toFixed(1)} mL ${S.hand.src.title}. Kendi kartuşuna tıkla` : S.hand.uc.j == null ? 'Otomatik pipet, yeni uç takılı. Numune tüpüne tıkla' : `Otomatik pipet, N${S.hand.uc.j + 1} ucu takılı. Aynı numuneden çek ya da ucu at`;
   el.bRack.textContent = S.wasteT > 0.5 ? 'Toplama rafına geç' : 'Atık rafına geç';
   el.bRack.disabled = S.busy;
   const bp = $('#btnPull'); bp.textContent = S.pulled ? 'Rafı kafanın altına it' : 'Rafı öne çek'; bp.disabled = S.busy;
@@ -1759,7 +1838,7 @@ function dersReset(g) {
   if (S.busy) { tweens.length = 0; S.busy = false; }
   reset();
   S.ders = !!g && g !== 'free'; S.nCart = S.ders ? 2 : 5; S.hizOnce = 0;
-  mlzKur({ bos: ['kutu', 'stand', 'meoh', 'water'], sart: ['stand', 'num'], yuk: ['stand', 'water', 'mix', 'elu'], free: [] }[g]);
+  mlzKur({ bos: ['kutu', 'stand', 'meoh', 'water'], sart: ['stand', 'num', 'pip'], yuk: ['stand', 'water', 'mix', 'elu'], free: [] }[g]);
   setSpeed(10); setMode('off'); setReg('max', 20);
   if (S.ders) {
     carts.forEach(c => { freshCart(c, false); c.gen = 0; c.Pth0 = 0.8; c.C = 0.3; });
@@ -1781,6 +1860,10 @@ function dunyaNoktasi(n) {
   if (ad === 'hole') { const h = +x; return colRack.localToWorld(V3(holeX(h % NX), 0.42, holeZ(Math.floor(h / NX)))); }
   if (ad === 'cart') { const c = carts[+x]; if (!c.g.visible) throw 0; return c.g.localToWorld(V3(0, 0.75, 0)); }
   if (ad === 'src') { const q = srcById[x]; return q.sprite.localToWorld(V3(0, 0, 0)); }
+  if (ad === 'disp') return srcById[x].disp.localToWorld(V3(0, 0.3, 0.1));
+  if (ad === 'pipstand') return PIPG.localToWorld(V3(1.1, 0.75, 0.05));
+  if (ad === 'tipbox') return PIPG.localToWorld(V3(-1.1, 0.22, 0.1));
+  if (ad === 'tipwaste') return PIPG.localToWorld(V3(0, 0.38, 0.1));
   if (ad === 'two') return (x === 'L' ? rockerL : rockerR).localToWorld(V3(0, 0, 0.03));
   if (ad === 'mode') return sel.localToWorld(V3(x === 'adj' ? -0.07 : x === 'max' ? 0.07 : 0, 0.02, 0.1));
   if (ad === 'knob') return (x === 'max' ? knobR : knobL).localToWorld(V3(0, 0, 0.2));
@@ -1813,7 +1896,10 @@ function speKoc(t) {
   const dolu = c => cartVol(c) > 0.002, ad = c => 'K' + (c.k + 1);
   const rack = L.filter(c => c.where === 'rack'), stand = L.filter(c => c.where === 'stand');
   const H = (n, r) => [n, 0, r || 46], DG = ['#dersP [data-dg="0"]', 0, 0];
-  if (L.every(c => c.step > t) && S.gm === 'off' && !stand.length && !S.hand) {
+  const hp = S.hand && S.hand.type === 'pip' ? S.hand : null, hd = S.hand && S.hand.type === 'disp' ? S.hand : null, elCart = S.hand && S.hand.type === 'cart';
+  if (L.every(c => c.step > t) && S.gm === 'off' && hp) return hp.uc ? { is: 'Numuneler bitti: kullanılmış ucu uç atık kutusuna atın.', h: H('tipwaste', 50) } : { is: 'Pipeti standına geri koyun.', h: H('pipstand', 50) };
+  if (L.every(c => c.step > t) && S.gm === 'off' && !stand.length && (!S.hand || hd)) {
+    if (hd) S.hand = null;
     if (S.busy) return { is: 'Raf hareket ediyor…', h: null };
     if (S.pulled || S.pullT > 0.001) return { is: 'Kartuşların hepsi bu adımı bitirdi: rafı kafanın altına geri itin (rafın ön yüzüne tıklayın).', h: H('pull', 50) };
     return { is: 'Bu adım tamam.', h: null, bitti: true };
@@ -1840,23 +1926,31 @@ function speKoc(t) {
   }
   if (S.headT > 0.001) return { is: 'Kafa kalkıyor…', h: null };
   const bekleyen = rack.filter(c => need(c) && !dolu(c)), bitmis = rack.filter(c => !need(c) && !dolu(c)), suren = rack.filter(c => need(c) || dolu(c));
-  if (!S.hand && !rafOnde() && (bekleyen.length || (bitmis.length && suren.length) || (stand.length && !suren.length))) return { is: 'Rafı öne çekin: rafın ön yüzüne tıklayın. Kartuşlara kafanın altında dokunulmaz.', h: H('pull', 50) };
-  if (bitmis.length && suren.length && !S.hand) {
+  if (!elCart && !rafOnde() && (bekleyen.length || (bitmis.length && suren.length) || (stand.length && !suren.length))) return { is: 'Rafı öne çekin: rafın ön yüzüne tıklayın. Kartuşlara kafanın altında dokunulmaz.', h: H('pull', 50) };
+  if (bitmis.length && suren.length && !elCart) {
     const c = bitmis[0];
     return { is: `${ad(c)} bu adımı bitirdi, diğeri sürüyor: ${ad(c)} basınç altında boş kalmasın; alttaki ${ad(c)} kartında “Standa al”a basın.`, h: ['#lsA' + c.k, 0, 0] };
   }
-  if (stand.length && !suren.length && !S.hand) { const c = stand[0]; return { is: `Diğer kartuş da bitti: ${ad(c)}’i rafa geri takın (alttaki kartta “Rafa tak”).`, h: ['#lsA' + c.k, 0, 0] }; }
-  const hp = S.hand && S.hand.type === 'pip' ? S.hand : null;
+  if (stand.length && !suren.length && !elCart) { const c = stand[0]; return { is: `Diğer kartuş da bitti: ${ad(c)}’i rafa geri takın (alttaki kartta “Rafa tak”).`, h: ['#lsA' + c.k, 0, 0] }; }
   if (S.busy) return { is: 'Raf hareket ediyor…', h: null };
-  if (hp && !rafOnde()) return { is: 'Çözelti eklemek için rafı öne çekin: rafın ön yüzüne tıklayın.', h: H('pull', 50) };
-  if (hp) {
-    const hedef = bekleyen.find(c => t === 2 ? hp.src.liq === 'sample' && hp.src.j === c.k : hp.src.id === KAYNAK[t]);
-    if (hedef) return { is: `Pipette ${hp.vol.toFixed(1).replace('.', ',')} mL ${hp.src.title}: ${ad(hedef)} kartuşuna tıklayıp ekleyin.`, h: H('cart:' + hedef.k, 40) };
-    return { is: `Pipetteki ${hp.src.title} şimdi kullanılmıyor: geri bırakmak için kendi kabına tıklayın.`, h: H('src:' + hp.src.id, 50) };
+  if (hp && hp.vol > 0.005) {
+    if (!rafOnde()) return { is: 'Numuneyi vermek için rafı öne çekin: rafın ön yüzüne tıklayın.', h: H('pull', 50) };
+    const hedef = bekleyen.find(c => hp.src.liq === 'sample' && hp.src.j === c.k);
+    if (hedef) return { is: `Pipette ${hp.vol.toFixed(1).replace('.', ',')} mL ${hp.src.title}: ${ad(hedef)} kartuşuna tıklayıp verin.`, h: H('cart:' + hedef.k, 40) };
+    return { is: `Pipetteki ${hp.src.title} şimdi kullanılmıyor: kendi tüpüne tıklayıp geri bırakın.`, h: H('src:' + hp.src.id, 50) };
   }
   if (bekleyen.length) {
-    const c = bekleyen[0], q = srcById[kaynak(c, t)];
-    return { is: `${ad(c)} için ${q.liq === 'sample' ? q.title + ' tüpünden' : q.title + ' erleninden'} pipetle çekin.`, h: H('src:' + q.id, 50) };
+    if (t === 2) {
+      const c = (hp && hp.uc && hp.uc.j != null && bekleyen.find(q => q.k === hp.uc.j)) || bekleyen[0], q = srcById[kaynak(c, t)];
+      if (!hp) return { is: 'Numune otomatik pipetle alınır: pipet standındaki P5000’i alın.', h: H('pipstand', 50) };
+      if (!hp.uc) return { is: 'Uç kutusuna tıklayıp pipete yeni uç takın.', h: H('tipbox', 50) };
+      if (hp.uc.j != null && hp.uc.j !== c.k) return { is: `Bu uç N${hp.uc.j + 1} numunesine girdi. ${ad(c)} için ucu uç atık kutusuna atın, yeni uç takın: her numuneye yeni uç.`, h: H('tipwaste', 50) };
+      return { is: `${q.title} tüpüne tıklayıp ${ad(c)} için numune çekin.`, h: H('src:' + q.id, 50) };
+    }
+    const c = bekleyen[0], q = srcById[KAYNAK[t]];
+    if (hp) return hp.uc ? { is: 'Çözücüler dispenserle verilir: önce pipetin ucunu uç atık kutusuna atın.', h: H('tipwaste', 50) } : { is: 'Çözücüler dispenserle verilir: pipeti standına geri koyun.', h: H('pipstand', 50) };
+    if (hd && hd.src.id === q.id) return { is: `${q.title} dispenseri seçili: ${ad(c)} kartuşuna tıklayın (3 mL).`, h: H('cart:' + c.k, 40) };
+    return { is: `${q.title} şişesinin dispenserine tıklayın.`, h: H('disp:' + q.id, 44) };
   }
   if (rack.some(dolu)) {
     if (S.pullT > 0.001) return { is: 'Rafı kafanın altına geri itin: rafın ön yüzüne tıklayın.', h: H('pull', 50) };
@@ -1883,7 +1977,7 @@ function otKartus(c) {
   const kayip = /atık teknesine aktı/.test(L);
   e(c.eluate >= 2.7 && !kayip, `Elüsyon: tüpte ${f1(c.eluate)} mL eluat`, kayip ? 'Elüsyon MeOH’u atık teknesine aktı, eluat kayboldu: elüsyondan önce toplama rafına geçilir.' : `Elüsyon eksik: tüpte ${f1(c.eluate)} mL eluat var (3 mL MeOH ile elüe edilir).`, 25);
   e(!/toplama tüpüne aktı/.test(L), 'Eluat temiz: toplama tüpüne yalnız elüsyon çözeltisi aktı', 'Eluat kontamine: elüsyon dışında bir çözelti toplama tüpüne aktı.', 20);
-  const sira = [[/beklenen:/, 10, 'Bir adımda beklenmeyen çözelti eklendi (adım sırası bozuldu).'], [/tamamen geçmeden/, 5, 'Önceki çözelti kartuştan tamamen geçmeden yenisi eklendi.'], [/fazla hacim/, 5, 'Bir adımda fazla hacim eklendi.'], [/protokol bittikten sonra/, 5, 'Protokol bittikten sonra kartuşa çözelti eklendi.']].filter(q => q[0].test(L));
+  const sira = [[/çapraz kontaminasyon/, 20, 'Çapraz kontaminasyon: numune tüpüne başka numunenin ucuyla girildi. Her numuneye yeni uç takılır.'], [/beklenen:/, 10, 'Bir adımda beklenmeyen çözelti eklendi (adım sırası bozuldu).'], [/tamamen geçmeden/, 5, 'Önceki çözelti kartuştan tamamen geçmeden yenisi eklendi.'], [/fazla hacim/, 5, 'Bir adımda fazla hacim eklendi.'], [/protokol bittikten sonra/, 5, 'Protokol bittikten sonra kartuşa çözelti eklendi.']].filter(q => q[0].test(L));
   e(!sira.length, 'Adımlar doğru sırada ve doğru hacimle yapıldı', sira.map(q => q[2]).join(' '), sira.reduce((a, q) => a + q[1], 0));
   if (c.gen) k.push([true, `Bozulan kartuş yenilendi (${c.gen} kez); değerlendirme son kartuşa göre yapıldı`, '']);
   return { ad: `K${c.k + 1} · N${c.k + 1}`, deger: st >= PROTO.length ? `eluat ${f1(c.eluate)} mL` : `${PROTO[st].short} adımında kaldı`, puan: Math.max(0, 100 - d), k };
