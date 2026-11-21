@@ -64,7 +64,7 @@ async function dersOynat(tarayici, port, hedef) {
   try {
     await sayfa.goto(`http://localhost:${port}/${hedef}`, { waitUntil: 'domcontentloaded', timeout: 90000 });
     await sayfa.waitForSelector('#dersP .ust', { timeout: 90000 });
-    let sonAnahtar = '', adimBasi = Date.now(), sonTik = 0, deneme = 0;
+    let sonCanli = '', sonAnahtar = '', adimBasi = Date.now(), sonTik = 0, deneme = 0;
     while (true) {
       if (hatalar.length) break;
       const d = await sayfa.evaluate(() => {
@@ -83,6 +83,7 @@ async function dersOynat(tarayici, port, hedef) {
           cevaplandi: !!q('#dSoru'),
           dugme: P.querySelectorAll('[data-dg]').length,
           tut: !!q('#dTut'),
+          canli: (q('#dCanli') || {}).textContent || '',
           halkalar,
         };
       });
@@ -91,6 +92,8 @@ async function dersOynat(tarayici, port, hedef) {
       if (anahtar !== sonAnahtar) {
         if (sonuc.kayma && d.ileri) { sonuc.uyarilar.push('Halkanın ortası tutmadı, kenarına tıklayınca geçti: ' + sonuc.kayma); }
         sonuc.kayma = ''; sonAnahtar = anahtar; adimBasi = Date.now(); deneme = 0; if (process.env.AYRINTI) console.log('   ·', anahtar, JSON.stringify(d.halkalar), d.dugme, d.tut); }
+      // Canlı gösterge değişiyorsa (rotor dönüyor, sıvı akıyor) adım ilerliyor demektir; takılmış sayma.
+      if (d.canli !== sonCanli) { sonCanli = d.canli; adimBasi = Date.now(); }
       sonuc.adim = `${d.no} ${d.ask}`.trim();
       if (Date.now() - adimBasi > ADIM_SURESI) { hatalar.push('Adımda takıldı: ' + sonuc.adim); break; }
 
