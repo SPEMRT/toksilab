@@ -813,14 +813,11 @@ spesart:{ad:'Kartuş takma ve şartlandırma',ozet:'İki kartuşu rafa tak; 3 mL
  bitti:function(){S().done.sart=1}},
 speyuk:{ad:'Numune yükleme',ozet:'10 mL numuneyi kendi kartuşuna yükle (N1 → K1, N2 → K2); tıkanan kartuşta basıncı artır, erken biteni standa al.',baslik:'SPE · YÜKLEME',mod:'use',gorev:'sart',
  adim:[
- {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>İki kartuş rafta ve <b>şartlandırılmış</b>: sorbent ıslak.</p><p>Her tüpte <b>10 mL</b> numune var. Kartuş 3 mL aldığı için numune parça parça yüklenir: <b>3 + 3 + 3 + 1 mL</b>. Her parça geçince sıradaki eklenir.</p><p><b>N1 → K1</b>, <b>N2 → K2</b>. Numune başka kartuşa giderse sonuç başka numuneye yazılır.</p><p>N2 bulanık: içindeki partiküller kartuşu yavaş yavaş tıkayabilir. ADJ basıncı 5 psi’ye ayarlı.</p>'},
+ {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>İki kartuş rafta ve <b>şartlandırılmış</b>: sorbent ıslak.</p><p>Her tüpte <b>10 mL</b> numune var. Kartuş 3 mL aldığı için numune parça parça yüklenir: <b>3 + 3 + 3 + 1 mL</b>. Her parça geçince sıradaki eklenir.</p><p><b>N1 → K1</b>, <b>N2 → K2</b>. Numune başka kartuşa giderse sonuç başka numuneye yazılır.</p><p>N2 bulanık: içindeki partiküller kartuşu yavaş yavaş tıkayabilir. ADJ basıncı 5 psi’ye ayarlı.</p><p>Numuneler <b>otomatik pipetle</b> (P5000, 3 mL’ye ayarlı) alınır. <b>Her numuneye yeni uç</b> takılır: aynı uçla başka numunenin tüpüne girilirse <b>çapraz kontaminasyon</b> olur.</p>'},
  {bolum:'Yükleme',ask:'Kolon rafının <b>ön yüzüne</b> tıklayın: raf öne gelir, kartuşlara numune eklenebilir.',oto:1,halka:H('pull',50),izin:['pull'],ok:function(s){return s.pulled&&s.pullT>=.999}},
- {bolum:'Yükleme',ask:'Pipet standındaki <b>otomatik pipeti</b> (P5000) alın.',halka:H('pipstand',50),izin:['pipstand'],ok:function(s){return s.hand&&s.hand.type==='pip'},
-  b:'Otomatik pipet elinizde',html:'<p>Pipet <b>3 mL’ye ayarlı</b>. Numuneler pipetle alınır; çözücüler gibi dispenserle verilmez, çünkü her numune ayrı bir kişiye ya da örneğe aittir.</p>'},
- {bolum:'Yükleme',ask:'<b>Uç kutusuna</b> tıklayın: pipete yeni uç takın.',halka:H('tipbox',50),izin:['tipbox'],ok:function(s){return s.hand&&s.hand.type==='pip'&&!!s.hand.uc},
-  b:'Yeni uç takıldı',html:'<p><b>Her numuneye yeni uç.</b> N1’in porsiyonları bu uçla alınabilir; N2’ye geçmeden önce uç atık kutusuna atılır ve yeni uç takılır.</p><p>Aynı uçla başka numunenin tüpüne girilirse <b>çapraz kontaminasyon</b> olur.</p>'},
- {bolum:'Yükleme',ask:'<b>N1</b> numune tüpüne tıklayın: pipetle 3 mL çekin.',halka:H('src:n1',50),izin:['src:n1'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.vol>0&&s.hand.src&&s.hand.src.id==='n1'},
-  b:'N1 numunesi pipette',html:'<p>Bu numune yalnız <b>K1</b> kartuşuna gider.</p>'},
+ {bolum:'Yükleme',ask:'Pipet standındaki <b>otomatik pipeti</b> (P5000) alın.',oto:1,halka:H('pipstand',50),izin:['pipstand'],ok:function(s){return s.hand&&s.hand.type==='pip'}},
+ {bolum:'Yükleme',ask:'<b>Uç kutusuna</b> tıklayın: pipete yeni uç takın.',oto:1,halka:H('tipbox',50),izin:['tipbox'],ok:function(s){return s.hand&&s.hand.type==='pip'&&!!s.hand.uc}},
+ {bolum:'Yükleme',ask:'<b>N1</b> numune tüpüne tıklayın: pipetle 3 mL çekin. Bu numune yalnız <b>K1</b>’e gider.',oto:1,halka:H('src:n1',50),izin:['src:n1'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.vol>0&&s.hand.src&&s.hand.src.id==='n1'}},
  {bolum:'Yükleme',ask:'<b>K1</b> kartuşuna tıklayın: numuneyi ekleyin.',oto:1,halka:H('cart:0',40),izin:['cart:0'],ok:function(){return E()[0].yuk>0}},
  koc(2,'Kalan numuneyi yükleyin: K1’e <b>N1</b>’den, K2’ye <b>N2</b>’den toplam <b>10’ar mL</b>. Akmayan kartuş olursa ADJ basıncını yavaşça artırın. Sıradaki işi sarı halka gösterir.',
   'Yükleme tamam',['src:n1','src:n2','src:y1','src:y2'],
@@ -865,8 +862,8 @@ return {sayfa:'spe_pilot.html',hazir:'__spe',tuval:'#c',ad:'SPE · CEREX 48',mod
  GM:{parts:'spetani'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['spetani','spesart','speyuk','speelu'],
  /* derste sarı halkanın gösterdiği yere göre kamera kendiliğinden odaklanır (yalnız görünüm değişince) */
  odak:function(ad){var s=S();if(!s||s.mode!=='use'||!window.speOdak)return;var k=null;
-  ad.some(function(n){if(n.charAt(0)==='#'){k=n.indexOf('data-dg')>=0?'on':n.indexOf('#lsA')===0?'sol':n.indexOf('#reg')===0?'on':null;return !!k}var p=n.split(':')[0];
-   k=p==='box'||p==='stand'||p==='disp'?'sol':p==='hole'||p==='pull'?'raf':p==='cart'?(s.hand&&s.hand.type==='pip'?'sag':'sol'):p==='src'||p==='pipstand'||p==='tipbox'||p==='tipwaste'?'sag':p==='two'||p==='knob'||p==='mode'||p==='gauge'?'on':p==='coll'||p==='waste'?'genel':null;return !!k});
+  ad.some(function(n){if(n.charAt(0)==='#'){k=n.indexOf('data-dg')>=0?'on':n.indexOf('#lsA')===0?'sol':n.indexOf('#reg')===0?'on':null;return !!k}var p=n.split(':')[0],p2=n.split(':')[1];
+   k=p==='box'||p==='stand'||p==='disp'?'sol':p==='hole'||p==='pull'?'raf':p==='cart'?(s.hand&&s.hand.type==='pip'?'raf':'sol'):p==='src'?(p2==='meoh'||p2==='water'||p2==='mix'||p2==='elu'?'sol':'numune'):p==='pipstand'||p==='tipbox'||p==='tipwaste'?'uc':p==='two'||p==='knob'||p==='mode'||p==='gauge'?'on':p==='coll'||p==='waste'?'genel':null;return !!k});
   if(k&&k!==ODAK_SON){ODAK_SON=k;window.speOdak(k)}},
  senkron:function(s,o){['spetani','spesart','speyuk','speelu'].forEach(function(k){if(o[k]&&o[k].bitti)s.done[k]=1})},
  /* serbest kullanım sessiz sınavdır: beş numune, uyarı yok; ✅ İşi bitirdim ile kartuş kartuş rapor */

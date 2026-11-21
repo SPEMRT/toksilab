@@ -190,6 +190,10 @@ body { background: radial-gradient(ellipse at 30% 0%, #1A2A30, var(--bg) 60%); }
 /* bilgi balonu parçanın epey üstünde durur; ince bir çizgi tıklanan parçayı gösterir */
 .toast.yer::before { content: ""; position: absolute; left: 50%; top: 100%; width: 2px; height: 50px; margin-left: -1px; background: linear-gradient(var(--warn), rgba(242,182,50,0)); }
 .toast.yer.good::before { background: linear-gradient(var(--ok), transparent); }
+.toast.yer.yanS, .toast.yer.yanD { transform: translate(0, -50%); max-width: none; box-sizing: border-box; }
+.toast.yer.yanS::before, .toast.yer.yanD::before { display: none; }
+.toast.yer.yanS::after { left: auto; right: -6px; top: 50%; bottom: auto; transform: translateY(-50%) rotate(-45deg); }
+.toast.yer.yanD::after { left: -6px; top: 50%; bottom: auto; transform: translateY(-50%) rotate(135deg); }
 .tip { background: rgba(18, 28, 32, .95); color: var(--fg); border-left: 4px solid var(--brand); }
 .status { background: #1E2A30; }
 .hint { color: #24343A; }
@@ -1011,12 +1015,42 @@ const tween = (obj, k, to, dur) => new Promise(res => tweens.push({ obj, k, from
 /* ---------- actions ---------- */
 const toastEl = $('#toast'); let toastTimer;
 let sonTik = null; /* bilgi mesajı tıklanan nesnenin hemen üstünde çıkar (tıklamadan 1,5 s içinde gelirse) */
+/* cihazın (gövde, raf, kafa) ekrandaki kutusu */
+function cihazKutu() {
+  const z1 = Math.max(FZ, RZ + S.pullT * 1.05 + 0.5), xs = [-1.75, 1.75], ys = [Y0, HEAD_UP + 0.7], zs = [-FZ, z1];
+  let l = 1e9, t = 1e9, rr = -1e9, b = -1e9;
+  const R = renderer.domElement.getBoundingClientRect();
+  for (const x of xs) for (const y of ys) for (const z of zs) {
+    const v = V3(x, y, z).project(camera);
+    const px = (v.x + 1) / 2 * R.width, py = (1 - v.y) / 2 * R.height;
+    l = Math.min(l, px); rr = Math.max(rr, px); t = Math.min(t, py); b = Math.max(b, py);
+  }
+  return { l, r: rr, t, b };
+}
 function toast(msg, good) {
   toastEl.textContent = msg; toastEl.hidden = false;
   const yer = sonTik && performance.now() - sonTik.t < 1500;
   toastEl.className = 'toast' + (good ? ' good' : '') + (yer ? ' yer' : '');
-  if (yer) { const W = stage.clientWidth, w = Math.min(340, W - 24) / 2; toastEl.style.left = Math.max(12 + w, Math.min(W - 12 - w, sonTik.x)) + 'px'; toastEl.style.top = Math.max(90, sonTik.y - 118) + 'px'; }
-  else { toastEl.style.left = ''; toastEl.style.top = ''; }
+  /* derste tıklamaya bağlı olmayan üst mesaj gösterilmez: yapılacak işi ders paneli söyler */
+  if (!yer && S.ders) { toastEl.hidden = true; return; }
+  if (yer) {
+    const W = stage.clientWidth, H = stage.clientHeight, bw = Math.min(340, W - 24), r = cihazKutu();
+    /* cihazın (raf, kartuşlar, kafa) üstüne tıklandıysa balon cihazın yanına konur; cihazı ve kartuşu kapatmaz */
+    const icinde = r && sonTik.x > r.l && sonTik.x < r.r && sonTik.y > r.t && sonTik.y < r.b;
+    const yerS = r.l - 26, yerD = W - r.r - 26, sol = icinde && yerS >= yerD && yerS >= 170, sag = icinde && !sol && yerD >= 170;
+    if (sol || sag) {
+      const gw = Math.min(260, sol ? yerS : yerD);
+      toastEl.classList.add(sol ? 'yanS' : 'yanD');
+      toastEl.style.left = (sol ? r.l - 14 - gw : r.r + 14) + 'px';
+      toastEl.style.top = Math.max(120, Math.min(H - 70, sonTik.y)) + 'px';
+      toastEl.style.width = gw + 'px';
+    } else {
+      toastEl.style.width = '';
+      toastEl.style.left = Math.max(12 + bw / 2, Math.min(W - 12 - bw / 2, sonTik.x)) + 'px';
+      toastEl.style.top = Math.max(90, (icinde ? r.t : sonTik.y) - (icinde ? 18 : 118)) + 'px';
+    }
+  }
+  else { toastEl.style.left = ''; toastEl.style.top = ''; toastEl.style.width = ''; }
   clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.hidden = true, 3600);
 }
 const fmtT = s => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60; return (h ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
@@ -1318,11 +1352,20 @@ $('#vIso').onclick = () => view(...VIEW_ISO);
 const ODAK = {
   genel: VIEW_ISO,
   sol: [[-2.1, BASE + 4.7, 9.2], [-2.2, BASE + 0.1, 0.9]],
-  raf: [[0.3, BASE + 3.5, RZ + 1.05 + 5.0], [0, BASE + 0.9, RZ + 0.6]],
+  raf: [[0.3, BASE + 4.0, RZ + 1.05 + 6.2], [0, BASE + 0.8, RZ + 0.6]],
   sag: [[2.7, BASE + 4.4, 9.5], [2.5, BASE - 0.4, 2.1]],
   on: [[0, BASE + 2.2, 9.4], [0, BASE + 0.1, 0.6]],
+  uc: [[3.9, 3.3, 6.9], [4.3, 0.3, 2.6]],
+  numune: [[3.5, 3.6, 5.6], [4.0, 0.7, 1.4]],
 };
-function speOdak(k) { const v = ODAK[k]; if (!v) return; view(...v); if (toastEl.classList.contains('yer')) toastEl.hidden = true; }
+/* tıklanan parçanın bilgi balonu açıksa önce okunur: kamera 1,4 s sonra döner, balon o an kapanır */
+let odakBekle = null;
+function speOdak(k) {
+  const v = ODAK[k]; if (!v) return;
+  clearTimeout(odakBekle);
+  const git = () => { view(...v); if (toastEl.classList.contains('yer')) toastEl.hidden = true; };
+  if (!toastEl.hidden && toastEl.classList.contains('yer')) odakBekle = setTimeout(git, 1400); else git();
+}
 $('#vFront').onclick = () => view([0, 2.4, 7.5], [0, 1.4, 0]);
 $('#vRack').onclick = () => view([1.6, BASE + 2.6, 3.6], [0, BASE + 1.0, RZ]);
 $('#vBack').onclick = () => view([-4.5, 4.5, -8], [0, 2.2, 0]);
