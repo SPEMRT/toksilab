@@ -20,7 +20,7 @@ const CIHAZ = {
   vorteks: { sayfa: 'vorteks_pilot.html', bolge: [-8, 8, -0.5, 30, -8, 10] },
   pipet: { sayfa: 'pipet_pilot.html', bolge: [-23, -9, -0.5, 32, -10, 4] },
   ultra: { sayfa: 'ultra_pilot.html', bolge: [-19, 19, -1.5, 25, -10, 10] },
-  su: { sayfa: 'su_pilot.html', bolge: [-13, 13, -0.5, 46, -18, 19] },
+  su: { sayfa: 'su_pilot.html', bolge: [-13, 13, -0.5, 46, -24, 19] },
   spe: { sayfa: 'spe_pilot.html', bolge: [-2.6, 2.6, -0.1, 5.6, -2.2, 2.2], icerden: true, eski: true },
 };
 

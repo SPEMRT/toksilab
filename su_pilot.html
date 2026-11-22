@@ -228,12 +228,14 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
   hot(add(new THREE.BoxGeometry(10,18,14),new THREE.MeshBasicMaterial({visible:false}),0,9,5,tp,false),'tap');K.tapTop=new THREE.Vector3(SINK.x-6,12.5,SINK.z-4)}
  /* ---- ELGA PURELAB flex ---- */
  const E=new THREE.Group();scene.add(E);K.E=E;
- add(RB(24,3,32,1.2),M.dgrey,0,1.5,0,E);
- add(RB(22,36,23,3),M.grey,0,20,-4.5,E);add(RB(8.6,36,9,2),M.grey,0,20,10,E);
+ /* renkler laboratuvardaki cihazın fotoğraflarından: gri gövde, gümüş sütunlar */
+ M.eGovde=new THREE.MeshPhysicalMaterial({color:'#9DA2A5',metalness:.25,roughness:.42,clearcoat:.35});M.eSutun=new THREE.MeshPhysicalMaterial({color:'#B8BDC0',metalness:.3,roughness:.32,clearcoat:.6});M.eTaban=new THREE.MeshStandardMaterial({color:'#83888B',metalness:.25,roughness:.5});
+ add(RB(24,3,38,1.2),M.eTaban,0,1.5,-3,E);
+ add(RB(22,36,30,4),M.eGovde,0,20,-8,E);add(RB(8.6,36,9,2),M.eGovde,0,20,10,E);
  K.door={};K.cart={};K.drip={};
  [-1,1].forEach(s=>{const sd=s<0?'L':'R';
   const g=new THREE.Group();g.position.set(s*11.3,0,6.5);E.add(g);K.door[sd]=g;
-  hot(add(RB(7,37,9,2.5),M.lgrey,-s*3.5,20.5,4.5,g),'door:'+sd);add(RB(7.4,1.4,9.4,.6),M.black,-s*3.5,39.2,4.5,g);
+  hot(add(RB(7,37,9,2.5),M.eSutun,-s*3.5,20.5,4.5,g),'door:'+sd);add(RB(7.4,1.4,9.4,.6),M.black,-s*3.5,39.2,4.5,g);
   add(new THREE.BoxGeometry(.3,30,.4),M.dgrey,-s*.25,20.5,8.4,g,false);
   /* yuva: arka plaka + taban */
   add(new THREE.BoxGeometry(6.6,36,.4),new THREE.MeshStandardMaterial({color:'#3A4045',roughness:.7}),s*7.8,20.5,6.9,E,false);
@@ -252,7 +254,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
   hot(add(new THREE.CylinderGeometry(3,3,31,10),new THREE.MeshBasicMaterial({visible:false}),0,19.5,0,c,false),'cart:'+sd);
   /* sızıntı damlası */
   const d=add(new THREE.CylinderGeometry(.28,.28,1,10),new THREE.MeshPhysicalMaterial({color:'#3FA6EA',emissive:'#1A6AA8',emissiveIntensity:.35,transparent:true,opacity:.85,depthWrite:false}),s*11.8,1.6,14,E,false);d.scale.y=3;d.visible=false;K.drip[sd]=d});
- add(RB(22,1.6,30,.8),M.black,0,38.8,-1.5,E);
+ add(RB(22,1.6,34,.8),M.black,0,38.8,-3.5,E);
  add(new THREE.BoxGeometry(8.4,36,1),M.dgrey,0,20,13.6,E,false);
  /* kartuş kapağı (ön alt yuvarlak) */
  const cart=add(new THREE.CylinderGeometry(2.6,2.6,.8,32),M.dgrey,0,7,14.1,E);cart.rotation.x=Math.PI/2;add(new THREE.BoxGeometry(3.6,.5,.4),M.lgrey,0,7,14.6,E).rotation.z=.5;
@@ -260,7 +262,7 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
  add(new THREE.CylinderGeometry(2.4,2.4,.6,24),M.black,4,39.8,-6,E);add(new THREE.BoxGeometry(3,.4,1),M.white,4,40.2,-6,E);
  /* logo */
  add(new THREE.PlaneGeometry(8,2),new THREE.MeshBasicMaterial({map:canvasTex(256,64,(c,w,h)=>{c.fillStyle='#8E9292';c.fillRect(0,0,w,h);c.fillStyle='#2A2C2D';c.font='700 46px sans-serif';c.textAlign='center';c.fillText('ELGA',w/2,50)})}),0,2.2,16.05,E,false);
- hot(add(new THREE.BoxGeometry(23,38,21),new THREE.MeshBasicMaterial({visible:false}),0,20,-6,E,false),'body');
+ hot(add(new THREE.BoxGeometry(23,38,28),new THREE.MeshBasicMaterial({visible:false}),0,20,-9,E,false),'body');
  /* tabanca */
  const H=new THREE.Group();scene.add(H);K.H=H;
  add(RB(4.6,24,3.6,1.6),M.grey,0,0,0,H);M.trig=M.black.clone();M.trig.emissive=new THREE.Color('#19C24A');M.trig.emissiveIntensity=0;K.trig=add(RB(4.6,2.4,3.8,1),M.trig,0,12.6,0,H);hot(K.trig,'trig');
@@ -365,7 +367,7 @@ function dropHand(){if(!S.drag)return;const p=S.drag,z=zoneOf(p);S.drag=null;if(
 let armKey='';
 function updArm(){const hp=K.H.position;const k=hp.x.toFixed(1)+hp.y.toFixed(1)+hp.z.toFixed(1);if(k===armKey)return;armKey=k;
  const a=V3(0,40,-3),top=V3(hp.x,hp.y+13.5,hp.z);const mid=V3((a.x+top.x)/2,Math.max(a.y,top.y)+22,(a.z+top.z)/2-6);
- const c=new THREE.CatmullRomCurve3([a,V3(a.x,a.y+8,a.z-2),mid,V3(top.x,top.y+8,top.z-1),top]);K.armMesh.geometry.dispose();K.armMesh.geometry=new THREE.TubeGeometry(c,80,1.05,14,false)}
+ const c=new THREE.CatmullRomCurve3([a,V3(a.x,a.y+8,a.z-2),mid,V3(top.x,top.y+8,top.z-1),top]);K.armMesh.geometry.dispose();K.armMesh.geometry=new THREE.TubeGeometry(c,80,1.5,16,false)}
 /* ekran */
 function drawScreen(){if(!stex)return;const R=S.R,flow=S.flowing||S.volMode;const alarm=S.leak.side&&!S.leak.seated;const tk=Math.floor(performance.now()/120);const key=[R.toFixed(1),flow,S.volMode,S.volSet,Math.round(S.volLeft),alarm,tk].join('|');if(key===lastScr)return;lastScr=key;const c=scv.getContext('2d');
  c.textAlign='left';c.fillStyle='#000';c.fillRect(0,0,240,460);
