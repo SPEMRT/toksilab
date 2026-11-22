@@ -69,7 +69,7 @@ const CIHAZLAR = [[2, 'bal'], [2, 'cen'], [2, 'vor'], [2, 'pip'], [2, 'spe'], [2
       sonuc(gz.k && !gz.ders && /LABORATUVARI TANI/.test(gz.pill), `Oda ${no}: turda açıklama kutusu var, ders paneli yok`);
       await p.screenshot({ path: path.join(__dirname, 'ekran', `labtur_oda${no}.png`) });
       hataKontrol(p, `Oda ${no} içi`);
-      await p.evaluate(() => (document.getElementById('hLab') || document.getElementById('mHome')).click());
+      await p.evaluate(() => (document.getElementById('taniGeri') || document.getElementById('hLab') || document.getElementById('mHome')).click()); // '‹ Koridora dön'
       await p.waitForURL(/lab_giris\.html/, { timeout: 30000 }).catch(() => {});
       await p.waitForFunction(() => document.getElementById('say') && /Gaz tüp odasından çıktın/.test(document.getElementById('say').innerText), null, { timeout: 90000 }).catch(() => {});
       const geri = await p.evaluate(() => ({ url: location.href, b: document.getElementById('say').innerText, pill: (document.querySelector('.hdr2 .pill') || {}).textContent || '' }));
