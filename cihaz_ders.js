@@ -8,6 +8,7 @@
    pipet_pilot.html?ders=piptani | pipsu | pipkan | pipstok | pipdcm  (tanıma · ileri · ters · 5 µL · DCM ön ıslatma)
    su_pilot.html?ders=sutani | sudol | susiz            (tanıma · 500 mL şişe · kartuş sızıntısı)
    spe_pilot.html?ders=spetani | spesart | speyuk | speelu  (tanıma · şartlandırma · yükleme · yıkama, kurutma, elüsyon)
+   gaz_pilot.html?ders=gaztani | gazoku | gazhe | gazar  (tanıma · göstergeler · helyum ayarı · argon tüpü değişimi)
    Sayfanın 3B sahnesini ve kendi işlevlerini kullanır; sahneye ve fiziğe dokunmaz. */
 (function(){
 'use strict';
@@ -876,8 +877,109 @@ return {sayfa:'spe_pilot.html',hazir:'__spe',tuval:'#c',ad:'SPE · CEREX 48',mod
    return n?'<b>'+n+' kartuş</b> kullanıldı, <b>'+b+'</b> tanesi elüsyona kadar bitti. Bitirince <b>✅ İşi bitirdim</b>: değerlendirme raporun açılır. Raporu üstteki <b>📋 Rapor</b> ile yeniden açabilirsin.':'Serbest kullanım: uyarı yok, kendi bildiğin gibi çalış. Görev: N1–N5 numunelerini Oasis HLB kartuşlarla ekstrakte et (şartlandırma → yükleme → yıkama → kurutma → elüsyon). Gereken malzemeleri üstteki <b>🧰 Tezgâh</b> düğmelerinden ya da tezgâhtaki işaretli yere tıklayarak getir. Bitirince <b>✅ İşi bitirdim</b>’e bas.'}}};
 }
 
+/* ---------- gaz tüp odası ---------- */
+function gaz(){
+var AD={'Gaz tüpü (50 L)':'cyl','Tüp vanası':'cv','Çelik kamçı (esnek bağlantı hortumu)':'pig','Açma (giriş) vanası · alt vana':'inl','Tahliye vanası · üst vana':'pur','Hat basıncı manometresi (sol, 0–10 bar)':'lp','Tüp basıncı manometresi (sağ, 0–400 bar)':'hp','Regülatör ve ayar kolu':'reg','Hat vanası':'out','Gaz hattı ve etiketi':'line','Güvenlik zinciri':'chain','Tüp koruma başlığı':'cap','Yedek tüpler':'spare','Boş tüpler':'empty'};
+var ADI={cyl:'gaz tüpü',cv:'tüp vanası',pig:'çelik kamçı',inl:'açma vanası',pur:'tahliye vanası',lp:'hat basıncı manometresi',hp:'tüp basıncı manometresi',reg:'regülatör',out:'hat vanası',line:'gaz hattı',chain:'güvenlik zinciri',cap:'koruma başlığı',spare:'yedek tüpler',empty:'boş tüpler'};
+var PAN=['Azot-1','Argon-1','Argon-2','Helyum','Azot-2'];
+/* halka: önce kamerayı doğru görünüme al (-1 oda, -2 yedek tüpler, 0–4 panel), sonra parçayı göster */
+/* kamera her adımın başında bir kez ayarlanır; sonra öğrenci (panele tıklayıp) değiştirebilir */
+function B(gor,id,r){var bir=0;return function(){if(!bir&&window.kamera){window.kamera(gor);bir=1}return ['hot:'+id,0,r||44]}}
+function popAcik(){var b=document.getElementById('bpop');return b&&!b.hidden}
+/* açılır kutudaki düğme (varsa) ya da kutuyu açan parça */
+function P(sec,gor,id,r){var y=B(gor,id,r);return function(){return popAcik()&&document.querySelector(sec)?[sec,0,0]:y()}}
+function f1(v){return v.toFixed(1).replace('.',',')}
+function st(i){return S().st[i]}
+function man(i){var t=st(i);return PAN[i]+' · hat '+f1(t.lp)+' bar · tüp '+Math.round(t.hp)+' bar'}
+function parca(gor,k,id,r,b,ne,neden,yanlis,ask){return {bolum:'Parçalar',ask:ask,parca:[k],halka:B(gor,id,r),b:b,ne:ne,neden:neden,yanlis:yanlis}}
+var A2=function(){return st(2).cyl.A};
+/* regülatör: hedefe göre +/− düğmesi */
+function regHalka(i,h){return function(){var t=st(i);if(!popAcik()||!document.querySelector('#bpop [data-d]'))return B(i,'reg:'+i,44)();var d=h-t.reg,k=Math.abs(d)>=.45?'0.5':'0.1';return ['#bpop [data-d="'+(d<0?'-':'')+k+'"]',0,0]}}
+/* yedekten doğru gazın tüpü */
+function argonHalka(){var j=-1;S().spare.some(function(x,k){if(!x.used&&x.g==='Ar'){j=k;return true}});if(popAcik()&&j>=0&&document.querySelector('#bpop [data-j="'+j+'"]'))return ['#bpop [data-j="'+j+'"]',0,0];return B(2,'slot:2:A',60)()}
+var DERS={
+gaztani:{ad:'Odayı tanıma',ozet:'Gaz tüpleri, vanalar, regülatör, manometreler, kamçı, zincir; yedek ve boş tüpler.',baslik:'GAZ TÜP ODASI · TANIMA',mod:'parts',gorev:'parts',kur:function(){window.kamera(-1)},
+ adim:[
+ {bolum:'Giriş',b:'Gaz tüp odası ne işe yarar?',
+  html:'<p>Laboratuvardaki cihazların kullandığı basınçlı gazlar (<b>azot</b>, <b>argon</b>, <b>helyum</b>) tek bir odada, tüplerde durur. Gaz, regülatörlerden geçip tavandaki ince paslanmaz borularla odalardaki cihazlara gider.</p><p>Soldan sağa beş panel var: <b>Azot-1</b> ve <b>Argon-1</b> tek tüplü; <b>Argon-2</b> (ICP-MS), <b>Helyum</b> (GC-MS) ve <b>Azot-2</b> (örnek hazırlama) çift tüplü.</p><p>Gaz tüpleri ≈ 200 bar basınç taşır: her parçanın ne işe yaradığını bilmek güvenlik için şarttır.</p>'},
+ parca(3,'cyl','cyl:3:A',60,'Gaz tüpü (50 L)','Yüksek saflıkta (5.0 = %99,999) gaz içeren çelik tüp; doluyken ≈ 200 bar.','Cihazın gazı buradan gelir. Bizim odamızda azot yeşil, argon mavi, helyum kahverengi tüplerdedir.','Renk tedarikçiye göre değişebilir: gazı her zaman <b>etiketten</b> doğrula.','Helyum panelindeki <b>gaz tüpüne</b> tıklayın.'),
+ parca(3,'cv','cv:3:A',36,'Tüp vanası','Tüpün tepesindeki kendi ana vanası (el çarkı).','Tüpteki gazı açar ya da keser. Tüp değişiminde ilk kapatılan vanadır.','Yavaşça açılır; hızlı açmak regülatöre basınç darbesi yapar.','Tüpün tepesindeki <b>tüp vanasına</b> tıklayın.'),
+ parca(3,'pig','pig:3:A',36,'Çelik kamçı','Tüpü regülatöre bağlayan, paslanmaz çelik örgülü yüksek basınç hortumu.','İki ucundaki emniyet halatları, bağlantı koparsa hortumun kamçı gibi savrulmasını önler.','Tüp başlığına İngiliz anahtarıyla sıkılır; oturduğu yerde <b>conta</b> olmalıdır.','Tüpü panele bağlayan <b>çelik kamçıya</b> (hortum) tıklayın.'),
+ parca(3,'reg','reg:3',44,'Regülatör ve ayar kolu','Yüksek tüp basıncını sabit hat basıncına düşüren cihaz.','Kolu saat yönünde çevirmek hat basıncını artırır. Çift tüplü panelde iki tüp aynı regülatöre bağlıdır.','Ayar, sol manometreye bakılarak yavaş yavaş yapılır.','Paneldeki <b>regülatöre</b> tıklayın.'),
+ parca(3,'lp','lp:3',34,'Hat basıncı manometresi (sol)','Regülatörden sonra laboratuvara giden basıncı gösterir (0–10 bar).','Cihazın ihtiyacına göre ayarlanır: ör. GC-MS 5,5 bar, ICP-MS 6 bar.','Gaz çekildikçe ibre hafifçe oynar; sürekli düşüyorsa kaçak ya da biten tüp olabilir.','Regülatörün <b>sol manometresine</b> tıklayın.'),
+ parca(3,'hp','hp:3',34,'Tüp basıncı manometresi (sağ)','Tüpteki basıncı gösterir (0–400 bar).','Dolu tüp ≈ 200 bar; gaz kullanıldıkça düşer.','Kırmızı bölgeye (≈ 20 barın altı) gelince tüp değiştirilir.','Regülatörün <b>sağ manometresine</b> tıklayın.'),
+ parca(3,'inl','inl:3:A',34,'Açma (giriş) vanası · alt vana','Kamçıdan gelen tüp gazını regülatöre açar.','Çift tüplü panelde her tüpün kendi açma vanası vardır; geçiş elle yapılır.','Tüp 1 bitmek üzereyken önce Tüp 2’ninki açılır, sonra Tüp 1’inki kapatılır. Otomatik geçiş yoktur.','Paneldeki alttaki <b>açma vanasına</b> tıklayın.'),
+ parca(3,'pur','pur:3:A',34,'Tahliye vanası · üst vana','Kamçının içinde sıkışan basıncı güvenle boşaltır.','Tüp vanası kapatıldıktan sonra açılır, basınç alınınca yeniden kapatılır.','Tüp vanası açıkken açılmaz: tüpteki gaz sürekli odaya boşalır.','Paneldeki üstteki <b>tahliye vanasına</b> tıklayın.'),
+ parca(3,'out','out:3',34,'Hat vanası','Regülatörden sonra hattı laboratuvara açar ya da kapatır.','Cihaza gaz gitmesini durdurmak ya da başlatmak için kullanılır.','Kapatılırsa cihaz gazsız kalır (ICP-MS’te plazma söner).','Regülatörün üstündeki kırmızı kollu <b>hat vanasına</b> tıklayın.'),
+ parca(3,'line','line:3',40,'Gaz hattı ve etiketi','Gazı tavandan laboratuvarlara taşıyan paslanmaz çelik boru.','Her hat etiketlidir: gaz, gittiği oda ve cihaz.','Hangi vanayı açtığını her zaman etiketten kontrol et.','Panelden tavana çıkan <b>gaz hattına</b> ya da etiketine tıklayın.'),
+ parca(3,'chain','chain:3',40,'Güvenlik zinciri','Tüpleri duvara sabitleyen zincir.','Tüp devrilmesin diye her zaman takılı durur.','Devrilen bir tüpün vanası kırılırsa tüp füze gibi fırlayabilir.','Tüpü duvara bağlayan <b>güvenlik zincirine</b> tıklayın.'),
+ parca(-2,'spare','spare:0',60,'Yedek tüpler','Dolu, başlığı takılı ve mühür bandı sağlam tüpler.','Biten tüpün yerine buradan doğru gazın tüpü alınır.','Tüp rengine göre değil, <b>etiketine</b> bakarak seçilir.','En soldaki <b>yedek tüplere</b> tıklayın.'),
+ parca(-1,'empty','empty',60,'Boş tüpler','Biten tüplerin “BOŞ” etiketiyle toplandığı alan.','Boş tüpler tedarikçiye geri gönderilir.','Dolu tüplerle karıştırılmaz; başlıkları takılı durur.','Sağ duvardaki <b>boş tüpler</b> alanına tıklayın.'),
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Tüp basıncını hangi manometre gösterir?',['Sol (0–10 bar)','Sağ (0–400 bar)','İkisi de aynı'],1,'Sağ manometre tüpü, sol manometre laboratuvara giden hattı gösterir.'],
+ ['Tüplerin duvara zincirle bağlanmasının nedeni nedir?',['Çalınmasın diye','Devrilip vanası kırılmasın diye','Soğuk kalsın diye'],1,'Vanası kırılan tüp yüksek basınçla fırlayabilir.'],
+ ['Yedek tüp nasıl seçilir?',['Rengine bakarak','Etiketine bakarak','En hafifini alarak'],1,'Renk tedarikçiye göre değişebilir; etiket kesindir.']],
+ bitti:function(){S().done.parts=1}},
+gazoku:{ad:'Göstergeleri okuma',ozet:'Beş panelde hat ve tüp basıncını oku; biten tüpü fark et.',baslik:'GAZ TÜP ODASI · GÖSTERGELER',mod:'use',gorev:'read',kur:function(){window.kamera(-1)},
+ adim:[
+ {bolum:'Giriş',b:'İki manometre',html:'<p>Her regülatörde iki manometre vardır:</p><ul><li><b>Sol</b>: hat basıncı, 0–10 bar. Laboratuvardaki cihaza giden basınç.</li><li><b>Sağ</b>: tüp basıncı, 0–400 bar. Dolu tüp ≈ 200 bar; 0’a yaklaşınca tüp biter.</li></ul><p>Her gün odaya girince panellere bakılır: hat basınçları doğru mu, bitmek üzere olan tüp var mı?</p>'}].concat([0,1,2,3,4].map(function(i){
+  return {bolum:'Okuma',ask:'<b>'+PAN[i]+'</b> paneline tıklayın ve manometreleri okuyun.',halka:B(-1,'panel:'+i,70),izin:['panel','line','chain','hp','lp'],ok:function(s){return !!s.read[i]},
+   b:function(){return PAN[i]+' paneli'},html:function(){var t=st(i),L=t.cyl,uy=t.hp<20?' Tüp <b>bitmek üzere</b>: değiştirilmeli.':t.hp<80?' Tüpte gaz azalıyor; yedeği hazır olsun.':' Tüp dolu sayılır.';return '<p>Sol manometre (hat): <b>'+f1(t.lp)+' bar</b>. Sağ manometre (tüp): <b>'+Math.round(t.hp)+' bar</b>.'+uy+'</p>'+(t.type==='D'?'<p>Çift tüplü panel: iki tüp aynı regülatöre bağlı; şu an açık olan tüp: <b>'+(t.inl.A&&t.inl.B?'Tüp 1 ve Tüp 2':t.inl.A?'Tüp 1':'Tüp 2')+'</b>.</p>':'<p>Tek tüplü panel.</p>')}}})).concat([{bolum:'Kontrol',test:1}]),
+ soru:[
+ ['Bir tüpün sağ manometresi 15 bar gösteriyor. Ne yapılır?',['Bir şey yapılmaz','Tüp değiştirilir (çift tüplüde diğer tüpe geçilir)','Hat basıncı artırılır'],1,'≈ 20 barın altı kırmızı bölgedir: tüp bitmek üzeredir.'],
+ ['Sol manometre neyi gösterir?',['Tüpteki basıncı','Cihaza giden hat basıncını','Oda basıncını'],1,'Regülatörden sonraki basınçtır.']],
+ bitti:function(){S().done.read=1}},
+gazhe:{ad:'GC-MS helyum basıncı',ozet:'Helyum regülatörünü 5,5 bara ayarla, hat vanasını aç.',baslik:'GAZ TÜP ODASI · HELYUM AYARI',mod:'use',gorev:'set',kur:function(){window.kamera(-1)},
+ adim:[
+ {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p>GC-MS’in taşıyıcı gazı <b>helyumdur</b>. Bakımdan sonra helyum hattı <b>3,5 bara</b> düşürülmüş ve <b>hat vanası kapatılmış</b>. GC-MS’in istediği hat basıncı <b>5,5 bar</b>.</p><p>Sıra: panele git → tüpte gaz var mı bak → regülatörü ayarla → hat vanasını aç.</p>'},
+ {bolum:'Ayar',ask:'<b>Helyum</b> paneline tıklayın.',halka:B(-1,'panel:3',70),izin:['panel','line','chain'],ok:function(s){return s.sel===3},b:'Helyum paneli',html:'<p>Helyum paneli <b>çift tüplü</b>; iki tüp aynı regülatöre bağlı.</p>'},
+ {bolum:'Ayar',ask:'Önce tüpte gaz olduğundan emin olun: <b>sağ manometreye</b> (tüp basıncı) tıklayın.',halka:B(3,'hp:3',34),izin:['hp'],ok:function(s){return !!s.ev.hpSeen},b:'Tüpte gaz var',html:function(){return '<p>Tüp basıncı <b>'+Math.round(st(3).hp)+' bar</b>: ayara geçilebilir.</p>'}},
+ {bolum:'Ayar',ask:'<b>Regülatöre</b> tıklayın; açılan kutudan <b>+0,5</b> / <b>+0,1</b> ile ayarı <b>5,5 bara</b> getirin.',halka:regHalka(3,5.5),izin:['reg'],canli:function(){return 'Regülatör ayarı: '+f1(st(3).reg)+' bar'},ok:function(){return Math.abs(st(3).reg-5.5)<.05},
+  hata:function(){var r=st(3).reg;return r>5.55?'Ayar '+f1(r)+' bar: fazla. <b>−0,1</b> ile 5,5’e indirin.':''},b:'5,5 bar',html:'<p>Regülatör ayarı 5,5 bar. Hat vanası kapalı olduğu için gaz henüz cihaza gitmiyor.</p>'},
+ {bolum:'Ayar',ask:'Regülatörün üstündeki kırmızı kollu <b>hat vanasını</b> açın.',halka:B(3,'out:3',34),izin:['out'],ok:function(){return st(3).out},b:'Hat açık',html:'<p>Helyum artık GC-MS hattına gidiyor.</p>'},
+ {bolum:'Sonuç',ask:'Hat basıncı <b>5,5 bara</b> oturana kadar sol manometreyi izleyin…',bekle:1,canli:function(){return man(3)},ok:function(){return Math.abs(st(3).lp-5.5)<.15},b:'Hat 5,5 barda',html:'<p>Hat basıncı ayara oturdu. Gerçekte bundan sonra GC-MS’te taşıyıcı gaz basıncı ve sızıntı kontrol edilir.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Regülatör ayarı hangi manometreye bakılarak yapılır?',['Sağ (tüp)','Sol (hat)','Fark etmez'],1,'Ayarlanan, cihaza giden hat basıncıdır.'],
+ ['GC-MS helyum hattı için doğru basınç hangisi?',['5,5 bar','55 bar','200 bar'],0,'200 bar tüp basıncıdır; hat birkaç bardır.']],
+ bitti:function(){S().done.set=1}},
+gazar:{ad:'Argon tüpü değişimi',ozet:'ICP-MS hattı hiç kesilmeden Tüp 2’ye geç, biten Tüp 1’i değiştir, kaçak testi yap.',baslik:'GAZ TÜP ODASI · TÜP DEĞİŞİMİ',mod:'use',gorev:'swap',kur:function(){window.kamera(-1)},
+ adim:[
+ {bolum:'Giriş',b:'Ne yapacaksınız?',html:'<p><b>Argon-2</b> paneli ICP-MS’i besler; ICP-MS’in plazması gaz kesilirse söner. Panel çift tüplü: <b>Tüp 1 bitmek üzere</b>, Tüp 2 dolu.</p><p>Önce hattı Tüp 2’ye geçireceksiniz, sonra Tüp 1’i güvenle değiştireceksiniz. Her adımda yalnız halkanın gösterdiği parça çalışır.</p>'},
+ {bolum:'Geçiş',ask:'<b>Argon-2</b> paneline tıklayın.',halka:B(-1,'panel:2',70),izin:['panel','line','chain'],ok:function(s){return s.sel===2},b:'Argon-2 paneli',html:'<p>ICP-MS hattı: 6 bar. İki tüp aynı regülatöre bağlı.</p>'},
+ {bolum:'Geçiş',ask:'<b>Sağ manometreye</b> (tüp basıncı) tıklayın.',halka:B(2,'hp:2',34),izin:['hp'],ok:function(s){return !!s.ev.hpSeen},b:'Tüp 1 bitmek üzere',html:function(){return '<p>Tüp 1: <b>'+Math.round(A2().p)+' bar</b>. Kırmızı bölgede: değiştirilmeli.</p>'}},
+ {bolum:'Geçiş',ask:'Önce <b>Tüp 2’nin açma vanasını</b> açın (sağ alt vana).',halka:B(2,'inl:2:B',34),izin:['inl'],ok:function(){return st(2).inl.B},b:'Tüp 2 devrede',html:'<p>Şimdi iki tüp de regülatöre açık; hat basıncı hiç düşmedi.</p>'},
+ {bolum:'Geçiş',ask:'Şimdi <b>Tüp 1’in açma vanasını</b> kapatın (sol alt vana).',halka:B(2,'inl:2:A',34),izin:['inl'],ok:function(){return !st(2).inl.A},b:'ICP-MS’i Tüp 2 besliyor',html:'<p>Sıra önemli: önce yeni tüp açılır, sonra eski tüp kapatılır. Ters yapılırsa hat bir an gazsız kalır.</p>'},
+ {bolum:'Söküm',ask:'<b>Tüp 1’in tüp vanasını</b> kapatın (tüpün tepesindeki el çarkı).',halka:B(2,'cv:2:A',34),izin:['cv'],ok:function(){return !A2().v},b:'Tüp vanası kapalı',html:'<p>Kamçının içinde hâlâ basınç var: sökmeden önce boşaltılmalı.</p>'},
+ {bolum:'Söküm',ask:'Üstteki <b>tahliye vanasını</b> açın: kamçıdaki basınç boşalsın.',halka:B(2,'pur:2:A',34),izin:['pur'],ok:function(s){return st(2).pur.A||!!s.ev.purged},b:'Tahliye açık',html:'<p>Kamçıdaki sıkışmış gaz dışarı veriliyor.</p>'},
+ {bolum:'Söküm',ask:'Basınç boşalınca <b>tahliye vanasını</b> kapatın.',halka:B(2,'pur:2:A',34),izin:['pur'],canli:function(){return 'Kamçıda '+Math.round(A2().pigP)+' bar'},ok:function(s){return !!s.ev.purged&&!st(2).pur.A},b:'Kamçı boşaldı',html:'<p>Basınç sıfır: kamçı güvenle sökülebilir.</p>'},
+ {bolum:'Söküm',ask:'<b>Kamçıya</b> tıklayın ve <b>İngiliz anahtarıyla sökün</b>.',halka:P('#ppD',2,'pig:2:A',36),izin:['pig'],ok:function(){return !A2().con},b:'Kamçı söküldü',html:'<p>Basınçlı kamçı sökülmez: somun gevşerken gaz fışkırır.</p>'},
+ {bolum:'Söküm',ask:'<b>Tüpe</b> tıklayın: başlığını takıp <b>boş tüpler</b> alanına taşıyın.',halka:P('#cpM',2,'cyl:2:A',60),izin:['cyl','cv','cap'],ok:function(){return !A2().present},b:'Boş tüp kaldırıldı',html:'<p>Boş tüp başlığı takılı ve “BOŞ” etiketli olarak toplanır.</p>'},
+ {bolum:'Yeni tüp',ask:'Boş kalan yere tıklayın ve yedeklerden <b>ARGON</b> tüpünü getirin.',halka:argonHalka,izin:['slot','spare'],ok:function(){return A2().present&&A2().fresh},b:'Dolu argon tüpü yerinde',html:'<p>Tüp etiketinden seçildi ve zincirlendi.</p>'},
+ {bolum:'Yeni tüp',ask:'<b>Tüpe</b> tıklayın ve <b>koruma başlığını</b> açın.',halka:P('#cpC',2,'cyl:2:A',60),izin:['cyl','cv','cap'],ok:function(){return !A2().capOn},b:'Başlık açıldı',html:'<p>Başlık taşırken vanayı korur; tüp bağlanırken çıkarılır.</p>'},
+ {bolum:'Yeni tüp',ask:'<b>Tüpe</b> tıklayın ve tüp başındaki <b>mühür bandını</b> açın.',halka:P('#cpB',2,'cyl:2:A',60),izin:['cyl','cv','cap'],ok:function(){return !A2().band},b:'Mühür bandı açıldı',html:'<p>Bant sağlamsa tüp dolumdan beri açılmamış demektir.</p>'},
+ {bolum:'Bağlantı',ask:'<b>Kamçıya</b> tıklayın ve oturacağı yerde <b>contayı kontrol edin</b>.',halka:P('#ppG',2,'pig:2:A',36),izin:['pig'],ok:function(){return A2().gChk},b:'Conta kontrolü',html:function(){return A2().gasket?'<p>Conta yerinde.</p>':'<p><b>Conta yok!</b> Contasız bağlantı mutlaka kaçırır.</p>'}},
+ {bolum:'Bağlantı',ask:'<b>Kamçıya</b> tıklayın ve <b>yeni conta</b> takın.',halka:P('#ppN',2,'pig:2:A',36),izin:['pig'],ok:function(){return A2().gasket},b:'Conta takıldı',html:'<p>Her bağlantıda conta kontrol edilir; şüphede yenisi takılır.</p>'},
+ {bolum:'Bağlantı',ask:'<b>Kamçıya</b> tıklayın ve <b>tüp başlığına takın</b>.',halka:P('#ppC',2,'pig:2:A',36),izin:['pig'],ok:function(){return A2().con},b:'Kamçı takıldı',html:'<p>Somun şimdilik elle çevrildi.</p>'},
+ {bolum:'Bağlantı',ask:'<b>Kamçıya</b> tıklayın ve <b>İngiliz anahtarıyla sıkıca sıkın</b>.',halka:P('#ppT',2,'pig:2:A',36),izin:['pig'],ok:function(){return A2().tight===2},b:'Bağlantı sıkıldı',html:'<p>Gevşek bağlantıdan 200 barlık gaz kaçar.</p>'},
+ {bolum:'Bağlantı',ask:'Açma vanası <b>kapalıyken</b> <b>tüp vanasını</b> yavaşça açın.',halka:P('#cpV',2,'cv:2:A',34),izin:['cv','cyl'],ok:function(){return A2().v},b:'Kamçı basınçlandı',html:'<p>Kamçı 200 barla doldu. Açma vanası kapalı: Tüp 1 yedekte bekleyecek.</p>'},
+ {bolum:'Kaçak testi',ask:'<b>Kamçıya</b> tıklayın ve bağlantıya <b>köpük spreyi</b> sıkın.',halka:P('#ppL',2,'pig:2:A',36),izin:['pig'],ok:function(s){return !!s.ev.leakOK},b:'Kabarcık yok',html:'<p>Köpük yerinde duruyor: bağlantı sızdırmıyor. Yeni Tüp 1 yedekte; Tüp 2 bitmeye yakınken Tüp 1’in açma vanası açılır, sonra Tüp 2’ninki kapatılır.</p>'},
+ {bolum:'Kontrol',test:1}],
+ soru:[
+ ['Çift tüplü panelde geçiş sırası nedir?',['Önce eski tüpün açma vanası kapatılır, sonra yeni tüpünki açılır','Önce yeni tüpün açma vanası açılır, sonra eski tüpünki kapatılır','İkisi aynı anda kapatılır'],1,'Böylece hat hiç gazsız kalmaz.'],
+ ['Kamçı sökülmeden önce ne yapılır?',['Tüp vanası kapatılır, tahliye ile basınç alınır','Hat vanası kapatılır','Hiçbir şey'],0,'Basınçlı kamçı sökülürse gaz fışkırır.'],
+ ['Yeni bağlantının sızdırmadığı nasıl anlaşılır?',['Kokusundan','Köpük spreyi sıkılır; kabarcık yoksa sızıntı yok','Manometreye vurarak'],1,'Kabarcık büyüyorsa bağlantı kaçırıyordur.']],
+ bitti:function(){S().done.swap=1}}
+};
+return {sayfa:'gaz_pilot.html',hazir:'__gaz',ad:'GAZ TÜP ODASI',model:'5 panel · N₂ · Ar · He',adTam:'Gaz tüp odasının',
+ acl:'Gaz tüp odasını dört kısa bölümde, adım adım öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 3–8 dakika sürer.',
+ GM:{parts:'gaztani',read:'gazoku',set:'gazhe',swap:'gazar'},AD:AD,ADI:ADI,DERS:DERS,SIRA:['gaztani','gazoku','gazhe','gazar'],
+ senkron:function(s,o){[['gaztani','parts'],['gazoku','read'],['gazhe','set'],['gazar','swap']].forEach(function(x){if(o[x[0]]&&o[x[0]].bitti)s.done[x[1]]=1})}};
+}
+
 /* ---------- sayfaya göre cihaz ---------- */
-var C=null;[vorteks,terazi,ultra,santrifuj,pipet,su,spe].some(function(f){var c=f();if(c.sayfa===SAYFA){C=c;return true}});
+var C=null;[vorteks,terazi,ultra,santrifuj,pipet,su,spe,gaz].some(function(f){var c=f();if(c.sayfa===SAYFA){C=c;return true}});
 if(!C)return;
 /* serbest kullanımda canlı uyarı kuralları: yanlış giden şey kesin dille panelde gösterilir */
 var SK={

@@ -43,7 +43,15 @@ const CIHAZLAR = [[2, 'bal'], [2, 'cen'], [2, 'vor'], [2, 'pip'], [2, 'spe'], [2
 
   // 1) Turu başlat ve koridora gir.
   const p = await sayfaAc();
+  // Tura başlarken "nasıl gezilir" tanıtımı (5 kart) çıkar; öğrenci gibi İleri ile geç.
   await p.click('#enter');
+  await p.waitForTimeout(800);
+  const kartlar = [];
+  for (let i = 0; i < 8 && await p.evaluate(() => { const k = document.getElementById('kvz'); return k && !k.hidden; }); i++) {
+    kartlar.push(await p.evaluate(() => document.querySelector('#kvz h3').textContent));
+    await p.evaluate(() => document.getElementById('kvzI').click()); await p.waitForTimeout(300);
+  }
+  sonuc(kartlar.length === 5, `Nasıl gezilir tanıtımı: ${kartlar.length} kart (${kartlar.join(' · ')})`);
   for (let i = 0; i < 30 && !(await balon(p)).includes('Koridor'); i++) { await videoGec(p); await p.waitForTimeout(1000); }
   sonuc((await balon(p)).includes('Koridor'), 'Tura başla: koridora girildi');
   hataKontrol(p, 'Tur başı');
@@ -55,8 +63,10 @@ const CIHAZLAR = [[2, 'bal'], [2, 'cen'], [2, 'vor'], [2, 'pip'], [2, 'spe'], [2
       await p.waitForURL(/gaz_pilot\.html/, { timeout: 30000 }).catch(() => {});
       const url = p.url();
       sonuc(/gaz_pilot\.html/.test(url) && /mod=tani/.test(url), `Oda ${no} (${ad}): turdan içeri girildi`);
-      await p.waitForSelector('#hLab, #mHome', { timeout: 90000 }).catch(() => {});
+      await p.waitForSelector('#taniK', { timeout: 90000 }).catch(() => {});
       await p.waitForTimeout(2000);
+      const gz = await p.evaluate(() => ({ k: !!document.getElementById('taniK'), ders: !!document.getElementById('dersK'), pill: (document.querySelector('.hdr .pill') || {}).textContent || '' }));
+      sonuc(gz.k && !gz.ders && /LABORATUVARI TANI/.test(gz.pill), `Oda ${no}: turda açıklama kutusu var, ders paneli yok`);
       await p.screenshot({ path: path.join(__dirname, 'ekran', `labtur_oda${no}.png`) });
       hataKontrol(p, `Oda ${no} içi`);
       await p.evaluate(() => (document.getElementById('hLab') || document.getElementById('mHome')).click());

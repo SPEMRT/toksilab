@@ -153,8 +153,33 @@ body.fps #gmode{background:rgba(14,21,24,.8);color:#EAF2F3}body.fps .moves,body.
 #joy{position:fixed;z-index:6;left:14px;bottom:calc(24vh + 18px);width:116px;height:116px;border-radius:50%;background:rgba(14,21,24,.45);border:2px solid rgba(124,242,216,.5);touch-action:none;display:none}
 #joy i{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:rgba(43,217,192,.85);box-shadow:0 4px 12px rgba(0,0,0,.35)}
 @media (pointer:coarse){#gmode{display:none}#joy{display:block}.moves{display:none!important}}
+
+/* kısa "nasıl gezilir" tanıtımı (oyunlardaki gibi): animasyonlu kartlar */
+#kvz{position:fixed;inset:0;z-index:2147483200;background:rgba(6,12,14,.72);display:grid;place-items:center;padding:16px;font-family:var(--f-body,"Source Sans 3",system-ui,sans-serif)}#kvz[hidden]{display:none}
+#kvz .kk{width:min(520px,100%);background:#1E2A30;color:#D7E4E7;border:1px solid #34454D;border-radius:18px;padding:18px 18px 14px;box-shadow:0 24px 60px rgba(0,0,0,.5);display:grid;gap:12px}
+#kvz .ku{display:flex;justify-content:space-between;align-items:baseline;font:600 11px "IBM Plex Mono",monospace;letter-spacing:.08em;color:#7CF2D8}#kvz .ku button{border:0;background:none;color:#9BB0B6;font:600 13px var(--f-body,sans-serif);cursor:pointer}
+#kvz h3{margin:0;font:700 24px "Barlow Condensed",sans-serif;color:#EAF2F3;letter-spacing:.02em}
+#kvz .kp{font-size:15.5px;line-height:1.45}#kvz .kp b{color:#EAF2F3}#kvz .kp small{display:block;margin-top:6px;color:#9BB0B6;font-size:13.5px}
+#kvz .sah{height:150px;border-radius:14px;background:radial-gradient(circle at 50% 120%,#2B3E45,#16242A 70%);position:relative;overflow:hidden;display:grid;place-items:center}
+#kvz .tus{display:inline-grid;place-items:center;min-width:40px;height:40px;padding:0 8px;border-radius:9px;background:#33444C;border-bottom:4px solid #0E1518;color:#EAF2F3;font:700 17px "IBM Plex Mono",monospace}
+#kvz .tus.b{animation:kvzBas 1.6s infinite}#kvz .tus.b2{animation:kvzBas 1.6s .8s infinite}
+@keyframes kvzBas{0%,40%,100%{transform:translateY(0);border-bottom-width:4px;background:#33444C}15%,30%{transform:translateY(3px);border-bottom-width:1px;background:#2BD9C0;color:#062126}}
+#kvz .sira{display:flex;gap:8px;align-items:center}#kvz .ayir{color:#6F858C;font-size:13px;margin:0 6px}
+#kvz .kisi{position:absolute;left:50%;bottom:14px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#F2B632;box-shadow:0 0 0 6px rgba(242,182,50,.25)}
+#kvz .kisi.ilr{animation:kvzIlr 1.6s infinite ease-in-out}@keyframes kvzIlr{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-42px) scale(.75)}}
+#kvz .don{width:70px;height:70px;border-radius:50%;border:4px solid #2BD9C0;border-right-color:transparent;animation:kvzDon 1.8s infinite linear}@keyframes kvzDon{to{transform:rotate(360deg)}}
+#kvz .el{position:absolute;font-size:34px;animation:kvzSur 2.2s infinite ease-in-out}@keyframes kvzSur{0%,100%{transform:translateX(-70px)}50%{transform:translateX(70px)}}
+#kvz .ufuk{position:absolute;inset:auto 0 50px 0;height:2px;background:repeating-linear-gradient(90deg,#4B6068 0 18px,transparent 18px 30px);animation:kvzUfuk 2.2s infinite ease-in-out}@keyframes kvzUfuk{0%,100%{transform:translateX(40px)}50%{transform:translateX(-40px)}}
+#kvz .plan{display:grid;grid-template-columns:repeat(6,34px);gap:6px}#kvz .plan i{height:34px;border-radius:5px;display:grid;place-items:center;font:700 13px "IBM Plex Mono",monospace;font-style:normal;color:#fff}
+#kvz .plan i:nth-child(2){animation:kvzSec 2s infinite}@keyframes kvzSec{0%,35%,100%{box-shadow:none}45%,80%{box-shadow:0 0 0 3px #F2B632,0 0 16px #F2B632}}
+#kvz .imlec{position:absolute;font-size:26px;animation:kvzIm 2s infinite ease-in-out}@keyframes kvzIm{0%{transform:translate(90px,60px)}40%,100%{transform:translate(-44px,14px)}}
+#kvz .cihaz{width:64px;height:54px;border-radius:8px;background:#C9D3D6;position:relative}#kvz .cihaz::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:4px solid #F2B632;animation:kvzHal 1.1s infinite}@keyframes kvzHal{0%,100%{opacity:.5;transform:scale(.9)}50%{opacity:1;transform:scale(1.08)}}
+#kvz .kart{position:absolute;right:28px;top:22px;background:#F1F6F7;color:#16242A;border-radius:8px;padding:6px 9px;font:700 12px var(--f-body,sans-serif);animation:kvzKart 2.2s infinite}@keyframes kvzKart{0%,45%{opacity:0;transform:translateY(6px)}60%,100%{opacity:1;transform:none}}
+#kvz .alt{display:flex;gap:8px;align-items:center}#kvz .nk{display:flex;gap:6px;margin-right:auto}#kvz .nk i{width:8px;height:8px;border-radius:50%;background:#33444C}#kvz .nk i.on{background:#2BD9C0}
+#kvz .alt button{border:0;border-radius:10px;padding:10px 16px;font:700 14.5px var(--f-body,sans-serif);cursor:pointer;background:#33444C;color:#EAF2F3}#kvz .alt button.p{background:#2F7DE1}#kvz .alt button:disabled{opacity:.35;cursor:default}
+@media (prefers-reduced-motion:reduce){#kvz *{animation:none!important}}
 </style>
-<nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
+<nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button><button id="mHelp" title="Laboratuvarda nasıl gezilir: kısa tanıtım"><span>❔</span>Nasıl gezilir</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
 <div id="wv" hidden><div class="wvb"><div class="wvt" id="wvT"></div><video id="wvV" playsinline preload="none" crossorigin="anonymous"></video><div class="wvc"><button id="wvS" aria-label="Sesi aç/kapat">🔊</button><label class="wvo"><input type="checkbox" id="wvO"> Tanıtım videolarını otomatik oynatma</label><span style="flex:1"></span><button id="wvX">Geç ›</button></div></div></div>
 <div class="hdr2"><b>MY_<i>ToksiLab</i></b><span class="pill">LABORATUVAR GİRİŞİ · 3B</span></div>
 <div id="cv3"></div>
@@ -842,8 +867,27 @@ let at='out';
 function fit(){const w=box.clientWidth,h=box.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.fov=w<h?72:62;cam.updateProjectionMatrix()}
 new ResizeObserver(fit).observe(box);fit();
 /* giriş animasyonu */
-$('#enter').onclick=enter;
-function enter(){if(started)return;started=true;$('#intro').classList.add('out');vidIlk('giris',enter2)}
+$('#enter').onclick=enter;$('#mHelp').onclick=()=>kilavuz(null);
+/* "nasıl gezilir" tanıtımı: turun başında bir kez, sonra soldaki ❔ ile */
+const KVZ_LS='toksilab_kilavuz_v1';const kvzGordu=()=>{try{return localStorage.getItem(KVZ_LS)==='1'}catch(_){return true}};
+const DOKUN=matchMedia('(pointer:coarse)').matches;
+const KVZ=[
+ {t:'İleri ve geri yürü',p:DOKUN?'Sağ alttaki <b>▲</b> ve <b>▼</b> düğmelerine dokun.':'Sağ alttaki <b>▲ ▼</b> düğmelerine tıkla ya da klavyede <b>W / S</b> (veya <b>↑ / ↓</b>) tuşlarını basılı tut.',k:'Shift ile daha hızlı yürürsün.',
+  s:'<div class="sira"><span class="tus b">W</span><span class="tus b2">S</span><span class="ayir">ya da</span><span class="tus b">▲</span><span class="tus b2">▼</span></div><span class="kisi ilr"></span>'},
+ {t:'Sağa ve sola dön',p:DOKUN?'<b>⟲</b> ve <b>⟳</b> düğmeleriyle dön.':'<b>⟲ ⟳</b> düğmeleri ya da <b>← / →</b> tuşlarıyla dön. <b>A / D</b> ile yana adım atarsın.',k:'',
+  s:'<div class="sira"><span class="tus b">←</span><span class="don"></span><span class="tus b2">→</span></div>'},
+ {t:'Etrafına bak',p:DOKUN?'Ekranı parmağınla <b>kaydır</b>: başını çevirir gibi etrafına bakarsın.':'Ekranı fareyle <b>sürükle</b>: başını çevirir gibi etrafına bakarsın.',k:DOKUN?'':'Oyunlardaki gibi istersen: <b>◎ Fareyle bak</b> düğmesi. Çıkmak için Esc.',
+  s:'<span class="ufuk"></span><span class="el">'+(DOKUN?'👆':'🖱️')+'</span>'},
+ {t:'Kat planıyla git',p:'Sağ üstteki <b>kat planında</b> bir odanın numarasına dokun: seni o odanın kapısına götürür.',k:'1 Kromatografi · 2 Örnek Hazırlama · 5 Gaz Tüp Odası içeri girilebilir.',
+  s:'<div class="plan"><i style="background:#2F7DE1">1</i><i style="background:#1F9A97">2</i><i style="background:#C9772F">3</i><i style="background:#C0392B">4</i><i style="background:#C9A227">5</i><i style="background:#7B4FB5">6</i></div><span class="imlec">'+(DOKUN?'👆':'👆')+'</span>'},
+ {t:'Cihazlara ve kapılara dokun',p:'Bir <b>cihaza</b>, <b>kapıya</b> ya da <b>etiketine</b> dokun: kısa bilgi kartı açılır.',k:DOKUN?'Odadan çıkmak için <b>‹ Koridora dön</b>.':'Yanındaysan <b>E</b> tuşu da olur. Odadan çıkmak için <b>‹ Koridora dön</b>.',
+  s:'<span class="cihaz"></span><span class="kart">⚖ Analitik terazi</span>'}];
+function kilavuz(sonra){let el=$('#kvz');if(!el){el=document.createElement('div');el.id='kvz';el.setAttribute('role','dialog');el.setAttribute('aria-label','Nasıl gezilir');document.body.appendChild(el)}
+ let i=0;const bit=()=>{el.hidden=true;try{localStorage.setItem(KVZ_LS,'1')}catch(_){}if(sonra)sonra()};
+ const ciz=()=>{const k=KVZ[i],son=i===KVZ.length-1;el.innerHTML=`<div class="kk"><div class="ku"><span>NASIL GEZİLİR · ${i+1} / ${KVZ.length}</span><button id="kvzA">Atla</button></div><div class="sah">${k.s}</div><h3>${k.t}</h3><div class="kp">${k.p}${k.k?'<small>'+k.k+'</small>':''}</div><div class="alt"><span class="nk">${KVZ.map((_,j)=>'<i class="'+(j===i?'on':'')+'"></i>').join('')}</span><button id="kvzG" ${i?'':'disabled'}>‹ Geri</button><button class="p" id="kvzI">${son?(sonra?(TANI?'Tura başla ›':'Laboratuvara gir ›'):'Tamam'):'İleri ›'}</button></div></div>`;
+  $('#kvzA').onclick=bit;$('#kvzG').onclick=()=>{if(i){i--;ciz()}};$('#kvzI').onclick=()=>{if(son)bit();else{i++;ciz()}};$('#kvzI').focus()};
+ el.hidden=false;ciz();el.onkeydown=e=>{if(e.key==='ArrowRight'||e.key==='Enter'){e.preventDefault();$('#kvzI').click()}else if(e.key==='ArrowLeft'){e.preventDefault();$('#kvzG').click()}else if(e.key==='Escape')bit();e.stopPropagation()}}
+function enter(){if(started)return;if(TANI&&!kvzGordu()){kilavuz(enter);return}started=true;$('#intro').classList.add('out');vidIlk('giris',enter2)}
 function enter2(){say('Ana girişin önündeyiz. Kapının üstündeki <b>sensör</b> yaklaştığımızı algılayınca kapılar kendiliğinden açılır…');goStop('door');
  const cont=()=>{if(TEAM_ON)startGreet();else{teamMode='home';say('Koridordayız. Sağ tarafta <b>1 Kromatografi</b>, <b>2 Örnek Hazırlama</b>, <b>3 İnorganik Analiz</b>, <b>4 Kimyasal Depo</b> ve en sonda <b>5 Gaz Tüp Odası</b>; sol tarafta, Örnek Hazırlama’nın karşısındaki küçük koridorun sonunda <b>6 Yangın ve Patlayıcı Analiz Laboratuvarı</b> var. Sol duvarda <b>poster sunumlarımız</b> var. Bir kapıya dokunursan içeri girersin.')}drawMap()};
  setTimeout(()=>{goStop('hall');inside=true;setTimeout(cont,1000)},4600)}

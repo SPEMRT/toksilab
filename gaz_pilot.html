@@ -119,6 +119,14 @@ dialog.odlg .qty{display:flex;gap:4px;align-items:center}dialog.odlg .qty button
 dialog.odlg pre{white-space:pre-wrap;background:#0E1518;border-radius:10px;padding:10px;font:12.5px/1.45 var(--f-mono);color:#CFE3EA;max-height:180px;overflow:auto}
 @media (max-width:900px){.dsp{width:190px}.dsp .mg{font-size:9.5px}}
 </style>
+<style id="dersOnCss">/* rehberli ders / serbest kullanım düzeni sayfa açılır açılmaz uygulanır: eski pilot arayüzü bir an bile görünmez (cihaz_ders.js yüklenince kendi stiline devreder) */
+html.dersOn .mentor,html.dersOn #stepc,html.dersOn #tband,html.dersOn #side,html.dersOn #res,html.dersOn .rot,html.dersOn #mTasks,html.dersOn #mParts,html.dersOn #mUse,html.dersOn #mPanel,html.dersOn #mReset,html.dersOn #egCubuk,html.dersOn #mHome,html.dersOn #hLab{display:none!important}
+html.dersOn #tip{visibility:hidden!important}
+html.dersOn .stage{right:390px}html.dersOn #cv3{width:calc(100vw - 390px)!important}
+html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;bottom:0;width:390px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
+@media (max-width:900px){html.dersOn .stage{right:0;bottom:46dvh}html.dersOn #cv3{width:100vw!important;height:54dvh!important}html.dersOn body::after{top:auto;left:0;width:auto;height:46dvh;border-radius:16px 16px 0 0}}
+</style>
+<script>if(!/[?&]mod=tani\b/.test(location.search))document.documentElement.classList.add('dersOn');setTimeout(function(){if(!document.body||!document.body.classList.contains('cders'))document.documentElement.classList.remove('dersOn')},12000)</script>
 <div class="wrap">
  <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">GAZ TÜP ODASI · GERÇEKÇİ PİLOT</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
  <div class="grid">
@@ -433,7 +441,9 @@ function tipAt(h,e){const id=partOf(h),inf=id&&INFO[id];if(!inf){hideTip();retur
 function popAt(e,html){const el=$('#bpop'),rc=box.getBoundingClientRect();el.innerHTML=html;el.hidden=false;const ex=e&&e.clientX!=null?e.clientX-rc.left:rc.width/2,ey=e&&e.clientY!=null?e.clientY-rc.top:rc.height/2;el.style.left=Math.max(140,Math.min(rc.width-140,ex))+'px';el.style.top=Math.max(260,ey)+'px'}
 const closePop=()=>$('#bpop').hidden=true;
 const isSwapA=(i,b)=>S.task==='swap'&&i===2&&b==='A';
-function onHot(h,e){closePop();if(!h||S.mode!=='use')return;const [a,i0,b]=h.split(':');const i=+i0;
+/* rehberli derste yalnız o adımın gösterdiği parça çalışır (cihaz_ders.js karar verir) */
+function izin(h){if(!window.__izin||window.__izin(h))return true;if(window.__izinUyari)window.__izinUyari(h);return false}
+function onHot(h,e){closePop();if(!h||S.mode!=='use')return;if(!izin(h))return;const [a,i0,b]=h.split(':');const i=+i0;
  if(a==='fcap'){say('Yerdeki tüp başlıkları: tüp bağlıyken burada durur; boş tüpe geri takılır.');return}
  if(a==='spare'){sparePop(+i0,e);return}
  if(a==='order'){openOrder();return}
@@ -609,6 +619,23 @@ reset('parts');
 try{build()}catch(err){console.error(err);$('#nogl').hidden=false}
 render();
 Object.assign(window,{openOrder,danger,reset,render,focus,onHot,toggleCv,toggleInl,togglePur,toggleOut,setReg,disconnect,connect,leakTest,readPanel,moveEmpty,bringSpare,cylPop,pigPop});Object.defineProperty(window,'S',{get:()=>S});window.__gaz=1;
+/* rehberli ders (cihaz_ders.js): halkanın konumu ve kamera görünümü (-1 oda, -2 yedek tüpler, 0–4 panel) */
+window.kamera=i=>{if(S.sel!==i){S.sel=i;goCam();render()}};
+const SCR_C={};window.scrOf=n=>{const id=n.indexOf('hot:')===0?n.slice(4):n;const L=HOT.filter(x=>x.userData.hot===id&&visibleDeep(x));if(!L.length)throw 0;
+ const r=box.getBoundingClientRect(),ek=v=>{v.project(R3.cam);return [r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height]};
+ /* halka, o parçayı gerçekten seçen bir noktaya konur */
+ const ck=SCR_C[id];if(ck&&performance.now()-ck.t<600)return ck.q;let bul=null;const F=[0,-.25,.25,-.45,.45];
+ for(const o of L){if(bul)break;const b=new THREE.Box3().setFromObject(o,true),c=b.getCenter(new THREE.Vector3()),z=b.getSize(new THREE.Vector3());
+  for(const fx of F){if(bul)break;for(const fy of F){if(bul)break;for(const fz of F){const q=ek(new THREE.Vector3(c.x+fx*z.x,c.y+fy*z.y,c.z+fz*z.z));if(q[0]<r.left||q[0]>r.right||q[1]<r.top||q[1]>r.bottom)continue;if(window.__pick(q[0],q[1])===id){bul=q;break}}}}}
+ bul=bul||ek(new THREE.Box3().setFromObject(L[0],true).getCenter(new THREE.Vector3()));SCR_C[id]={q:bul,t:performance.now()};return bul};
+/* Laboratuvarı Tanı turu (?mod=tani): yalnız bilgi. Parçalara dokununca kısa bilgi kartı açılır; kullanım ve görevler Eğitimler'dedir */
+if(/[?&]mod=tani\b/.test(location.search)){
+ const pl=document.querySelector('.hdr .pill');if(pl)pl.textContent='LABORATUVARI TANI · GAZ TÜP ODASI';
+ ['mTasks','mUse','mPanel','mReset','tband'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.display='none'});
+ const tn=document.createElement('div');tn.id='taniK';tn.innerHTML=`<button id="taniX" title="Kapat">✕</button><b>🏛️ Laboratuvarı tanı · Gaz tüp odası</b><span>Laboratuvardaki cihazların kullandığı <b>azot, argon ve helyum</b> burada, tüplerde durur; regülatörlerden geçip tavandaki borularla odalara gider. <b>Parçalara dokun</b> ya da fareyle üzerine gel: kısa bilgi kartı açılır. Sürükleyerek odayı döndürebilirsin.</span><small>Panelleri kullanmayı (basınç ayarı, tüp değişimi) öğrenmek için ana menüde <b>Eğitimler → Temel beceriler → Gaz tüp odası</b>.</small>`;
+ const cs=document.createElement('style');cs.textContent='#taniK{position:absolute;z-index:6;right:12px;top:12px;width:min(520px,calc(100% - 520px));min-width:300px;background:rgba(22,48,44,.95);color:#CFEDE7;border:1px solid #2B6B63;border-radius:12px;padding:10px 36px 10px 14px;display:grid;gap:4px;font:13.5px/1.45 "Source Sans 3",system-ui,sans-serif;box-shadow:0 10px 26px rgba(0,0,0,.35)}#taniK b{color:#EAF2F3}#taniK small{color:#7CF2D8;font-size:12.5px}#taniX{position:absolute;top:6px;right:6px;width:26px;height:26px;border:0;border-radius:7px;background:#1F3B37;color:#CFEDE7;cursor:pointer}@media (max-width:760px){#taniK{left:8px;right:8px;transform:none;width:auto;top:auto;bottom:8px}}';
+ document.head.appendChild(cs);$('#stg').appendChild(tn);$('#taniX').onclick=()=>tn.remove();
+ reset('parts');S.mode='parts';render()}
 window.__tick=(sec)=>{const n=Math.ceil(sec/.1);for(let i=0;i<n;i++){lastF=performance.now()-100;step(performance.now())}};
 window.__cam=(p,t)=>{camAnim=null;R3.cam.position.set(...p);R3.ctl.target.set(...t);R3.ctl.update()};
 
@@ -622,5 +649,7 @@ new MutationObserver(()=>{const m=document.querySelector('.mentor');m.classList.
 </script>
 
 <script src="anamenu.js" charset="utf-8" defer></script>
+<script>/* rehberli ders betiği (turda yüklenmez): tarayıcı önbelleğinde eski sürüm kalmasın diye 5 dakikada bir yenilenen adresle yüklenir */
+if(!/[?&]mod=tani\b/.test(location.search))(function(){var s=document.createElement('script');s.charset='utf-8';s.src='cihaz_ders.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})();</script>
 </body>
 </html>
