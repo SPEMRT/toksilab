@@ -1,0 +1,213 @@
+// Rehberli dersleri bir öğrenci gibi baştan sona oynatır: yanıp sönen sarı halkaya
+// tıklar, ders düğmelerine basar, soruları yanıtlar. Bir adımda takılırsa ya da
+// JavaScript hatası çıkarsa o dersi başarısız sayar.
+// Kullanım: node tests/dersler.js                 (tüm dersler)
+//           node tests/dersler.js spe_pilot.html   (bir sayfanın dersleri)
+//           node tests/dersler.js spe_pilot.html?ders=speyuk
+const fs = require('fs');
+const path = require('path');
+const { chromium } = require('playwright');
+const { sunucuAc, yonlendir, tarayiciAc } = require('./ortak');
+
+const KOK = path.resolve(__dirname, '..');
+const ADIM_SURESI = +process.env.ADIM_SURESI || 120000; // bir adımda en fazla bekleme (ms)
+
+// cihaz_ders.js başındaki listeden dersleri çıkar: "sayfa.html?ders=a | b | c"
+function dersListesi() {
+  const bas = fs.readFileSync(path.join(KOK, 'cihaz_ders.js'), 'utf8').split('*/')[0];
+  const L = [];
+  for (const m of bas.matchAll(/(\w+_pilot\.html)\?ders=([\w |]+?)\s{2,}/g))
+    m[2].split('|').map(s => s.trim()).filter(Boolean).forEach(d => L.push(`${m[1]}?ders=${d}`));
+  return L;
+}
+
+// Halkanın göstermediği, öğrencinin kendi karar verdiği adımlar için doğru davranış.
+// Her çözüm sayfanın içinde çalışır; adım metni (ask) desene uyunca halka yerine çağrılır.
+const COZUM = [
+  { sayfa: 'terazi_pilot.html', ask: /aralığına getirin/, fn: () => {
+    // Canlı göstergeden kayıktaki maddeyi oku: azsa "Az" modunda kayığa vur, fazlaysa "Fazlayı al".
+    const t = (document.getElementById('dCanli') || {}).textContent || '';
+    const m = t.match(/≈\s*([\d,]+)\s*mg/); if (!m) return 'halka';
+    const mg = parseFloat(m[1].replace(',', '.'));
+    const dg = [...document.querySelectorAll('#dersP [data-dg]')];
+    const dugme = ad => dg.find(b => b.textContent.includes(ad));
+    if (mg > 10.1) { dugme('Fazlayı')?.click(); return; }
+    if (!/mod: Az/.test(t)) { dugme('Az')?.click(); return; }
+    return 'halka';
+  } },
+  { sayfa: 'pipet_pilot.html', ask: /hacmi ([\d,]+) µL/, fn: () => {
+    // Kutu kapalıysa halka (hacim halkası) açar; açıksa − / + ile hedef hacme git.
+    const m = (document.querySelector('#dersP .ask') || {}).innerText?.match(/hacmi ([\d,]+) µL/);
+    if (!m) return; // adım tam bu sırada geçti
+    const hedef = parseFloat(m[1].replace(',', '.'));
+    const v = document.getElementById('vpop');
+    if (!v || v.hidden) return 'halka';
+    for (let n = 0; n < 400 && Math.abs(window.S.vol - hedef) > 1e-3; n++)
+      document.getElementById(window.S.vol < hedef ? 'vpP' : 'vpM').click();
+  } },
+  { sayfa: 'terazi_pilot.html', ask: /Kabarcığı ortalayın/, fn: () => {
+    // Canlı ipucunu uygula: doğru ayağın kutusu açıksa ↻ / ↺; değilse halka (ayak) açar.
+    const g = window.sugg(), f = document.getElementById('fpop');
+    if (!g || !f || f.hidden) return 'halka';
+    if (!document.getElementById('fpT').textContent.startsWith(g[0] === 'L' ? 'Sol' : 'Sağ')) return 'halka';
+    document.getElementById(g[1] > 0 ? 'fpCW' : 'fpCCW').click();
+  } },
+  { sayfa: 'santrifuj_pilot.html', ask: /yerleştirin|karşısına \(8 yuva/i, degil: /denge (mikro)?tüpü hazırlayın/i, fn: () => {
+    // Aynı tür tüpleri karşılıklı diz; tek kalanı boş bir çiftin bir yarısına koy.
+    const s = window.S, N = s.slots.length, h = N / 2;
+    const bos = s.tray.filter(t => t.where == null && !/^w/.test(t.kind));
+    const g = {}; bos.forEach(t => (g[t.kind] = g[t.kind] || []).push(t));
+    const yer = () => { for (let k = 0; k < h; k++) if (!s.slots[k] && !s.slots[k + h]) return k; return -1; };
+    const koy = (t, k) => { s.sel = t.id; window.slot(k); };
+    for (const L of Object.values(g)) {
+      while (L.length >= 2) { const k = yer(); koy(L.shift(), k); koy(L.shift(), k + h); }
+      if (L.length) koy(L[0], yer());
+    }
+  } },
+  { sayfa: 'santrifuj_pilot.html', ask: /denge (mikro)?tüpü hazırlayın/i, fn: () => {
+    // Hacim düğmelerini sırayla dene; denge tüpünü karşısız tüpün karşısına koy, olmazsa geri al.
+    const s = window.S, N = s.slots.length, h = N / 2;
+    const bal = () => s.tray.find(t => /^w/.test(t.kind));
+    const b = bal();
+    if (b && b.where != null) { if (s.f.placed) return; window.slot(b.where); }
+    const dg = document.querySelectorAll('#dersP [data-dg]');
+    window.__coz = (window.__coz || 0); if (dg.length) dg[window.__coz++ % dg.length].click();
+    const t = bal(); if (!t) return;
+    for (let k = 0; k < N; k++) if (s.slots[k] && !s.slots[(k + h) % N]) { s.sel = t.id; window.slot((k + h) % N); return; }
+  } },
+];
+
+// Yavaş makinede uzun beklemeleri kısaltmak için sayfanın kendi hız ayarı (öğrenci de kullanabilir).
+const HIZLANDIR = {
+  'spe_pilot.html': () => { if (window.S && window.setSpeed && window.S.speed !== 60) window.setSpeed(60); },
+};
+
+// Halka ekran dışında kalırsa testin devam edebilmesi için sayfanın kendi işlevi.
+const EKRAN_DISI = {
+  'santrifuj_pilot.html': () => window.toggleLid(),
+};
+
+async function dersOynat(tarayici, port, hedef) {
+  const sayfa = await tarayici.newPage({ viewport: { width: 1280, height: 800 } });
+  const hatalar = [];
+  sayfa.on('pageerror', e => hatalar.push('JS hatası: ' + e.message));
+  await yonlendir(sayfa);
+  const sonuc = { hedef, tamam: false, adim: '', hatalar, uyarilar: [], kayma: '', sure: 0 };
+  const t0 = Date.now();
+  try {
+    for (let k = 0; ; k++) { // yük altında sayfa geç açılabilir: bir kez daha dene
+      try { await sayfa.goto(`http://localhost:${port}/${hedef}`, { waitUntil: 'domcontentloaded', timeout: 90000 }); break; }
+      catch (e) { if (k) throw e; }
+    }
+    await sayfa.waitForSelector('#dersP .ust', { timeout: 90000 });
+    let canliTik = '', sonCanli = '', sonAnahtar = '', adimBasi = Date.now(), sonTik = 0, deneme = 0;
+    while (true) {
+      if (hatalar.length) break;
+      const hz = HIZLANDIR[hedef.split('?')[0]]; if (hz) await sayfa.evaluate(hz).catch(() => {});
+      const d = await sayfa.evaluate(() => {
+        const P = document.getElementById('dersP');
+        const q = s => P.querySelector(s);
+        const ileri = q('#dIleri');
+        const halkalar = [...document.querySelectorAll('.dersHalka2')]
+          .filter(h => h.style.display === 'block')
+          .map(h => [parseFloat(h.style.left), parseFloat(h.style.top), parseFloat(h.style.width) || 40]);
+        return {
+          no: (q('.ust span') || {}).textContent || '',
+          ask: ((q('.ask') || {}).innerText || '').split('\n')[0].slice(0, 140),
+          bitti: !!q('#dSonraki'),
+          ileri: !!ileri && !ileri.disabled,
+          secenek: P.querySelectorAll('[data-c]').length,
+          cevaplandi: !!q('#dSoru'),
+          dugme: P.querySelectorAll('[data-dg]').length,
+          tut: !!q('#dTut'),
+          canli: (q('#dCanli') || {}).textContent || '',
+          halkalar,
+        };
+      });
+      if (d.bitti) { sonuc.tamam = true; break; }
+      const anahtar = d.no + '|' + d.ask + '|' + d.cevaplandi + '|' + d.ileri;
+      if (anahtar !== sonAnahtar) {
+        sonTik = Date.now() - 700; canliTik = d.canli; // kamera yerine otursun diye ilk tıklamadan önce kısa bekleme
+        if (sonuc.kayma && d.ileri) { sonuc.uyarilar.push('Halkanın ortası tutmadı, kenarına tıklayınca geçti: ' + sonuc.kayma); }
+        sonuc.kayma = ''; sonAnahtar = anahtar; adimBasi = Date.now(); deneme = 0; if (process.env.AYRINTI) console.log('   ·', anahtar, JSON.stringify(d.halkalar), d.dugme, d.tut); }
+      // Canlı gösterge değişiyorsa (rotor dönüyor, sıvı akıyor) adım ilerliyor demektir; takılmış sayma.
+      if (d.canli !== sonCanli) { sonCanli = d.canli; adimBasi = Date.now(); }
+      sonuc.adim = `${d.no} ${d.ask}`.trim();
+      if (Date.now() - adimBasi > ADIM_SURESI) {
+        hatalar.push('Adımda takıldı: ' + sonuc.adim);
+        if (process.env.AYRINTI) console.log('   durum:', await sayfa.evaluate(() => { const s = window.S || {}; const o = {}; for (const k in s) if (typeof s[k] !== 'object' && typeof s[k] !== 'function') o[k] = s[k]; return JSON.stringify(o).slice(0, 1500); }));
+        break;
+      }
+
+      // Panel sık yeniden çizilir; düğmeye sayfanın içinden tıkla.
+      const bas = sec => sayfa.evaluate(x => { const e = document.querySelector(x); if (e) e.click(); }, sec);
+      if (d.cevaplandi) await bas('#dSoru');
+      else if (d.secenek) await bas('#dersP [data-c]');
+      else if (d.ileri) await bas('#dIleri');
+      // Son tıklamadan sonra canlı gösterge değiştiyse işlem sürüyor: yeniden tıklama, bekle.
+      else if (sonTik && d.canli !== canliTik && Date.now() - sonTik < 60000) { canliTik = d.canli; sonTik = Date.now(); }
+      // Ders düğmeleri bütün bir işlemi başlatır (kafa iner, raf değişir): sonrasında daha uzun bekle.
+      else if (Date.now() - sonTik > (d.dugme ? 8000 : 1500)) {
+        canliTik = d.canli;
+        // Adım öğrenciden bir işlem bekliyor: düğme, basılı tutma ya da halkaya tıklama.
+        sonTik = Date.now(); deneme++;
+        const sayfaAdi = hedef.split('?')[0];
+        const coz = COZUM.find(c => c.sayfa === sayfaAdi && c.ask.test(d.ask) && !(c.degil && c.degil.test(d.ask)));
+        if (coz && (await sayfa.evaluate(coz.fn)) !== 'halka') { /* çözüm uygulandı */ }
+        else if (coz) { const [x, y] = d.halkalar[0] || []; if (x != null) await sayfa.mouse.click(x, y); }
+        else if (d.dugme) await bas(`#dersP [data-dg="${(deneme - 1) % d.dugme}"]`);
+        else if (d.tut) {
+          const b = await sayfa.locator('#dTut').boundingBox();
+          await sayfa.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+          await sayfa.mouse.down(); await sayfa.waitForTimeout(4000); await sayfa.mouse.up();
+        } else if (d.halkalar.length && d.halkalar.every(([x, y]) => x < 0 || y < 0 || x > 1280 || y > 800)) {
+          // Halka ekranın dışında: öğrenci göremez. Bulguyu kaydet, sayfanın kendi işleviyle devam et.
+          const not = 'Halka ekranın dışında (' + d.halkalar.map(([x, y]) => Math.round(x) + ',' + Math.round(y)).join(' ') + '): ' + d.no + ' ' + d.ask;
+          if (!sonuc.uyarilar.includes(not)) sonuc.uyarilar.push(not);
+          const ed = EKRAN_DISI[hedef.split('?')[0]];
+          if (ed) await sayfa.evaluate(ed);
+        } else if (d.halkalar.length) {
+          // Önce halkanın ortası; tutmazsa halkanın içinde başka noktalar (öğrenci de böyle dener).
+          const n = d.halkalar.length, [x, y, w] = d.halkalar[(deneme - 1) % n];
+          const KAY = [[0, 0], [0, 0], [0, -.3], [0, .3], [-.3, 0], [.3, 0], [0, -.4], [-.25, -.25], [.25, -.25]];
+          const [ox, oy] = KAY[Math.floor((deneme - 1) / n) % KAY.length];
+          if (ox || oy) sonuc.kayma = d.no + ' ' + d.ask;
+          await sayfa.mouse.click(x + ox * w, y + oy * w);
+        }
+      }
+      await sayfa.waitForTimeout(250);
+    }
+  } catch (e) { hatalar.push('Hata: ' + e.message.split('\n')[0]); }
+  sonuc.sure = Math.round((Date.now() - t0) / 1000);
+  if (!sonuc.tamam || hatalar.length) {
+    fs.mkdirSync(path.join(__dirname, 'ekran'), { recursive: true });
+    await sayfa.screenshot({ path: path.join(__dirname, 'ekran', 'ders_' + hedef.replace(/\W+/g, '_') + '.png') }).catch(() => {});
+  }
+  await sayfa.close();
+  return sonuc;
+}
+
+(async () => {
+  const { sunucu, port } = await sunucuAc();
+  const arg = process.argv.slice(2);
+  const tum = dersListesi();
+  const hedefler = arg.length ? tum.filter(h => arg.some(a => h === a || h.startsWith(a + '?'))).concat(arg.filter(a => a.includes('?ders=') && !tum.includes(a))) : tum;
+  const tarayici = await tarayiciAc(chromium);
+  // Aynı anda birkaç ders oynatılır (PARALEL=3 varsayılan).
+  let kotu = 0, sira = 0;
+  const isci = async () => {
+    while (sira < hedefler.length) {
+      const h = hedefler[sira++];
+      const r = await dersOynat(tarayici, port, h);
+      const iyi = r.tamam && !r.hatalar.length;
+      if (!iyi) kotu++;
+      console.log(`${iyi ? '✓' : '✗'} ${h}  (${r.sure} sn)` +
+        (iyi ? '' : '\n    son adım: ' + r.adim + r.hatalar.map(x => '\n    ' + x).join('')) +
+        r.uyarilar.map(x => '\n    ⚠ ' + x).join(''));
+    }
+  };
+  await Promise.all(Array.from({ length: +process.env.PARALEL || 3 }, isci));
+  await tarayici.close(); sunucu.close();
+  console.log(`\n${hedefler.length - kotu}/${hedefler.length} ders sonuna kadar oynandı.`);
+  process.exit(kotu ? 1 : 0);
+})();

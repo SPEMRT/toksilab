@@ -599,7 +599,7 @@ function perfShouldRender(){const now=performance.now();if(!PERF.applied)perfApp
 function animate(t){requestAnimationFrame(animate);if(!R3)return;const ck=S.mode+document.body.classList.contains('panel');if(ck!==camKey){if(camKey)goCam();camKey=ck}
  if(camAnim){const k=Math.min(1,(performance.now()-camAnim.s)/800),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;R3.cam.position.lerpVectors(camAnim.p0,camAnim.p,e);R3.ctl.target.lerpVectors(camAnim.t0,camAnim.t,e);if(k>=1)camAnim=null}
  PERF.mv=R3.ctl.update();step(performance.now());hints();if(performance.now()-liveT>400){liveT=performance.now();live()}if(perfShouldRender())R3.renderer.render(R3.scene,R3.cam)}
-function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
+function goLab(e){if(e&&e.preventDefault)e.preventDefault();const q=new URLSearchParams(location.search),ret=q.get('ret'),tur=q.get('mod')==='tani';location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(tur?'?mod=tani':'')+(ret?'#'+ret:'')}
 $('#mHome').onclick=goLab;{const a=document.getElementById('hLab');if(a)a.onclick=goLab}
 $('#ordB').onclick=()=>openOrder();
 $('#mTasks').onclick=$('#tOpen').onclick=()=>$('#tdlg').showModal();$('#tClose').onclick=()=>$('#tdlg').close();
