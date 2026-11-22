@@ -37,5 +37,5 @@ takıldığını yazar ve `tests/ekran/ders_*.png` ekran görüntüsünü kayded
 
     node tests/labtur.js
 
-"Laboratuvarı Tanı" turunu başlatır, kat planından 6 odanın hepsine gider, açık
-odalara girer, 9 cihazın bilgi kartını açar.
+"Laboratuvarı Tanı" turunu başlatır ("nasıl gezilir" tanıtımından geçer), kat planından
+6 odanın hepsine gider, açık odalara ve gaz tüp odasına girip tura döner, 9 cihazın bilgi kartını açar.

@@ -9,7 +9,7 @@ const { KOK, sunucuAc, tarayiciAc, yonlendir } = require('./ortak');
   const { sunucu, port } = await sunucuAc();
   // Kapsam: ana sayfa, lab turu, temel beceri cihazları ve SPE. Hepsi için: --tum
   const KAPSAM = ['index.html', 'lab_giris.html', 'terazi_pilot.html', 'pipet_pilot.html', 'vorteks_pilot.html',
-    'santrifuj_pilot.html', 'ultra_pilot.html', 'su_pilot.html', 'spe_pilot.html'];
+    'santrifuj_pilot.html', 'ultra_pilot.html', 'su_pilot.html', 'gaz_pilot.html', 'spe_pilot.html'];
   const arg = process.argv.slice(2);
   const sayfalar = arg.includes('--tum') ? fs.readdirSync(KOK).filter(f => f.endsWith('.html')).sort()
     : arg.length ? arg : KAPSAM;

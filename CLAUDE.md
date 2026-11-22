@@ -7,7 +7,7 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
 - `index.html`: ana sayfa ve eğitim kataloğu
 - `lab_giris.html`: 3B laboratuvar; `?mod=tani` = "Laboratuvarı Tanı" turu
 - `*_pilot.html`: cihaz simülatörleri (terazi, pipet, vorteks, santrifüj, ultra, su, SPE, gaz, HS-GC-MS…)
-- `cihaz_ders.js`: 7 cihazın rehberli dersleri (terazi, pipet, vorteks, santrifüj, ultra, su, SPE).
+- `cihaz_ders.js`: 8 cihazın rehberli dersleri (terazi, pipet, vorteks, santrifüj, ultra, su, gaz tüp odası, SPE).
   Her adımda `halka` öğrenciye sarı halkayla nereye tıklayacağını gösterir.
 - `anamenu.js`, `egitim_cubugu.js`: sayfalar arası ortak menü ve eğitim çubuğu
 
