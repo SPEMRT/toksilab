@@ -7,172 +7,140 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+/* Kalibrasyon çözeltisi hazırlama: cihaz derslerindeki gibi adım adım (sağda ders paneli, Devam ile ilerler) */
 :root{--bg:#0E1518;--card:#1E2A30;--card2:#25333A;--line:#34454D;--ink:#EAF2F3;--muted:#9BB0B6;--blue:#2F7DE1;--ok:#2DBE5B;--bad:#E5484D;--warn:#F2B632;--teal:#2BD9C0;
  --f-display:'Barlow Condensed',system-ui,sans-serif;--f-body:'Source Sans 3',system-ui,sans-serif;--f-mono:'IBM Plex Mono',ui-monospace,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:radial-gradient(ellipse at 30% 0%,#1A2A30,var(--bg) 60%);color:var(--ink);font-family:var(--f-body);min-height:100vh;padding:12px 16px 40px}
-button,input,select{font:inherit;color:inherit}
-button{cursor:pointer}
-.wrap{max-width:1180px;margin:0 auto;display:grid;gap:12px}
-.hdr{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+body{background:radial-gradient(ellipse at 30% 0%,#1A2A30,var(--bg) 60%);color:var(--ink);font-family:var(--f-body);min-height:100vh}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}
+.sahne{position:fixed;inset:0 390px 0 0;overflow:auto;padding:12px 16px 40px}
+.hdr{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .brand{display:flex;align-items:center;gap:10px}.brand b{font:700 24px/1 var(--f-display)}.brand b i{font-style:normal;color:var(--teal)}
 .pill{font:600 10.5px var(--f-mono);letter-spacing:.1em;border-radius:999px;padding:4px 9px;background:var(--warn);color:#2A2000}
 .hdr a{color:#7FDCD0;font-weight:600;font-size:14px}
-.mentor{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;background:#F1F6F7;color:#16242A;border-radius:14px;padding:10px 14px;border-left:5px solid var(--teal);box-shadow:0 8px 22px rgba(0,0,0,.3)}
-.mentor img{width:48px;height:48px;border-radius:50%;object-fit:cover}.mentor .nm{font:600 11px var(--f-mono);color:#1F9A97;letter-spacing:.08em}.mentor p{font-size:15px;line-height:1.45}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}
-.tabs button{border:0;border-radius:11px;background:var(--card2);padding:10px 14px;font-weight:700;font-size:14.5px;display:flex;gap:8px;align-items:center}
-.tabs button span{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#33444C;font-size:13px}
-.tabs button.on{background:var(--blue)}.tabs button.on span{background:#fff;color:var(--blue)}.tabs button.done span{background:var(--ok);color:#062126}
-.card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 10px 26px rgba(0,0,0,.3);display:grid;gap:10px}
-.card h2{font:700 24px var(--f-display)}.card h3{font:700 19px var(--f-display);color:#CFE3EA}
-.card p,.card li{font-size:15px;line-height:1.55;color:#D3E0E4}.card ul,.card ol{padding-left:20px;display:grid;gap:4px}
-.sub{font:600 11px var(--f-mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.box{background:var(--card2);border-radius:12px;padding:12px;display:grid;gap:6px}
-.box b.k{font:700 17px var(--f-display);color:var(--teal)}
-.formula{font:700 26px var(--f-mono);text-align:center;background:#0E1518;border-radius:12px;padding:14px;color:#7CF2D8;letter-spacing:.02em}
-.formula small{display:block;font:500 13px var(--f-body);color:var(--muted);margin-top:6px;letter-spacing:0}
-.ladder{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
-.ladder div{background:#0E1518;border-radius:10px;padding:8px 12px;font:700 16px var(--f-mono);color:#EAF6F8;text-align:center}.ladder div small{display:block;font:500 11px var(--f-body);color:var(--muted)}
-.ladder i{font-style:normal;color:var(--warn);font:700 13px var(--f-mono)}
-.conv{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:center}
-.qa input,.conv input,.conv select,td input,td select,.inp{background:#0E1518;border:1px solid #33444C;border-radius:9px;padding:8px 10px;width:100%;min-width:0}
-td input,td select{padding:6px 8px;font:600 14px var(--f-mono)}
-.chain{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
-.chain .st{flex:1;min-width:150px;background:var(--card2);border-radius:12px;padding:10px;display:grid;gap:3px;position:relative}
-.chain .st b{font:700 16px var(--f-display)}.chain .st span{font:600 13px var(--f-mono);color:#7CF2D8}.chain .st small{font-size:12.5px;color:var(--muted);line-height:1.35}
-.chain .ar{align-self:center;font:700 20px var(--f-mono);color:var(--warn)}
-table{width:100%;border-collapse:collapse;font-size:14px}th{font:600 11px var(--f-mono);color:var(--muted);text-align:left;padding:6px 5px;border-bottom:1px solid var(--line);letter-spacing:.04em}
-td{padding:5px;border-bottom:1px solid #26353C;vertical-align:middle}td.g{font:700 14px var(--f-mono);color:#EAF6F8}
-td.ok input,td.ok select{border-color:var(--ok);background:rgba(45,190,91,.12)}td.bad input,td.bad select{border-color:var(--bad);background:rgba(229,72,77,.12)}td.wr input,td.wr select{border-color:var(--warn);background:rgba(242,182,50,.12)}
-.msg{font-size:12px;color:#FFB4A8;margin-top:3px;line-height:1.3}.msg.w{color:#F2D27A}
-.bt{border:0;border-radius:10px;padding:10px 14px;font-weight:700;background:var(--card2)}.bt.p{background:var(--blue)}.bt.g{background:var(--ok);color:#062126}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.score{font:700 15px var(--f-mono);padding:8px 12px;border-radius:10px;background:#0E1518}
-.qa{display:grid;grid-template-columns:1fr 160px 90px;gap:8px;align-items:center;background:var(--card2);border-radius:10px;padding:8px 10px}
-.qa .u{font:600 13px var(--f-mono);color:var(--muted)}
-.qa.ok{outline:2px solid var(--ok)}.qa.bad{outline:2px solid var(--bad)}
-.tip{background:rgba(43,217,192,.08);border-left:4px solid var(--teal);padding:10px 12px;border-radius:10px;font-size:14.5px;line-height:1.5}
-.warn{background:rgba(242,182,50,.1);border-left:4px solid var(--warn);padding:10px 12px;border-radius:10px;font-size:14.5px;line-height:1.5}
-.plan li{margin-bottom:4px}
-.labels{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
-.lbl{background:#fff;color:#16242A;border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.35;border-left:6px solid var(--blue)}.lbl b{font-size:14px}
-.params{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
-.params div{background:#0E1518;border-radius:10px;padding:8px 10px}.params small{display:block;font:600 10.5px var(--f-mono);color:var(--muted);letter-spacing:.06em}.params b{font:700 16px var(--f-mono)}
-.hide{display:none!important}
-@media (max-width:820px){.g2,.g3{grid-template-columns:1fr}.qa{grid-template-columns:1fr 120px 70px}.conv{grid-template-columns:1fr auto}table{font-size:12.5px}.tbw{overflow-x:auto}}
-@media print{body{background:#fff;color:#000}.hdr,.tabs,.mentor,.noprint{display:none!important}.card{box-shadow:none;background:#fff;color:#000}.card p,.card li{color:#000}}
+.masa{max-width:900px;margin:0 auto;display:grid;gap:14px}
+.kutu{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.kutu h3{font:700 15px var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:#7FDCD0;margin-bottom:10px}
+/* seyreltme zinciri */
+.zincir{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap}
+.halka{flex:1 1 110px;min-width:0;background:var(--card2);border:2px solid transparent;border-radius:12px;padding:10px;text-align:center;transition:.3s}
+.halka small{display:block;font:600 10.5px var(--f-mono);letter-spacing:.08em;color:var(--muted)}
+.halka b{display:block;font:700 22px var(--f-display);margin:2px 0}.halka span{font-size:12.5px;color:#C7D6DA}
+.halka.on{border-color:var(--warn);box-shadow:0 0 0 3px rgba(242,182,50,.2),0 0 18px rgba(242,182,50,.35)}
+.halka.tam{border-color:var(--ok)}.halka.tam b::after{content:" ✓";color:var(--ok);font-size:16px}
+.ok-ar{align-self:center;color:#6F858C;font-size:20px}
+/* plan tablosu */
+table{width:100%;border-collapse:collapse;font-size:14px}th{font:600 10.5px var(--f-mono);letter-spacing:.08em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:7px 8px;border-bottom:1px solid #26343A}td.g{font-weight:700}td.bos{color:#556870}tr.on td{background:rgba(242,182,50,.08)}tr.tam td.v{color:#8FE0A8;font-weight:700}
+.birim{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}.birim div{background:var(--card2);border-radius:10px;padding:8px 4px}.birim b{display:block;font:700 18px var(--f-display)}.birim small{color:var(--muted);font-size:12px}
+.birim div.on{outline:2px solid var(--warn)}
+.formul{font:600 22px var(--f-mono);text-align:center;padding:8px;background:var(--card2);border-radius:12px}.formul small{display:block;font:400 13px var(--f-body);color:var(--muted);margin-top:4px}
+/* ders paneli */
+#dersK{position:fixed;z-index:20;top:0;right:0;bottom:0;width:390px;overflow:auto;padding:14px;background:#1E2A30;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
+#P{display:grid;gap:10px;font:15px/1.45 var(--f-body);color:#D7E4E7}
+.ust{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.ust b{font:700 19px var(--f-display);color:#EAF2F3}.ust span{font:600 11px var(--f-mono);color:#9BB0B6;white-space:nowrap}
+.bol{display:flex;gap:4px}.bol i{flex:1 1 0;min-width:0;font:600 10px var(--f-mono);font-style:normal;text-align:center;color:#6F858C;border-top:3px solid #33444C;padding-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bol i.g{border-color:#2DBE5B;color:#8FE0A8}.bol i.s{border-color:#2BD9C0;color:#EAF2F3}
+.ask{background:#F1F6F7;color:#16242A;border-radius:12px;padding:11px 13px;border-left:5px solid #F2B632;font-size:16px}.ask.tamam{border-left-color:#2DBE5B;background:#E6F6EB}
+.ask small{display:block;margin-top:6px;color:#B3261E;font-weight:600;font-size:13.5px}
+.giris{display:flex;gap:8px;align-items:center}.giris input{flex:1;min-width:0;background:#0E1518;border:2px solid #34454D;border-radius:10px;padding:10px 12px;font:600 18px var(--f-mono);color:#EAF2F3}
+.giris input:focus{outline:none;border-color:var(--teal)}.giris .u{font:600 14px var(--f-mono);color:#9BB0B6;min-width:52px}
+.kart{background:#25333A;border-radius:12px;padding:12px 13px;display:grid;gap:8px}.kart h4{font:700 18px var(--f-display);color:#2BD9C0;letter-spacing:.02em}
+.kart p+p,.kart p+ul,.kart ul+p{margin-top:2px}.kart ul{margin-left:18px;display:grid;gap:3px}.kart .hes{font:600 14px var(--f-mono);background:#16242A;border-radius:8px;padding:8px 10px;color:#7CF2D8}
+.alt{display:flex;gap:8px;flex-wrap:wrap}
+#P button{border:0;border-radius:10px;padding:10px 14px;font:700 14.5px var(--f-body);background:#33444C;color:#EAF2F3}
+#P button.p{background:#2F7DE1;flex:1}#P button.k{background:#F2B632;color:#2A2000;flex:1}#P button:disabled{opacity:.4;cursor:default}
+#P button.ince{background:none;color:#9BB0B6;font-weight:600;font-size:13px;padding:4px}
+.sec{display:grid;gap:6px}.sec button{text-align:left;font-weight:600!important}.sec button.d{background:#1F7A3D!important}.sec button.y{background:#8E2A2E!important}
+.mentor{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;background:#F1F6F7;color:#16242A;border-radius:12px;padding:9px 12px;border-left:5px solid var(--teal)}
+.mentor img{width:44px;height:44px;border-radius:50%;object-fit:cover}.mentor .nm{font:600 10.5px var(--f-mono);color:#1F9A97;letter-spacing:.08em}.mentor p{font-size:14px;line-height:1.4}
+@media (max-width:900px){.sahne{inset:0 0 50dvh 0}#dersK{top:auto;left:0;width:auto;height:50dvh;border-radius:16px 16px 0 0;padding:10px 12px}.birim{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="sahne">
  <div class="hdr"><div class="brand"><b>MY_<i>ToksiLab</i></b><span class="pill">KALİBRASYON MASASI</span></div><a href="https://spemrt.github.io/toksilab/lab_giris.html" id="hLab">‹ Laboratuvar</a></div>
- <div class="mentor"><img id="av" alt=""><div><div class="nm">UZM. MY</div><p id="say"></p></div></div>
- <div class="tabs" id="tabs"><button data-t="0" class="on"><span>1</span>Bilgi</button><button data-t="1"><span>2</span>Çözümlü örnek</button><button data-t="2"><span>3</span>Sıra sende</button></div>
-
- <!-- 1: bilgi -->
- <section class="card" data-p="0">
-  <h2>Kalibrasyon çözeltisi nasıl hazırlanır?</h2>
-  <p>Cihaz bize yalnızca bir <b>sinyal</b> (pik alanı) verir. Konsantrasyonu bildiğimiz çözeltileri ölçüp “şu kadar madde = şu kadar sinyal” ilişkisini kurarız: <b>kalibrasyon eğrisi</b>. Bu çözeltileri, 1 mg/mL’lik ana stoğu <b>metanolle adım adım seyrelterek</b> hazırlarız.</p>
-  <div class="chain">
-   <div class="st"><b>Ana stok</b><span>1 mg/mL</span><small>Referans madde ampulü</small></div><div class="ar">→</div>
-   <div class="st"><b>Ara stoklar</b><span>1000 → 10 → 1 ng/mL</span><small>10 mL balon jojede metanolle</small></div><div class="ar">→</div>
-   <div class="st"><b>Kalibratörler</b><span>0,05 – 5 ng/mL</span><small>7 seviye, her biri 1 mL</small></div>
-  </div>
-  <h3>1 · Birimler: her basamak 1000 kat</h3>
-  <div class="ladder"><div>1 mg/mL</div><i>=</i><div>1000 µg/mL</div><i>=</i><div>1 000 000 ng/mL</div></div>
-  <div class="conv"><input id="cvV" class="inp" type="number" value="1" step="any"><select id="cvA" class="inp"><option selected>mg/mL</option><option>µg/mL</option><option>ng/mL</option><option>pg/mL</option></select><span style="font:700 18px var(--f-mono)">=</span><b id="cvR" style="font:700 16px var(--f-mono);color:#7CF2D8"></b></div>
-  <h3>2 · Tek formül</h3>
-  <div class="formula">C₁ × V₁ = C₂ × V₂<small>C₁: elimdeki çözelti · V₁: ondan alacağım hacim · C₂: istediğim konsantrasyon · V₂: istediğim toplam hacim<br><b>V₁ = C₂ × V₂ / C₁</b> &nbsp;·&nbsp; Metanol = V₂ − V₁ &nbsp;·&nbsp; İki tarafta birimler aynı olmalı</small></div>
-  <h3>3 · Neden ara stok?</h3>
-  <p>1 000 000 ng/mL’den 0,05 ng/mL’ye tek adımda inmek için 0,00005 µL almak gerekirdi: imkânsız. Bu yüzden 10 ya da 100 katlık adımlarla inilir. Pratik kural: <b>alınacak hacim 10 µL’den az olmamalı</b>; azsa daha seyreltik ara stoktan al.</p>
-  <div class="row noprint"><button class="bt p" data-go="1">Çözümlü örneğe geç ›</button></div>
- </section>
-
- <!-- 2: çözümlü örnek -->
- <section class="card hide" data-p="1">
-  <h2>Çözümlü örnek: <span class="an">fentanil</span>, metanolde 0,05 – 5 ng/mL</h2>
-  <div class="params" id="exP"></div>
-  <h3>Adım 1 · Ara stoklar (10 mL balon joje, metanolle çizgiye tamamla)</h3>
-  <div class="tbw"><table id="exS"></table></div>
-  <h3>Adım 2 · Kalibratörler (her biri <span class="vf">1</span> mL)</h3>
-  <div class="tbw"><table id="exT"></table></div>
-  <div class="tip">Üst seviyeler (1–5 ng/mL) <b>AS-2</b>’den, alt seviyeler (0,05–0,5 ng/mL) <b>AS-3</b>’ten alınır. Böylece bütün hacimler 50–500 µL arasında kalır, pipetle rahat ve doğru alınır.</div>
-  <div class="row noprint"><button class="bt p" data-go="2">Şimdi sen dene ›</button></div>
- </section>
-
- <!-- 3: alıştırma -->
- <section class="card hide" data-p="2">
-  <h2>Sıra sende</h2>
-  <div class="row noprint"><button class="bt" id="newEx">🎲 Yeni alıştırma</button><button class="bt" id="resetEx">Örnekteki değerler</button></div>
-  <div class="params" id="prP"></div>
-  <h3>A · Birim çevir</h3>
-  <div id="qA" style="display:grid;gap:6px"></div>
-  <h3>B · Ara stoklar (10 mL balon joje)</h3>
-  <div id="qB" style="display:grid;gap:6px"></div>
-  <h3>C · Kalibratörler (her biri <span class="vf">1</span> mL, metanolde)</h3>
-  <div class="tbw"><table id="qC"></table></div>
-  <div class="row noprint"><button class="bt g" id="chk">✓ Kontrol et</button><button class="bt" id="sol">Çözümü göster</button><span class="score" id="score"></span></div>
- </section>
+ <div class="masa">
+  <div class="kutu"><h3>Seyreltme zinciri · fentanil, metanolde</h3>
+   <div class="zincir" id="zincir"></div></div>
+  <div class="kutu" id="kBirim" hidden><h3>Birimler: her basamak 1000 kat</h3>
+   <div class="birim"><div data-b="mg"><b>1</b><small>mg/mL</small></div><div data-b="ug"><b>1 000</b><small>µg/mL</small></div><div data-b="ng"><b>1 000 000</b><small>ng/mL</small></div><div data-b="pg"><b>10⁹</b><small>pg/mL</small></div></div></div>
+  <div class="kutu" id="kFormul" hidden><h3>Tek formül</h3><div class="formul">C₁ × V₁ = C₂ × V₂<small>V₁ = C₂ × V₂ / C₁ · çözücü = V₂ − V₁ · iki tarafta birimler aynı</small></div></div>
+  <div class="kutu" id="kPlan" hidden><h3>Hazırlama planı</h3><table id="plan"></table></div>
+ </div>
 </div>
+<div id="dersK"><div id="P"></div></div>
 <script>
-const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];$('#av').src=AVATAR;
-const fmt=(n,d)=>{if(d==null){d=Math.abs(n)>=100?0:Math.abs(n)>=10?1:Math.abs(n)>=1?2:3}return Number(n).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0})};
-const num=v=>{if(v==null)return NaN;v=String(v).trim().replace(/\s/g,'').replace(',','.');return v===''?NaN:Number(v)};
+const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const fmt=n=>Number(n).toLocaleString('tr-TR',{maximumFractionDigits:3});
+const num=v=>{v=String(v??'').trim().replace(/\s/g,'').replace(',','.');return v===''?NaN:Number(v)};
 const near=(a,b,t=.01)=>isFinite(a)&&Math.abs(a-b)<=Math.max(Math.abs(b)*t,1e-9);
-const say=t=>$('#say').innerHTML=t;
-const LEV=[.05,.1,.25,.5,1,2.5,5];const DRUGS=['fentanil','buprenorfin','LSD','karfentanil'];
-const DEF={drug:'fentanil',S0:1,Vf:1};/* S0 mg/mL, Vf mL */
-let P={...DEF},A={},checked=false;
-/* ara stoklar: AS-1 1000, AS-2 10, AS-3 1 ng/mL (10 mL) */
-function plan(p){const s0=p.S0*1e6;const AS=[{n:'AS-1',c:1000,from:'Ana stok',fc:s0},{n:'AS-2',c:10,from:'AS-1',fc:1000},{n:'AS-3',c:1,from:'AS-2',fc:10}];
- AS.forEach(a=>a.v=a.c*10000/a.fc);/* µL, 10 mL */
- const V=p.Vf*1000;const rows=LEV.map((c,i)=>{const src=c>=1?AS[1]:AS[2];const v=c*V/src.c;return {i,c,src:src.n,sc:src.c,v,meoh:V-v}});return {AS,rows,V}}
-const SRC={'AS-1':1000,'AS-2':10,'AS-3':1};
-function pr(p){return `<div><small>MADDE</small><b>${p.drug}</b></div><div><small>ANA STOK</small><b>${fmt(p.S0)} mg/mL</b></div><div><small>ÇÖZÜCÜ</small><b>metanol</b></div><div><small>ARALIK</small><b>0,05 – 5 ng/mL</b></div><div><small>HER KALİBRATÖR</small><b>${fmt(p.Vf)} mL</b></div>`}
-function setVf(){$$('.vf').forEach(e=>e.textContent=fmt(P.Vf));$$('.an').forEach(e=>e.textContent=P.drug)}
-/* çözümlü örnek */
-function renderEx(){const p={...DEF},s=plan(p);$('#exP').innerHTML=pr(p);
- $('#exS').innerHTML='<tr><th>ARA STOK</th><th>HEDEF</th><th>NEREDEN</th><th>HESAP (V₁ = C₂×V₂ / C₁)</th><th>ALINACAK</th></tr>'+s.AS.map(a=>`<tr><td class="g">${a.n}</td><td>${fmt(a.c)} ng/mL</td><td>${a.from} (${fmt(a.fc)} ng/mL)</td><td style="font-family:var(--f-mono);font-size:12.5px">${fmt(a.c)} × 10 mL / ${fmt(a.fc)}</td><td class="g">${a.v>=1000?fmt(a.v/1000)+' mL':fmt(a.v)+' µL'}</td></tr>`).join('');
- $('#exT').innerHTML='<tr><th>SEVİYE</th><th>HEDEF (ng/mL)</th><th>KAYNAK</th><th>HESAP</th><th>ALINACAK</th><th>METANOL</th></tr>'+s.rows.map(r=>`<tr><td class="g">K${r.i+1}</td><td>${fmt(r.c)}</td><td>${r.src} (${r.sc} ng/mL)</td><td style="font-family:var(--f-mono);font-size:12.5px">${fmt(r.c)} × 1000 µL / ${r.sc}</td><td class="g">${fmt(r.v)} µL</td><td>${fmt(r.meoh)} µL</td></tr>`).join('')}
-/* alıştırma */
-let UQ=[];const POOL=[['1 mg/mL kaç µg/mL?',1000,'µg/mL'],['1 µg/mL kaç ng/mL?',1000,'ng/mL'],['1 mg/mL kaç ng/mL?',1e6,'ng/mL'],['0,05 ng/mL kaç pg/mL?',50,'pg/mL'],['250 µL kaç mL?',.25,'mL'],['0,1 mg/mL kaç ng/mL?',1e5,'ng/mL'],['2,5 mL kaç µL?',2500,'µL'],['500 ng/mL kaç µg/mL?',.5,'µg/mL']];
-function mkUQ(rand){UQ=rand?[...POOL].sort(()=>Math.random()-.5).slice(0,3):POOL.slice(0,3)}
-function renderPr(){const s=plan(P);$('#prP').innerHTML=pr(P);setVf();
- $('#qA').innerHTML=UQ.map((q,i)=>`<div class="qa" id="qa${i}"><span>${q[0]}</span><input data-k="u${i}" placeholder="cevap" value="${A['u'+i]??''}"><span class="u">${q[2]}</span></div>`).join('');
- $('#qB').innerHTML=s.AS.map((a,i)=>`<div class="qa" id="qb${i}"><span><b>${a.n}</b> (${fmt(a.c)} ng/mL) için ${a.from==='Ana stok'?'ana stoktan ('+fmt(P.S0)+' mg/mL)':a.from+'’den'} kaç µL?</span><input data-k="b${i}" value="${A['b'+i]??''}"><span class="u">µL</span></div>`).join('');
- $('#qC').innerHTML='<tr><th></th><th>HEDEF (ng/mL)</th><th>KAYNAK</th><th>ALINACAK (µL)</th><th>METANOL (µL)</th></tr>'+s.rows.map(r=>{const id='c'+r.i;return `<tr id="r${id}"><td class="g">K${r.i+1}</td><td class="g">${fmt(r.c)}</td><td><select data-k="${id}s"><option value="">—</option>${Object.keys(SRC).map(k=>`<option ${A[id+'s']===k?'selected':''}>${k}</option>`).join('')}</select></td><td><input data-k="${id}v" value="${A[id+'v']??''}"></td><td><input data-k="${id}m" value="${A[id+'m']??''}"></td></tr>`}).join('');
- $$('#qA input,#qB input,#qC input,#qC select').forEach(el=>{el.oninput=el.onchange=()=>{A[el.dataset.k]=el.value;if(checked)check(true)}});if(checked)check(true)}
-function setCell(td,st,msg){td.className=st;let m=td.querySelector('.msg');if(m)m.remove();if(msg){m=document.createElement('div');m.className='msg'+(st==='wr'?' w':'');m.textContent=msg;td.appendChild(m)}}
-function diag(val,ok){if(!isFinite(val))return 'Boş.';const r=val/ok;if(near(r,1000,.02)||near(r,.001,.02))return '1000 kat fark: birimi kontrol et (mL ↔ µL, µg ↔ ng).';if(near(r,10,.02)||near(r,.1,.02)||near(r,100,.02)||near(r,.01,.02))return 'Kat farkı var: hangi ara stoğun konsantrasyonunu kullandın?';return 'Yanlış. V₁ = C₂ × V₂ / C₁ ile yeniden hesapla.'}
-function check(silent){checked=true;const s=plan(P);let tot=0,good=0;
- UQ.forEach((q,i)=>{tot++;const ok=near(num(A['u'+i]),q[1],.005);if(ok)good++;$('#qa'+i).className='qa '+(ok?'ok':'bad')});
- s.AS.forEach((a,i)=>{tot++;const ok=near(num(A['b'+i]),a.v);if(ok)good++;$('#qb'+i).className='qa '+(ok?'ok':'bad')});
- s.rows.forEach(r=>{const id='c'+r.i,tds=$('#r'+id).querySelectorAll('td');const sv=A[id+'s'],v=num(A[id+'v']),m=num(A[id+'m']);tot+=3;
-  const vi=sv?r.c*s.V/SRC[sv]:NaN;let sOk=false,sm='';if(!sv)sm='Kaynak seç.';else if(vi<10)sm=`Bu kaynaktan ${fmt(vi,4)} µL gerekir: çok az. Daha seyreltik stok seç.`;else if(vi>s.V)sm=`Bu kaynaktan ${fmt(vi)} µL gerekir: toplam hacmi aşar. Daha derişik stok seç.`;else{sOk=true;if(sv!==r.src)sm='Olur, ama önerilen '+r.src+'.'}
-  if(sOk)good++;setCell(tds[2],sOk?(sm?'wr':'ok'):'bad',sm);
-  const vOk=sOk&&near(v,vi);if(vOk)good++;setCell(tds[3],vOk?'ok':'bad',vOk?'':sOk?diag(v,vi):'Önce kaynağı düzelt.');
-  const mOk=isFinite(v)&&near(m,s.V-v);if(mOk)good++;setCell(tds[4],mOk?'ok':'bad',mOk?'':`Toplam ${fmt(s.V)} µL: ${fmt(s.V)} − ${isFinite(v)?fmt(v):'?'}`)});
- const pc=Math.round(good/tot*100);$('#score').textContent=`${good} / ${tot} doğru`;$('#score').style.color=pc>=90?'#2DBE5B':pc>=60?'#F2B632':'#FF6B6B';
- if(!silent){if(pc===100){say('Harika, hepsi doğru ✓ Şimdi <b>🎲 Yeni alıştırma</b> ile farklı bir madde ya da hacimle tekrar dene.');$$('#tabs button')[2].classList.add('done')}else say(`${good}/${tot} doğru. Kırmızı kutuların altındaki notlara bak. Hataların çoğu <b>birim</b> ya da <b>yanlış ara stok</b> seçiminden gelir.`)}
- return pc}
-function solve(){const s=plan(P);UQ.forEach((q,i)=>A['u'+i]=fmt(q[1],6).replace(/\./g,''));s.AS.forEach((a,i)=>A['b'+i]=fmt(a.v,3).replace(/\./g,''));s.rows.forEach(r=>{A['c'+r.i+'s']=r.src;A['c'+r.i+'v']=fmt(r.v,3).replace(/\./g,'');A['c'+r.i+'m']=fmt(r.meoh,3).replace(/\./g,'')});renderPr();check(true);say('Çözüm yazıldı. Her satırı formülle kendine açıkla, sonra <b>🎲 Yeni alıştırma</b> ile kendin çöz.')}
-function tab(i){$$('#tabs button').forEach((b,j)=>b.classList.toggle('on',j===i));$$('section[data-p]').forEach(s=>s.classList.toggle('hide',+s.dataset.p!==i));scrollTo({top:0,behavior:'smooth'});
- say(['Merhaba! Bu <b>kalibrasyon masası</b>. Tek bir maddeyi (<b>'+DEF.drug+'</b>) metanolde 0,05–5 ng/mL aralığında hazırlamayı öğreneceğiz. Bilmen gereken iki şey var: <b>birimler</b> ve <b>C₁V₁ = C₂V₂</b>.',
-  'Ana stoktan üç ara stokla aşağı iniyoruz: 1000 → 10 → 1 ng/mL. Sonra her kalibratörü uygun ara stoktan 1 mL’ye tamamlıyoruz.',
-  'Sıra sende! Kutuları doldur, <b>✓ Kontrol et</b>’e bas. Virgül ya da nokta kullanabilirsin. Takılırsan <b>Çözümlü örnek</b>e dön.'][i])}
-$$('#tabs button').forEach(b=>b.onclick=()=>tab(+b.dataset.t));$$('[data-go]').forEach(b=>b.onclick=()=>tab(+b.dataset.go));
-const U={'mg/mL':1e6,'µg/mL':1e3,'ng/mL':1,'pg/mL':1e-3};function conv(){const v=num($('#cvV').value),u=$('#cvA').value;const ng=v*U[u];$('#cvR').innerHTML=isFinite(ng)?Object.keys(U).filter(k=>k!==u).map(k=>`${fmt(ng/U[k],6)} ${k}`).join(' · '):'—'}$('#cvV').oninput=$('#cvA').onchange=conv;conv();
-$('#chk').onclick=()=>check(false);$('#sol').onclick=solve;
-$('#newEx').onclick=()=>{const pick=a=>a[Math.floor(Math.random()*a.length)];let n;do{n={drug:pick(DRUGS),S0:pick([1,1,.1]),Vf:pick([1,2,.5])}}while(JSON.stringify(n)===JSON.stringify(P));P=n;A={};checked=false;$('#score').textContent='';mkUQ(true);renderPr();say(`Yeni alıştırma: <b>${P.drug}</b>, ana stok <b>${fmt(P.S0)} mg/mL</b>, her kalibratör <b>${fmt(P.Vf)} mL</b>. Hacimler değişti, dikkat!`)};
-$('#resetEx').onclick=()=>{P={...DEF};A={};checked=false;$('#score').textContent='';mkUQ(false);renderPr();say('Çözümlü örnekteki değerlere döndün.')};
-function goLab(e){if(e&&e.preventDefault)e.preventDefault();const ret=new URLSearchParams(location.search).get('ret');location.href=(/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/')+'lab_giris.html'+(ret?'#'+ret:'')}
-$('#hLab').onclick=goLab;
-mkUQ(false);renderEx();renderPr();tab(0);
-window.__kal={plan,check,solve,P:()=>P};
-</script>
+/* yanlış cevaba göre ipucu: 1000 kat fark birim, 10/100 kat fark yanlış stok */
+function ipucu(v,dogru){if(!isFinite(v))return 'Bir sayı yaz.';const r=v/dogru;
+ if(near(r,1000,.02)||near(r,.001,.02))return '1000 kat fark var: birimi kontrol et (mL ↔ µL ya da µg ↔ ng).';
+ if(near(r,10,.02)||near(r,.1,.02)||near(r,100,.02)||near(r,.01,.02))return 'Kat farkı var: C₁ olarak doğru stoğun konsantrasyonunu mu kullandın?';
+ return 'Olmadı. V₁ = C₂ × V₂ / C₁ ile yeniden hesapla; birimleri eşitlemeyi unutma.'}
 
+/* zincir ve plan */
+const Z=[{k:'ana',ad:'Ana stok',c:'1 mg/mL',a:'referans ampul'},{k:'as1',ad:'AS-1',c:'1000 ng/mL',a:'10 mL'},{k:'as2',ad:'AS-2',c:'10 ng/mL',a:'10 mL'},{k:'as3',ad:'AS-3',c:'1 ng/mL',a:'10 mL'},{k:'kal',ad:'Kalibratörler',c:'0,05–5 ng/mL',a:'7 seviye × 1 mL'}];
+const PLAN=[['AS-1','1000 ng/mL','Ana stok (1 000 000 ng/mL)','10 µL'],['AS-2','10 ng/mL','AS-1 (1000 ng/mL)','100 µL'],['AS-3','1 ng/mL','AS-2 (10 ng/mL)','10 000 µL = 10 mL'],
+ ['K7 · 5','5 ng/mL','AS-2','500 µL'],['K5 · 1','1 ng/mL','AS-2','100 µL'],['K3 · 0,25','0,25 ng/mL','AS-3','250 µL'],['K1 · 0,05','0,05 ng/mL','AS-3','50 µL']];
+let TAM={},ON=null,PON=-1;
+function zincirCiz(){$('#zincir').innerHTML=Z.map((z,i)=>(i?'<span class="ok-ar">→</span>':'')+`<div class="halka${ON===z.k?' on':''}${TAM[z.k]?' tam':''}"><small>${z.ad.toUpperCase()}</small><b>${z.c}</b><span>${z.a}</span></div>`).join('')}
+function planCiz(){$('#plan').innerHTML='<tr><th>ÇÖZELTİ</th><th>HEDEF</th><th>NEREDEN</th><th>ALINACAK (V₁)</th></tr>'+PLAN.map((r,i)=>{const t=TAM['p'+i];return `<tr class="${i===PON?'on':''} ${t?'tam':''}"><td class="g">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="v ${t?'':'bos'}">${t?r[3]:'?'}</td></tr>`}).join('')}
+function goster(o){$('#kBirim').hidden=!o.birim;$('#kFormul').hidden=!o.formul;$('#kPlan').hidden=!o.plan;$$('.birim div').forEach(d=>d.classList.toggle('on',(o.birimOn||[]).includes(d.dataset.b)));ON=o.on||null;PON=o.pon??-1;zincirCiz();planCiz()}
+
+/* adımlar: html = açıklama; s = soru {soru, birim, dogru, ac(açıklama doğru cevaptan sonra)}; g = sol taraf görünümü */
+const ADIM=[
+ {bolum:'Giriş',b:'Kalibrasyon neden gerekir?',g:{on:'kal'},html:'<p>Cihaz bize madde miktarını değil, bir <b>sinyal</b> (pik alanı) verir. Sinyali konsantrasyona çevirmek için, konsantrasyonunu bildiğimiz çözeltileri ölçeriz: bunlar <b>kalibratörlerdir</b>.</p><p>Bu derste fentanil için <b>0,05–5 ng/mL</b> arası 7 kalibratörü, <b>1 mg/mL</b>’lik ana stoktan metanolle seyrelterek hazırlamayı adım adım hesaplayacağız.</p><p>Soldaki <b>seyreltme zinciri</b> yol haritamız: ana stok → üç ara stok → kalibratörler.</p>'},
+ {bolum:'Birimler',b:'Her basamak 1000 kat',g:{birim:1,birimOn:['mg','ug','ng'],on:'ana'},html:'<p>Konsantrasyon birimleri 1000’er kat ilerler:</p><div class="hes">1 mg/mL = 1 000 µg/mL = 1 000 000 ng/mL</div><p>Hesaplarda en sık hata buradan gelir: iki tarafta birimler aynı olmalı. Ana stoğumuzu <b>ng/mL</b>’ye çevirip çalışacağız.</p>'},
+ {bolum:'Birimler',b:'Ana stok ng/mL olarak',g:{birim:1,birimOn:['mg','ng'],on:'ana'},s:{soru:'Ana stok <b>1 mg/mL</b>. Bu kaç <b>ng/mL</b> eder?',birim:'ng/mL',dogru:1e6,ac:'<p>1 mg = 1 000 µg = 1 000 000 ng. Yani ana stok <b>1 000 000 ng/mL</b>.</p>'}},
+ {bolum:'Formül',b:'Tek formül: C₁V₁ = C₂V₂',g:{formul:1},html:'<p>Seyreltmede madde miktarı değişmez, yalnız hacim artar:</p><div class="hes">C₁ × V₁ = C₂ × V₂</div><ul><li><b>C₁</b>: elimdeki çözelti</li><li><b>V₁</b>: ondan alacağım hacim (aradığımız)</li><li><b>C₂</b>: istediğim konsantrasyon</li><li><b>V₂</b>: istediğim toplam hacim</li></ul><div class="hes">V₁ = C₂ × V₂ / C₁</div><p>Alınan hacim balon jojeye konur, <b>metanolle çizgiye tamamlanır</b>.</p>'},
+ {bolum:'Formül',b:'Neden ara stok?',g:{formul:1,on:'kal'},html:'<p>1 000 000 ng/mL’den 0,05 ng/mL’ye tek adımda inmek için 1 mL’lik kalibratöre <b>0,00005 µL</b> ana stok gerekirdi: hiçbir pipet bunu alamaz.</p><p>Bu yüzden 10 ya da 100 katlık adımlarla, <b>ara stoklarla</b> ineriz.</p><p><b>Pratik kural:</b> pipetle alınacak hacim <b>10 µL’den az olmamalı</b>. Azsa daha seyreltik ara stoktan al.</p>'},
+ {bolum:'Ara stoklar',b:'AS-1: 1000 ng/mL',g:{formul:1,plan:1,on:'as1',pon:0},s:{soru:'<b>AS-1</b>: 10 mL balon jojede <b>1000 ng/mL</b>. Ana stoktan (1 000 000 ng/mL) kaç <b>µL</b> alırsın?',birim:'µL',dogru:10,yol:'1000 ng/mL × 10 mL / 1 000 000 ng/mL = 0,01 mL',ac:'<p>0,01 mL = <b>10 µL</b> ana stok alınır, metanolle 10 mL’ye tamamlanır.</p>',tam:['as1','p0']}},
+ {bolum:'Ara stoklar',b:'AS-2: 10 ng/mL',g:{formul:1,plan:1,on:'as2',pon:1},s:{soru:'<b>AS-2</b>: 10 mL, <b>10 ng/mL</b>. <b>AS-1</b>’den (1000 ng/mL) kaç <b>µL</b>?',birim:'µL',dogru:100,yol:'10 × 10 mL / 1000 = 0,1 mL',ac:'<p>0,1 mL = <b>100 µL</b> AS-1 alınır, metanolle 10 mL’ye tamamlanır. 100 kat seyreltme.</p>',tam:['as2','p1']}},
+ {bolum:'Ara stoklar',b:'AS-3: 1 ng/mL',g:{formul:1,plan:1,on:'as3',pon:2},s:{soru:'<b>AS-3</b>: 10 mL, <b>1 ng/mL</b>. <b>AS-2</b>’den (10 ng/mL) kaç <b>mL</b>?',birim:'mL',dogru:1,yol:'1 × 10 mL / 10 = 1 mL',ac:'<p><b>1 mL</b> AS-2 alınır, metanolle 10 mL’ye tamamlanır. 10 kat seyreltme.</p>',tam:['as3','p2']}},
+ {bolum:'Kalibratörler',b:'Hangi stoktan?',g:{plan:1,on:'kal'},html:'<p>Her kalibratör <b>1 mL</b> (1000 µL) hazırlanır.</p><ul><li>Üst seviyeler (<b>1–5 ng/mL</b>) → <b>AS-2</b>’den (10 ng/mL)</li><li>Alt seviyeler (<b>0,05–0,5 ng/mL</b>) → <b>AS-3</b>’ten (1 ng/mL)</li></ul><p>Böylece bütün hacimler <b>50–500 µL</b> arasında kalır: pipetle rahat ve doğru alınır.</p>'},
+ {bolum:'Kalibratörler',b:'En üst seviye: 5 ng/mL',g:{formul:1,plan:1,on:'kal',pon:3},s:{soru:'<b>5 ng/mL</b>, toplam 1000 µL, <b>AS-2</b>’den (10 ng/mL). Kaç <b>µL</b> AS-2?',birim:'µL',dogru:500,yol:'5 × 1000 µL / 10 = 500 µL',ac:'<p><b>500 µL</b> AS-2 + <b>500 µL</b> metanol.</p>',tam:['p3']}},
+ {bolum:'Kalibratörler',b:'1 ng/mL',g:{formul:1,plan:1,on:'kal',pon:4},s:{soru:'<b>1 ng/mL</b>, 1000 µL, <b>AS-2</b>’den (10 ng/mL). Kaç <b>µL</b>?',birim:'µL',dogru:100,yol:'1 × 1000 / 10 = 100 µL',ac:'<p><b>100 µL</b> AS-2 + <b>900 µL</b> metanol.</p>',tam:['p4']}},
+ {bolum:'Kalibratörler',b:'0,25 ng/mL',g:{formul:1,plan:1,on:'kal',pon:5},s:{soru:'<b>0,25 ng/mL</b>, 1000 µL. Artık <b>AS-3</b>’ten (1 ng/mL). Kaç <b>µL</b>?',birim:'µL',dogru:250,yol:'0,25 × 1000 / 1 = 250 µL',ac:'<p><b>250 µL</b> AS-3 + <b>750 µL</b> metanol. AS-2’den alsaydık 25 µL gerekirdi; AS-3 daha rahat.</p>',tam:['p5']}},
+ {bolum:'Kalibratörler',b:'En alt seviye: 0,05 ng/mL',g:{formul:1,plan:1,on:'kal',pon:6},s:{soru:'<b>0,05 ng/mL</b>, 1000 µL, <b>AS-3</b>’ten (1 ng/mL). Kaç <b>µL</b>?',birim:'µL',dogru:50,yol:'0,05 × 1000 / 1 = 50 µL',ac:'<p><b>50 µL</b> AS-3 + <b>950 µL</b> metanol. Plan tamam!</p>',tam:['p6','kal']}},
+ {bolum:'Kontrol',test:1}];
+const SORU=[
+ ['0,5 µg/mL kaç ng/mL?',['0,5','500','500 000'],1,'µg → ng 1000 kat: 0,5 × 1000 = 500 ng/mL.'],
+ ['Alınacak hacim 3 µL çıktı. Ne yaparsın?',['3 µL alırım','Daha seyreltik bir ara stoktan alırım','Hacmi tahmin ederim'],1,'10 µL’nin altı pipetle doğru alınamaz; daha seyreltik stok kullanılır.'],
+ ['2 ng/mL, 1000 µL kalibratör için AS-2’den (10 ng/mL) kaç µL?',['20 µL','200 µL','2000 µL'],1,'2 × 1000 / 10 = 200 µL; kalan 800 µL metanol.']];
+const bolumler=[...new Set(ADIM.map(a=>a.bolum))];
+let i=0,gecti=false,uyari='',sn=0,cevap=null,puan=0;
+const P=$('#P');
+function ciz(){const a=ADIM[i],bi=bolumler.indexOf(a.bolum);
+ let h=`<div class="ust"><b>KALİBRASYON ÇÖZELTİSİ</b><span>${i+1} / ${ADIM.length}</span></div><div class="bol">${bolumler.map((b,k)=>`<i class="${k<bi?'g':k===bi?'s':''}">${b}</i>`).join('')}</div>`;
+ if(a.test)h+=test();
+ else{
+  if(a.s){h+=`<div class="ask${gecti?' tamam':''}">${gecti?'✓ Doğru! Açıklamayı oku, sonra devam et.':a.s.soru}${uyari?'<small>'+uyari+'</small>':''}</div>`;
+   if(!gecti)h+=`<div class="giris"><input id="cvp" inputmode="decimal" autocomplete="off" placeholder="cevap"><span class="u">${a.s.birim}</span></div><div class="alt"><button class="k" id="kontrol">✓ Kontrol et</button><button class="ince" id="goster">Çözümü göster</button></div>`;
+   else h+=`<div class="kart"><h4>${a.b}</h4>${a.s.yol?'<div class="hes">'+a.s.yol+'</div>':''}${a.s.ac}</div>`}
+  else h+=`<div class="kart"><h4>${a.b}</h4>${a.html}</div>`;
+  h+=`<div class="alt"><button id="geri" ${i?'':'disabled'}>‹ Geri</button><button class="p" id="ileri" ${a.s&&!gecti?'disabled':''}>Devam ›</button></div>`}
+ h+=`<div class="mentor"><img src="${AVATAR}" alt=""><div><div class="nm">UZM. MY</div><p id="say">${soz()}</p></div></div>`;
+ P.innerHTML=h;goster(a.g||{plan:1});
+ const c=$('#cvp');if(c){c.focus();c.onkeydown=e=>{if(e.key==='Enter')kontrol()}}
+ const k=$('#kontrol');if(k)k.onclick=kontrol;const g=$('#goster');if(g)g.onclick=()=>{uyari='';tamam()};
+ const gr=$('#geri');if(gr)gr.onclick=()=>git(i-1);const il=$('#ileri');if(il)il.onclick=()=>git(i+1);
+ P.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{if(cevap!==null)return;cevap=+b.dataset.c;if(cevap===SORU[sn][2])puan++;ciz()});
+ const sd=$('#dSoru');if(sd)sd.onclick=()=>{sn++;cevap=null;ciz()};const bt=$('#bastan');if(bt)bt.onclick=()=>{TAM={};sn=0;puan=0;cevap=null;git(0)}}
+function soz(){const a=ADIM[i];if(a.test)return sn>=SORU.length?'Tebrikler! Kalibratör planını baştan sona çıkardın.':'Son olarak üç kısa soru.';
+ if(uyari)return 'Hata yapmak öğrenmenin parçası. İpucuna bakıp bir daha dene.';if(a.s&&!gecti)return 'Hesabı kâğıtta yapabilirsin; formül solda.';if(gecti)return 'Harika! Plan tablosu doldu, bak.';return 'Hazırsan <b>Devam</b>’a bas.'}
+function kontrol(){const a=ADIM[i],v=num($('#cvp').value);if(near(v,a.s.dogru)){uyari='';tamam()}else{uyari=ipucu(v,a.s.dogru);ciz()}}
+function tamam(){const a=ADIM[i];gecti=true;(a.s.tam||[]).forEach(k=>TAM[k]=1);ciz()}
+function git(n){if(n<0||n>=ADIM.length)return;i=n;gecti=!!(ADIM[i].s&&(ADIM[i].s.tam||[]).every(k=>TAM[k])&&(ADIM[i].s.tam||[]).length);uyari='';ciz();
+ if(matchMedia('(max-width:900px)').matches)$('#dersK').scrollTop=0}
+function test(){if(sn>=SORU.length)return `<div class="kart"><h4>Bölüm tamamlandı</h4><div class="hes">${puan} / ${SORU.length} doğru</div><p>Ana stoktan üç ara stokla 0,05–5 ng/mL kalibratörlere inmeyi öğrendin.</p>${puan<SORU.length?'<p>Yanlış yanıtladığın konular için ilgili adımlara geri dönebilirsin.</p>':''}</div><div class="alt"><button id="bastan">↺ Baştan</button><button class="p" onclick="location.href=MEDIA+'index.html#menu'">Eğitimlere dön ›</button></div>`;
+ const s=SORU[sn];return `<div class="kart"><h4>Soru ${sn+1} / ${SORU.length}</h4><div>${s[0]}</div><div class="sec">${s[1].map((c,k)=>`<button data-c="${k}" class="${cevap===null?'':k===s[2]?'d':k===cevap?'y':''}">${c}</button>`).join('')}</div>${cevap!==null?'<div style="font-size:13.5px;color:#B9CBD0">'+(cevap===s[2]?'✓ Doğru. ':'✗ Doğru yanıt işaretlendi. ')+s[3]+'</div>':''}</div>${cevap!==null?`<div class="alt"><button class="p" id="dSoru">${sn+1<SORU.length?'Sonraki soru ›':'Sonucu gör ›'}</button></div>`:''}`}
+$('#hLab').onclick=e=>{e.preventDefault();const r=new URLSearchParams(location.search).get('ret');location.href=MEDIA+'lab_giris.html'+(r?'#'+r:'')};
+git(0);
+</script>
 <script src="anamenu.js" charset="utf-8" defer></script>
 </body>
 </html>
