@@ -15,7 +15,12 @@ const { KOK, sunucuAc, tarayiciAc, yonlendir } = require('../tests/ortak');
 // icerden: sahnede tek büyük grup varsa (SPE) o grubun içindeki parçalar ayrı ayrı seçilir.
 // Birimler sayfadan sayfaya değişir; lab turu modeli odadaki eski modelin genişliğine oturtur.
 const CIHAZ = {
-  terazi: { sayfa: 'terazi_pilot.html', bolge: [-15, 15, -0.5, 40, -26, 31] },
+  // terazi: lab turundaki model laboratuvardaki cihazın fotoğrafına göre: köşe profilleri beyaz (turkuaz değil),
+  // terminal haznenin sol önünde. Eğitim sayfası değişmez; yalnız model çıkarılırken uygulanır.
+  terazi: { sayfa: 'terazi_pilot.html', bolge: [-40, 15, -3, 40, -26, 24], duzelt: [
+    ["teal:new THREE.MeshPhysicalMaterial({color:'#1F9A97'", "teal:new THREE.MeshPhysicalMaterial({color:'#E6E9EA'"],
+    ["const term=new THREE.Group();term.position.set(0,3.6,25.5);term.rotation.x=-1.05;", "const term=new THREE.Group();term.position.set(-22,3.6,13);term.rotation.set(-1.05,.4,0,'YXZ');"],
+  ] },
   santrifuj: { sayfa: 'santrifuj_pilot.html', bolge: [-14, 14, -0.5, 40, -16, 18] },
   vorteks: { sayfa: 'vorteks_pilot.html', bolge: [-8, 8, -0.5, 30, -8, 10] },
   pipet: { sayfa: 'pipet_pilot.html', bolge: [-23, -9, -0.5, 32, -10, 4] },
