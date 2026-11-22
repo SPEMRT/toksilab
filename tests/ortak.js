@@ -42,7 +42,7 @@ async function yonlendir(sayfa) {
   await sayfa.route(/^https:\/\/spemrt\.github\.io\/toksilab\//, async r => {
     const ad = decodeURIComponent(new URL(r.request().url()).pathname.replace(/^\/toksilab\//, ''));
     const dosya = path.join(KOK, ad);
-    if (dosya.startsWith(KOK) && fs.existsSync(dosya)) return r.fulfill({ path: dosya });
+    if (dosya.startsWith(KOK) && fs.existsSync(dosya)) return r.fulfill({ path: dosya, contentType: TURLER[path.extname(dosya)] });
     return r.fulfill({ status: 404 });
   });
   if (fs.existsSync(NM)) await sayfa.route(/^https:\/\/(cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com)\//, async r => {
