@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
+const { execFileSync } = require('child_process');
 const { KOK, sunucuAc, tarayiciAc, yonlendir } = require('../tests/ortak');
 
 // bolge: cihaza ait nesnelerin (cm) içinde kaldığı kutu [xmin,xmax, ymin,ymax, zmin,zmax].
@@ -73,9 +74,13 @@ const CIHAZ = {
       const boy = kutu.getSize(new THREE.Vector3());
       return { n, b64: btoa(s), boy: [boy.x, boy.y, boy.z].map(v => +(v / 100).toFixed(3)) };
     }, { bolge: c.bolge, icerden: !!c.icerden, eski: !!c.eski });
-    const dosya = path.join(cikti, ad + '.glb');
-    fs.writeFileSync(dosya, Buffer.from(sonuc.b64, 'base64'));
-    console.log(`✓ ${ad}: ${sonuc.n} nesne, boyut ${sonuc.boy.join(' × ')} (sayfa birimi/100), ${(fs.statSync(dosya).size / 1024).toFixed(0)} KB → modeller/${ad}.glb`);
+    const dosya = path.join(cikti, ad + '.glb'), ham = dosya + '.ham';
+    fs.writeFileSync(ham, Buffer.from(sonuc.b64, 'base64'));
+    // dosya boyutunu küçült (meshopt): şekil verisi kısaltılır, dokulara (etiket, ekran) dokunulmaz.
+    // Lab turu bu dosyaları MeshoptDecoder ile açar.
+    execFileSync(path.join(__dirname, '..', 'tests', 'node_modules', '.bin', 'gltf-transform'), ['meshopt', ham, dosya], { stdio: 'ignore' });
+    const hamKB = (fs.statSync(ham).size / 1024).toFixed(0); fs.unlinkSync(ham);
+    console.log(`✓ ${ad}: ${sonuc.n} nesne, ${hamKB} KB → ${(fs.statSync(dosya).size / 1024).toFixed(0)} KB → modeller/${ad}.glb`);
     await p.close();
   }
   await tarayici.close(); sunucu.close();

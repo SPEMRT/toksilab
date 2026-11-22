@@ -2,9 +2,12 @@
   "name": "toksilab-testler",
   "private": true,
   "description": "Tarayıcı testleri. CDN'e erişilemeyen ortamlar için three.js'in yerel kopyaları.",
-  "scripts": { "test": "node smoke.js" },
+  "scripts": {
+    "test": "node smoke.js"
+  },
   "devDependencies": {
-    "three160": "npm:three@0.160.0",
-    "three128": "npm:three@0.128.0"
+    "@gltf-transform/cli": "^4.5.1",
+    "three128": "npm:three@0.128.0",
+    "three160": "npm:three@0.160.0"
   }
 }
