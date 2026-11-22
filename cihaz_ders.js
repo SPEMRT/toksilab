@@ -28,6 +28,8 @@ var AD={'Karıştırma başlığı (kauçuk kap)':'cup','Anahtar: O / ON / TOUCH
 var ADI={cup:'karıştırma başlığı',sw:'anahtar',knob:'hız düğmesi',led:'güç ışığı',feet:'ayaklar',body:'gövde',hs:'HS viali',fal:'Falkon tüpü',ep:'Eppendorf tüpü',rack:'tüp rafı'};
 var TUP={hs:'HS viali',fal:'Falkon tüpü',ep:'Eppendorf tüpü'};
 /* yanlış tüp alınırsa rafa geri konur */
+/* hız kutusu açıksa halka hedefe götüren + / − düğmesine geçer */
+function kademeHalka(h){return function(s){var k=document.getElementById('kpop');return k&&!k.hidden?['#'+(s.lvl<h?'kpP':'kpM'),0,0]:['knob',0,54]}}
 function yanlisTup(dogru){return function(){var s=S();if(s.held&&s.held!==dogru){var k=s.held;window.toRack();return 'Aldığınız '+TUP[k]+' idi; rafa geri kondu. Yanıp sönen halkanın gösterdiği tüpe tıklayın.'}return ''}}
 var DERS={
 vortani:{ad:'Cihazı tanıma',ozet:'Vorteks ne işe yarar; başlık, anahtar, hız düğmesi ve tüpler.',baslik:'VORTEKS · CİHAZI TANIMA',mod:'parts',
@@ -61,7 +63,7 @@ vorkul:{ad:'İlk karıştırma: HS viali',ozet:'TOUCH modu, hız ayarı, viali b
   html:'<p>Kanda alkol analizi için hazırlanmış bir HS vialini karıştıracaksınız. Vialde kan dipte, su ve iç standart üstte duruyor: iki ayrı tabaka.</p><p>Vial bu hâliyle analiz edilirse sonuç yanlış çıkar. Birkaç saniyelik bir karıştırma yeter; bunun için <b>TOUCH</b> modu kullanılır.</p>'},
  {bolum:'Ayar',ask:'<b>Anahtara</b> tıklayın. Her tıklamada konum değişir: O → ON → TOUCH. <b>TOUCH</b> olana kadar tıklayın.',halka:['sw',0,54],izin:['sw'],ok:function(s){return s.sw==='touch'},
   b:'Anahtar TOUCH konumunda',html:'<p>Güç ışığı yandı; sağ üstteki göstergede <b>TOUCH</b> yazıyor. Başlık şu an dönmüyor: TOUCH modunda yalnızca tüp bastırıldığında döner.</p><p>Kısa karıştırmalar için en güvenli moddur; tüpü kaldırdığınız anda cihaz durur.</p>'},
- {bolum:'Ayar',ask:'<b>Hız düğmesine</b> tıklayın ve açılan kutudaki <b>+</b> ile hızı <b>5</b>. kademeye getirin.',halka:['knob',0,54],izin:['knob'],ok:function(s){return s.lvl===5},hata:function(){var s=S();return s.lvl>5?'Hız '+s.lvl+'. kademede. <b>−</b> ile 5’e indirin.':''},
+ {bolum:'Ayar',ask:'<b>Hız düğmesine</b> tıklayın ve açılan kutudaki <b>+</b> ile hızı <b>5</b>. kademeye getirin.',halka:kademeHalka(5),izin:['knob'],ok:function(s){return s.lvl===5},hata:function(){var s=S();return s.lvl>5?'Hız '+s.lvl+'. kademede. <b>−</b> ile 5’e indirin.':''},
   b:'Hız: 5. kademe',html:'<p>5. kademe yaklaşık <b>1500 rpm</b>’dir. Küçük bir vial için orta hız yeterlidir:</p><ul><li>Çok düşük hızda girdap oluşmaz, sıvı karışmaz.</li><li>Çok yüksek hızda vial elden kayabilir.</li></ul>'},
  {bolum:'Karıştırma',ask:'Raftaki <b>HS vialine</b> (kısa, koyu kırmızı sıvılı) tıklayarak viali alın.',halka:['tubes.hs',-38,70],izin:['tube:hs'],ok:function(s){return s.held==='hs'||s.cupT==='hs'},hata:yanlisTup('hs'),
   b:'Vial elinizde',html:'<p>Viale bakın: altta koyu kırmızı <b>kan</b>, üstte berrak sıvı (su ve iç standart). İki tabaka henüz karışmamış.</p><p>Vorteksten önce her zaman kapağa bakılır. HS vialinin kapağı preslenmiştir ve sızdırmaz.</p>'},
@@ -88,14 +90,14 @@ vorlle:{ad:'Sıvı-sıvı ekstraksiyon: Falkon tüpü',ozet:'Kapak kontrolü, d�
  {bolum:'Hazırlık',ask:'Tüpün kapağı açık, tezgâhta duruyor. Aşağıdaki düğmeyle kapağı kapatın.',izin:[],dugme:['Kapağı sıkıca kapat',function(){if(!S().caps.fal)window.capToggle()}],ok:function(s){return s.caps.fal},
   hata:function(){var s=S();if(s.cupT==='fal'&&!s.caps.fal){window.cupTap();return 'Kapağı açık tüp başlığa konmaz; tüp elinize geri alındı. Önce kapağı kapatın.'}return ''},
   b:'Önce kapak',html:'<p>Vorteksten önce bakılacak ilk şey kapaktır. Açık ya da gevşek kapakla karıştırılırsa:</p><ul><li>Sıvı dışarı sıçrar; <b>numune kaybolur</b>.</li><li>Tezgâh, cihaz ve eldiven kirlenir (<b>bulaşma</b>).</li><li>Çözücü buharı solunur.</li></ul><p>Vidalı kapak sonuna kadar çevrilerek kapatılır.</p>'},
- {bolum:'Hazırlık',ask:'<b>Hız düğmesine</b> tıklayın ve hızı <b>3</b>. kademeye getirin.',halka:['knob',0,54],izin:['knob'],ok:function(s){return s.lvl===3},hata:function(){var s=S();return s.lvl>3?'Hız '+s.lvl+'. kademede. <b>−</b> ile 3’e indirin.':''},
+ {bolum:'Hazırlık',ask:'<b>Hız düğmesine</b> tıklayın ve hızı <b>3</b>. kademeye getirin.',halka:kademeHalka(3),izin:['knob'],ok:function(s){return s.lvl===3},hata:function(){var s=S();return s.lvl>3?'Hız '+s.lvl+'. kademede. <b>−</b> ile 3’e indirin.':''},
   b:'Düşük hızla başlayın',html:'<p>Sonunda yüksek hıza çıkacaksınız, ama <b>başlangıç her zaman düşük hızdadır</b>.</p><p>Yüksek hızla başlanırsa sıvı bir anda kapağa sıçrar. Kapağa yapışan sıvı karışmaya katılmaz ve tüp elinizden kayabilir.</p>'},
  {bolum:'Karıştırma',ask:'Tüpü yerleştirin: <b>karıştırma başlığına</b> tıklayın.',oto:1,halka:['cup',0,62],izin:['cup'],ok:function(s){return s.cupT==='fal'},hata:yanlisTup('fal')},
  {bolum:'Karıştırma',ask:'Tüpü elinizle başlığa <b>bastırarak tutun</b>. Çalıştırmadan önce tutulur.',izin:[],dugme:['✋ Tüpü bastırarak tut',function(){if(!S().hold)window.holdToggle()}],ok:function(s){return s.hold||s.press},
   b:'Tüp her zaman elle tutulur',html:'<p>ON modunda başlık siz durdurana kadar döner, ama tüp başlığın üstünde <b>kendi kendine durmaz</b>: elle bastırılmazsa karışmaz, hız artınca başlıktan <b>fırlar</b> ve tezgâha düşer.</p><p>Bu yüzden önce tüp başlığa bastırılarak tutulur, sonra anahtar açılır; iş bitince önce anahtar kapatılır, sonra tüp bırakılır.</p>'},
  {bolum:'Karıştırma',ask:'<b>Anahtara</b> bir kez tıklayarak <b>ON</b> konumuna getirin.',halka:['sw',0,54],izin:['sw'],ok:function(s){return s.sw==='on'},hata:function(){return S().sw==='touch'?'Anahtar TOUCH konumuna geçti. ON olana kadar yeniden tıklayın.':''},
   b:'ON: sürekli çalışma',html:'<p>Başlık dönmeye başladı ve siz durdurana kadar dönecek. Uzun karıştırmalarda elinizle bastırmanız gerekmez; yine de tüp <b>sıkıca tutulur</b>.</p><p>Şu an hız düşük: sıvı yavaşça dönüyor, ama iki tabaka hâlâ ayrı.</p>'},
- {bolum:'Karıştırma',ask:'Şimdi hızı yükseltin: <b>hız düğmesine</b> tıklayın ve <b>8</b>. kademeye çıkarın.',oto:1,halka:['knob',0,54],izin:['knob'],ok:function(s){return s.lvl>=7&&s.cupT==='fal'}},
+ {bolum:'Karıştırma',ask:'Şimdi hızı yükseltin: <b>hız düğmesine</b> tıklayın ve <b>8</b>. kademeye çıkarın.',oto:1,halka:kademeHalka(8),izin:['knob'],ok:function(s){return s.lvl>=7&&s.cupT==='fal'}},
  {bolum:'Karıştırma',ask:'<b>30 saniye</b> yüksek hızda karıştırın. Tüpü ve göstergeyi izleyin…',bekle:1,izin:[],canli:function(s){return 'Yüksek hızda geçen süre: '+Math.min(30,Math.floor(s.tHigh))+' / 30 sn · ekstraksiyon %'+Math.round(s.mix.fal*100)},ok:function(s){return s.mix.fal>=1},
   dugme:['✋ Tüpü bastırarak tut',function(){if(!S().hold)window.holdToggle()}],
   hata:function(){var s=S();return s.cupT!=='fal'?'Tüp başlıkta değil. Tüpü başlığa geri koyun.':!(s.hold||s.press)?'Tüpü bastırarak tutmuyorsunuz: karışmıyor. Aşağıdaki düğmeyle yeniden tutun.':s.sw!=='on'?'Anahtar ON konumunda olmalı.':s.lvl<7?'Hız düştü. En az 7. kademe olmalı.':''},
@@ -190,7 +192,7 @@ ter10:{ad:'10,00 mg referans standart tartımı',ozet:'Kayık, dara, spatulayla 
  {bolum:'Kayık',ask:'Kayığı yerleştirin: içerideki <b>tartım kefesine</b> tıklayın.',halka:kapiYaHedef(['panHot',0,60]),ok:function(s){return s.boat==='al'},hata:kapiUyari,
   b:'Kayık kefede',html:'<p>Kayık kefenin <b>ortasına</b> kondu. Kenara konan yük, bazı terazilerde küçük bir sapma yaratır.</p><p>Ekran şimdi kayığın kendi ağırlığını gösteriyor (yaklaşık 148 mg). Bu ağırlığı birazdan sıfırlayacaksınız.</p>'},
  {bolum:'Dara',ask:'Kapıyı kapatın: <b>sağ sensöre</b> yeniden tıklayın.',oto:1,halka:['sensR',0,44],ok:function(s){return !acik(s)}},
- {bolum:'Dara',ask:'Değer durulunca ekranda <b>● KARARLI</b> yazar. Sonra <b>→T← Dara</b> tuşuna tıklayın.',canli:ekran,halka:['keyt',0,40],ok:function(s){return s.ev.tare&&s.boat==='al'},hata:function(){var s=S();return acik(s)?'Kapı açık. Dara kapılar kapalıyken alınır.':s.pendingTare?'Terazi değerin durulmasını bekliyor; durulunca dara kendiliğinden alınacak.':''},
+ {bolum:'Dara',ask:'Değer durulunca ekranda <b>● KARARLI</b> yazar. Sonra <b>→T← Dara</b> tuşuna tıklayın.',canli:ekran,halka:function(s){return acik(s)?[s.tR?'sensR':'sensL',0,44]:['keyt',0,40]},ok:function(s){return s.ev.tare&&s.boat==='al'},hata:function(){var s=S();return acik(s)?'Kapı açık. Dara kapılar kapalıyken alınır.':s.pendingTare?'Terazi değerin durulmasını bekliyor; durulunca dara kendiliğinden alınacak.':''},
   b:'Dara alındı',html:'<p>Ekran <b>sıfır</b> oldu. Kayığın ağırlığı artık hesaba katılmıyor; bundan sonra ekran yalnızca <b>eklediğiniz maddeyi</b> gösterir.</p><p>Dara, kefede bir kap varken kullanılır. Boş kefe için <b>Sıfırla</b> tuşu vardır.</p>'},
  {bolum:'Ekleme',ask:'Tezgâhtaki <b>temiz spatula kabına</b> tıklayarak bir spatula alın.',halka:['itsh',0,60],ok:function(s){return s.held==='sp'},
   b:'Temiz spatula',html:'<p>Her standart için <b>yeni ve temiz</b> bir spatula kullanılır. Başka bir maddeye değmiş spatula, standarda o maddeyi bulaştırır (<b>çapraz bulaşma</b>).</p>'},
@@ -311,7 +313,8 @@ function tol(s){return {buc:.5,mic:.15,ang:.5}[s.rotor]||.5}
 function denge(s){var v=window.imb(),n=s.slots.filter(Boolean).length,t=tol(s);return 'Rotorda '+n+' tüp · dengesizlik '+g2(v.m)+' g (sınır '+g2(t)+' g)'+(n&&v.m>t?' ✗':n?' ✓':'')}
 function ekran(s){return 'Ekran: P'+(s.prog||'–')+' · '+rpm(s.rpm)+' rpm · '+mmss(s.sec)+' · ayar alanı: '+(s.sel2==='t'?'süre':'hız')}
 function calisma(s){return {idle:'Hazır',accel:'Hızlanıyor',run:'Çalışıyor',decel:'Yavaşlıyor',error:'DENGESİZLİK, duruyor'}[s.phase]+' · '+rpm(Math.round(s.cur/10)*10)+' rpm · kalan '+mmss(s.phase==='idle'?0:s.left)}
-var KAPAK=['lidH',-10,80];
+/* kapak açıkken ön kenar ekranın üstüne çıkar; halka kapağın görünen alt bandına (menteşe tarafı) konur */
+var KAPAK=function(s){return s&&s.lid==='open'?['lid',0,70]:['lidH',-10,80]};
 /* raftaki yerleşmemiş tüplerin hepsine sarı halka; tüp seçiliyse önerilen karşı yuvaya da */
 function tupHalka(tur,yk){return function(s){var L=s.tray.filter(function(t){return (tur?tur.indexOf(t.kind)>=0:true)&&t.where==null}).map(function(t){return ['tubes.'+t.id,yk||-46,56]});
  var N=s.slots.length;if(s.sel){for(var k=0;k<N;k++){if(s.slots[k]&&!s.slots[(k+N/2)%N]){L.unshift(['slotHot.'+s.rotor+'.'+((k+N/2)%N)+'.hs',0,46]);break}}}return L.length?L:null}}
