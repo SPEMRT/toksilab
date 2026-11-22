@@ -97,6 +97,8 @@ function toast(t){var x=document.getElementById('tlt');if(x)x.remove();x=$('div'
 
 function ciz(){
  if(window.TLE_CUBUK_YOK)return;
+ /* cihaz sayfalarında çubuk gösterilmez (ders paneli yeterli); adım takibi arka planda sürer */
+ if(/_pilot\.html$/.test(BU)){kaldir();return}
  var s=oku(),m=s.aktif,M=MOD[m];
  if(!M){kaldir();return}
  var bura=sayfaAdimlari(m);if(!bura.length){kaldir();return}

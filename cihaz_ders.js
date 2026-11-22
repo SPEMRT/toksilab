@@ -1008,8 +1008,16 @@ function notIzle(){var y=document.getElementById('say');if(!y||!window.MutationO
 function dspKur(){var e=document.getElementById('dsp');if(!e||e.dataset.sur)return;e.dataset.sur=1;e.title='Sürükleyerek istediğin yere taşı';var K2='toksilab_dsp_'+SAYFA,dr=null;
  var koy=function(fx,fy){var par=e.offsetParent||e.parentElement;if(!par)return;var W=par.clientWidth,H=par.clientHeight,w=e.offsetWidth*.8,h=e.offsetHeight*.8;var x=Math.max(4,Math.min(W-w-4,fx*W)),y=Math.max(4,Math.min(H-h-4,fy*H));
   ['left','top'].forEach(function(k,i){e.style.setProperty(k,(i?y:x)+'px','important')});['right','bottom'].forEach(function(k){e.style.setProperty(k,'auto','important')});e.classList.add('tasindi')};
- try{var o=JSON.parse(localStorage.getItem(K2)||'null');if(o)setTimeout(function(){koy(o.x,o.y)},300)}catch(_){}
- addEventListener('resize',function(){try{var o=JSON.parse(localStorage.getItem(K2)||'null');if(o)koy(o.x,o.y)}catch(_){}});
+ /* taşınmış ekran kayıtlı yerine konur; Kontroller paneli açıksa ve ekran panelin altında kalıyorsa panelin yanına (dar ekranda üstüne) kayar, panel kapanınca yerine döner */
+ var yerlestir=function(){var o=null;try{o=JSON.parse(localStorage.getItem(K2)||'null')}catch(_){}if(!o)return;koy(o.x,o.y);
+  var sd=document.getElementById('side');if(!sd||!document.body.classList.contains('panel')||getComputedStyle(sd).display==='none')return;
+  var s=sd.getBoundingClientRect(),r=e.getBoundingClientRect(),par=(e.offsetParent||e.parentElement).getBoundingClientRect();
+  if(r.right<=s.left||r.left>=s.right||r.bottom<=s.top||r.top>=s.bottom)return;
+  var nx=s.left-8-r.width;if(nx>=par.left+4){e.style.setProperty('left',(nx-par.left)+'px','important');return}
+  var ny=s.top-8-r.height;if(ny>=par.top+4)e.style.setProperty('top',(ny-par.top)+'px','important')};
+ var yT=null,yGec=function(){clearTimeout(yT);yT=setTimeout(yerlestir,360)};
+ setTimeout(yerlestir,300);addEventListener('resize',yGec);
+ if(window.MutationObserver)new MutationObserver(yGec).observe(document.body,{attributes:true,attributeFilter:['class']});
  e.addEventListener('pointerdown',function(ev){var r=e.getBoundingClientRect(),par=(e.offsetParent||e.parentElement).getBoundingClientRect();dr={dx:ev.clientX-r.left,dy:ev.clientY-r.top,par:par};e.classList.add('sur');try{e.setPointerCapture(ev.pointerId)}catch(_){}ev.preventDefault();ev.stopPropagation()});
  e.addEventListener('pointermove',function(ev){if(!dr)return;var P2=dr.par;koy((ev.clientX-dr.dx-P2.left)/P2.width,(ev.clientY-dr.dy-P2.top)/P2.height)});
  var bit=function(){if(!dr)return;dr=null;e.classList.remove('sur');var par=e.offsetParent||e.parentElement;try{localStorage.setItem(K2,JSON.stringify({x:parseFloat(e.style.left)/par.clientWidth,y:parseFloat(e.style.top)/par.clientHeight}))}catch(_){}};
