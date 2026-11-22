@@ -10,6 +10,9 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
 - `cihaz_ders.js`: 8 cihazın rehberli dersleri (terazi, pipet, vorteks, santrifüj, ultra, su, gaz tüp odası, SPE).
   Her adımda `halka` öğrenciye sarı halkayla nereye tıklayacağını gösterir.
 - `anamenu.js`, `egitim_cubugu.js`: sayfalar arası ortak menü ve eğitim çubuğu
+- `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
+  `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
+  o cihaz için yeniden çalıştır ve lab turunu kontrol et.
 
 ## Değişiklikten sonra test (zorunlu)
 Testler `tests/` klasöründe; ayrıntı `tests/README.md`. İlk kullanımda bir kez: `cd tests && npm install`.
