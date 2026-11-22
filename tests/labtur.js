@@ -63,7 +63,7 @@ const CIHAZLAR = [[2, 'bal'], [2, 'cen'], [2, 'vor'], [2, 'pip'], [2, 'spe'], [2
       await p.waitForURL(/lab_giris\.html/, { timeout: 30000 }).catch(() => {});
       await p.waitForFunction(() => document.getElementById('say') && /Gaz tüp odasından çıktın/.test(document.getElementById('say').innerText), null, { timeout: 90000 }).catch(() => {});
       const geri = await p.evaluate(() => ({ url: location.href, b: document.getElementById('say').innerText, pill: (document.querySelector('.hdr2 .pill') || {}).textContent || '' }));
-      sonuc(/mod=tani/.test(geri.url) && /Gaz tüp odasından çıktın/.test(geri.b) && /TANI/.test(geri.pill), `Oda ${no}: tura, koridorun sonuna geri dönüldü`);
+      sonuc(/mod=tani/.test(geri.url) && /Gaz tüp odasından çıktın/.test(geri.b) && /TANI/.test(geri.pill), `Oda ${no}: tura, koridorun sonuna geri dönüldü` + ` (adres: ${geri.url.replace(/^.*\//, '')} · etiket: ${geri.pill} · balon: ${geri.b.slice(0, 70)})`);
     } else if (acik) { // açık odadan sonra koridora dönülür
       await planTikla(p, no);
       let girdi = false;
