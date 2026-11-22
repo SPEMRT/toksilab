@@ -15,7 +15,11 @@ const { KOK, sunucuAc, tarayiciAc, yonlendir } = require('../tests/ortak');
 // icerden: sahnede tek büyük grup varsa (SPE) o grubun içindeki parçalar ayrı ayrı seçilir.
 // Birimler sayfadan sayfaya değişir; lab turu modeli odadaki eski modelin genişliğine oturtur.
 const CIHAZ = {
-  terazi: { sayfa: 'terazi_pilot.html', bolge: [-15, 15, -0.5, 40, -26, 31] },
+  // terazi: lab turundaki model laboratuvardaki cihazın fotoğrafına göre: köşe profilleri beyaz (turkuaz değil),
+  // hazne daha yüksek. Eğitim sayfası değişmez; yalnız model çıkarılırken uygulanır.
+  terazi: { sayfa: 'terazi_pilot.html', bolge: [-15, 15, -0.5, 40, -26, 31], duzelt: [
+    ["teal:new THREE.MeshPhysicalMaterial({color:'#1F9A97'", "teal:new THREE.MeshPhysicalMaterial({color:'#E6E9EA'"],
+  ], uzat: { taban: 3, oran: 1.35, ustu: 10 } }, // hazne dikine büyütülür: üstü 10'u geçen parçalar taban (y=3) çizgisinden uzar
   santrifuj: { sayfa: 'santrifuj_pilot.html', bolge: [-14, 14, -0.5, 40, -16, 18] },
   vorteks: { sayfa: 'vorteks_pilot.html', bolge: [-8, 8, -0.5, 30, -8, 10] },
   pipet: { sayfa: 'pipet_pilot.html', bolge: [-23, -9, -0.5, 32, -10, 4] },
@@ -57,7 +61,7 @@ const CIHAZ = {
     // eski three.js (r128, SPE): dışa aktarıcı ayrı betik olarak yüklenir
     if (c.eski) await p.addScriptTag({ url: 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js' });
     await p.waitForTimeout(3000);
-    const sonuc = await p.evaluate(async ({ bolge, icerden, eski }) => {
+    const sonuc = await p.evaluate(async ({ bolge, icerden, eski, uzat }) => {
       const THREE = eski ? window.THREE : await import('three');
       const GLTFExporter = eski ? THREE.GLTFExporter : (await import('three/addons/exporters/GLTFExporter.js')).GLTFExporter;
       const sc = window.__R3 ? window.__R3.scene : window.__SC, grup = new THREE.Group(), kutu = new THREE.Box3();
@@ -75,6 +79,10 @@ const CIHAZ = {
         if (b.min.x < x0 || b.max.x > x1 || b.min.y < y0 || b.max.y > y1 || b.min.z < z0 || b.max.z > z1) return;
         const k = o.clone(true); k.applyMatrix4(o.parent.matrixWorld); k.traverse(m => { const mt = [].concat(m.material || []); if (m.isSprite || (mt.length && mt.every(x => x.visible === false || (x.transparent && x.opacity === 0)))) m.visible = false; }); /* görünmez tıklama alanları alınmaz */ grup.add(k); kutu.union(b); n++;
       });
+      // dikine uzatma (ör. terazi haznesi): üst ucu belli yüksekliği geçen parçalar taban çizgisinden uzatılır
+      if (uzat) grup.children.forEach(o => { const b = new THREE.Box3().setFromObject(o); if (b.max.y <= uzat.ustu) return;
+        o.position.y = uzat.taban + (o.position.y - uzat.taban) * uzat.oran; o.scale.y *= uzat.oran; });
+      if (uzat) { kutu.makeEmpty(); grup.children.forEach(o => kutu.expandByObject(o)); }
       // tabanın ortası (0,0,0), birim cm → m
       const m = kutu.getCenter(new THREE.Vector3());
       grup.children.forEach(o => o.position.sub(new THREE.Vector3(m.x, kutu.min.y, m.z)));
@@ -84,7 +92,7 @@ const CIHAZ = {
       let s = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
       const boy = kutu.getSize(new THREE.Vector3());
       return { n, b64: btoa(s), boy: [boy.x, boy.y, boy.z].map(v => +(v / 100).toFixed(3)) };
-    }, { bolge: c.bolge, icerden: !!c.icerden, eski: !!c.eski });
+    }, { bolge: c.bolge, icerden: !!c.icerden, eski: !!c.eski, uzat: c.uzat || null });
     const dosya = path.join(cikti, ad + '.glb'), ham = dosya + '.ham';
     fs.writeFileSync(ham, Buffer.from(sonuc.b64, 'base64'));
     // dosya boyutunu küçült (meshopt): şekil verisi kısaltılır, dokulara (etiket, ekran) dokunulmaz.
