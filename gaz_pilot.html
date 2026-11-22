@@ -332,7 +332,9 @@ function build(){const renderer=new THREE.WebGLRenderer({antialias:true});render
   {const hw=D?36:20,c0=D?0:12;const pts=[];for(let t=0;t<=1;t+=1/(D?90:60)){const a=Math.PI*(1-t);pts.push(new THREE.Vector3(c0+Math.cos(a)*hw,96,Math.max(1,15+Math.sin(a)*14.5)))}
    const im=new THREE.InstancedMesh(new THREE.TorusGeometry(.75,.22,6,12),M.steel,pts.length);const mm=new THREE.Matrix4(),q=new THREE.Quaternion();
    pts.forEach((p,j)=>{const nx=pts[Math.min(pts.length-1,j+1)].clone().sub(pts[Math.max(0,j-1)]).normalize();q.setFromUnitVectors(new THREE.Vector3(1,0,0),nx);if(j%2)q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),Math.PI/2));mm.compose(new THREE.Vector3(xc+p.x,p.y,p.z),q,new THREE.Vector3(1,1,1));im.setMatrixAt(j,mm)});
-   im.castShadow=true;scene.add(im);hot(im,'chain:'+i);[-1,1].forEach(s=>add(new THREE.BoxGeometry(4,6,3),M.black,xc+c0+s*hw,96,1.5))}
+   im.castShadow=true;scene.add(im);hot(im,'chain:'+i);
+   /* ince zincire kolay tıklansın: aynı eğri boyunca görünmeyen kalın tıklama alanı */
+   {const tb=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(xc+p.x,p.y,p.z))),48,3.2,8,false),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));scene.add(tb);hot(tb,'chain:'+i)}[-1,1].forEach(s=>add(new THREE.BoxGeometry(4,6,3),M.black,xc+c0+s*hw,96,1.5))}
  });
  {const sp=new THREE.Group();scene.add(sp);sp.visible=false;const wm=new THREE.MeshPhysicalMaterial({color:'#F4F6F6',roughness:.35,clearcoat:.6}),rm=new THREE.MeshStandardMaterial({color:'#2F7DE1',roughness:.4});
   add(new THREE.CylinderGeometry(2.4,2.6,11,24),wm,0,-6.5,0,sp);add(new THREE.CylinderGeometry(1.2,2.2,2.2,20),wm,0,0,0,sp);add(RB(2.4,3.2,5.2,.5),rm,0,2.2,1.2,sp);add(new THREE.BoxGeometry(1,3.6,1.4),rm,0,-.6,2.8,sp);add(new THREE.CylinderGeometry(.35,.35,1.2,10),M.black,0,2.6,4.2,sp).rotation.x=Math.PI/2;
@@ -392,7 +394,7 @@ function hints(){if(!R3)return;const h=hint()||'';if(h===lastHint)return;lastHin
   lp:()=>warnBox(null,V3(xc+rx-7.5,177,5),V3(9,9,4)),reg:()=>warnBox(null,V3(xc+rx,164,8),V3(9.5,9.5,10)),out:()=>warnBox(null,V3(xc+(D?0:rx-14)+3,199,4),V3(11,7,7)),
   slot:()=>warnBox(null,V3(cylX(i,b),70,15),V3(26,142,26)),spare:()=>warnBox(null,V3(-279,72,15),V3(154,148,28)),order:()=>warnBox(null,V3(-279,172,0),V3(62,20,3))}[a];
  if(W)curWarn=[W()]}
-function hint(){if(S.mode!=='use'||S.res)return null;const e=S.ev;
+function hint(){if(document.body.classList.contains('cders'))return null;/* rehberli derste sarı halka yeterli */ if(S.mode!=='use'||S.res)return null;const e=S.ev;
  if(S.task==='read'){for(let i=0;i<5;i++)if(!S.read[i])return S.sel===i?null:'panel:'+i;return null}
  if(S.task==='set'){const st=S.st[3];if(S.sel!==3)return 'panel:3';if(!e.hpSeen)return 'hp:3';if(Math.abs(st.reg-5.5)>.05)return 'reg:3';if(!st.out)return 'out:3';return null}
  if(S.task==='swap'){const st=S.st[2],A=st.cyl.A;if(!e.hpSeen)return S.sel!==2?'panel:2':'hp:2';
@@ -631,10 +633,13 @@ const SCR_C={};window.scrOf=n=>{const id=n.indexOf('hot:')===0?n.slice(4):n;cons
 /* Laboratuvarı Tanı turu (?mod=tani): yalnız bilgi. Parçalara dokununca kısa bilgi kartı açılır; kullanım ve görevler Eğitimler'dedir */
 if(/[?&]mod=tani\b/.test(location.search)){
  const pl=document.querySelector('.hdr .pill');if(pl)pl.textContent='LABORATUVARI TANI · GAZ TÜP ODASI';
- ['mTasks','mUse','mPanel','mReset','tband'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.display='none'});
+ ['mHome','mParts','mTasks','mUse','mPanel','mReset','tband','stepc'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.display='none'});
+ const mn=document.querySelector('.mentor');if(mn)mn.style.display='none';
+ /* turdaki diğer odalardaki gibi: koridora dönüş */
+ const gd=document.createElement('button');gd.id='taniGeri';gd.textContent='‹ Koridora dön';gd.onclick=goLab;
  const tn=document.createElement('div');tn.id='taniK';tn.innerHTML=`<button id="taniX" title="Kapat">✕</button><b>🏛️ Laboratuvarı tanı · Gaz tüp odası</b><span>Laboratuvardaki cihazların kullandığı <b>azot, argon ve helyum</b> burada, tüplerde durur; regülatörlerden geçip tavandaki borularla odalara gider. <b>Parçalara dokun</b> ya da fareyle üzerine gel: kısa bilgi kartı açılır. Sürükleyerek odayı döndürebilirsin.</span><small>Panelleri kullanmayı (basınç ayarı, tüp değişimi) öğrenmek için ana menüde <b>Eğitimler → Temel beceriler → Gaz tüp odası</b>.</small>`;
- const cs=document.createElement('style');cs.textContent='#taniK{position:absolute;z-index:6;right:12px;top:12px;width:min(520px,calc(100% - 520px));min-width:300px;background:rgba(22,48,44,.95);color:#CFEDE7;border:1px solid #2B6B63;border-radius:12px;padding:10px 36px 10px 14px;display:grid;gap:4px;font:13.5px/1.45 "Source Sans 3",system-ui,sans-serif;box-shadow:0 10px 26px rgba(0,0,0,.35)}#taniK b{color:#EAF2F3}#taniK small{color:#7CF2D8;font-size:12.5px}#taniX{position:absolute;top:6px;right:6px;width:26px;height:26px;border:0;border-radius:7px;background:#1F3B37;color:#CFEDE7;cursor:pointer}@media (max-width:760px){#taniK{left:8px;right:8px;transform:none;width:auto;top:auto;bottom:8px}}';
- document.head.appendChild(cs);$('#stg').appendChild(tn);$('#taniX').onclick=()=>tn.remove();
+ const cs=document.createElement('style');cs.textContent='#taniK{position:absolute;z-index:6;right:12px;top:12px;width:min(520px,calc(100% - 520px));min-width:300px;background:rgba(22,48,44,.95);color:#CFEDE7;border:1px solid #2B6B63;border-radius:12px;padding:10px 36px 10px 14px;display:grid;gap:4px;font:13.5px/1.45 "Source Sans 3",system-ui,sans-serif;box-shadow:0 10px 26px rgba(0,0,0,.35)}#taniK b{color:#EAF2F3}#taniK small{color:#7CF2D8;font-size:12.5px}#taniGeri{position:absolute;z-index:6;left:12px;bottom:12px;border:0;border-radius:12px;padding:12px 18px;background:#2F7DE1;color:#fff;font:700 15px "Source Sans 3",system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.35)}#taniGeri:hover{background:#3B8BF0}#taniX{position:absolute;top:6px;right:6px;width:26px;height:26px;border:0;border-radius:7px;background:#1F3B37;color:#CFEDE7;cursor:pointer}@media (max-width:760px){#taniK{left:8px;right:8px;transform:none;width:auto;top:auto;bottom:8px}}';
+ document.head.appendChild(cs);$('#stg').appendChild(tn);$('#stg').appendChild(gd);$('#taniX').onclick=()=>tn.remove();
  reset('parts');S.mode='parts';render()}
 window.__tick=(sec)=>{const n=Math.ceil(sec/.1);for(let i=0;i<n;i++){lastF=performance.now()-100;step(performance.now())}};
 window.__cam=(p,t)=>{camAnim=null;R3.cam.position.set(...p);R3.ctl.target.set(...t);R3.ctl.update()};
