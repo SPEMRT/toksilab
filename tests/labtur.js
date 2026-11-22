@@ -9,7 +9,7 @@ const { sunucuAc, tarayiciAc, yonlendir } = require('./ortak');
 
 const ODALAR = [
   [1, 'Kromatografi Laboratuvarı', true], [2, 'Örnek Hazırlama Laboratuvarı', true],
-  [3, 'İnorganik Analiz Laboratuvarı'], [4, 'Kimyasal Depo'], [5, 'Gaz Tüp Odası'],
+  [3, 'İnorganik Analiz Laboratuvarı'], [4, 'Kimyasal Depo'], [5, 'Gaz Tüp Odası', 'gaz'],
   [6, 'Yangın ve Patlayıcı Analiz Laboratuvarı'],
 ];
 // Oda 2'deki cihazlar ve oda 1'deki HS-GC-MS (lab_giris.html'deki DEVS sırası)
@@ -50,7 +50,21 @@ const CIHAZLAR = [[2, 'bal'], [2, 'cen'], [2, 'vor'], [2, 'pip'], [2, 'spe'], [2
 
   // 2) Kat planından her odaya git.
   for (const [no, ad, acik] of ODALAR) {
-    if (acik) { // açık odadan sonra koridora dönülür
+    if (acik === 'gaz') { // gaz tüp odası ayrı sayfadır; turdan girilir ve tura geri dönülür
+      await planTikla(p, no);
+      await p.waitForURL(/gaz_pilot\.html/, { timeout: 30000 }).catch(() => {});
+      const url = p.url();
+      sonuc(/gaz_pilot\.html/.test(url) && /mod=tani/.test(url), `Oda ${no} (${ad}): turdan içeri girildi`);
+      await p.waitForSelector('#hLab, #mHome', { timeout: 90000 }).catch(() => {});
+      await p.waitForTimeout(2000);
+      await p.screenshot({ path: path.join(__dirname, 'ekran', `labtur_oda${no}.png`) });
+      hataKontrol(p, `Oda ${no} içi`);
+      await p.evaluate(() => (document.getElementById('hLab') || document.getElementById('mHome')).click());
+      await p.waitForURL(/lab_giris\.html/, { timeout: 30000 }).catch(() => {});
+      await p.waitForFunction(() => document.getElementById('say') && /Gaz tüp odasından çıktın/.test(document.getElementById('say').innerText), null, { timeout: 90000 }).catch(() => {});
+      const geri = await p.evaluate(() => ({ url: location.href, b: document.getElementById('say').innerText, pill: (document.querySelector('.hdr2 .pill') || {}).textContent || '' }));
+      sonuc(/mod=tani/.test(geri.url) && /Gaz tüp odasından çıktın/.test(geri.b) && /TANI/.test(geri.pill), `Oda ${no}: tura, koridorun sonuna geri dönüldü`);
+    } else if (acik) { // açık odadan sonra koridora dönülür
       await planTikla(p, no);
       let girdi = false;
       for (let i = 0; i < 25 && !girdi; i++) {
