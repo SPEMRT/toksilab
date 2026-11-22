@@ -20,7 +20,16 @@ const CIHAZ = {
   vorteks: { sayfa: 'vorteks_pilot.html', bolge: [-8, 8, -0.5, 30, -8, 10] },
   pipet: { sayfa: 'pipet_pilot.html', bolge: [-23, -9, -0.5, 32, -10, 4] },
   ultra: { sayfa: 'ultra_pilot.html', bolge: [-19, 19, -1.5, 25, -10, 10] },
-  su: { sayfa: 'su_pilot.html', bolge: [-13, 13, -0.5, 46, -24, 19] },
+  // su: lab turundaki model, laboratuvardaki cihazın fotoğraflarına göre (gümüş-gri sütunlar, derin gövde,
+  // kalın yeşil kol). Eğitim sayfası (su_pilot.html) değişmez; değişiklik yalnız model çıkarılırken uygulanır.
+  su: { sayfa: 'su_pilot.html', bolge: [-13, 13, -0.5, 75, -24, 19], duzelt: [
+    [" add(RB(24,3,32,1.2),M.dgrey,0,1.5,0,E);\n add(RB(22,36,23,3),M.grey,0,20,-4.5,E);",
+     " M.eGovde=new THREE.MeshPhysicalMaterial({color:'#9DA2A5',metalness:.25,roughness:.42,clearcoat:.35});M.eSutun=new THREE.MeshPhysicalMaterial({color:'#B8BDC0',metalness:.3,roughness:.32,clearcoat:.6});M.eTaban=new THREE.MeshStandardMaterial({color:'#83888B',metalness:.25,roughness:.5});\n add(RB(24,3,38,1.2),M.eTaban,0,1.5,-3,E);\n add(RB(22,36,30,4),M.eGovde,0,20,-8,E);"],
+    ["add(RB(8.6,36,9,2),M.grey,0,20,10,E);", "add(RB(8.6,36,9,2),M.eGovde,0,20,10,E);"],
+    ["hot(add(RB(7,37,9,2.5),M.lgrey,-s*3.5,20.5,4.5,g),'door:'+sd);", "hot(add(RB(7,37,9,2.5),M.eSutun,-s*3.5,20.5,4.5,g),'door:'+sd);"],
+    [" add(RB(22,1.6,30,.8),M.black,0,38.8,-1.5,E);", " add(RB(22,1.6,34,.8),M.black,0,38.8,-3.5,E);"],
+    ["K.armMesh.geometry=new THREE.TubeGeometry(c,80,1.05,14,false)", "K.armMesh.geometry=new THREE.TubeGeometry(c,80,1.5,16,false)"],
+  ] },
   spe: { sayfa: 'spe_pilot.html', bolge: [-2.6, 2.6, -0.1, 5.6, -2.2, 2.2], icerden: true, eski: true },
 };
 
@@ -38,7 +47,9 @@ const CIHAZ = {
     await yonlendir(p);
     // sahneye dışarıdan ulaşmak için: R3 nesnesi window.__R3 olarak da tutulur (yalnız bu araçta)
     await p.route(new RegExp(c.sayfa.replace('.', '\\.') + '(\\?.*)?$'), async r => {
-      const res = await r.fetch(); const t = (await res.text()).replace('R3={renderer,scene', 'R3=window.__R3={renderer,scene').replace('const scene = new THREE.Scene();', 'const scene = window.__SC = new THREE.Scene();');
+      const res = await r.fetch(); let t0 = await res.text();
+      for (const [a, b] of (c.duzelt || [])) { if (!t0.includes(a)) throw new Error(c.sayfa + ': görünüm düzeltmesi uymadı (sayfa değişmiş olabilir): ' + a.slice(0, 50)); t0 = t0.replace(a, b); }
+      const t = t0.replace('R3={renderer,scene', 'R3=window.__R3={renderer,scene').replace('const scene = new THREE.Scene();', 'const scene = window.__SC = new THREE.Scene();');
       r.fulfill({ response: res, body: t, headers: { ...res.headers(), 'content-type': 'text/html; charset=utf-8' } });
     });
     await p.goto(`http://localhost:${port}/${c.sayfa}?serbest=1`, { waitUntil: 'domcontentloaded', timeout: 90000 });
