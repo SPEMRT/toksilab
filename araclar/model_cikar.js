@@ -22,7 +22,7 @@ const CIHAZ = {
   ], uzat: { taban: 3, oran: 1.35, ustu: 10 } }, // hazne dikine büyütülür: üstü 10'u geçen parçalar taban (y=3) çizgisinden uzar
   // santrifüj: gövde rengi laboratuvardaki cihazın fotoğrafındaki mint yeşili (eğitim sayfası değişmez)
   santrifuj: { sayfa: 'santrifuj_pilot.html', bolge: [-14, 14, -0.5, 40, -16, 18], duzelt: [
-    ["teal:new THREE.MeshPhysicalMaterial({color:'#2C9EA3'", "teal:new THREE.MeshPhysicalMaterial({color:'#8CC8C0'"],
+    ["teal:new THREE.MeshPhysicalMaterial({color:'#2C9EA3'", "teal:new THREE.MeshPhysicalMaterial({color:'#5FA9A2'"],
   ] },
   vorteks: { sayfa: 'vorteks_pilot.html', bolge: [-8, 8, -0.5, 30, -8, 10] },
   pipet: { sayfa: 'pipet_pilot.html', bolge: [-23, -9, -0.5, 32, -10, 4] },
