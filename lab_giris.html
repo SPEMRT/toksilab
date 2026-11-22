@@ -204,6 +204,7 @@ body.fps #gmode{background:rgba(14,21,24,.8);color:#EAF2F3}body.fps .moves,body.
 import * as THREE from 'three';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';const $=s=>document.querySelector(s);$('#av').src=AVATAR;
 const say=t=>{$('#say').innerHTML=t;const m=$('.mentor');m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop')};
 const BASE=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';
@@ -709,8 +710,16 @@ const R2={x0:2,x1:10,z0:-14,z1:-8,dz:-11};const OBST=[];const R2INFO={};
  }
  DEVS.forEach(d=>{const b=new THREE.Box3().setFromObject(d.g);const s=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
   const hm=A(new THREE.BoxGeometry(s.x+.12,s.y+.1,s.z+.12),new THREE.MeshBasicMaterial({visible:false}),c.x,c.y,c.z,false);hot(hm,'dev:'+d.k);
-  const rr=d.rr||Math.max(s.x,s.z)*.62;const ring=A(new THREE.RingGeometry(rr,rr+.025,40),new THREE.MeshBasicMaterial({color:'#2BD9C0',transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide}),c.x,b.min.y+.003,c.z,false);ring.rotation.x=-Math.PI/2;d.ring=ring});
- RM.userData.ok=true;}
+  const rr=d.rr||Math.max(s.x,s.z)*.62;const ring=A(new THREE.RingGeometry(rr,rr+.025,40),new THREE.MeshBasicMaterial({color:'#2BD9C0',transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide}),c.x,b.min.y+.003,c.z,false);ring.rotation.x=-Math.PI/2;d.ring=ring;d.hm=hm});
+ RM.userData.ok=true;modelYukle();}
+/* eğitim sayfalarındaki ayrıntılı cihaz modelleri (araclar/model_cikar.js ile .glb olarak çıkarılır).
+   Yüklenince tezgâhtaki basit modelin yerine geçer; yüklenemezse basit model kalır. */
+function modelYukle(){const MODEL={bal:'modeller/terazi.glb'};const L=new GLTFLoader();DEVS.forEach(d=>{const u=MODEL[d.k];if(!u)return;
+ L.load(u,gl=>{const m=gl.scene;m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+  while(d.g.children.length)d.g.remove(d.g.children[0]);d.g.add(m);d.g.updateWorldMatrix(true,true);
+  const b=new THREE.Box3().setFromObject(d.g),s=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
+  if(d.hm){d.hm.geometry.dispose();d.hm.geometry=new THREE.BoxGeometry(s.x+.12,s.y+.1,s.z+.12);d.hm.position.copy(c)}
+  if(d.ring&&!d.rr){const rr=Math.max(s.x,s.z)*.62;d.ring.geometry.dispose();d.ring.geometry=new THREE.RingGeometry(rr,rr+.025,40);d.ring.position.set(c.x,b.min.y+.003,c.z)}},undefined,e=>console.warn('Model yüklenemedi: '+u,e))})}
 
 /* sol duvar: poster sunumları + yangın tüpü */
 const POSTERS=[
