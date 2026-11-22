@@ -1349,14 +1349,15 @@ let camAnim = null;
 function view(pos, tgt) { camAnim = { t: 0, p0: camera.position.clone(), t0: controls.target.clone(), p1: V3(...pos), t1: V3(...tgt) }; }
 $('#vIso').onclick = () => view(...VIEW_ISO);
 /* derslerde adıma göre kendiliğinden odak: kullanıcı kamerayı istediği gibi çevirebilir, yeni adımda yeniden odaklanır */
+/* hedef noktası odaklanan nesnenin kendisindedir (arkasında değil); nesne ekranın ortasına gelir */
 const ODAK = {
   genel: VIEW_ISO,
-  sol: [[-2.1, BASE + 4.7, 9.2], [-2.2, BASE + 0.1, 0.9]],
-  raf: [[0.3, BASE + 4.0, RZ + 1.05 + 6.2], [0, BASE + 0.8, RZ + 0.6]],
+  sol: [[-2.6, 5.0, 7.6], [-2.6, 1.5, 0.9]],
+  raf: [[0.3, BASE + 3.6, RZ + 1.05 + 5.6], [0, BASE + 0.95, RZ + 1.05]],
   sag: [[2.7, BASE + 4.4, 9.5], [2.5, BASE - 0.4, 2.1]],
-  on: [[0, BASE + 2.2, 9.4], [0, BASE + 0.1, 0.6]],
-  uc: [[3.9, 3.3, 6.9], [4.3, 0.3, 2.6]],
-  numune: [[3.5, 3.6, 5.6], [4.0, 0.7, 1.4]],
+  on: [[0, BASE + 1.8, 9.0], [0, BASE - 0.2, 1.0]],
+  uc: [[4.1, 3.0, 6.4], [4.35, 0.35, 2.75]],
+  numune: [[3.8, 3.3, 5.6], [4.1, 0.85, 1.45]],
 };
 /* tıklanan parçanın bilgi balonu açıksa önce okunur: kamera 1,4 s sonra döner, balon o an kapanır */
 let odakBekle = null;
@@ -1364,7 +1365,7 @@ function speOdak(k) {
   const v = ODAK[k]; if (!v) return;
   clearTimeout(odakBekle);
   const git = () => { view(...v); if (toastEl.classList.contains('yer')) toastEl.hidden = true; };
-  if (!toastEl.hidden && toastEl.classList.contains('yer')) odakBekle = setTimeout(git, 1400); else git();
+  if (!toastEl.hidden && toastEl.classList.contains('yer')) odakBekle = setTimeout(git, 900); else git();
 }
 $('#vFront').onclick = () => view([0, 2.4, 7.5], [0, 1.4, 0]);
 $('#vRack').onclick = () => view([1.6, BASE + 2.6, 3.6], [0, BASE + 1.0, RZ]);
