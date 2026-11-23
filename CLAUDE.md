@@ -59,6 +59,9 @@ Testler `tests/` klasöründe; ayrıntı `tests/README.md`. İlk kullanımda bir
 - Kalibrasyon dersi bölüm listesiyle açılır (cihaz derslerindeki gibi): 8 bölüm, biten ✓, "Kaldığın yerden
   devam et", panelde "☰ Bölümler", üstteki bölüm çubuğu tıklanabilir. Ortadan bir bölüme atlanınca önceki
   bölümlerin plan satırları dolu gelir (`atla`). İlerleme tarayıcıda: localStorage `toksilab_kalibrasyon_v1`.
+- Soru adımlarında kullanılacak formül sarı halkayla işaretlenir ("● BU FORMÜL"; telefonda formüle kaydırılır):
+  formül kutularında `data-f` (c = C₁V₁, m = kütle, saf = saflık, v = hacim); adımda `g.f`, yoksa `g.formul` → c.
+  Yoğunluk kutusunda üç formül ayrı kartlarda, oklarla, birimler parantez içinde.
 
 **Sıradaki (öncelik kullanıcıda; önce sor):**
 1. Kalibrasyon dersine eklemeler (kullanıcı anlatacak).
