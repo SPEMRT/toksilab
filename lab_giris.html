@@ -179,6 +179,10 @@ body.fps #gmode{background:rgba(14,21,24,.8);color:#EAF2F3}body.fps .moves,body.
 #kvz .alt{display:flex;gap:8px;align-items:center}#kvz .nk{display:flex;gap:6px;margin-right:auto}#kvz .nk i{width:8px;height:8px;border-radius:50%;background:#33444C}#kvz .nk i.on{background:#2BD9C0}
 #kvz .alt button{border:0;border-radius:10px;padding:10px 16px;font:700 14.5px var(--f-body,sans-serif);cursor:pointer;background:#33444C;color:#EAF2F3}#kvz .alt button.p{background:#2F7DE1}#kvz .alt button:disabled{opacity:.35;cursor:default}
 @media (prefers-reduced-motion:reduce){#kvz *{animation:none!important}}
+#pv{position:fixed;inset:0;z-index:2147483300;background:rgba(6,12,14,.94);display:grid;grid-template-rows:auto 1fr}#pv[hidden]{display:none}
+#pv .pvU{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;flex-wrap:wrap}#pv .pvU>div:first-child{display:grid;min-width:0}#pv .pvU b{font:700 12px "IBM Plex Mono",monospace;letter-spacing:.08em}#pv .pvU span{color:#EAF2F3;font:600 15px var(--f-body,sans-serif);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pv .pvB{display:flex;gap:6px}#pv .pvB button,#pv .pvB a{border:0;border-radius:9px;background:#25333A;color:#fff;min-width:36px;height:36px;display:grid;place-items:center;font:700 17px sans-serif;text-decoration:none;cursor:pointer}#pv .pvB .pvX{background:#8E2A2E}
+#pv .pvA{overflow:auto;display:grid;place-items:center;padding:0 8px 8px}#pv .pvA img{display:block;background:#fff;cursor:zoom-in;max-width:none}#pv .pvA img.sig{max-width:100%;max-height:calc(100vh - 70px);width:auto}#pv .pvA.yak{place-items:start}#pv .pvA.yak img{cursor:grab}
 </style>
 <nav class="snav2" aria-label="Menü"><button id="mHome"><span>⌂</span>Ana Sayfa</button><button id="mIntro"><span>↺</span>Baştan</button><button id="mVid"><span>🎬</span>Karşılama</button><button id="mHelp" title="Laboratuvarda nasıl gezilir: kısa tanıtım"><span>❔</span>Nasıl gezilir</button><button id="mPerf" title="Zayıf ekran kartlarında akıcılık için: gölgeler kapanır, çözünürlük ve kare hızı düşer"><span>⚡</span>Performans</button></nav>
 <div id="wv" hidden><div class="wvb"><div class="wvt" id="wvT"></div><video id="wvV" playsinline preload="none" crossorigin="anonymous"></video><div class="wvc"><button id="wvS" aria-label="Sesi aç/kapat">🔊</button><label class="wvo"><input type="checkbox" id="wvO"> Tanıtım videolarını otomatik oynatma</label><span style="flex:1"></span><button id="wvX">Geç ›</button></div></div></div>
@@ -729,13 +733,15 @@ const MODEL={bal:['terazi'],cen:['santrifuj'],vor:['vorteks'],pip:['pipet','y'],
   if(d.ring&&!d.rr){const rr=Math.max(s.x,s.z)*.62;d.ring.geometry.dispose();d.ring.geometry=new THREE.RingGeometry(rr,rr+.025,40);d.ring.position.set(c.x,b.min.y+.003,c.z)}},undefined,e=>console.warn('Model yüklenemedi: '+u,e))})}
 
 /* sol duvar: poster sunumları + yangın tüpü */
+/* koridordaki posterler: laboratuvarımızın kongre poster sunumları (gorseller/posterler; _k = duvar dokusu) */
 const POSTERS=[
- {t:'Kanda etanol tayini için HS-GC-FID yönteminin validasyonu',k:'P-03',c:'#1F9A97',g:'calib',a:'Doğrusallık 0,05–4 g/L (r² > 0,999); LOQ 0,02 g/L; tekrarlanabilirlik %RSD < 3.'},
- {t:'Postmortem kanda sentetik katinonların LC-MS/MS ile taranması',k:'P-07',c:'#2F7DE1',g:'chrom',a:'27 katinon 9 dakikada ayrıldı; en sık α-PVP ve 3-MMC saptandı.'},
- {t:'İdrarda opioid analizi için katı faz ekstraksiyonunun optimizasyonu',k:'P-11',c:'#6A4FB3',g:'bars',a:'Karışık mod SPE ile geri kazanım %85–102; matriks etkisi < %15.'},
- {t:'Saçta uyuşturucu madde analizi: segmental yaklaşımla kullanım geçmişi',k:'P-14',c:'#C2312B',g:'seg',a:'3 cm segmentlerde kokain ve metaboliti; kullanım örüntüsü aylık izlendi.'},
- {t:'ICP-MS ile kanda kurşun, arsenik ve kadmiyum tayini',k:'P-18',c:'#E0862A',g:'bars2',a:'Mikrodalga yakma sonrası LOQ: Pb 0,5 µg/L, As 0,2 µg/L, Cd 0,05 µg/L.'},
- {t:'Postmortem redistribüsyon: femoral ve kalp kanı oranlarının karşılaştırılması',k:'P-22',c:'#2E7D32',g:'scatter',a:'C/P oranı > 2 olan ilaçlarda yorumlama dikkat gerektirir.'}];
+ {f:'ketamin',k:'1',c:'#1F6F8B',t:'Nationwide Monitoring of Ketamine Consumption Trends in Turkey',tr:'Türkiye genelinde atık suda ketamin kullanım eğilimleri'},
+ {f:'fentanil',k:'2',c:'#2F7DE1',t:'Assessing the Fentanyl Consumption in Turkey via Wastewater-Based Epidemiology',tr:'Atık su temelli epidemiyolojiyle Türkiye’de fentanil kullanımı'},
+ {f:'vitreus',k:'3',c:'#6A4FB3',t:'Artificial Vitreous Humor as a Substitute Matrix in Postmortem Toxicological Analysis',tr:'Postmortem toksikolojide yapay vitröz sıvı'},
+ {f:'agirmetal',k:'4',c:'#E0862A',t:'Occurrence and Fate of Heavy Metals in Municipal Wastewater in Turkey',tr:'Kentsel atık suda ağır metaller: örnek hazırlama yöntemi'},
+ {f:'farmakozmetik',k:'5',c:'#C2312B',t:'Lifetime Cancer Risk and Margin of Safety for Eye Shadows',tr:'Göz farlarında ömür boyu kanser riski ve güvenlik marjı'},
+ {f:'morfin',k:'6',c:'#2E7D32',t:'Tracing Morphine Sources in Wastewater: A Preliminary Study',tr:'Atık suda morfinin kaynağını izlemek'}];
+POSTERS.forEach(p=>{p.url='gorseller/posterler/'+p.f+'.jpg';p.duvar='gorseller/posterler/'+p.f+'_k.jpg'});
 function posterCanvas(p){const c=document.createElement('canvas');c.width=900;c.height=1280;const x=c.getContext('2d');const W=900,H=1280;
  x.fillStyle='#FFFFFF';x.fillRect(0,0,W,H);x.fillStyle=p.c;x.fillRect(0,0,W,250);x.fillStyle='rgba(255,255,255,.18)';x.fillRect(0,250,W,8);
  x.fillStyle='#fff';x.font='600 24px "IBM Plex Mono",monospace';x.fillText('XIV. Ulusal Adli Toksikoloji Sempozyumu · Poster '+p.k,36,46);
@@ -757,7 +763,7 @@ function posterCanvas(p){const c=document.createElement('canvas');c.width=900;c.
  let ys=Math.max(yl,yr)+6;ys=sec('SONUÇ',30,ys,840);ys=wrap(p.a,30,ys+10,830,32,'600 26px "Source Sans 3",sans-serif','#24333B');lines(30,ys,840,3);
  x.fillStyle='#F1F5F6';x.fillRect(0,H-70,W,70);x.fillStyle='#5E6C73';x.font='600 20px "IBM Plex Mono",monospace';x.fillText('* iletişim: mytoksilab · Kaynaklar: 1–12',30,H-28);
  x.fillStyle=p.c;x.beginPath();x.arc(W-60,H-36,24,0,7);x.fill();x.fillStyle='#fff';x.font='700 22px "Barlow Condensed",sans-serif';x.textAlign='center';x.fillText('MY',W-60,H-28);x.textAlign='left';return c}
-const PZ=[-3.4,-7.4,-14.6,-18.8,-23,-27];POSTERS.forEach((p,i)=>{const z=PZ[i];const cv=posterCanvas(p);p.url=cv.toDataURL('image/jpeg',.85);const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;
+const PZ=[-3.4,-7.4,-14.6,-18.8,-23,-27];POSTERS.forEach((p,i)=>{const z=PZ[i];const t=new THREE.TextureLoader().load(p.duvar);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;
  add(new THREE.BoxGeometry(.04,1.36,.98),M.alu,-1.975,1.62,z);const m=add(new THREE.PlaneGeometry(.92,1.31),new THREE.MeshStandardMaterial({map:t,roughness:.55}),-1.95,1.62,z);m.rotation.y=Math.PI/2;hot(m,'poster:'+i);
  add(new THREE.BoxGeometry(.5,.04,.08),M.dark,-1.8,2.3,z);add(new THREE.BoxGeometry(.46,.02,.05),M.light,-1.8,2.28,z)});
 add(new THREE.CylinderGeometry(.09,.09,.55,16),new THREE.MeshStandardMaterial({color:'#C62828',roughness:.4}),-1.85,.6,-9.2);add(new THREE.CylinderGeometry(.03,.03,.1,8),M.dark,-1.85,.92,-9.2);
@@ -986,7 +992,19 @@ function openDoorCardKart(no){const r=ROOMS[no-1];goStop('d'+no);const el=$('#ro
  $('#rx').onclick=closeRoom;if($('#rgo'))$('#rgo').onclick=()=>{if(no<=2)enterRoom(no);else if(no===5)location.href=BASE+GAZ_URL};
  say(`<b>${r.n}</b>. ${r.st==='open'?(no===1?'İçeri girince sağdaki tezgahta HS-GC-MS seni bekliyor.':'Şu an kullandığın cihazlar bu odada.'):r.st==='info'?'Gaz tüpleri burada; tavandaki borularla N₂-1, Ar-1, Ar-2, He ve N₂-2 odalara dağıtılıyor. İçeri girip regülatörleri ve manometreleri inceleyebilirsin.':'Bu oda yakında açılacak.'} Kapının yanındaki panoda odayla ilgili bilgiler var.`);drawMap()}
 let openRoomDoor=0;
-function openPoster(i){const p=POSTERS[i];const el=$('#room');el.hidden=false;el.classList.add('wide');el.innerHTML=`<button class="x" id="rx">✕</button><div class="no" style="color:${p.c}">POSTER ${p.k}</div><h2 style="font-size:21px">${p.t}</h2><img src="${p.url}" alt="Poster" style="width:100%;border-radius:8px"><p style="font-size:12.5px">Örnek poster. Kendi poster sunumlarınla değiştirilecek.</p>`;$('#rx').onclick=closeRoom;say(`Bu bir <b>poster sunumu</b>: ${p.t.toLowerCase()}. Laboratuvarımızın kongrelerde sunduğu çalışmalar koridorda sergileniyor.`)}
+/* poster görüntüleyici: tam ekran, okunaklı; tıkla / + − ile yakınlaş, sürükleyerek gez */
+function openPoster(i){const p=POSTERS[i];closeRoom();let v=$('#pv');if(!v){v=document.createElement('div');v.id='pv';document.body.appendChild(v)}
+ v.innerHTML=`<div class="pvU"><div><b style="color:${p.c}">POSTER ${p.k} / ${POSTERS.length}</b><span>${p.t}</span></div><div class="pvB"><button data-z="-1" title="Uzaklaş">−</button><button data-z="0" title="Ekrana sığdır">⤢</button><button data-z="1" title="Yakınlaş">+</button><a href="${p.url}" target="_blank" rel="noopener" title="Yeni sekmede aç">↗</a><button data-g="-1" title="Önceki">‹</button><button data-g="1" title="Sonraki">›</button><button class="pvX" title="Kapat">✕</button></div></div><div class="pvA"><img src="${p.url}" alt="${p.t}"></div>`;
+ v.hidden=false;const A=v.querySelector('.pvA'),im=A.querySelector('img');let z=1;
+ const uyg=()=>{im.style.width=z===1?'':(z*100)+'%';im.classList.toggle('sig',z===1);A.classList.toggle('yak',z>1)};uyg();
+ im.onclick=e=>{if(z===1){const r=im.getBoundingClientRect(),fx=(e.clientX-r.left)/r.width,fy=(e.clientY-r.top)/r.height;z=2.5;uyg();A.scrollLeft=fx*A.scrollWidth-A.clientWidth/2;A.scrollTop=fy*A.scrollHeight-A.clientHeight/2}else{z=1;uyg()}};
+ v.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{const d=+b.dataset.z;z=d===0?1:Math.max(1,Math.min(4,z+d*.75));uyg()});
+ v.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>openPoster((i+ +b.dataset.g+POSTERS.length)%POSTERS.length));
+ let sur=null;A.onpointerdown=e=>{if(z>1&&e.pointerType==='mouse'){sur={x:e.clientX,y:e.clientY,l:A.scrollLeft,t:A.scrollTop,m:0}}};A.onpointermove=e=>{if(!sur)return;const dx=e.clientX-sur.x,dy=e.clientY-sur.y;if(Math.abs(dx)+Math.abs(dy)>4)sur.m=1;A.scrollLeft=sur.l-dx;A.scrollTop=sur.t-dy};
+ A.onpointerup=e=>{if(sur&&sur.m){e.stopPropagation();im.addEventListener('click',ev=>ev.stopImmediatePropagation(),{once:true,capture:true})}sur=null};
+ const kapat=()=>{v.hidden=true;document.removeEventListener('keydown',tus)};const tus=e=>{if(e.key==='Escape')kapat();else if(e.key==='ArrowRight')openPoster((i+1)%POSTERS.length);else if(e.key==='ArrowLeft')openPoster((i-1+POSTERS.length)%POSTERS.length)};
+ document.addEventListener('keydown',tus);v.querySelector('.pvX').onclick=kapat;v.onclick=e=>{if(e.target===v)kapat()};
+ say(`<b>Poster ${p.k}</b>: ${p.tr}. Laboratuvarımızın kongrelerde sunduğu çalışmalar koridorda sergileniyor. Okumak için postere tıklayıp yakınlaştır.`)}
 function closeRoom(){$('#room').classList.remove('wide');$('#room').hidden=true;openRoomDoor=0}
 /* harita */
 function drawMap(){const s=$('#mapS');const zx=z=>14+(-z)/30*190;let h=`<rect x="10" y="40" width="200" height="36" rx="4" fill="#26323A" stroke="#52636B"/><rect x="2" y="44" width="10" height="28" fill="#2BD9C0"/><text x="7" y="96" fill="#9BB0B6" font-size="9" text-anchor="middle" font-family="IBM Plex Mono">GİRİŞ</text>`;
