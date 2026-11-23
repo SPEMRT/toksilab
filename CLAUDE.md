@@ -56,6 +56,9 @@ Testler `tests/` klasöründe; ayrıntı `tests/README.md`. İlk kullanımda bir
   ara stok (m = C×V → saflığa böl → V = m/ρ; etanol %99,8, ρ 0,789 → 63,5 µL; metanol %99,9, ρ 0,792 →
   63,2 µL), su ile; kalibratörler aynı (0,05/0,1/0,5 g/L, HS vialinde 2 mL). Soru başına tolerans `s.tol`,
   ipucu başına tolerans `s.ip[[oran, metin, tol]]`.
+- Kalibrasyon dersi bölüm listesiyle açılır (cihaz derslerindeki gibi): 8 bölüm, biten ✓, "Kaldığın yerden
+  devam et", panelde "☰ Bölümler", üstteki bölüm çubuğu tıklanabilir. Ortadan bir bölüme atlanınca önceki
+  bölümlerin plan satırları dolu gelir (`atla`). İlerleme tarayıcıda: localStorage `toksilab_kalibrasyon_v1`.
 
 **Sıradaki (öncelik kullanıcıda; önce sor):**
 1. Kalibrasyon dersine eklemeler (kullanıcı anlatacak).

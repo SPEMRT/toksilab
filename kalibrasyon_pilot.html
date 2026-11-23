@@ -59,6 +59,12 @@ td{padding:7px 8px;border-bottom:1px solid #26343A}td.g{font-weight:700}td.bos{c
 .mix{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center}.mix div{background:var(--card2);border-radius:10px;padding:8px 4px;border-top:4px solid var(--r)}
 .mix small{display:block;font-size:12.5px;color:#C7D6DA}.mix b{display:block;font:700 18px var(--f-display);margin-top:2px}.mix b.bos{color:#556870}
 .mixnot{font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
+.liste{display:grid;gap:8px}#P .liste button{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;text-align:left;background:#25333A;padding:12px}
+#P .liste button:hover{background:#2D3E46}.liste .no{width:30px;height:30px;border-radius:50%;background:#33444C;display:grid;place-items:center;font:700 13px var(--f-mono)}
+#P .liste button.bitti .no{background:#2DBE5B;color:#062126}.liste b{display:block;font:700 17px var(--f-display);letter-spacing:.02em}.liste small{display:block;font-weight:400;font-size:13px;color:#B9CBD0;line-height:1.35}
+.liste em{font:600 11px var(--f-mono);font-style:normal;color:#7FDCD0;white-space:nowrap}.acl{font-size:14px;color:#B9CBD0}
+#P button.bl{background:none;border:1px solid #34454D;padding:5px 10px;font-size:12.5px;color:#7FDCD0;white-space:nowrap}
+.bol i{cursor:pointer}.bol i:hover{color:#EAF2F3}
 .mentor{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;background:#F1F6F7;color:#16242A;border-radius:12px;padding:9px 12px;border-left:5px solid var(--teal)}
 .mentor img{width:44px;height:44px;border-radius:50%;object-fit:cover}.mentor .nm{font:600 10.5px var(--f-mono);color:#1F9A97;letter-spacing:.08em}.mentor p{font-size:14px;line-height:1.4}
 @media (max-width:900px){.sahne{inset:0 0 50dvh 0}#dersK{top:auto;left:0;width:auto;height:50dvh;border-radius:16px 16px 0 0;padding:10px 12px}.birim{grid-template-columns:repeat(2,1fr)}}
@@ -158,10 +164,31 @@ const SORU=[
  ['Yoğunluğu 0,789 g/mL olan etanolden 0,1 g kaç µL?',['78,9 µL','100 µL','126,7 µL'],2,'V = m / ρ = 0,1 / 0,789 = 0,1267 mL ≈ 126,7 µL; yoğunlukla çarpılmaz, bölünür.'],
  ['0,5 ng/mL mix kalibratör (1000 µL) için Mix AS-2’den (her madde 10 ng/mL) kaç µL?',['10 µL','50 µL','250 µL'],1,'0,5 × 1000 / 10 = 50 µL; mix olması alınacak hacmi değiştirmez, bir pipet beş maddeyi birlikte taşır.']];
 const bolumler=[...new Set(ADIM.map(a=>a.bolum))];
+/* bölüm listesi: cihaz derslerindeki gibi; öğrenci istediği bölüme gidip tekrar edebilir */
+const BOL={'Giriş':['Giriş','Kalibrasyon neden gerekir? Seyreltme zinciri'],'Birimler':['Birimler','mg → µg → ng: her basamak 1000 kat'],'Formül':['Formül','C₁V₁ = C₂V₂, birimlerin sadeleşmesi, neden ara stok'],
+ 'Ara stoklar':['Ara stoklar','Fentanil: AS-1, AS-2, AS-3'],'Kalibratörler':['Kalibratörler','Fentanil 0,05–5 ng/mL, 7 seviye'],'Mix':['Mix','5 maddelik mix kalibratör'],
+ 'Etanol':['Etanol + metanol','Saf sıvıdan mix ara stok: kütle, saflık, yoğunluk; HS vialinde kalibratörler'],'Kontrol':['Kontrol testi','Kısa test']};
+const bas=k=>ADIM.findIndex(a=>a.bolum===bolumler[k]),son=k=>{let n=-1;ADIM.forEach((a,j)=>{if(a.bolum===bolumler[k])n=j});return n};
+const LSK='toksilab_kalibrasyon_v1';let KY={};try{KY=JSON.parse(localStorage.getItem(LSK)||'{}')||{}}catch(e){}KY.bitti=KY.bitti||{};
+function kaydet(){try{localStorage.setItem(LSK,JSON.stringify(KY))}catch(e){}}
+/* adımların sol tarafta doldurduğu anahtarlar (plan satırları, zincir); 'sec'+n cevap kaydı ayrı tutulur */
+const anah=a=>[...(a.tam||[]),...((a.s&&a.s.tam)||[]),...((a.sec&&a.sec.tam)||[])];
+/* n. adıma atla: önceki adımların sonuçları tabloda dolu gelsin, bu adım ve sonrası yeniden çözülsün */
+function atla(n){TAM={};ADIM.forEach((a,j)=>{if(j<n)anah(a).forEach(k=>TAM[k]=1)});if(ADIM[n].test){sn=0;puan=0;cevap=null}git(n)}
+let LISTE=false;
+function liste(){LISTE=true;const ad=ADIM[KY.son]?ADIM[KY.son]:null;
+ let h=`<div class="ust"><b>KALİBRASYON ÇÖZELTİSİ</b><span>${bolumler.length} bölüm</span></div><div class="acl">Bir bölüm seç. Bitirdiğin bölümlere istediğin zaman dönüp tekrar edebilirsin.</div>`;
+ if(ad&&KY.son>0)h+=`<button class="p" id="devamEt">▶ Kaldığın yerden devam et · ${BOL[ad.bolum][0]}${ad.b?': '+ad.b:''}</button>`;
+ h+='<div class="liste">'+bolumler.map((b,k)=>{const t=KY.bitti[b],n=ADIM.filter(a=>a.bolum===b).length;return `<button data-b="${k}" class="${t?'bitti':''}"><span class="no">${t?'✓':k+1}</span><span><b>${BOL[b][0]}</b><small>${BOL[b][1]}${b==='Kontrol'?' · '+SORU.length+' soru':' · '+n+' adım'}</small></span><em>${t?'Tekrarla':'Başla ›'}</em></button>`}).join('')+'</div>';
+ h+=`<div class="mentor"><img src="${AVATAR}" alt=""><div><div class="nm">UZM. MY</div><p>İlk kez geliyorsan <b>Giriş</b>’ten başla; bölümler sırayla birbirini tamamlıyor.</p></div></div>`;
+ P.innerHTML=h;TAM={};goster({});
+ P.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>atla(bas(+b.dataset.b)));
+ const d=$('#devamEt');if(d)d.onclick=()=>atla(KY.son)}
 let i=0,gecti=false,uyari='',sn=0,cevap=null,puan=0;
 const P=$('#P');
 function ciz(){const a=ADIM[i],bi=bolumler.indexOf(a.bolum);
- let h=`<div class="ust"><b>KALİBRASYON ÇÖZELTİSİ</b><span>${i+1} / ${ADIM.length}</span></div><div class="bol">${bolumler.map((b,k)=>`<i class="${k<bi?'g':k===bi?'s':''}">${b}</i>`).join('')}</div>`;
+ LISTE=false;const sonAdim=i===son(bi),gecildi=!(a.s||a.sec)||gecti;if(sonAdim&&gecildi&&!a.test&&!KY.bitti[a.bolum]){KY.bitti[a.bolum]=1;kaydet()}
+ let h=`<div class="ust"><b>KALİBRASYON ÇÖZELTİSİ</b><span>${i+1} / ${ADIM.length}</span><button class="bl" id="bolumler">☰ Bölümler</button></div><div class="bol">${bolumler.map((b,k)=>`<i data-bk="${k}" title="${BOL[b][0]}" class="${KY.bitti[b]||k<bi?'g':''} ${k===bi?'s':''}">${b}</i>`).join('')}</div>`;
  if(a.test)h+=test();
  else{
   if(a.sec){h+=`<div class="ask${gecti?' tamam':''}">${gecti?'✓ Doğru!':a.sec.soru}${uyari?'<small>'+uyari+'</small>':''}</div>`;
@@ -170,27 +197,28 @@ function ciz(){const a=ADIM[i],bi=bolumler.indexOf(a.bolum);
    if(!gecti)h+=`<div class="giris"><input id="cvp" inputmode="decimal" autocomplete="off" placeholder="cevap"><span class="u">${a.s.birim}</span></div><div class="hsat"><label>🧮 HESAP SATIRI · formülü yaz: 0,5 × 2000 / 2</label><div class="sat"><input id="hs" autocomplete="off" placeholder="ör. 1000 × 10 / 1000000"><output id="hso">—</output><button id="hsa" title="Sonucu cevap kutusuna yaz">↓</button></div></div><div class="alt"><button class="k" id="kontrol">✓ Kontrol et</button><button class="ince" id="goster">Çözümü göster</button></div>`;
    else h+=`<div class="kart"><h4>${a.b}</h4>${a.s.yol?'<div class="hes">'+a.s.yol+'</div>':''}${a.s.ac}</div>`}
   else h+=`<div class="kart"><h4>${a.b}</h4>${a.html}</div>`;
-  h+=`<div class="alt"><button id="geri" ${i?'':'disabled'}>‹ Geri</button><button class="p" id="ileri" ${(a.s||a.sec)&&!gecti?'disabled':''}>Devam ›</button></div>`}
+  h+=`<div class="alt"><button id="geri" ${i?'':'disabled'}>‹ Geri</button>${sonAdim?'<button id="bolumler2">☰ Bölümler</button>':''}<button class="p" id="ileri" ${(a.s||a.sec)&&!gecti?'disabled':''}>${sonAdim?'Sonraki bölüm ›':'Devam ›'}</button></div>`}
  h+=`<div class="mentor"><img src="${AVATAR}" alt=""><div><div class="nm">UZM. MY</div><p id="say">${soz()}</p></div></div>`;
  P.innerHTML=h;goster(a.g||{plan:1});
  const c=$('#cvp');if(c){c.focus();c.onkeydown=e=>{if(e.key==='Enter')kontrol()}}
  const k=$('#kontrol');if(k)k.onclick=kontrol;
  P.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{if(+b.dataset.sk===a.sec.dogru){uyari='';gecti=true;TAM['sec'+i]=1;(a.sec.tam||[]).forEach(k=>TAM[k]=1);ciz()}else{uyari='Bir daha düşün: '+(a.sec.ipucu||'açıklamayı hatırla.');ciz()}});
  const hs=$('#hs');if(hs){const hsH=()=>{const r=hesapla(hs.value);$('#hso').textContent=isFinite(r)?fmt(r):'—'};hs.oninput=hsH;hs.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#hsa').click()}};$('#hsa').onclick=()=>{const r=hesapla(hs.value);if(isFinite(r)){c.value=String(+r.toPrecision(10)).replace('.',',');c.focus()}}}const g=$('#goster');if(g)g.onclick=()=>{uyari='';tamam()};
+ ['#bolumler','#bolumler2'].forEach(q=>{const e=$(q);if(e)e.onclick=liste});P.querySelectorAll('[data-bk]').forEach(e=>e.onclick=()=>atla(bas(+e.dataset.bk)));
  const gr=$('#geri');if(gr)gr.onclick=()=>git(i-1);const il=$('#ileri');if(il)il.onclick=()=>git(i+1);
  P.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{if(cevap!==null)return;cevap=+b.dataset.c;if(cevap===SORU[sn][2])puan++;ciz()});
- const sd=$('#dSoru');if(sd)sd.onclick=()=>{sn++;cevap=null;ciz()};const bt=$('#bastan');if(bt)bt.onclick=()=>{TAM={};sn=0;puan=0;cevap=null;git(0)}}
+ const sd=$('#dSoru');if(sd)sd.onclick=()=>{sn++;cevap=null;ciz()};const bt=$('#bastan');if(bt)bt.onclick=()=>{sn=0;puan=0;cevap=null;ciz()};const bl3=$('#bolumler3');if(bl3)bl3.onclick=liste}
 function soz(){const a=ADIM[i];if(a.test)return sn>=SORU.length?'Tebrikler! Kalibratör planını baştan sona çıkardın.':'Son olarak birkaç kısa soru.';
  if(uyari)return 'Hata yapmak öğrenmenin parçası. İpucuna bakıp bir daha dene.';if(a.s&&!gecti)return 'Formülü aşağıdaki <b>hesap satırına</b> yazabilirsin; birimleri sadeleştirmeyi unutma.';if(gecti)return 'Harika! Plan tablosu doldu, bak.';return 'Hazırsan <b>Devam</b>’a bas.'}
 function hesapla(t){t=String(t||'').replace(/×|x/gi,'*').replace(/÷|:/g,'/').replace(/\s/g,'').replace(/(\d),(\d)/g,'$1.$2');if(!t||!/^[\d.+\-*/()]+$/.test(t))return NaN;try{const r=Function('"use strict";return ('+t+')')();return typeof r==='number'?r:NaN}catch(e){return NaN}}
 function kontrol(){const a=ADIM[i],v=num($('#cvp').value);if(near(v,a.s.dogru,a.s.tol??.01)){uyari='';tamam()}else{const o=(a.s.ip||[]).find(([r,,t])=>near(v/a.s.dogru,r,t??.02));uyari=o?o[1]:ipucu(v,a.s.dogru);ciz()}}
 function tamam(){const a=ADIM[i];gecti=true;(a.s.tam||[]).forEach(k=>TAM[k]=1);ciz()}
-function git(n){if(n<0||n>=ADIM.length)return;i=n;(ADIM[i].tam||[]).forEach(k=>TAM[k]=1);gecti=!!TAM['sec'+n]||!!(ADIM[i].s&&(ADIM[i].s.tam||[]).every(k=>TAM[k])&&(ADIM[i].s.tam||[]).length);uyari='';ciz();
+function git(n){if(n<0||n>=ADIM.length)return;i=n;KY.son=n;kaydet();(ADIM[i].tam||[]).forEach(k=>TAM[k]=1);gecti=!!TAM['sec'+n]||!!(ADIM[i].s&&(ADIM[i].s.tam||[]).every(k=>TAM[k])&&(ADIM[i].s.tam||[]).length);uyari='';ciz();
  if(matchMedia('(max-width:900px)').matches)$('#dersK').scrollTop=0}
-function test(){if(sn>=SORU.length)return `<div class="kart"><h4>Bölüm tamamlandı</h4><div class="hes">${puan} / ${SORU.length} doğru</div><p>Ana stoktan ara stoklarla kalibratörlere inmeyi, birimlerin nasıl sadeleştiğini, birden çok maddeyi bir mix’te birlikte hazırlamayı ve saf etanol ile metanolden yoğunluk ve saflığı hesaba katarak bir mix ara stok hazırlayıp kalibratörleri suda seyreltmeyi öğrendin.</p>${puan<SORU.length?'<p>Yanlış yanıtladığın konular için ilgili adımlara geri dönebilirsin.</p>':''}</div><div class="alt"><button id="bastan">↺ Baştan</button><button class="p" onclick="location.href=MEDIA+'index.html#menu'">Eğitimlere dön ›</button></div>`;
+function test(){if(sn>=SORU.length&&!KY.bitti.Kontrol){KY.bitti.Kontrol=1;kaydet()}if(sn>=SORU.length)return `<div class="kart"><h4>Bölüm tamamlandı</h4><div class="hes">${puan} / ${SORU.length} doğru</div><p>Ana stoktan ara stoklarla kalibratörlere inmeyi, birimlerin nasıl sadeleştiğini, birden çok maddeyi bir mix’te birlikte hazırlamayı ve saf etanol ile metanolden yoğunluk ve saflığı hesaba katarak bir mix ara stok hazırlayıp kalibratörleri suda seyreltmeyi öğrendin.</p>${puan<SORU.length?'<p>Yanlış yanıtladığın konular için ilgili adımlara geri dönebilirsin.</p>':''}</div><div class="alt"><button id="bastan">↺ Testi tekrarla</button><button id="bolumler3">☰ Bölümler</button><button class="p" onclick="location.href=MEDIA+'index.html#menu'">Eğitimlere dön ›</button></div>`;
  const s=SORU[sn];return `<div class="kart"><h4>Soru ${sn+1} / ${SORU.length}</h4><div>${s[0]}</div><div class="sec">${s[1].map((c,k)=>`<button data-c="${k}" class="${cevap===null?'':k===s[2]?'d':k===cevap?'y':''}">${c}</button>`).join('')}</div>${cevap!==null?'<div style="font-size:13.5px;color:#B9CBD0">'+(cevap===s[2]?'✓ Doğru. ':'✗ Doğru yanıt işaretlendi. ')+s[3]+'</div>':''}</div>${cevap!==null?`<div class="alt"><button class="p" id="dSoru">${sn+1<SORU.length?'Sonraki soru ›':'Sonucu gör ›'}</button></div>`:''}`}
 $('#hLab').onclick=e=>{e.preventDefault();const r=new URLSearchParams(location.search).get('ret');location.href=MEDIA+'lab_giris.html'+(r?'#'+r:'')};
-git(0);
+liste();
 </script>
 <script src="anamenu.js" charset="utf-8" defer></script>
 </body>
