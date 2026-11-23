@@ -47,6 +47,11 @@ Testler `tests/` klasöründe; ayrıntı `tests/README.md`. İlk kullanımda bir
   siteye koymadan önce bulanıklaştır.
 - `kalibrasyon_pilot.html`: adım adım rehberli ders (fentanil ng/mL zinciri, birimlerin sadeleşmesi,
   etanol 2 g/L ara stoktan 0,05–0,5 g/L, HS vialinde 2 mL, su ile; hesap satırı; test).
+- Kalibrasyon dersine "Mix" bölümü (fentanil ile etanol arasında): 5 madde (fentanil, morfin, kokain,
+  MDMA, amfetamin), her ana stok 1 mg/mL → Mix AS-1/2/3 → aynı 0,05–5 ng/mL kalibratörler. Her madde kendi
+  C₁V₁=C₂V₂ hesabı; 5'e bölme/5 ile çarpma hatalarına özel ipucu (`s.ip`); farklı stok örneği (MDMA
+  0,1 mg/mL → 100 µL); etiket/uyum/tuz-baz notları; teste 2 mix sorusu. Kullanıcı dosyaları şimdilik
+  GitHub'a elle yüklüyor (bu oturumda yazma izni yoktu).
 
 **Sıradaki (öncelik kullanıcıda; önce sor):**
 1. Kalibrasyon dersine eklemeler (kullanıcı anlatacak).
