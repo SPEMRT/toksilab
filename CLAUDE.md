@@ -36,3 +36,25 @@ Testler `tests/` klasöründe; ayrıntı `tests/README.md`. İlk kullanımda bir
 - Değişiklikler ayrı dalda yapılır, kullanıcı GitHub'da çekme isteğini onaylayarak `main`'e alır.
 - Birleştirmeden önce önizleme: `https://raw.githack.com/SPEMRT/toksilab/<dal>/<sayfa>.html`
   (sayfalar arası geçişler canlı siteye gider; o kısımlar ancak birleştirince denenebilir).
+
+## Yapılanlar ve sıradaki işler (kullanıcıyla konuşulanlar)
+**Yapıldı:**
+- Lab turu, Örnek Hazırlama odası: tezgâhtaki 7 cihaz eğitim sayfalarındaki modellerle değiştirildi
+  (`modeller/*.glb`). Ultra saf su, terazi ve santrifüjün görünümü laboratuvardaki gerçek cihaza göre
+  düzenlendi (yalnız lab turunda; `araclar/model_cikar.js` içindeki `duzelt`/`uzat`); eğitim sayfaları aynı.
+- Bilgi kartlarında gerçek cihaz fotoğrafı: ELGA, terazi, santrifüj (`gorseller/*.jpg`; kurum
+  etiketleri bulanık, ≈ 20–30 KB). Fotoğraflarda kurum adı, sözleşme no, demirbaş etiketleri varsa
+  siteye koymadan önce bulanıklaştır.
+- `kalibrasyon_pilot.html`: adım adım rehberli ders (fentanil ng/mL zinciri, birimlerin sadeleşmesi,
+  etanol 2 g/L ara stoktan 0,05–0,5 g/L, HS vialinde 2 mL, su ile; hesap satırı; test).
+
+**Sıradaki (öncelik kullanıcıda; önce sor):**
+1. Kalibrasyon dersine eklemeler (kullanıcı anlatacak).
+2. Kalan cihazların (vorteks, pipet, ultrasonik banyo, SPE) fotoğraflarını bilgi kartlarına eklemek.
+3. "Sanal eğitmen": derslerde hata/doğru anında kullanıcının HeyGen videosu (önceden kaydedilmiş kısa
+   klipler, her kullanımda ücret yok). Önce SPE (ör. elüsyonda su seçmek) ve kalibrasyon için klip listesi
+   ve konuşma metinleri; serbest kullanım "sessiz sınav" olduğu için orada klipler sonda raporda oynasın.
+4. Lab turunda cihaz kartlarına "▶ Uzm. MY anlatıyor" videosu (kullanıcı önlükle cihaz yanında fotoğraf
+   çekip HeyGen'de seslendirecek; 20–40 sn, alt yazılı, kendiliğinden açılmasın).
+5. Siteyi Cloudflare Pages'te şifreli yayınlamak (kullanıcı adı + şifre ya da Cloudflare Access).
+6. `lab_giris.html`'de `viewport` etiketi yok; telefonda tur küçük görünüyor (kullanıcıya sorulmadı).
