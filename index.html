@@ -109,6 +109,7 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 @media (max-width:700px){.top{flex-wrap:wrap;padding:12px 16px}.brand small{display:none}.brand b{font-size:22px}.brand svg{width:38px;height:38px}.tnav{width:100%;flex-wrap:nowrap;overflow-x:auto;gap:2px}.tnav button{font-size:13px;padding:7px 10px;white-space:nowrap}.cards{grid-template-columns:1fr}.mc{min-height:0}.pb{grid-template-columns:1fr}.cats{grid-auto-flow:column;grid-auto-columns:max-content;border-right:0;border-bottom:1px solid var(--line);overflow-x:auto}.how{grid-template-columns:1fr}.tnav .hm{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
+<script src="maskot.js" charset="utf-8"></script>
 </head>
 <body>
 <canvas id="bg"></canvas><div class="glow"></div>
@@ -153,6 +154,13 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
     <div class="go">Vakalara git ›</div></a>
   </div>
   <div class="stats"><div><b>6</b>oda</div><div><b>11</b>cihaz simülatörü</div><div><b id="stM">1</b>tam analiz modülü</div></div>
+  <section class="ekip" id="ekip" aria-label="ToksiLab ekibi"><div class="ek-bas"><b>ToksiLab ekibi</b><span>Derslerde yanında olacak rehberler</span></div><div class="ek-iz" id="ekIz"></div></section>
+  <style>.ekip{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px}.ek-bas{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:10px}.ek-bas b{font:700 20px var(--f-display,sans-serif);letter-spacing:.02em}.ek-bas span{color:var(--muted);font-size:13.5px}
+  .ek-iz{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.ek{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:center;background:var(--card2);border-radius:14px;padding:8px 10px;cursor:default}.ek .msk{width:56px;height:56px}.ek b{display:block;font:700 18px var(--f-display,sans-serif)}.ek small{color:#C7D6DA;font-size:13px;line-height:1.3;display:block}</style>
+  <script>(function(){var M=window.MASKOT,e=document.getElementById('ekIz');if(!M||!e){var x=document.getElementById('ekip');if(x)x.hidden=true;return}
+   var L=[['toksi','Ekibin lideri. Laboratuvar turu, SPE, ultra saf su, vorteks, santrifüj ve gaz tüp odası.'],['vivi','HS-GC-MS ve kanda etanol eğitimi.'],['pipo','Pipetleme dersleri.'],['molli','Kalibrasyon, terazi ve örnek hazırlama: hesaplar.']];
+   e.innerHTML=L.map(function(k){return '<div class="ek" data-k="'+k[0]+'">'+M.span('bekle','',k[0])+'<div><b>'+M.hepsi[k[0]].ad+'</b><small>'+k[1]+'</small></div></div>'}).join('');
+   e.querySelectorAll('.ek').forEach(function(d){var m=d.querySelector('.msk');d.onmouseenter=function(){M.durum(m,'dogru',2700)};d.onclick=d.onmouseenter})})();</script>
   <button class="replay" id="replay">▶ Tanıtımı tekrar oynat</button>
  </div>
 </div>

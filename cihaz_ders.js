@@ -15,6 +15,8 @@
 var Q=null;try{Q=new URLSearchParams(location.search)}catch(e){}
 if(!Q)return;
 var SERB=Q.get('serbest')==='1'||Q.get('gorev')==='free',NOT='';
+/* maskot (maskot.js): rehber kartı; yoksa hiçbir şey eklenmez */
+var MK=window.MASKOT,MAD=MK?MK.AD:'UZM. MY';function mkart(d,t){return MK?'<div class="mskYer">'+MK.kart(d,t)+'</div>':''}
 var SAYFA=location.pathname.split('/').pop()||'';
 var LS='toksilab_ders_v1';
 var P,i=0,UST=0,ustG=false,gecti=false,uyari='',puan=0,sn=0,cevap=null,hataM='',SONP=null;
@@ -1101,7 +1103,7 @@ function serbestCiz(){
   '<div class="kart"><h4>Serbest kullanım</h4><div><p>Görev yok: cihazı istediğiniz gibi kullanın. Cihazın parçalarına tıklayarak ya da soldaki <b>⚙ Kontroller</b> panelinden çalıştırabilirsiniz.</p><p>Paneli sağ üstteki <b>—</b> ile küçültüp cihaza tam ekran bakabilirsiniz.</p></div></div>'+
   (C.serbest&&C.serbest.html||'')+
   '<div class="uyari" id="dUy" hidden></div>'+
-  '<div class="not" id="dNot"'+(NOT?'':' hidden')+'><b class="nm">UZM. MY</b><span id="dNotT">'+NOT+'</span></div>'+
+  '<div class="not" id="dNot"'+(NOT?'':' hidden')+'><b class="nm">'+MAD+'</b><span id="dNotT">'+NOT+'</span></div>'+
   '<div class="alt"><button class="ince" id="dListe">☰ Bölümler (rehberli ders)</button></div>';
  P.querySelector('#dListe').onclick=function(){ac('liste')};if(C.serbest&&C.serbest.bagla)C.serbest.bagla(P)}
 /* sayfanın kendi uzman notları (gizli mentor balonu) serbest kullanımda panele yansıtılır */
@@ -1127,7 +1129,7 @@ function dspKur(){var e=document.getElementById('dsp');if(!e||e.dataset.sur)retu
  e.addEventListener('dblclick',function(){try{localStorage.removeItem(K2)}catch(_){}['left','top','right','bottom'].forEach(function(k){e.style.removeProperty(k)});e.classList.remove('tasindi')})}
 function kontrolEk(){var side=document.getElementById('side');if(!side||document.getElementById('sbEk'))return;var c=side.querySelector('.card')||side;var d=document.createElement('div');d.id='sbEk';
  var nl=C.serbest.numune||[];d.innerHTML=(nl.length?'<button class="bt sbNum" id="sbNumB">🧪 Numune seç ▾</button><div class="sbNumL" id="sbNumL" hidden>'+nl.map(function(n){return '<button class="bt" data-num="'+n[0]+'">'+n[1]+'</button>'}).join('')+'</div>':'')+
-  (C.serbest.ek||'')+(C.serbest.sessiz?'<div class="sbSes" id="sbSes">'+(C.serbest.ses?C.serbest.ses(S()):'')+'</div>':'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>UZM. MY</b><span class="nt"></span></div>')+'<button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
+  (C.serbest.ek||'')+(C.serbest.sessiz?'<div class="sbSes" id="sbSes">'+(C.serbest.ses?C.serbest.ses(S()):'')+'</div>':'<div class="sbUy" id="sbUy" hidden></div><div class="sbNot" id="sbNot" hidden><b>'+MAD+'</b><span class="nt"></span></div>')+'<button class="sbDers" id="sbDers">☰ Rehberli derse dön</button>';
  c.appendChild(d);var L2=d.querySelector('#sbNumL');
  if(L2)d.querySelector('#sbNumB').onclick=function(){L2.hidden=!L2.hidden};
  d.querySelectorAll('[data-num]').forEach(function(b){b.onclick=function(){var m=C.serbest.numuneSec(b.dataset.num);if(!m)L2.hidden=true;else{NOT=m;var n=document.getElementById('sbNot');if(n){n.querySelector('.nt').innerHTML=m;n.hidden=false}}}});
@@ -1158,7 +1160,7 @@ function liste(){
  h+='<div class="acl">'+C.acl+'</div><div class="liste">';
  SIRA.forEach(function(id,k){var d=DERS[id],b=o[id]&&o[id].bitti;
   h+='<button data-d="'+id+'" class="'+(b?'bitti':'')+'"><span class="no">'+(b?'✓':k+1)+'</span><span><b>'+d.ad+'</b><small>'+d.ozet+'</small></span><em>'+(b?'Tekrarla':'Başla ›')+'</em></button>'});
- P.innerHTML=h+'</div>'+cikis();cikisBagla();
+ P.innerHTML=h+'</div>'+mkart('bekle','Merhaba, ben <b>'+(MK?MK.ad:'')+'</b>! Bir bölüm seç; derste yanında olacağım.')+cikis();cikisBagla();
  P.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){ac(b.dataset.d)}})}
 
 function aciklama(a){
@@ -1180,7 +1182,7 @@ function ciz(){
   if(bek&&a.dugme)h+='<div class="alt">'+dugmeler(a).map(function(d,k){return '<button class="is" data-dg="'+k+'">'+d[0]+'</button>'}).join('')+'</div>';
   if(!a.ask||gecti)h+=aciklama(a);
   h+='<div class="alt"><button id="dGeri"'+(i?'':' disabled')+'>‹ Geri</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
- h+=cikis();P.innerHTML=h;cikisBagla();canli();
+ h+=mkart.apply(null,ruh(a))+cikis();P.innerHTML=h;cikisBagla();canli();
  var g=P.querySelector('#dGeri'),n=P.querySelector('#dIleri');
  if(g)g.onclick=function(){ac(D)};if(i&&g)g.onclick=function(){geri()};if(n)n.onclick=function(){git(i+1)};
  var t=P.querySelector('#dTut');if(t){t.addEventListener('pointerdown',function(e){e.preventDefault();try{t.setPointerCapture(e.pointerId)}catch(_){}window.startPress()});['pointerup','pointercancel'].forEach(function(ev){t.addEventListener(ev,function(){window.endPress()})})}
@@ -1190,6 +1192,13 @@ function ciz(){
  var tk=P.querySelector('#dTekrar');if(tk)tk.onclick=function(){ac(D)};
  var sr=P.querySelector('#dSonraki');if(sr)sr.onclick=function(){ac(sr.dataset.d)};
  if(matchMedia('(max-width:900px)').matches)document.getElementById('dersK').scrollTop=0}
+/* maskotun ruh hâli ve sözü: görev bekliyor → halkaya bakar; hata → düşünür; geçti → sevinir */
+function ruh(a){
+ if(a.test){if(sn>=SORU.length)return ['dogru','Tebrikler! Bölümü bitirdin.'];if(cevap===null)return ['bekle','Soruyu dikkatle oku, sonra yanıtla.'];return cevap===SORU[sn][2]?['dogru','Doğru!']:['yanlis','Olmadı; doğru yanıt işaretlendi. Açıklamayı oku.']}
+ if(uyari&&!gecti)return ['yanlis','Hmm… İpucunu okuyup bir daha dene.'];
+ if(a.ask&&!gecti)return ['bak','Görevi yap: yanıp sönen <b>sarı halka</b> nereye dokunacağını gösterir.'];
+ if(gecti)return ['dogru','Harika! Açıklamayı oku, sonra <b>Devam</b>’a bas.'];
+ return ['bekle','Açıklamayı oku; hazırsan <b>Devam</b>’a bas.']}
 function dugmeler(a){return typeof a.dugme[0]==='string'?[a.dugme]:a.dugme}
 function canli(){var a=ADIM[i],e=P.querySelector('#dCanli');if(e&&a.canli)e.textContent=a.canli(S())}
 function test(){

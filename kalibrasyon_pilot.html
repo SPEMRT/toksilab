@@ -76,6 +76,7 @@ td{padding:7px 8px;border-bottom:1px solid #26343A}td.g{font-weight:700}td.bos{c
 .mentor img{width:44px;height:44px;border-radius:50%;object-fit:cover}.mentor .nm{font:600 10.5px var(--f-mono);color:#1F9A97;letter-spacing:.08em}.mentor p{font-size:14px;line-height:1.4}
 @media (max-width:900px){.sahne{inset:0 0 50dvh 0}#dersK{top:auto;left:0;width:auto;height:50dvh;border-radius:16px 16px 0 0;padding:10px 12px}.birim{grid-template-columns:repeat(2,1fr)}.fz{flex-direction:column}.fz .ok-ar{align-self:center;transform:rotate(90deg);line-height:1}}
 </style>
+<script src="maskot.js" charset="utf-8"></script>
 </head>
 <body>
 <div class="sahne">
@@ -93,7 +94,7 @@ td{padding:7px 8px;border-bottom:1px solid #26343A}td.g{font-weight:700}td.bos{c
 </div>
 <div id="dersK"><div id="P"></div></div>
 <script>
-const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';const AVATAR=MEDIA+'avatar.jpg';
+const MEDIA=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const fmt=n=>Number(n).toLocaleString('tr-TR',{maximumFractionDigits:3});
 const num=v=>{v=String(v??'').trim().replace(/\s/g,'').replace(',','.');return v===''?NaN:Number(v)};
@@ -187,7 +188,7 @@ function liste(){LISTE=true;const ad=ADIM[KY.son]?ADIM[KY.son]:null;
  let h=`<div class="ust"><b>KALİBRASYON ÇÖZELTİSİ</b><span>${bolumler.length} bölüm</span></div><div class="acl">Bir bölüm seç. Bitirdiğin bölümlere istediğin zaman dönüp tekrar edebilirsin.</div>`;
  if(ad&&KY.son>0)h+=`<button class="p" id="devamEt">▶ Kaldığın yerden devam et · ${BOL[ad.bolum][0]}${ad.b?': '+ad.b:''}</button>`;
  h+='<div class="liste">'+bolumler.map((b,k)=>{const t=KY.bitti[b],n=ADIM.filter(a=>a.bolum===b).length;return `<button data-b="${k}" class="${t?'bitti':''}"><span class="no">${t?'✓':k+1}</span><span><b>${BOL[b][0]}</b><small>${BOL[b][1]}${b==='Kontrol'?' · '+SORU.length+' soru':' · '+n+' adım'}</small></span><em>${t?'Tekrarla':'Başla ›'}</em></button>`}).join('')+'</div>';
- h+=`<div class="mentor"><img src="${AVATAR}" alt=""><div><div class="nm">UZM. MY</div><p>İlk kez geliyorsan <b>Giriş</b>’ten başla; bölümler sırayla birbirini tamamlıyor.</p></div></div>`;
+ h+=mkart('bekle','İlk kez geliyorsan <b>Giriş</b>’ten başla; bölümler sırayla birbirini tamamlıyor.');
  P.innerHTML=h;TAM={};goster({});
  P.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>atla(bas(+b.dataset.b)));
  const d=$('#devamEt');if(d)d.onclick=()=>atla(KY.son)}
@@ -205,7 +206,7 @@ function ciz(){const a=ADIM[i],bi=bolumler.indexOf(a.bolum);
    else h+=`<div class="kart"><h4>${a.b}</h4>${a.s.yol?'<div class="hes">'+a.s.yol+'</div>':''}${a.s.ac}</div>`}
   else h+=`<div class="kart"><h4>${a.b}</h4>${a.html}</div>`;
   h+=`<div class="alt"><button id="geri" ${i?'':'disabled'}>‹ Geri</button>${sonAdim?'<button id="bolumler2">☰ Bölümler</button>':''}<button class="p" id="ileri" ${(a.s||a.sec)&&!gecti?'disabled':''}>${sonAdim?'Sonraki bölüm ›':'Devam ›'}</button></div>`}
- h+=`<div class="mentor"><img src="${AVATAR}" alt=""><div><div class="nm">UZM. MY</div><p id="say">${soz()}</p></div></div>`;
+ h+=mkart(ruh(),soz());
  P.innerHTML=h;goster(a.g||{plan:1});
  {const g=a.g||{},fl=(a.s||a.sec)?(g.f||(g.formul?['c']:[])):[];$$('[data-f]').forEach(e=>e.classList.toggle('on',fl.includes(e.dataset.f)));const ilk=$$('[data-f].on').find(e=>e.offsetParent);if(ilk&&matchMedia('(max-width:900px)').matches)setTimeout(()=>ilk.scrollIntoView({block:'center',behavior:'smooth'}),60)}
  const c=$('#cvp');if(c){c.focus();c.onkeydown=e=>{if(e.key==='Enter')kontrol()}}
@@ -216,8 +217,11 @@ function ciz(){const a=ADIM[i],bi=bolumler.indexOf(a.bolum);
  const gr=$('#geri');if(gr)gr.onclick=()=>git(i-1);const il=$('#ileri');if(il)il.onclick=()=>git(i+1);
  P.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{if(cevap!==null)return;cevap=+b.dataset.c;if(cevap===SORU[sn][2])puan++;ciz()});
  const sd=$('#dSoru');if(sd)sd.onclick=()=>{sn++;cevap=null;ciz()};const bt=$('#bastan');if(bt)bt.onclick=()=>{sn=0;puan=0;cevap=null;ciz()};const bl3=$('#bolumler3');if(bl3)bl3.onclick=liste}
-function soz(){const a=ADIM[i];if(a.test)return sn>=SORU.length?'Tebrikler! Kalibratör planını baştan sona çıkardın.':'Son olarak birkaç kısa soru.';
- if(uyari)return 'Hata yapmak öğrenmenin parçası. İpucuna bakıp bir daha dene.';if(a.s&&!gecti)return 'Formülü aşağıdaki <b>hesap satırına</b> yazabilirsin; birimleri sadeleştirmeyi unutma.';if(gecti)return 'Harika! Plan tablosu doldu, bak.';return 'Hazırsan <b>Devam</b>’a bas.'}
+/* maskot (Molli): kart ve ruh hâli */
+const mkart=(d,t)=>window.MASKOT?MASKOT.kart(d,'<span id="say">'+t+'</span>'):`<div class="mentor"><div><p id="say">${t}</p></div></div>`;
+function ruh(){const a=ADIM[i];if(a.test)return cevap===null?(sn>=SORU.length?'dogru':'bekle'):(cevap===SORU[sn][2]?'dogru':'yanlis');if(uyari)return 'yanlis';if((a.s||a.sec)&&!gecti)return 'bak';return gecti?'dogru':'bekle'}
+function soz(){const a=ADIM[i];if(a.test)return sn>=SORU.length?'Tebrikler! Kalibratör planını baştan sona çıkardın.':cevap===null?'Son olarak birkaç kısa soru.':cevap===SORU[sn][2]?'Doğru!':'Olmadı; doğru yanıt işaretlendi, açıklamayı oku.';
+ if(uyari)return 'Hata yapmak öğrenmenin parçası. İpucuna bakıp bir daha dene.';if(a.s&&!gecti)return 'Sarı halkalı formülü kullan; aşağıdaki <b>hesap satırına</b> yazabilirsin.';if(gecti)return 'Harika! Plan tablosu doldu, bak.';return 'Hazırsan <b>Devam</b>’a bas.'}
 function hesapla(t){t=String(t||'').replace(/×|x/gi,'*').replace(/÷|:/g,'/').replace(/\s/g,'').replace(/(\d),(\d)/g,'$1.$2');if(!t||!/^[\d.+\-*/()]+$/.test(t))return NaN;try{const r=Function('"use strict";return ('+t+')')();return typeof r==='number'?r:NaN}catch(e){return NaN}}
 function kontrol(){const a=ADIM[i],v=num($('#cvp').value);if(near(v,a.s.dogru,a.s.tol??.01)){uyari='';tamam()}else{const o=(a.s.ip||[]).find(([r,,t])=>near(v/a.s.dogru,r,t??.02));uyari=o?o[1]:ipucu(v,a.s.dogru);ciz()}}
 function tamam(){const a=ADIM[i];gecti=true;(a.s.tam||[]).forEach(k=>TAM[k]=1);ciz()}

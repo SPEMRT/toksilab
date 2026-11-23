@@ -56,6 +56,14 @@ var YUKLE=function(bolum,ad,b,html){var q='#daTree [data-f="ORNEK_SET|'+ad+'"]';
 var dlgAcik=function(t){var r=false;document.querySelectorAll('#desk .dlg .dt b').forEach(function(b){if(b.textContent.indexOf(t)===0)r=true});return r};
 /* ---------- animasyonlar (inlet, kolon): fotoğrafın üstünde, ders paneli açık kalır ---------- */
 var AN=null;
+/* maskot (maskot.js): rehber kartı */
+var MK=window.MASKOT;function mkart(d,t){return MK?'<div class="mskYer">'+MK.kart(d,t)+'</div>':''}
+function ruh(a){
+ if(a.test){if(sn>=SORU.length)return ['dogru','Tebrikler! Bölümü bitirdin.'];if(cevap===null)return ['bekle','Soruyu dikkatle oku, sonra yanıtla.'];return cevap===SORU[sn][2]?['dogru','Doğru!']:['yanlis','Olmadı; doğru yanıt işaretlendi. Açıklamayı oku.']}
+ if(uyari&&!gecti)return ['yanlis','Hmm… İpucunu okuyup bir daha dene.'];
+ if(a.ask&&!gecti)return ['bak','Görevi yap; sarı halka nereye dokunacağını gösterir.'];
+ if(gecti)return ['dogru','Harika! Açıklamayı oku, sonra <b>Devam</b>’a bas.'];
+ return ['bekle','Açıklamayı oku; hazırsan <b>Devam</b>’a bas.']}
 function animKapat(){document.querySelectorAll('.ianim').forEach(function(x){x.remove()});AN=null}
 function gorevBitti(){var a=ADIM[i];return !!AN&&!!a.gorev&&AN.n>=a.gorev.length}
 function gorevOlay(tur){var a=ADIM[i];if(!AN||!a.gorev||gecti)return;var g=a.gorev[AN.n];if(g&&g[0]===tur){AN.n++;AN.t0=0;ciz()}}
@@ -659,7 +667,7 @@ function liste(){
  SIRA.forEach(function(id,k){var d=DERS[id],b=o[id]&&o[id].bitti;
   h+='<button data-d="'+id+'" class="'+(b?'bitti':'')+'"><span class="no">'+(b?'✓':k+1)+'</span><span><b>'+d.ad+'</b><small>'+d.ozet+'</small></span><em>'+(b?'Tekrarla':'Başla ›')+'</em></button>'});
  if(PILOT)['hs','gc','da'].forEach(function(dg){if(dg!==GID)h+='<button data-d="'+dg+'"><span class="no">⇄</span><span><b>'+GRUP[dg].ad+' dersleri</b><small>Bu grubun bölümlerine geçin.</small></span><em>Aç ›</em></button>'});
- P.innerHTML=h+'</div>'+cikis;cikisBagla();
+ P.innerHTML=h+'</div>'+mkart('bekle','Merhaba, ben <b>'+(MK?MK.ad:'')+'</b>! HS-GC-MS derslerinde yanındayım.')+cikis;cikisBagla();
  P.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){ac(b.dataset.d)}})}
 
 /* ---------- ders ---------- */
@@ -694,7 +702,7 @@ function ciz(){
   else if(a.faz!==undefined)h+=serit(a.faz);
   else if(a.prog!==undefined)h+=program(a.prog);
   h+='<div class="alt"><button id="dGeri"'+(i&&!a.geriYok?'':' disabled')+'>‹ Geri</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
- h+=cikis;P.innerHTML=h;cikisBagla();
+ h+=mkart.apply(null,ruh(a))+cikis;P.innerHTML=h;cikisBagla();
  var m=document.getElementById('dersM'),dar=matchMedia('(max-width:1000px)').matches,bekle=!!a.ask&&!gecti;
  if(m){var gm=bekle&&a.gorev&&AN&&AN.acik&&a.gorev[AN.n]?a.gorev[AN.n][1]:'';m.className=bekle?'on':'';m.innerHTML=bekle?(gm||a.ask)+(uyari?'<br><b style="color:#B3261E">'+uyari+'</b>':''):''}
  if(dar&&kaydir){kaydir=false;(bekle?document.getElementById(S.view==='pc'?'pcW':S.view==='hslid'&&!a.hot&&a.sec?'loadP':'stageW'):P).scrollIntoView({block:'start',behavior:'smooth'})}

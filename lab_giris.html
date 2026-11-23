@@ -1,4 +1,5 @@
 <title>MY ToksiLab · Laboratuvar Girişi</title>
+<script src="maskot.js" charset="utf-8"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1054,7 +1055,7 @@ function loop(t){requestAnimationFrame(loop);{const n0=performance.now();const b
  if(locked&&now-xhT>90){xhT=now;xhUpd()}
  updTeam(dt,now);updDev(now);renderer.render(scene,cam)}
 requestAnimationFrame(loop);
-say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.');drawMap();
+say('Merhaba, ben <b>Toksi</b>! Bu turda sana eşlik edeceğim. <b>Laboratuvara gir</b> düğmesine bas; rehberimiz Uzm. MY seni içeri götürecek.');drawMap();
 /* gaz odasından dönüş: lab_giris.html#r5 */
 {if(/^#r5\b/.test(location.hash)){history.replaceState(null,'',location.pathname+location.search);$('#intro').classList.add('out');started=true;inside=true;teamMode='home';
  const s=STOPS.d5;G.x=P.x=s.x;G.z=P.z=s.z;G.yaw=P.yaw=s.yaw;G.pitch=P.pitch=-.03;openRoomDoor=5;drawMap();
@@ -1069,7 +1070,7 @@ say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri 
 $('#mHome').onclick=()=>{location.href=BASE+'index.html#menu'};
 if(TANI){const e=$('#enter');if(e)e.textContent='Tura başla ›';const t=document.querySelector('.it3');if(t)t.innerHTML='<b>Laboratuvarı tanıma turu.</b> Koridoru ve odaları gez; cihazlara tıklayınca kısa bilgi kartı açılır. Cihazları kullanmak için ana menüdeki <b>Eğitimler</b>’e geç.';const p=document.querySelector('.hdr2 .pill');if(p)p.textContent='LABORATUVARI TANI · TUR'}
 $('#mVid').onclick=()=>{const k='oda'+inRoom;if(inRoom&&VID[k])playVideo(k);else playWelcome(null)};
-$('#mIntro').onclick=()=>{teamForm();inRoom=false;roomUI();openRoomDoor=0;started=false;inside=false;closeRoom();P.z=14;P.x=0;G.x=0;G.z=9.5;$('#intro').classList.remove('out');say('Merhaba, ben Uzm. MY. <b>Laboratuvara gir</b> düğmesine bas; seni içeri ben götüreceğim.')};
+$('#mIntro').onclick=()=>{teamForm();inRoom=false;roomUI();openRoomDoor=0;started=false;inside=false;closeRoom();P.z=14;P.x=0;G.x=0;G.z=9.5;$('#intro').classList.remove('out');say('Merhaba, ben <b>Toksi</b>! Bu turda sana eşlik edeceğim. <b>Laboratuvara gir</b> düğmesine bas; rehberimiz Uzm. MY seni içeri götürecek.')};
 document.getElementById('back').onclick=leaveRoom;
 window.__proj=(x,y,z)=>{const v=new THREE.Vector3(x,y,z).project(cam);const r=renderer.domElement.getBoundingClientRect();return [r.left+(v.x+1)/2*r.width,r.top+(1-v.y)/2*r.height]};Object.assign(window,{playWelcome,openDev,enterRoom2,enterRoom,leaveRoom,openInfo,teamDisperse,openTeam,TP,GG:G,openPoster,enter,goStop,openDoorCard,closeRoom,step,turn,__lab:1,PP:P});
 </script>

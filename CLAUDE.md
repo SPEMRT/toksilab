@@ -10,6 +10,14 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
 - `cihaz_ders.js`: 8 cihazın rehberli dersleri (terazi, pipet, vorteks, santrifüj, ultra, su, gaz tüp odası, SPE).
   Her adımda `halka` öğrenciye sarı halkayla nereye tıklayacağını gösterir.
 - `anamenu.js`, `egitim_cubugu.js`: sayfalar arası ortak menü ve eğitim çubuğu
+- `maskot.js`: rehber maskotları (Uzm. MY fotoğraflı rehber kartlarının yerine). Her sayfanın `<head>`inde
+  yüklenir; sayfa adına göre karakter seçer (`SAYFA`): Toksi (damla, lider; varsayılan: ana sayfa, lab turu,
+  SPE, su, ultra, vorteks, santrifüj, gaz tüp odası), Vivi (HS viali: hsgcms_pilot, egitim), Pipo (pipet ucu:
+  pipet_pilot), Molli (molekül: kalibrasyon, terazi, örnek hazırlama). Eski `img#av`/`.mentor img` ve "UZM. MY"
+  etiketlerini kendisi değiştirir; `#say`/`#sayT` yazısına göre sevinir/düşünür. Derslerde `MASKOT.kart(durum, metin)`
+  (durum: bekle, dogru, yanlis, bak); `cihaz_ders.js` ve `hs_ders.js` paneline `ruh(a)` ile eklenir.
+  Ana sayfada "ToksiLab ekibi" kartı. Uzm. MY videoları, lab turundaki personel kartı ve eğitim belgesindeki
+  "Eğitici · Uzm. MY" imzası bilinçli olarak değişmedi.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.
