@@ -52,6 +52,10 @@ Testler `tests/` klasöründe; ayrıntı `tests/README.md`. İlk kullanımda bir
   C₁V₁=C₂V₂ hesabı; 5'e bölme/5 ile çarpma hatalarına özel ipucu (`s.ip`); farklı stok örneği (MDMA
   0,1 mg/mL → 100 µL); etiket/uyum/tuz-baz notları; teste 2 mix sorusu. Kullanıcı dosyaları şimdilik
   GitHub'a elle yüklüyor (bu oturumda yazma izni yoktu).
+- Kalibrasyon dersinin etanol bölümü etanol + metanol mix oldu: saf sıvılardan 25 mL balonda 2 g/L mix
+  ara stok (m = C×V → saflığa böl → V = m/ρ; etanol %99,8, ρ 0,789 → 63,5 µL; metanol %99,9, ρ 0,792 →
+  63,2 µL), su ile; kalibratörler aynı (0,05/0,1/0,5 g/L, HS vialinde 2 mL). Soru başına tolerans `s.tol`,
+  ipucu başına tolerans `s.ip[[oran, metin, tol]]`.
 
 **Sıradaki (öncelik kullanıcıda; önce sor):**
 1. Kalibrasyon dersine eklemeler (kullanıcı anlatacak).
