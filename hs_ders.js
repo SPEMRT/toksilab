@@ -62,27 +62,81 @@ function ruh(a){
  if(a.test){if(sn>=SORU.length)return ['dogru','Tebrikler! Bölümü bitirdin.'];if(cevap===null)return ['bekle','Soruyu dikkatle oku, sonra yanıtla.'];return cevap===SORU[sn][2]?['dogru','Doğru!']:['yanlis','Olmadı; doğru yanıt işaretlendi. Açıklamayı oku.']}
  if(uyari&&!gecti)return ['yanlis','Hmm… İpucunu okuyup bir daha dene.'];
  if(a.ask&&!gecti)return ['bak','Görevi yap; sarı halka nereye dokunacağını gösterir.'];
+ if(gecti&&a.anim&&!a.gorev&&!document.querySelector('.ianim'))return ['bak',a.deney?'Animasyonu aç: kolonun içinde sana küçük bir <b>sıcaklık deneyi</b> hazırladım.':'İstersen animasyonu açıp izle; sonra <b>Devam</b>’a bas.'];
+ if(a.anim&&document.querySelector('.ianim'))return ['bekle','Açıklamalar animasyonun yanında. Bitince <b>Devam</b>’a bas.'];
  if(gecti)return ['dogru','Harika! Açıklamayı oku, sonra <b>Devam</b>’a bas.'];
  return ['bekle','Açıklamayı oku; hazırsan <b>Devam</b>’a bas.']}
-function animKapat(){document.querySelectorAll('.ianim').forEach(function(x){x.remove()});AN=null}
+function animKapat(){document.querySelectorAll('.ianim').forEach(function(x){x.remove()});AN=null;var sw=document.getElementById('stageW');if(sw)sw.style.minHeight=''}
 function gorevBitti(){var a=ADIM[i];return !!AN&&!!a.gorev&&AN.n>=a.gorev.length}
 function gorevOlay(tur){var a=ADIM[i];if(!AN||!a.gorev||gecti)return;var g=a.gorev[AN.n];if(g&&g[0]===tur){AN.n++;AN.t0=0;ciz()}}
 function animAc(){var a=ADIM[i];if(!a.anim||document.querySelector('.ianim'))return;var f=a.anim==='inlet'?A.inletAnim:A.colAnim;if(!f)return;f();
  var W=document.querySelector('.ianim'),sw=document.getElementById('stageW');if(!W||!sw)return;
- sw.style.position='relative';sw.appendChild(W);
- W.style.position='absolute';W.style.zIndex='20';W.style.padding='8px';W.style.overflow='auto';W.style.background='rgba(5,10,12,.92)';W.style.borderRadius='14px';W.style.placeItems='start center';
- var kutu=W.firstElementChild,H=sw.clientHeight-16,or=a.anim==='inlet'?16/11:16/15,pay=a.anim==='inlet'?130:285;
- if(kutu){kutu.style.maxWidth=Math.max(a.anim==='inlet'?300:380,Math.min(a.anim==='inlet'?540:620,(H-pay)*or))+'px';kutu.style.gridTemplateColumns='minmax(0,1fr)';kutu.style.boxSizing='border-box'}
+ sw.style.position='relative';sw.appendChild(W);W.style.cssText='';W.classList.add('anDers');
+ var kutu=W.firstElementChild;if(kutu){kutu.classList.add('anKutu');kutu.style.maxWidth='none'}
+ var yan=document.createElement('div');yan.className='anYan';yan.id='anYan';W.appendChild(yan);
  var tb=W.querySelector('#caCmp');if(tb){tb.style.overflowX='auto';tb.style.fontSize='11.5px'}
- ['#iaD','#caD','#iaP','#caS'].forEach(function(q){var e=W.querySelector(q);if(e)e.style.display='none'});
+ ['#iaD','#caD','#iaP'].forEach(function(q){var e=W.querySelector(q);if(e)e.style.display='none'});
  var ms=W.querySelector('[data-ms]');if(ms)ms.parentNode.style.display='none';
  if(!a.gorev)['#iaN'].forEach(function(q){var e=W.querySelector(q);if(e)e.style.display=''});
  W.addEventListener('click',function(e){var id=e.target.id;if(id==='iaI'||id==='caI')gorevOlay('enj');if(id==='caM2')gorevOlay('iso');if(id==='iaN')gorevOlay('splitless');if(id==='caM1')gorevOlay('prog')},true);
  W.addEventListener('input',function(e){if(e.target.id==='iaR'&&+e.target.value<=5)gorevOlay('oran')},true);
  if(!AN||!a.gorev)AN={n:0,t0:0};AN.acik=1;if(a.gorev&&AN.n===0)AN.n=1;
- setTimeout(function(){dispatchEvent(new Event('resize'))},40);
+ DN={n:0,son:'',imza:'',tz:0};if(a.deney&&W._ca)W._ca.hiz(2);
+ if(!window.__anBoy){window.__anBoy=1;addEventListener('resize',anBoyut)}
+ anBoyut();yanCiz();
+ setTimeout(function(){anBoyut();dispatchEvent(new Event('resize'))},40);
  if(matchMedia('(max-width:1000px)').matches)sw.scrollIntoView({block:'start',behavior:'smooth'});ciz()}
-function animTik(){var a=ADIM[i];if(!AN)return;
+/* animasyon kutusu sahnenin yüksekliğini doldurur; yanında bilgi paneli (dar ekranda altında) */
+function anBoyut(){var W=document.querySelector('.ianim.anDers'),sw=document.getElementById('stageW'),a=ADIM[i];if(!W||!sw||!a)return;
+ var Wd=sw.clientWidth-16,dar=Wd<820;W.classList.toggle('dar',dar);
+ var yanW=dar?0:Math.round(Math.min(360,Math.max(270,Wd*.36)));W.style.setProperty('--yanW',yanW+'px');
+ var k=W.firstElementChild,cv=W.querySelector('canvas'),y=document.getElementById('anYan');if(!k||!cv)return;
+ var or=a.anim==='inlet'?16/11:16/15,kalan=dar?Wd:Wd-yanW-12,gen;
+ if(dar){sw.style.minHeight='';gen=Math.min(kalan,620)}
+ else{sw.style.minHeight='';var H=sw.clientHeight-16,ek=k.offsetHeight-cv.offsetHeight;gen=Math.min(kalan,Math.max(320,(H-ek)*or+24))}
+ gen=Math.round(gen);var eski=parseInt(k.style.width)||0;k.style.width=gen+'px';
+ if(y)y.style.maxHeight=dar?'none':(sw.clientHeight-16)+'px';
+ /* dar ekranda bilgi paneli animasyonun altına geçer; sahne içeriği kadar uzar */
+ if(dar)sw.style.minHeight=(W.scrollHeight+16)+'px';
+ if(Math.abs(eski-gen)>2)setTimeout(function(){dispatchEvent(new Event('resize'))},0)}
+/* ---------- kolon sıcaklık deneyi (maskotla): SOP → sabit 60 °C → sabit 120 °C → SOP ---------- */
+var DN=null,DENEY=['SOP programını izle','Sabit 60 °C','Sabit 120 °C','SOP programına dön'];
+function f2(v){return v==null?'>12':v.toFixed(2).replace('.',',')}
+function ogr(ca,ne){var s=ca.rt(null),r;
+ if(ne==='sop')return '<b class="t">SOP PROGRAMI</b>Üç pik ayrı ayrı çıktı: metanol <b>'+f2(s.meoh)+'</b>, etanol <b>'+f2(s.etoh)+'</b>, n-propanol <b>'+f2(s.npr)+'</b> dk. Metanol ile etanol arasında <b>'+f2(s.etoh-s.meoh)+' dk</b> var; ikisi ayrı ölçülebiliyor.';
+ if(ne==='60'){r=ca.rt(60);return '<b class="t">SABİT 60 °C</b>Pikler daha <b>erken</b> çıktı (metanol '+f2(r.meoh)+', etanol '+f2(r.etoh)+' dk) ve <b>birbirine yaklaştı</b>: metanol ile etanol arası '+f2(s.etoh-s.meoh)+' dakikadan <b>'+f2(r.etoh-r.meoh)+' dakikaya</b> indi.<br>Metanol (kaynama noktası 64,7 °C) ve etanol (78,4 °C) uçucu maddelerdir. Fırın ısındıkça filme daha kısa tutunur, hızla ilerlerler; birbirlerinden ayrılmaya zaman kalmaz.'}
+ if(ne==='120'){r=ca.rt(120);return '<b class="t">SABİT 120 °C</b>Üç madde de neredeyse <b>aynı anda</b> çıktı ('+f2(r.meoh)+' / '+f2(r.etoh)+' / '+f2(r.npr)+' dk); pikler üst üste bindi.<br>120 °C bu alkollerin kaynama noktalarının çok üstünde: moleküller filme hemen hiç tutunmuyor, helyumla birlikte kolonu doğrudan geçiyor. Hiç tutunmayan bir gaz kolonu yaklaşık <b>1,6 dk</b>’da geçer; pikler bu sürenin hemen arkasında. Bu kromatogramda metanol ile etanol <b>ayırt edilemez</b>.'}
+ r=ca.rt(35);return '<b class="t">SONUÇ</b><b>Alkol gibi uçucu, kaynama noktası düşük maddeler analiz edilirken fırın düşük sıcaklıkta başlatılır.</b> SOP’ta fırın 35 °C’de 2 dk bekler: maddeler filme tutunur ve birbirinden ayrılır. Sonra 50 °C/dk ısınarak geride kalanları çabuk çıkarır.<br>Fırını baştan sona 35 °C’de tutsaydık ayrılma daha da iyi olurdu, ama n-propanol <b>'+f2(r.npr)+' dakikada</b> geniş bir pik olarak çıkardı. Program ikisinin iyi yanını birleştirir.'}
+function deneyIlerle(ca){var n=DN.n,bitti=ca.done,eski=n;
+ if(n===0&&ca.runMode==='prog'&&bitti){DN.n=1;DN.son=ogr(ca,'sop')}
+ else if(n===1&&ca.runMode==='iso'&&ca.runIso===60&&bitti){DN.n=2;DN.son=ogr(ca,'60')}
+ else if(n===2&&ca.runMode==='iso'&&ca.runIso===120&&bitti){DN.n=3;DN.son=ogr(ca,'120')}
+ else if(n===3&&ca.mode==='prog'){DN.n=4;DN.son=ogr(ca,'son')}
+ if(DN.n!==eski)DN.tz=Date.now()}
+function deneyMaskot(ca){var n=DN.n,iso=ca.iso,izl=ca.mode==='iso'&&!ca.done;
+ if(n>0&&n<4&&Date.now()-DN.tz<2600)return ['dogru','Güzel! Yukarıdaki açıklamayı oku.'];
+ if(n===0)return ca.mode==='prog'?['bekle','Önce yöntemin kendi programını izleyelim: fırın <b>35 °C’de 2 dk</b> bekleyip sonra ısınıyor. Üç pik çıkana kadar bekle.']:['bak','Önce <b>SOP programı</b> düğmesine basıp yöntemin programını izle.'];
+ if(n===1){if(ca.mode!=='iso')return ['bak','Şimdi fırını programlamadan dene: <b>Sabit sıcaklık</b> düğmesine bas, kaydırıcıyı <b>60 °C</b>’ye getir.'];
+  if(iso!==60)return ['bak','Kaydırıcı şu an <b>'+iso+' °C</b>. <b>60 °C</b>’ye getir.'];
+  return ca.runIso===60?['bekle','60 °C’de izliyoruz. Pikler ne zaman çıkıyor, birbirine ne kadar yakın? Grafiğe bak.']:['bak','Kaydırıcıyı bırak; animasyon 60 °C’de yeniden başlayacak.']}
+ if(n===2){if(ca.mode!=='iso')return ['bak','<b>Sabit sıcaklık</b> düğmesine bas ve bu kez <b>120 °C</b> dene.'];
+  if(iso!==120)return ['bak','Şimdi kaydırıcıyı <b>120 °C</b>’ye getir.'];
+  return ca.runIso===120?['bekle','120 °C’de izliyoruz. Bu kez pikler nerede çıkıyor?']:['bak','Kaydırıcıyı bırak; animasyon 120 °C’de yeniden başlayacak.']}
+ if(n===3)return ['bak','Son olarak <b>SOP programı</b> düğmesine basıp yönteme dön.'];
+ return ['dogru','Deney tamam! Uçucu maddeleri ayırmak için fırını <b>düşük sıcaklıkta</b> başlatırız.']}
+var NOT_KOLON='<ul><li>Renkli noktalar moleküllerdir: <b style="color:#FF6B6B">kırmızı</b> metanol, <b style="color:#4DA3FF">mavi</b> etanol, <b style="color:#2DBE5B">yeşil</b> n-propanol.</li><li><b>Yeşil kenar</b> kolonun iç kaplamasıdır (WAX film). Kenara yapışan nokta bekler, ortadaki helyumla ilerler.</li><li>Kaplamaya çok tutunan madde geç çıkar. Alttaki grafikte her madde kolondan çıktıkça bir pik çizilir.</li></ul>';
+function yanCiz(){var y=document.getElementById('anYan'),a=ADIM[i],W=document.querySelector('.ianim');if(!y||!a||!W)return;var ca=W._ca;
+ if(a.deney&&ca&&DN)deneyIlerle(ca);
+ var mk=a.deney&&ca&&DN?deneyMaskot(ca):null;
+ var imza=[DN&&DN.n,mk&&mk.join('|'),ca&&!a.deney?ca.mode+ca.iso:''].join('#');if(y.dataset.imza===imza)return;y.dataset.imza=imza;
+ var not=a.animNot||(a.anim==='col'?NOT_KOLON:''),h='';
+ if(not)h+=a.deney&&DN&&DN.n>0?'<details><summary><h4 style="display:inline">Ne görüyorsun?</h4></summary>'+not+'</details>':'<h4>Ne görüyorsun?</h4><div>'+not+'</div>';
+ if(a.deney&&ca&&DN){h+='<h4>Sıcaklık deneyi</h4><ol class="dn">'+DENEY.map(function(d,k){return '<li class="'+(k<DN.n?'ok':k===DN.n?'sim':'')+'">'+d+'</li>'}).join('')+'</ol>';
+  if(DN.son)h+='<div class="ogr">'+DN.son+'</div>';
+  if(MK)h+=MK.kart(mk[0],mk[1])}
+ else if(ca&&a.anim==='col'){var s=ca.rt(null);h+='<div class="ogr"><b class="t">ŞU AN</b>'+(ca.mode==='prog'?'<b>SOP programı</b>: 35 °C’de 2 dk bekleme, sonra 50 °C/dk ısıtma. Metanol ile etanol arası '+f2(s.etoh-s.meoh)+' dk.':(function(){var r=ca.rt(ca.iso);return '<b>Sabit '+ca.iso+' °C</b>: metanol '+f2(r.meoh)+', etanol '+f2(r.etoh)+' dk. Aradaki fark '+f2(r.etoh-r.meoh)+' dk.'})())+'</div>'}
+ y.innerHTML=h}
+function animTik(){var a=ADIM[i];if(!AN)return;if(AN.acik){yanCiz();var W=document.querySelector('.ianim.anDers');if(W){var md=W._ca?W._ca.mode:'';if(W.dataset.md!==md){W.dataset.md=md;anBoyut()}}else{var sw=document.getElementById('stageW');if(sw)sw.style.minHeight=''}}
  if(AN.acik&&!document.querySelector('.ianim')){AN.acik=0;
   if(a.gorev&&!gecti){var g=a.gorev[AN.n];if(g&&g[0]==='kapat'){AN.n++}else if(AN.n<a.gorev.length){AN={n:0,t0:0}}}ciz();return}
  if(AN.acik&&a.gorev&&!gecti){var g2=a.gorev[AN.n];if(g2&&g2[0]==='bekle'){var now=Date.now();if(!AN.t0)AN.t0=now;else if(now-AN.t0>g2[2]*1000){AN.n++;AN.t0=0;ciz()}}}}
@@ -297,7 +351,7 @@ gctani:{grup:'gc',ad:'Cihazı tanıma',ic:'🔍',ozet:'GC fırını, kolon, inle
   b:'Bilgisayar',ne:'Cihazı yöneten yazılım burada çalışır.',neden:'Yöntem (hangi sıcaklık, hangi iyonlar), sekans (hangi vial, hangi sırayla) ve sonuçların değerlendirilmesi bilgisayardan yapılır.',yanlis:'Bilgisayarda sekans başlatılmadan yapılan enjeksiyonun verisi kaydedilmez.',son:'DİKKAT'},
  {bolum:'Fırının içi',ask:'Şimdi fırının içine bakalım: <b>GC fırın kapağına</b> yeniden dokunarak kapağı açın.',hot:'GC fırın kapağı',view:['main','oven'],ok:function(){return S.view==='oven'},
   b:'Fırının içi',html:'<p>Ortadaki halka biçiminde sarılı ince boru <b>kolon</b>dur. Arkadaki ızgaranın gerisinde, sıcak havayı fırının her yerine eşit dağıtan bir fan vardır.</p><p>Kapak açıkken fırın soğur ve cihaz “hazır değil” durumuna geçer.</p>'},
- {bolum:'Fırının içi',ask:'Ortadaki sarılı <b>kolona</b> dokunun.',hot:'Kolon (DB-WAX)',kes:1,view:['oven'],anim:'col',animYazi:'Kolonda ayrılmayı izleyin',animNot:'<ul><li>Renkli noktalar moleküllerdir: <b style="color:#FF6B6B">kırmızı</b> metanol, <b style="color:#4DA3FF">mavi</b> etanol, <b style="color:#2DBE5B">yeşil</b> n-propanol.</li><li>Kolonun kenarına yapışan nokta bekliyor, ortadaki ilerliyor. Kenarda çok bekleyen madde geç çıkar.</li><li>Alttaki grafikte her madde kolondan çıktıkça bir pik çizilir: önce metanol, sonra etanol, en son n-propanol.</li><li><b>Sabit sıcaklık</b> düğmesini deneyin: pikler erken çıkar ama birbirine yaklaşır. <b>SOP programı</b> onları ayrı tutar.</li></ul>',
+ {bolum:'Fırının içi',ask:'Ortadaki sarılı <b>kolona</b> dokunun.',hot:'Kolon (DB-WAX)',kes:1,view:['oven'],anim:'col',deney:1,animYazi:'Kolonda ayrılmayı izle ve sıcaklık deneyini yap',
   b:'Kolon: DB-WAX, 30 m',ne:'30 metre uzunluğunda, saç teli kadar ince bir cam borudur. İç yüzeyi ince bir sıvı tabakayla (sabit faz) kaplıdır.',neden:'Bileşikler bu tabakaya farklı ölçüde tutunur. Az tutunan önce, çok tutunan sonra çıkar: metanol yaklaşık 2,9, etanol 3,2, iç standart (n-propanol) 3,8 dakikada.',yanlis:'Kolon kırılgandır ve sıcaklık sınırı vardır. Sınır aşılırsa kaplama bozulur.',son:'DİKKAT'},
  {bolum:'Fırının içi',ask:'Sol üstteki <b>ön inlete</b> dokunun.',hot:'Ön inlet',kes:1,view:['oven'],anim:'inlet',animYazi:'Inletin çalışmasını izleyin',animNot:'<ul><li>Turuncu bulut headspace’ten gelen örnektir; mavi noktalar taşıyıcı gaz helyumdur.</li><li><b>💉 Enjeksiyon</b> düğmesine basın: bulutun çoğu sağ alttaki split çıkışından atılır, azı kolona iner.</li><li><b>Split oranı</b> kaydırıcısını sola çekin: kolona inen miktar artar.</li><li><b>Splitless</b>: çıkış kapanır, örneğin tamamı kolona gider. Kanda alkol analizinde split kullanılır, çünkü örnek derişiktir.</li></ul>',
   b:'Ön inlet (giriş)',ne:'Örneğin kolona girdiği yerdir. Headspace’in transfer hattı buraya bağlıdır; kolonun bir ucu da buraya takılır.',neden:'210 °C’de tutulur. “Split” modunda çalışır: gelen gazın küçük bir kısmı kolona girer, kalanı dışarı atılır. Böylece kolon aşırı yüklenmez ve pikler keskin olur.',yanlis:'Bağlantı gevşekse gaz kaçar; alanlar küçülür ve tekrarlanabilirlik bozulur.',son:'DİKKAT'},
@@ -606,6 +660,15 @@ css.textContent=
 '@media (max-width:1000px){body.ders .main,body.ders.dersPC .main{grid-template-columns:1fr}}'+
 '#dersM{display:none;position:fixed;z-index:60;left:8px;right:8px;bottom:8px;background:#F1F6F7;color:#16242A;border-left:5px solid #F2B632;border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.5)}'+
 '@media (max-width:1000px){#dersM.on{display:block}}'+
+'.ianim.anDers{position:absolute;inset:0;z-index:20;display:grid;grid-template-columns:auto var(--yanW,320px);justify-content:center;align-items:start;gap:12px;padding:8px;background:#0A1012;border-radius:14px;overflow:auto}'+
+'.ianim.anDers.dar{grid-template-columns:minmax(0,1fr);justify-items:center}.ianim.anDers .anKutu{box-sizing:border-box;grid-template-columns:minmax(0,1fr)}'+
+'.anYan{box-sizing:border-box;width:100%;background:#1E2A30;border-radius:14px;padding:12px;display:grid;gap:10px;align-content:start;overflow:auto;font-size:14px;line-height:1.45;color:#D7E4E7}'+
+'.anYan h4{font:700 16px "Barlow Condensed",sans-serif;color:#2BD9C0;letter-spacing:.02em;margin:0}.anYan ul{margin:4px 0 0 18px;display:grid;gap:4px}.anYan details summary{cursor:pointer}'+
+'.anYan .dn{list-style:none;margin:0;padding:0;display:grid;gap:5px;counter-reset:dn}.anYan .dn li{display:grid;grid-template-columns:22px 1fr;gap:6px;align-items:center;color:#8FA3A9}'+
+'.anYan .dn li::before{counter-increment:dn;content:counter(dn);width:20px;height:20px;border-radius:50%;background:#33444C;display:grid;place-items:center;font:700 11px "IBM Plex Mono",monospace;color:#EAF2F3}'+
+'.anYan .dn li.ok{color:#8FE0A8}.anYan .dn li.ok::before{content:"✓";background:#2DBE5B;color:#062126}.anYan .dn li.sim{color:#EAF2F3;font-weight:600}.anYan .dn li.sim::before{background:#F2B632;color:#2A2000}'+
+'.anYan .ogr{background:#16242A;border-radius:10px;padding:9px 11px;border-left:4px solid #2BD9C0}.anYan .ogr b.t{display:block;font:600 10.5px "IBM Plex Mono",monospace;color:#7FDCD0;letter-spacing:.08em;margin-bottom:3px}'+
+'.anYan .mskKart p{font-size:13.5px}'+
 '#dersP{display:grid;gap:10px;min-width:0;grid-template-columns:minmax(0,1fr);font-size:15px;line-height:1.45;color:#D7E4E7}'+
 '#dersP .ust{display:flex;justify-content:space-between;align-items:baseline;gap:8px}'+
 '#dersP .ust b{font:700 19px "Barlow Condensed",sans-serif;color:#EAF2F3;letter-spacing:.02em}'+
@@ -697,8 +760,7 @@ function ciz(){
   if(a.ask)h+='<div class="ask'+(gecti?' tamam':'')+'">'+(gecti?(a.bekle?'✓ Açıklamayı okuyun, sonra devam edin.':'✓ Doğru. Açıklamayı okuyun, sonra devam edin.'):a.ask)+(uyari&&!gecti?'<small>'+uyari+'</small>':'')+'</div>';
   if(a.gorev&&!gecti)h+=gorevHtml(a);
   if(!a.ask||gecti)h+=aciklama(a);
-  if(a.anim&&!a.gorev&&gecti&&document.querySelector('.ianim')&&a.animNot)h+='<div class="kart" style="outline:2px solid #2BD9C0"><h4>İzlerken şunlara bakın</h4><div>'+a.animNot+'</div></div>';
-  if(a.anim&&!a.gorev&&gecti&&!document.querySelector('.ianim'))h+='<div class="alt"><button class="anim" id="dAnim">▶ '+a.animYazi+' (isteğe bağlı)</button></div>';
+  if(a.anim&&!a.gorev&&gecti&&!document.querySelector('.ianim'))h+='<div class="alt"><button class="anim" id="dAnim">▶ '+a.animYazi+(a.deney?'':' (isteğe bağlı)')+'</button></div>';
   else if(a.faz!==undefined)h+=serit(a.faz);
   else if(a.prog!==undefined)h+=program(a.prog);
   h+='<div class="alt"><button id="dGeri"'+(i&&!a.geriYok?'':' disabled')+'>‹ Geri</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
@@ -789,6 +851,8 @@ function basla(){
  var dk=document.getElementById('desk');if(dk)['mousedown','click','dblclick','contextmenu','pointerdown'].forEach(function(n){dk.addEventListener(n,pcKoruma,true)});
  st.addEventListener('pointerdown',function(e){if(e.target.closest('.hs.key'))dokunus(e)},true);
  st.addEventListener('click',function(e){if(!e.target.closest('.hs.key'))dokunus(e)},true);
- git(0);setInterval(tik,150);setTimeout(function(){dispatchEvent(new Event('resize'))},60)}
+ git(0);setInterval(tik,150);setTimeout(function(){dispatchEvent(new Event('resize'))},60);
+ /* testler için: adıma git ve durumu oku */
+ window.__hsDers={git:function(n){git(n)},tamam:function(){tamam()},animAc:function(){animAc()},bul:function(t){for(var k=0;k<ADIM.length;k++)if(ADIM[k].b===t||ADIM[k].ask===t)return k;return -1},durum:function(){return {i:i,gecti:gecti,b:ADIM[i]&&ADIM[i].b}}}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',basla);else basla();
 })();

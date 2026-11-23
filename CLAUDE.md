@@ -20,7 +20,12 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   "Eğitici · Uzm. MY" imzası bilinçli olarak değişmedi.
 - `index.html` üst menüde "Hakkında" paneli (`panelAc('hakkinda')`, adresle `#hakkinda`): kullanıcının kendi yazdığı
   "MY ToksiLab’ın çıkış hikâyesi" ve imzası (Uzman Biyolog Murat Yayla, Toksikoloji Laboratuvarı Analisti). Metni
-  kullanıcı onaylamadan değiştirme. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+  kullanıcı onaylamadan değiştirme.
+- HS-GC-MS derslerinde (`hs_ders.js`) animasyonlar (kolon, inlet) sahnede solda, yanında bilgi paneli `#anYan`
+  ("Ne görüyorsun?" = adımın `animNot`u; dar ekranda altta); ders panelinde artık "İzlerken şunlara bakın" yok.
+  `gctani` kolon adımında (`deney:1`) Vivi ile sıcaklık deneyi: SOP izle → sabit 60 °C → sabit 120 °C → SOP'a dön;
+  açıklamalar `colAnim`ın `W._ca.rt()` hesapladığı alıkonma süreleriyle yazılır. Amaç: uçucu/kaynama noktası düşük
+  maddelerde fırın düşük sıcaklıkta başlatılır. Testte adıma gitmek için `window.__hsDers` (git, bul, tamam). "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.
