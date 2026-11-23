@@ -78,6 +78,12 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 .ov.on{opacity:1;pointer-events:auto}
 .pn{position:fixed;z-index:31;top:0;right:0;bottom:0;width:min(1000px,100vw);background:#0C1518;border-left:1px solid var(--line);transform:translateX(100%);transition:transform .45s cubic-bezier(.2,.8,.2,1);display:grid;grid-template-rows:auto 1fr;box-shadow:-30px 0 60px rgba(0,0,0,.45)}
 .pn.on{transform:none}
+.hak{max-width:720px;margin:0 auto;padding:6px 4px 30px;font-size:16.5px;line-height:1.7;color:#D7E4E7}.hak h2{font:700 28px var(--f-display);color:var(--ink);margin-bottom:14px;line-height:1.15}
+.hak p{margin:0 0 14px}.hak p.soru{border-left:4px solid var(--teal);padding:6px 0 6px 14px;margin:20px 0}.hak p.soru b{color:var(--mint)}
+.hak p.vurgu{font-weight:700;color:var(--ink);background:rgba(43,217,192,.08);border-radius:12px;padding:12px 16px;margin:20px 0}
+.hak .imza{display:flex;align-items:center;gap:14px;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}.hak .imza img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--teal)}
+@media (max-width:700px){.hak{padding:4px 12px 30px;font-size:16px}.hak h2{font-size:24px}}
+.hak .imza b{display:block;font:700 20px var(--f-display);color:var(--ink)}.hak .imza span{color:var(--muted);font-size:14.5px}
 .pn header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 22px;border-bottom:1px solid var(--line)}
 .pn header h3{font:700 30px var(--f-display)}.pn header small{display:block;font:600 11px var(--f-mono);letter-spacing:.16em;color:var(--mint)}
 .x{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);font-size:18px}.x:hover{background:rgba(255,255,255,.12)}
@@ -133,7 +139,7 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
  <div class="top">
   <a class="brand" href="#" id="logoTop"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="none" stroke="#2BD9C0" stroke-width="10"/><text x="100" y="120" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="64" fill="#fff">MY</text></svg>
    <div><b>MY_<i>ToksiLab</i></b><small>ADLİ TOKSİKOLOJİ EĞİTİM LABORATUVARI</small></div></a>
-  <nav class="tnav"><button data-p="nasil" class="hm">Nasıl kullanılır?</button><button data-p="egitim">Eğitimler</button><button id="perf" title="Zayıf ekran kartlarında akıcılık için">⚡ Performans</button></nav>
+  <nav class="tnav"><button data-p="nasil" class="hm">Nasıl kullanılır?</button><button data-p="hakkinda">Hakkında</button><button data-p="egitim">Eğitimler</button><button id="perf" title="Zayıf ekran kartlarında akıcılık için">⚡ Performans</button></nav>
  </div>
  <div class="wrap">
   <section class="hero"><div class="k">HOŞ GELDİN</div><h1>Ne yapmak <i>istersin?</i></h1>
@@ -314,10 +320,24 @@ function panelAc(tur,kat){const P=$('#pn');P.classList.add('on');P.setAttribute(
   $('#pb').innerHTML=`<div class="list" style="grid-column:1/-1"><div class="how">
    <div><b>🏛️ Laboratuvarı Tanı</b>Önce bir tur at: hangi oda nerede, hangi cihaz hangi tezgâhta. Cihaza tıklayınca kısa bilgi kartı açılır; simülatör açılmaz.</div>
    <div><b>🎓 Eğitimler</b>Kategoriden bir konu seç. Her konunun alt basamakları var; istediğin basamaktan başlayabilirsin.</div>
-   <div><b>🎯 Analiz modülleri</b>Baştan sona bir analiz: üstte ince bir eğitim çubuğu adımını ve ilerlemeni gösterir; sonunda final testi ve rapor.</div>
    <div><b>💾 İlerleme</b>Eğitimlerdeki ilerlemen bu tarayıcıda saklanır; aynı cihazdan kaldığın yerden devam edersin.</div>
    <div><b>⌨️ Kontroller</b>3B sahnede sürükle: bak · W A S D: yürü · tekerlek: yakınlaş. Telefonda dokun ve kaydır.</div>
-   <div><b>⚡ Performans</b>Ekran takılıyorsa üstteki Performans modunu aç: gölgeler kapanır, akıcılık artar.</div></div></div>`}}
+   <div><b>⚡ Performans</b>Ekran takılıyorsa üstteki Performans modunu aç: gölgeler kapanır, akıcılık artar.</div></div></div>`}
+ if(tur==='hakkinda'){$('#pnK').textContent='HAKKINDA';$('#pnT').textContent='MY ToksiLab';
+  $('#pb').innerHTML=`<article class="hak" style="grid-column:1/-1">
+   <h2>MY ToksiLab’ın çıkış hikâyesi</h2>
+   <p>Uzun yıllardır toksikoloji laboratuvarında analist olarak çalışıyorum. Bu süre içerisinde laboratuvarımıza eğitim amacıyla gelen çok sayıda öğrenciyi gözlemleme, çalışmalarını takip etme ve en çok hangi konularda zorlandıklarını görme fırsatım oldu.</p>
+   <p>Zamanla şunu fark ettim: Laboratuvarı öğrenmek yalnızca anlatılanları dinlemekle mümkün değil. Bir cihazı tanımak, pipet kullanmak, çözelti hazırlamak veya bir analiz gerçekleştirmek için öğrencinin bizzat denemesi, uygulaması ve gerektiğinde hata yaparak öğrenmesi gerekiyor.</p>
+   <p>Ancak gerçek bir laboratuvarda bu her zaman mümkün olmuyor. Yoğunluk, rutin analizlerin devam etmesi, malzeme ve kimyasal kısıtlılıkları öğrencilerin uygulama imkânlarını sınırlandırıyor. Bazı öğrenciler laboratuvara hiç gelemiyor, gelebilenler ise çoğu zaman yapılan işlemleri izlemekle yetiniyor.</p>
+   <p class="soru">Bir süre sonra kendime şu soruyu sordum: <b>Laboratuvara gelemeyen öğrencilere laboratuvarı götüremez miyiz?</b></p>
+   <p>MY ToksiLab fikri böyle doğdu.</p>
+   <p>Yıllar içerisinde edindiğim deneyimi ve öğrencilerin en çok zorlandığı noktaları bir araya getirerek bu simülasyonu hazırlamaya karar verdim. Amacım; tartımdan pipetlemeye, çözelti hazırlamadan kalibrasyon hesaplamalarına ve HS-GC-MS analizine kadar farklı laboratuvar uygulamalarını öğrencilerin özgürce deneyimleyebileceği bir ortam oluşturmaktı.</p>
+   <p>Burada hata yapmaktan çekinmenize gerek yok. İstediğiniz kadar deneyebilir, yanlışlarınızı görebilir ve yeniden başlayabilirsiniz. Çünkü öğrenmenin en önemli adımlarından biri, yaparak öğrenmektir.</p>
+   <p>Elbette hiçbir simülasyon gerçek laboratuvar deneyiminin yerini tamamen tutamaz. Ancak sizi gerçek laboratuvara hazırlayabilir, bilgi ve becerilerinizi geliştirmenize, kendinize daha fazla güvenmenize yardımcı olabilir.</p>
+   <p class="vurgu">Bu çalışmayı hazırlarken tek bir düşüncem vardı: Yıllar içinde kazandığım deneyim, öğrencilerimizin daha iyi öğrenmesine katkı sağlasın.</p>
+   <p>Umarım MY ToksiLab, laboratuvar yolculuğunuzda size faydalı bir arkadaş olur.</p>
+   <div class="imza"><img src="avatar.jpg" alt=""><div><b>Uzman Biyolog Murat Yayla</b><span>Toksikoloji Laboratuvarı Analisti</span></div></div>
+  </article>`}}
 function egitimCiz(aktif){const s=T?T.oku():{};
  $('#pb').innerHTML=`<nav class="cats">${KAT.map(k=>`<button data-k="${k.id}" class="${k.id===aktif?'on':''}"><span>${k.ic}</span>${k.ad}<em>${k.it.length}</em></button>`).join('')}</nav><div class="list" id="L"></div>`;
  const k=KAT.find(x=>x.id===aktif);
@@ -337,8 +357,8 @@ function vwKapat(){VV.pause();VW.classList.remove('on');setTimeout(()=>{VW.hidde
 $('#hvBtn').onclick=vwAc;$('#vwX').onclick=vwKapat;VW.onclick=e=>{if(e.target===VW)vwKapat()};VV.onended=vwKapat;
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!VW.hidden)vwKapat()});
 window.__G={panelAc,introBitir,introBasla,vwAc};
-if(['egitim','nasil'].includes(HSH))setTimeout(()=>panelAc(HSH),350);
-addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(['egitim','nasil'].includes(h)){introBitir();panelAc(h)}});
+if(['egitim','nasil','hakkinda'].includes(HSH))setTimeout(()=>panelAc(HSH),350);
+addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(['egitim','nasil','hakkinda'].includes(h)){introBitir();panelAc(h)}});
 </script>
 </body>
 </html>

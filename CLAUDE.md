@@ -18,6 +18,9 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   (durum: bekle, dogru, yanlis, bak); `cihaz_ders.js` ve `hs_ders.js` paneline `ruh(a)` ile eklenir.
   Ana sayfada "ToksiLab ekibi" kartı. Uzm. MY videoları, lab turundaki personel kartı ve eğitim belgesindeki
   "Eğitici · Uzm. MY" imzası bilinçli olarak değişmedi.
+- `index.html` üst menüde "Hakkında" paneli (`panelAc('hakkinda')`, adresle `#hakkinda`): kullanıcının kendi yazdığı
+  "MY ToksiLab’ın çıkış hikâyesi" ve imzası (Uzman Biyolog Murat Yayla, Toksikoloji Laboratuvarı Analisti). Metni
+  kullanıcı onaylamadan değiştirme. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.
