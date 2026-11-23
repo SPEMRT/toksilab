@@ -44,7 +44,7 @@ const CIHAZLAR = [[2, 'bal'], [2, 'cen'], [2, 'vor'], [2, 'pip'], [2, 'spe'], [2
   // 1) Turu başlat ve koridora gir.
   const p = await sayfaAc();
   // Tura başlarken "nasıl gezilir" tanıtımı (5 kart) çıkar; öğrenci gibi İleri ile geç.
-  await p.click('#enter');
+  await p.evaluate(() => document.getElementById('enter').click()); // doğrudan tıkla: sayfa yüklenirken Playwright'ın gezinme beklemesine takılmasın
   await p.waitForTimeout(800);
   const kartlar = [];
   for (let i = 0; i < 8 && await p.evaluate(() => { const k = document.getElementById('kvz'); return k && !k.hidden; }); i++) {
