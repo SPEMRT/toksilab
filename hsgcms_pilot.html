@@ -1385,6 +1385,6 @@ if(location.hash==='#prep')setTimeout(()=>show('prep'),400);
 <script src="egitim_cubugu.js" charset="utf-8" defer></script>
 <script src="anamenu.js" charset="utf-8" defer></script>
 <script>/* ders betiği: tarayıcı önbelleğinde eski sürüm kalmasın diye 5 dakikada bir yenilenen adresle yüklenir */
-(function(){var s=document.createElement('script');s.charset='utf-8';s.src='hs_ders.js?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})();</script>
+(function(){['hs_ders.js','hs_serbest.js'].forEach(function(f){var s=document.createElement('script');s.charset='utf-8';s.src=f+'?v='+Math.floor(Date.now()/3e5);document.body.appendChild(s)})})();</script>
 </body>
 </html>

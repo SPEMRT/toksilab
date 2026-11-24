@@ -1,5 +1,7 @@
 /* MY ToksiLab · Rehberli dersler: Headspace örnekleyici (Agilent 7694E)
-   hsgcms_pilot.html?ders=hs        → bölüm listesi
+   hsgcms_pilot.html?ders=hsgc      → HS-GC-MS sistemi bölüm listesi (eski ?ders=hs ve ?ders=gc de buraya açılır)
+   hsgcms_pilot.html?ders=sistani   → Sistemi tanıma (hstani + gctani birleşimi) · ?ders=hsgctest → Kontrol testi
+   hsgcms_pilot.html?ders=hs        → (eski) bölüm listesi
    hsgcms_pilot.html?ders=hstani    → Cihazı tanıma
    hsgcms_pilot.html?ders=hsyukle   → Numune yükleme
    hsgcms_pilot.html?ders=hstus     → Tuş takımı parametreleri
@@ -12,6 +14,7 @@
 var PILOT=!!window.__DERS_PILOT,D=null;
 try{D=PILOT?(sessionStorage.getItem('toksilab_ders_git')||'hs'):new URLSearchParams(location.search).get('ders')}catch(e){if(PILOT)D='hs'}
 if(!D)return;
+if(D==='hs'||D==='gc')D='hsgc';
 var BASE=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';
 var LS='toksilab_ders_v1';
 var HS,S,A,P,G,SON=null,i=0,gecti=false,uyari='',puan=0,sn=0,cevap=null,kaydir=false,hataM='';
@@ -643,9 +646,25 @@ dasonuc:{grup:'da',ad:'Kalibrasyon ve sonuç',ic:'📄',ozet:'Kalibrasyon eğris
 };
 var GRUP={hs:{ad:'HEADSPACE ÖRNEKLEYİCİ',alt:'Agilent 7694E',son:'Headspace örnekleyicinin bütün bölümlerini tamamladınız.',sira:['hstani','hsyukle','hstus','hsbaslat']},
  gc:{ad:'GC-MS',alt:'Agilent 6890N · 5975B',son:'GC-MS’in bütün bölümlerini tamamladınız.',sira:['gctani','gctus','pctani','pcsekans']},
- da:{ad:'VERİ ANALİZİ',alt:'Enhanced Data Analysis',son:'Veri analizinin bütün bölümlerini tamamladınız.',sira:['datani','dakrom','dasonuc']}};
+ da:{ad:'VERİ ANALİZİ',alt:'Enhanced Data Analysis',son:'Veri analizinin bütün bölümlerini tamamladınız.',sira:['datani','dakrom','dasonuc']},
+ hsgc:{ad:'HS-GC-MS SİSTEMİ',alt:'7694E · 6890N · 5975B',acl:'Numunenin yolculuğunu sırayla izleyin: vialden kromatograma. Her bölüm 5–10 dakika sürer.',son:'HS-GC-MS sisteminin bütün bölümlerini tamamladınız.',sira:['sistani','hsyukle','hstus','gctus','pctani','pcsekans','hsbaslat','hsgctest']}};
+/* HS ve GC-MS tek ders: iki "Cihazı tanıma" dersinin adımları sırayla birleşir (metinler tek yerde kalır).
+   "Analizi başlatma" sekans oluşturmanın arkasına alındı: gerçekte önce sekans kurulur, sonra HS’te Start’a basılır. */
+(function(){
+ var kopya=function(a,ad){var o={};for(var k in a)o[k]=a[k];o.bolum=ad[a.bolum]||a.bolum;return o};
+ var parca=function(L,ad){return L.adim.filter(function(a){return !a.test}).map(function(a){return kopya(a,ad)})};
+ var h=DERS.hstani,g=DERS.gctani;
+ DERS.sistani={grup:'hsgc',ad:'Sistemi tanıma',ic:'🔍',ozet:'HS örnekleyici, GC fırını, kolon, inlet, MS ve bilgisayar: numunenin izlediği yol · sıcaklık deneyi.',baslik:'HS-GC-MS · SİSTEMİ TANIMA',view:['main'],yukGizle:1,
+  adim:parca(h,{'Dış görünüm':'HS dışı','İç görünüm':'HS içi'}).concat(parca(g,{'Giriş':'GC-MS','Dış görünüm':'GC-MS','Fırının içi':'GC fırını'}),[{bolum:'Kontrol',test:1}]),
+  soru:h.soru.concat(g.soru)};
+ var t=[];['hstani','gctani','hsyukle','hstus','gctus','pctani','pcsekans','hsbaslat'].forEach(function(k){var q=DERS[k]&&DERS[k].soru;if(q&&q.length)t.push(q[0])});
+ DERS.hsgctest={grup:'hsgc',ad:'Kontrol testi',ic:'✅',ozet:'Her bölümden bir soru: sistemi bir bütün olarak sınayın.',baslik:'HS-GC-MS · KONTROL TESTİ',view:['main'],yukGizle:1,adim:[{bolum:'Kontrol',test:1}],soru:t};
+ ['hstani','gctani','hsyukle','hstus','gctus','pctani','pcsekans','hsbaslat'].forEach(function(k){if(DERS[k])DERS[k].grup='hsgc'});
+ /* birleşik listede adlar ayırt edilsin */
+ DERS.hstus.ad='HS tuş takımı';DERS.gctus.ad='GC tuş takımı';DERS.pctani.ad='Yazılımı tanıma';DERS.pcsekans.ad='Sekans oluşturma';
+})();
 var FAZ=[['Dengeleme','4,0'],['Basınç','0,20'],['Loop dolar','0,20'],['Loop denge','0,05'],['Enjeksiyon','0,50']];
-var L=DERS[D],ADIM=L?L.adim:[],SORU=L?L.soru:[],GR=GRUP[L?(L.grup||'hs'):(GRUP[D]?D:'hs')],SIRA=GR.sira,GID=L?(L.grup||'hs'):(GRUP[D]?D:'hs');
+var L=DERS[D],ADIM=L?L.adim:[],SORU=L?L.soru:[],GR=GRUP[L?(L.grup||'hsgc'):(GRUP[D]?D:'hsgc')],SIRA=GR.sira,GID=L?(L.grup||'hsgc'):(GRUP[D]?D:'hsgc');
 
 /* ---------- görünüm ---------- */
 var css=document.createElement('style');
@@ -717,20 +736,21 @@ css.textContent=
 '@media (prefers-reduced-motion:reduce){.hs.dersK,.dersH,.disp.dersD{animation:none}.hs.dersK{box-shadow:0 0 0 4px #F2B632 inset}}';
 document.head.appendChild(css);
 
-function oku(){try{return JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){return {}}}
+function oku(){var o;try{o=JSON.parse(localStorage.getItem(LS)||'{}')||{}}catch(e){o={}}
+ if(!o.sistani&&o.hstani&&o.hstani.bitti&&o.gctani&&o.gctani.bitti)o.sistani={bitti:1};return o}
 function kayit(){try{var o=oku();o[D]={bitti:1,puan:puan,soru:SORU.length,t:Date.now()};localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
 var bolumler=[];ADIM.forEach(function(a){if(bolumler.indexOf(a.bolum)<0)bolumler.push(a.bolum)});
 var cikis='<div class="alt">'+(L?'<button class="ince" id="dListe">☰ Bölümler</button>':'')+(PILOT?'':'<button class="ince" id="dSerbest">Dersten çık · serbest kullanım</button>')+'</div>';
-function cikisBagla(){var l=P.querySelector('#dListe'),s=P.querySelector('#dSerbest');if(l)l.onclick=function(){ac(GID)};if(s)s.onclick=function(){location.href=location.pathname}}
+function cikisBagla(){var l=P.querySelector('#dListe'),s=P.querySelector('#dSerbest');if(l)l.onclick=function(){ac(GID)};if(s)s.onclick=function(){var k=L?D:'',t=/^(gc)/.test(k)?'gc':/^(pc|da)/.test(k)||GID==='da'?'pc':'hs';location.href=location.pathname+'?serbest='+t}}
 
 /* ---------- bölüm listesi ---------- */
 function liste(){
  var o=oku(),h='<div class="ust"><b>'+GR.ad+'</b><span>'+GR.alt+'</span></div>';
- h+='<div class="acl">Cihazı kısa bölümler hâlinde öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 5–10 dakika sürer.</div><div class="liste">';
+ h+='<div class="acl">'+(GR.acl||'Cihazı kısa bölümler hâlinde öğrenin. Sırayla ilerlemeniz önerilir; her bölüm 5–10 dakika sürer.')+'</div><div class="liste">';
  SIRA.forEach(function(id,k){var d=DERS[id],b=o[id]&&o[id].bitti;
   h+='<button data-d="'+id+'" class="'+(b?'bitti':'')+'"><span class="no">'+(b?'✓':k+1)+'</span><span><b>'+d.ad+'</b><small>'+d.ozet+'</small></span><em>'+(b?'Tekrarla':'Başla ›')+'</em></button>'});
- if(PILOT)['hs','gc','da'].forEach(function(dg){if(dg!==GID)h+='<button data-d="'+dg+'"><span class="no">⇄</span><span><b>'+GRUP[dg].ad+' dersleri</b><small>Bu grubun bölümlerine geçin.</small></span><em>Aç ›</em></button>'});
- P.innerHTML=h+'</div>'+mkart('bekle','Merhaba, ben <b>'+(MK?MK.ad:'')+'</b>! HS-GC-MS derslerinde yanındayım.')+cikis;cikisBagla();
+ if(PILOT)['hsgc','da'].forEach(function(dg){if(dg!==GID)h+='<button data-d="'+dg+'"><span class="no">⇄</span><span><b>'+GRUP[dg].ad+' dersleri</b><small>Bu grubun bölümlerine geçin.</small></span><em>Aç ›</em></button>'});
+ P.innerHTML=h+'</div>'+mkart('bekle','Merhaba, ben <b>'+(MK?MK.ad:'')+'</b>! Numunenin yolculuğunda yanındayım.')+cikis;cikisBagla();
  P.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){ac(b.dataset.d)}})}
 
 /* ---------- ders ---------- */

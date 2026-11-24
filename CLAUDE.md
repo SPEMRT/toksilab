@@ -25,7 +25,15 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   ("Ne görüyorsun?" = adımın `animNot`u; dar ekranda altta); ders panelinde artık "İzlerken şunlara bakın" yok.
   `gctani` kolon adımında (`deney:1`) Vivi ile sıcaklık deneyi: SOP izle → sabit 60 °C → sabit 120 °C → SOP'a dön;
   açıklamalar `colAnim`ın `W._ca.rt()` hesapladığı alıkonma süreleriyle yazılır. Amaç: uçucu/kaynama noktası düşük
-  maddelerde fırın düşük sıcaklıkta başlatılır. Testte adıma gitmek için `window.__hsDers` (git, bul, tamam). "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+  maddelerde fırın düşük sıcaklıkta başlatılır. Testte adıma gitmek için `window.__hsDers` (git, bul, tamam).
+- HS ve GC-MS dersleri tek ders: `?ders=hsgc` "HS-GC-MS sistemi", 8 bölüm (numunenin yolculuğu sırasıyla):
+  sistani (hstani + gctani adımları çalışma anında birleşir), hsyukle, hstus, gctus, pctani, pcsekans, hsbaslat,
+  hsgctest (her dersin ilk sorusu). Eski `?ders=hs` / `?ders=gc` buraya açılır; hstani+gctani bitmişse sistani ✓.
+  Veri analizi (`?ders=da`) ve metot geliştirme (`?mod=metot`) ayrı.
+- HS-GC-MS serbest kullanım `hs_serbest.js`: `?serbest=hs|gc|pc` ya da parametresiz açılışta; üç sekme, alt düğmeler,
+  sağda "Burada neler yapabilirsin?" + maskot (sayfanın `#say` uyarılarını aktarır). SOP ekranı (16 adım) yalnızca
+  "Kanda etanol" modülü aktifken (localStorage `toksilab_egitim_v1`.aktif) ya da `?gorev=`/`?mod=`/`?egitim=`/`?sop=` ile.
+  Dersten "serbest kullanım"a geçişte bölümün cihazının sekmesi açılır. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.

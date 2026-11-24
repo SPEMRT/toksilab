@@ -294,8 +294,7 @@ const KAT=[
   {ic:'⚗️',ad:'Sıvı-sıvı ekstraksiyon',d:'pH ayarı, çözücü seçimi, faz ayırma.',dr:'y',s:[]},
   {ic:'💇',ad:'Saç örneği hazırlama',d:'Yıkama, kurutma, kesme, mikrodalga asit yakma.',dr:'y',s:[]}]},
  {id:'cihaz',ic:'📊',ad:'Analitik cihazlar',acik:'Her cihazda: tanı, numune ver, sonuca bak, eğri kur.',it:[
-  {ic:'♨️',ad:'Headspace örnekleyici (7694E)',d:'Rehberli ders: cihazı adım adım, açıklamalarıyla öğrenin. 4 bölüm, her biri 5–10 dk.',dr:'h',s:[H('Cihazı tanıma'),H('Numune yükleme'),H('Tuş takımı parametreleri'),H('Analizi başlatma')]},
-  {ic:'🔥',ad:'GC-MS',d:'Agilent 6890N · 5975B. Rehberli ders: cihaz, tuş takımı ve bilgisayar yazılımı, adım adım.',dr:'h',s:[H('Cihazı tanıma'),H('Tuş takımı parametreleri'),H('Yazılımı tanıma ve menüler'),H('Sekans oluşturma ve başlatma')]},
+  {ic:'♨️',ad:'HS-GC-MS sistemi',d:'Agilent 7694E headspace · 6890N GC · 5975B MS. Rehberli ders: numunenin yolculuğu sırasıyla, vialden kromatograma. 8 bölüm, her biri 5–10 dk.',dr:'h',s:[H('Sistemi tanıma'),H('Numune yükleme'),H('HS tuş takımı'),H('GC tuş takımı'),H('Yazılımı tanıma'),H('Sekans oluşturma'),H('Analizi başlatma'),H('Kontrol testi')]},
   {ic:'📈',ad:'Veri analizi (Data Analysis)',d:'Rehberli ders: kromatogramı okuma, kütle spektrumu, kalibrasyon ve sonuç raporu.',dr:'h',s:[H('Programı tanıma ve menüler'),H('Kromatogram ve spektrum'),H('Kalibrasyon ve sonuç')]},
   {ic:'🧭',ad:'GC-MS metot geliştirme',d:'Kendi yöntemini oluştur: fırın programı, split, akış, HS sıcaklık ve süreleri, solvent delay, SIM grupları. Veri senin parametrelerine göre oluşur; tahmini gerçek cihazında dene, motoru kendi cihazına uydur.',dr:'h',s:[H('Canlı tahmin ve görevler'),H('Tahmin raporu (gerçek cihaz için)'),H('Gerçek cihaz gözlemleriyle motoru uydurma')]},
   {ic:'⚛️',ad:'ICP-MS',d:'Saç, kan ve idrarda toksik elementler (As, Pb, Cd, Hg, Tl).',dr:'y',s:[H('Cihazı tanı'),H('Numune verme'),H('Sonuçlara bakma'),H('Kalibrasyon eğrisi')]},
@@ -310,7 +309,7 @@ const BD={h:['HAZIR','h'],y:['YAKINDA','y'],k:['KISMEN','k']};
 /* her konunun "Başla" adresi; alt maddeler yalnızca bilgi */
 const GO={'KKD ve laboratuvar güvenliği':'egitim.html?m=etanol&tek=kkd','Analitik terazi':'terazi_pilot.html','Otomatik pipet':'pipet_pilot.html','Vorteks':'vorteks_pilot.html','Santrifüj':'santrifuj_pilot.html','Ultrasonik banyo':'ultra_pilot.html','Ultra saf su':'su_pilot.html','Gaz tüp odası':'gaz_pilot.html',
  'Kalibrasyon çözeltisi hazırlama':'kalibrasyon_pilot.html','Stok ve ara stok hazırlama':'ornek_hazirlama.html','Kalibrasyon eğrisi oluşturma':'egitim.html?m=etanol&tek=kalib','Headspace vial hazırlama':'ornek_hazirlama.html','Katı faz ekstraksiyonu (SPE)':'spe_pilot.html',
- 'Headspace örnekleyici (7694E)':'hsgcms_pilot.html?ders=hs','GC-MS':'hsgcms_pilot.html?ders=gc','Veri analizi (Data Analysis)':'hsgcms_pilot.html?ders=da','GC-MS metot geliştirme':'hsgcms_pilot.html?mod=metot','Kanda alkol analizi (HS-GC-MS)':'egitim.html?m=etanol','Atık suda SPE':'spe_pilot.html'};
+ 'HS-GC-MS sistemi':'hsgcms_pilot.html?ders=hsgc','Veri analizi (Data Analysis)':'hsgcms_pilot.html?ders=da','GC-MS metot geliştirme':'hsgcms_pilot.html?mod=metot','Kanda alkol analizi (HS-GC-MS)':'egitim.html?m=etanol','Atık suda SPE':'spe_pilot.html'};
 
 function panelAc(tur,kat){const P=$('#pn');P.classList.add('on');P.setAttribute('aria-hidden','false');$('#ov').classList.add('on');
  if(tur==='egitim'){$('#pnK').textContent='EĞİTİM KATALOĞU';$('#pnT').textContent='Eğitimler';egitimCiz(kat||'beceri')}
