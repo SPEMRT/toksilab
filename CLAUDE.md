@@ -38,7 +38,14 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   ilerleme çubuğu, Toksi + "Devam et ›" sıradaki konuyu açar); kategoriye dokununca kartlar üstte numaralı şeride
   küçülür, konular kare kartlar (✓ bitti, SIRADAKİ, kısmi %); karta dokununca ayrıntı penceresi (`#ekDt`, bölümler +
   Başla). İlerleme `IZ` tablosuyla: cihaz/HS dersleri `toksilab_ders_v1` (ders kimlikleri), kalibrasyon
-  `toksilab_kalibrasyon_v1` (8 bölüm), analiz modülü `TLE`. Yeni ders eklenince `IZ`'ye kimlikleriyle ekle. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+  `toksilab_kalibrasyon_v1` (8 bölüm), analiz modülü `TLE`. Yeni ders eklenince `IZ`'ye kimlikleriyle ekle.
+- Ana sayfa (`index.html`): karşılama "Bir laboratuvar. Sınırsız deneme. Gerçek bir deneyim." (anahtar kelimeler
+  turkuaz), Toksi balonu "Hazır mısın? Bugün laboratuvar senin!", sayaç (konu sayısı KAT'tan); bento kartlar
+  (Laboratuvarı Tanı büyük, Eğitimler ve Adli Vakalar küçük); ilerleme varsa "Kaldığın yer · Devam et" şeridi
+  (`anaCiz`, Eğitimler panelindeki `ilerle`/`siradaki`). İlerleme yalnızca tarayıcıda (localStorage); hesap/sunucu
+  yok, kullanıcı şimdilik böyle istiyor.
+- Videolar şimdilik kapalı (kullanıcı isteği; dosyalar depoda): `index.html` ve `lab_giris.html`'de
+  `VIDEO_KAPALI=true`; `false` yapınca hoş geldiniz ve lab turu tanıtım videoları geri gelir. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.

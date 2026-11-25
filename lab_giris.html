@@ -917,12 +917,14 @@ function enter2(){say('Ana girişin önündeyiz. Kapının üstündeki <b>sensö
 /* sol menü vurgusu: ana kapıdan girince Karşılama, odadayken Ana Sayfa */
 function menuDurum(){const v=$('#mVid'),h=$('#mHome');if(v)v.classList.toggle('dikkat',!!inside);if(h)h.classList.toggle('dikkat',!!inRoom)}
 setInterval(()=>{try{menuDurum()}catch(e){}},600);
-/* ---- tanıtım videoları: laboratuvar girişi ve oda girişleri (dosya yoksa atlanır) ---- */
+/* ---- tanıtım videoları: laboratuvar girişi ve oda girişleri (dosya yoksa atlanır) ----
+   VIDEO_KAPALI=true: videolar şimdilik gösterilmez (kullanıcı isteği); dosyalar depoda duruyor, false yapınca geri gelir. */
+const VIDEO_KAPALI=true;
 const VID={giris:{f:'lab_giris',t:'Laboratuvar girişi · tanıtım'},oda2:{f:'oda2',t:'Örnek Hazırlama Laboratuvarı · tanıtım'}};
 const vidOto=()=>{try{return localStorage.getItem('toksilab_video_oto')!=='0'}catch(e){return true}};
 const vidGor=k=>{try{return (JSON.parse(localStorage.getItem('toksilab_video_gor')||'{}'))[k]}catch(e){return false}};
 const vidGordu=k=>{try{const o=JSON.parse(localStorage.getItem('toksilab_video_gor')||'{}');o[k]=1;localStorage.setItem('toksilab_video_gor',JSON.stringify(o))}catch(e){}};
-function playVideo(k,done){const D=VID[k];if(!D){done&&done();return}
+function playVideo(k,done){const D=VID[k];if(!D||VIDEO_KAPALI){done&&done();return}
  const W=$('#wv'),V=$('#wvV');let fin=false;$('#wvT').textContent=D.t;$('#wvO').checked=!vidOto();
  V.innerHTML='';V.poster=BASE+D.f+'.jpg';V.src=BASE+D.f+'.mp4';const tr=document.createElement('track');tr.kind='subtitles';tr.srclang='tr';tr.label='Türkçe';tr.src=BASE+D.f+'.vtt';tr.default=true;V.appendChild(tr);const altyazi=()=>{if(V.textTracks[0])V.textTracks[0].mode='showing'};altyazi();tr.addEventListener('load',altyazi);V.addEventListener('loadedmetadata',altyazi,{once:true});
  W.hidden=false;void W.offsetWidth;W.classList.add('on');V.currentTime=0;V.muted=false;
@@ -1069,6 +1071,7 @@ say('Merhaba, ben <b>Toksi</b>! Bu turda sana eşlik edeceğim. <b>Laboratuvara 
  say(`Tekrar hoş geldin! <b>${RBD[no].n}</b>’ndasın, <b>${DEVI[d.k].n}</b> önünde kaldığın yerdesin. Başka bir cihaza geçebilir ya da <b>‹ Koridora dön</b> ile koridora çıkabilirsin.`)}}
 $('#mHome').onclick=()=>{location.href=BASE+'index.html#menu'};
 if(TANI){const e=$('#enter');if(e)e.textContent='Tura başla ›';const t=document.querySelector('.it3');if(t)t.innerHTML='<b>Laboratuvarı tanıma turu.</b> Koridoru ve odaları gez; cihazlara tıklayınca kısa bilgi kartı açılır. Cihazları kullanmak için ana menüdeki <b>Eğitimler</b>’e geç.';const p=document.querySelector('.hdr2 .pill');if(p)p.textContent='LABORATUVARI TANI · TUR'}
+if(VIDEO_KAPALI)$('#mVid').style.display='none';
 $('#mVid').onclick=()=>{const k='oda'+inRoom;if(inRoom&&VID[k])playVideo(k);else playWelcome(null)};
 $('#mIntro').onclick=()=>{teamForm();inRoom=false;roomUI();openRoomDoor=0;started=false;inside=false;closeRoom();P.z=14;P.x=0;G.x=0;G.z=9.5;$('#intro').classList.remove('out');say('Merhaba, ben <b>Toksi</b>! Bu turda sana eşlik edeceğim. <b>Laboratuvara gir</b> düğmesine bas; rehberimiz Uzm. MY seni içeri götürecek.')};
 document.getElementById('back').onclick=leaveRoom;

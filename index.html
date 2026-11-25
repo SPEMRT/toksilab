@@ -45,7 +45,7 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none}.brand svg{width:46px;height:46px}
 .brand b{font:700 26px/1 var(--f-display)}.brand b i{font-style:normal;color:var(--teal)}.brand small{display:block;font:600 9.5px var(--f-mono);letter-spacing:.18em;color:var(--muted);margin-top:3px}
 .tnav{display:flex;gap:6px;flex-wrap:wrap}.tnav button,.tnav a{font:600 13.5px var(--f-body);color:#C9D7DB;padding:8px 12px;border-radius:999px;text-decoration:none}.tnav button:hover,.tnav a:hover{background:rgba(255,255,255,.06);color:#fff}
-.wrap{max-width:1220px;margin:0 auto;padding:0 clamp(16px,4vw,40px) 60px}
+.wrap{max-width:1440px;margin:0 auto;padding:0 clamp(16px,4vw,40px) 60px}
 .hero{padding:clamp(18px,5vh,56px) 0 clamp(18px,4vh,40px);display:grid;gap:10px}
 .hero .k{font:600 12px var(--f-mono);letter-spacing:.24em;color:var(--mint)}
 .hero h1{font:700 clamp(38px,6vw,72px)/1 var(--f-display);letter-spacing:.01em}.hero h1 i{font-style:normal;color:var(--teal)}
@@ -62,6 +62,26 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 .mc .go{margin-top:auto;font:700 13.5px var(--f-body);color:var(--mint);display:flex;align-items:center;gap:6px}
 .mc .chips{display:flex;gap:5px;flex-wrap:wrap}.mc .chips span{font:600 10.5px var(--f-mono);padding:3px 7px;border-radius:999px;background:rgba(255,255,255,.06);color:#B7C8CD}
 .mc.ana{--c:rgba(43,217,192,.32)}
+.hero.yeni{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px}.hero.yeni>div{display:grid;gap:10px}
+.hero h1.uc{line-height:1.02}.hero h1.uc span{display:block}
+.sayac{display:flex;gap:clamp(18px,3vw,34px);margin-top:6px;color:var(--muted);font-size:13.5px}.sayac b{display:block;font:700 30px/1 var(--f-display);color:#fff}
+.tm{display:grid;justify-items:center;gap:8px;padding-right:clamp(0px,3vw,40px)}.tm .msk{width:clamp(120px,13vw,170px);height:clamp(120px,13vw,170px)}
+.bub{background:#F1F6F7;color:#16242A;border-radius:16px;padding:10px 16px;font-size:15px;position:relative;text-align:center;max-width:250px}.bub::before{content:"";position:absolute;top:-8px;left:50%;border:8px solid transparent;border-top:0;border-bottom-color:#F1F6F7;transform:translateX(-50%)}
+.bento{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
+.bk{position:relative;display:grid;gap:10px;align-content:start;text-align:left;padding:22px;border-radius:22px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--ink);font:inherit;cursor:pointer;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+.bk,.bk *{text-decoration:none}
+.bk:hover{border-color:var(--a);transform:translateY(-3px);box-shadow:0 18px 40px rgba(0,0,0,.4)}
+.bk .ic{font-size:44px;line-height:1}.bk h2{font:700 30px/1.05 var(--f-display)}.bk p{font-size:15px;line-height:1.5;color:#C3D2D6}
+.bk .chips{display:flex;gap:6px;flex-wrap:wrap}.bk .chips span{font:600 11px var(--f-mono);padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.07);color:#B7C8CD}
+.bk .go{display:inline-block;justify-self:start;font-weight:700;font-size:15px;background:var(--a);color:#06141A;border-radius:12px;padding:10px 16px}
+.bk.buyuk{grid-row:1/3;align-content:end;min-height:clamp(330px,46vh,460px);background:radial-gradient(circle at 85% 15%,rgba(43,217,192,.32),transparent 58%),var(--card)}
+.bk.buyuk .ic{position:absolute;top:22px;left:22px;font-size:64px}.bk.buyuk h2{font-size:clamp(34px,4vw,46px)}
+.bk.kucuk{grid-template-columns:60px 1fr;align-items:center}.bk.kucuk>div{display:grid;gap:8px}.bk.kucuk .chips{display:none}
+.anaDevam[hidden]{display:none}.anaDevam{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 16px;margin-top:16px}
+.anaDevam .mskKart{background:none;border:0;padding:0}.anaDevam .mskKart p{color:var(--ink)}
+.anaDevam button{border:0;background:linear-gradient(90deg,#2BD9C0,#7CF2D8);color:#062126;font-weight:700;border-radius:12px;padding:11px 18px;white-space:nowrap;cursor:pointer;font-family:inherit;font-size:15px}
+@media (max-width:980px){.bento{grid-template-columns:1fr}.bk.buyuk{grid-row:auto;min-height:0}.bk.buyuk .ic{position:static;font-size:48px}.hero.yeni{grid-template-columns:1fr}.tm{display:none}}
+@media (max-width:700px){.anaDevam{grid-template-columns:1fr}}
 .stats{display:flex;gap:clamp(14px,4vw,48px);flex-wrap:wrap;padding:26px 4px 6px;color:var(--muted);font-size:13.5px}
 .stats b{display:block;font:700 34px/1 var(--f-display);color:#fff}
 .hv{display:inline-grid;grid-template-columns:132px 1fr;gap:14px;align-items:center;justify-self:start;margin-top:6px;padding:8px 18px 8px 8px;border-radius:16px;background:var(--card);border:1px solid var(--line);text-align:left;font:700 16px var(--f-body);color:#fff;transition:border-color .25s,transform .25s}
@@ -175,24 +195,23 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
   <nav class="tnav"><button data-p="nasil" class="hm">Nasıl kullanılır?</button><button data-p="hakkinda">Hakkında</button><button data-p="egitim">Eğitimler</button><button id="perf" title="Zayıf ekran kartlarında akıcılık için">⚡ Performans</button></nav>
  </div>
  <div class="wrap">
-  <section class="hero"><div class="k">HOŞ GELDİN</div><h1>Ne yapmak <i>istersin?</i></h1>
-   <p>Laboratuvarı gezerek tanıyabilir, bir beceriyi tek başına çalışabilir ya da bir analizi numuneden rapora kadar baştan sona yürütebilirsin.</p>
-   <button class="hv" id="hvBtn"><span class="hvi"><img src="menu_karsilama.jpg" alt=""><b>▶</b></span><span><small>HOŞ GELDİNİZ VİDEOSU · 30 SN</small>Simülasyonu Uzm. MY'den dinleyin</span></button></section>
-  <div class="cards">
-   <a class="mc ana" href="lab_giris.html?mod=tani&v=20261111"><div class="ic">🏛️</div><h2>Laboratuvarı Tanı</h2>
-    <p>Koridoru ve odaları gez; cihazları, tezgâhları ve gaz hatlarını yerinde gör. Bir cihaza tıklayınca kısa bilgi kartı açılır.</p>
+  <section class="hero yeni"><div><div class="k">HOŞ GELDİN</div>
+   <h1 class="uc"><span>Bir <i>laboratuvar.</i></span><span>Sınırsız <i>deneme.</i></span><span>Gerçek bir <i>deneyim.</i></span></h1>
+   <p><b style="color:#fff">Toksikoloji laboratuvarını keşfet.</b> Cihazları kullan, analizleri gerçekleştir ve kendi öğrenme yolculuğuna başla.</p>
+   <div class="sayac"><span><b>6</b>oda</span><span><b>11</b>cihaz simülatörü</span><span><b id="stK">22</b>eğitim konusu</span></div>
+   <button class="hv" id="hvBtn"><span class="hvi"><img src="menu_karsilama.jpg" alt=""><b>▶</b></span><span><small>HOŞ GELDİNİZ VİDEOSU · 30 SN</small>Simülasyonu Uzm. MY'den dinleyin</span></button></div>
+   <div class="tm" id="anaTm"><div class="bub">Hazır mısın? <b>Bugün laboratuvar senin!</b></div></div></section>
+  <div class="bento">
+   <a class="bk buyuk" href="lab_giris.html?mod=tani&v=20261111" style="--a:#2BD9C0"><span class="ic">🏛️</span><h2>Laboratuvarı Tanı</h2>
+    <p>Koridoru ve odaları gez; cihazları, tezgâhları ve gaz hatlarını yerinde gör. Bir cihaza dokununca kısa bilgi kartı açılır.</p>
     <div class="chips"><span>Kromatografi</span><span>Örnek Hazırlama</span><span>İnorganik</span><span>Kimyasal depo</span><span>Gaz tüp</span><span>Yangın</span></div>
-    <div class="go">Tura başla ›</div></a>
-   <button class="mc" data-p="egitim" style="--c:rgba(47,125,225,.28)"><div class="ic">🎓</div><h2>Eğitimler</h2>
-    <p>Temel becerilerden (terazi, pipet) cihaz kullanımına ve kanda alkol gibi baştan sona analiz modüllerine.</p>
-    <div class="chips"><span>Beceriler</span><span>Kalibrasyon</span><span>HS-GC-MS</span><span>Analiz modülleri</span></div>
-    <div class="go">Eğitimi seç ›</div></button>
-   <a class="mc" href="vakalar.html" style="--c:rgba(229,72,77,.2)"><div class="ic">🕵️</div><h2>Adli Vakalar</h2>
-    <p>Vaka dosyasını incele, doğru analizi seç, sonucu yorumla. Öğrendiklerini gerçekçi senaryolarda dene.</p>
-    <div class="chips"><span>Vaka oyunu</span></div>
-    <div class="go">Vakalara git ›</div></a>
+    <span class="go">Tura başla ›</span></a>
+   <button class="bk kucuk" data-p="egitim" style="--a:#5B9BFF"><span class="ic">🎓</span><div><h2>Eğitimler</h2>
+    <p>Temel becerilerden cihazlara ve baştan sona analiz modüllerine: 5 adımlık öğrenme yolu.</p><span class="go">Eğitimi seç ›</span></div></button>
+   <a class="bk kucuk" href="vakalar.html" style="--a:#FF6B7A"><span class="ic">🕵️</span><div><h2>Adli Vakalar</h2>
+    <p>Vaka dosyasını incele, doğru analizi seç, sonucu yorumla.</p><span class="go">Vakalara git ›</span></div></a>
   </div>
-  <div class="stats"><div><b>6</b>oda</div><div><b>11</b>cihaz simülatörü</div><div><b id="stM">1</b>tam analiz modülü</div></div>
+  <div class="anaDevam" id="anaDevam" hidden></div>
   <section class="ekip" id="ekip" aria-label="ToksiLab ekibi"><div class="ek-bas"><b>ToksiLab ekibi</b><span>Derslerde yanında olacak rehberler</span></div><div class="ek-iz" id="ekIz"></div></section>
   <style>.ekip{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px}.ek-bas{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:10px}.ek-bas b{font:700 20px var(--f-display,sans-serif);letter-spacing:.02em}.ek-bas span{color:var(--muted);font-size:13.5px}
   .ek-iz{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.ek{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:center;background:var(--card2);border-radius:14px;padding:8px 10px;cursor:default}.ek .msk{width:56px;height:56px}.ek b{display:block;font:700 18px var(--f-display,sans-serif)}.ek small{color:#C7D6DA;font-size:13px;line-height:1.3;display:block}</style>
@@ -405,10 +424,20 @@ function egitimCiz(aktif){EK=aktif&&KAT.some(x=>x.id===aktif)?aktif:null;const k
  if(k)$('#pb').querySelectorAll('.ekT').forEach(b=>b.onclick=()=>{const it=k.it[+b.dataset.i];if(it.dr!=='y')ekDetay(it)});
  const yb=$('#ekYolB');if(yb)yb.onclick=()=>egitimCiz(null);
  const dv=$('#ekDevam');if(dv)dv.onclick=()=>{egitimCiz(sr.k.id);setTimeout(()=>ekDetay(sr.it),250)}}
+/* ana sayfa: Toksi, konu sayısı, ilerleme varsa "Kaldığın yer" */
+function anaCiz(){const M=window.MASKOT,tm=$('#anaTm');if(M&&tm&&!tm.querySelector('.msk'))tm.insertAdjacentHTML('afterbegin',M.span('dogru','','toksi'));
+ const n=KAT.reduce((a,k)=>a+k.it.length,0),sk=$('#stK');if(sk)sk.textContent=n;
+ const d=$('#anaDevam');if(!d)return;const var_=KAT.some(k=>k.it.some(it=>(ilerle(it)||0)>0)),sr=siradaki();
+ if(!var_||!sr){d.hidden=true;return}
+ d.innerHTML=(M?M.kart('bak',`Kaldığın yer: <b>${sr.k.ad}</b> · Sıradaki konu: <b>${sr.it.ad}</b>`,'toksi'):`<p>Sıradaki konu: <b>${sr.it.ad}</b></p>`)+'<button id="anaDevamB">Devam et ›</button>';d.hidden=false;
+ $('#anaDevamB').onclick=()=>{panelAc('egitim',sr.k.id);setTimeout(()=>ekDetay(sr.it),250)}}
+anaCiz();addEventListener('focus',anaCiz);
 function panelKapat(){const d=$('#ekDt');if(d)d.classList.remove('on');$('#pn').classList.remove('on');$('#pn').setAttribute('aria-hidden','true');$('#ov').classList.remove('on')}
 document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>panelAc(b.dataset.p));
 $('#pnX').onclick=panelKapat;$('#ov').onclick=panelKapat;addEventListener('keydown',e=>{if(e.key!=='Escape'||introOn)return;const d=$('#ekDt');if(d&&d.classList.contains('on')){d.classList.remove('on');return}panelKapat()});
-/* ---------- hoş geldiniz videosu (kendiliğinden başlamaz) ---------- */
+/* ---------- hoş geldiniz videosu (kendiliğinden başlamaz) ----------
+   VIDEO_KAPALI=true: düğme şimdilik gizli (kullanıcı isteği); dosyalar depoda duruyor, false yapınca geri gelir. */
+const VIDEO_KAPALI=true;if(VIDEO_KAPALI)$('#hvBtn').style.display='none';
 const VW=$('#vw'),VV=$('#vwV');
 function vwAc(){VW.hidden=false;void VW.offsetWidth;VW.classList.add('on');VV.currentTime=0;const p=VV.play();if(p&&p.catch)p.catch(()=>{})}
 function vwKapat(){VV.pause();VW.classList.remove('on');setTimeout(()=>{VW.hidden=true},400)}
