@@ -98,6 +98,33 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 .ov.on{opacity:1;pointer-events:auto}
 .pn{position:fixed;z-index:31;top:0;right:0;bottom:0;width:min(1000px,100vw);background:#0C1518;border-left:1px solid var(--line);transform:translateX(100%);transition:transform .45s cubic-bezier(.2,.8,.2,1);display:grid;grid-template-rows:auto 1fr;box-shadow:-30px 0 60px rgba(0,0,0,.45)}
 .pn.on{transform:none}
+/* Nasıl kullanılır: üç sekme (Başlarken · Ekrandaki işaretler · Sık sorulanlar) */
+.nsW{grid-column:1/-1;min-width:0;padding:18px 24px 22px}
+.nsT{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.nsT button{border:2px solid transparent;border-radius:18px;padding:14px 16px;text-align:left;display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;color:var(--ink);cursor:pointer;font:inherit;background:linear-gradient(150deg,color-mix(in srgb,var(--c) 28%,#15242A),#15242A);opacity:.75;transition:transform .2s,opacity .2s,box-shadow .2s,border-color .2s}
+.nsT button:hover{opacity:1;transform:translateY(-2px)}.nsT button.on{opacity:1;border-color:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent),0 12px 30px rgba(0,0,0,.4)}
+.nsT .i{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:28px;background:var(--c)}.nsT b{display:block;font:700 21px var(--f-display)}.nsT small{color:#B9CBD0;font-size:13px}
+.nsB{font:700 15px var(--f-display);letter-spacing:.06em;color:var(--mint);margin:2px 0 10px}
+.nsA{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.nsA>div{position:relative;background:var(--card2);border-radius:18px;padding:16px 14px;display:grid;gap:8px;align-content:start;border-top:4px solid var(--c)}
+.nsA .no{width:34px;height:34px;border-radius:50%;background:var(--c);color:#06141A;display:grid;place-items:center;font:700 16px var(--f-mono)}
+.nsA .ic{font-size:34px;position:absolute;right:14px;top:14px}.nsA b{font:700 20px var(--f-display);line-height:1.1}.nsA p{font-size:14px;color:#C7D6DA;line-height:1.45}
+.nsA>div:not(:last-child)::after{content:"›";position:absolute;right:-12px;top:42%;font:700 26px var(--f-display);color:var(--mint)}
+.nsI{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.nsI>div{display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:start;background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:13.5px;color:#C7D6DA;line-height:1.4}
+.nsI>div>span:first-child{font-size:24px}.nsI b{display:block;color:var(--ink);font-size:14.5px}
+.nsS{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.nsS>div{background:var(--card2);border-radius:16px;padding:14px;display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:center}
+.nsS .g{display:grid;place-items:center;min-height:56px}.nsS b{display:block;font:700 18px var(--f-display)}.nsS p{font-size:13.5px;color:#C7D6DA;line-height:1.4}
+.nsS .halka{width:44px;height:44px;border-radius:50%;border:4px solid var(--warn);box-shadow:0 0 14px rgba(242,182,50,.8);animation:nsH 1.1s infinite}@keyframes nsH{50%{transform:scale(1.15)}}
+.nsS .tik{width:30px;height:30px;border-radius:50%;background:var(--ok);color:#062126;display:grid;place-items:center;font-weight:700}
+.nsS .sr{font:600 10px var(--f-mono);background:var(--warn);color:#2A2000;border-radius:999px;padding:3px 8px}.nsS .dv{border-radius:10px;padding:8px 12px;background:#2F7DE1;font-weight:700;font-size:13px}
+.nsS .bl{font-weight:700;font-size:13px;color:#7FDCD0;border:1px solid var(--line);border-radius:10px;padding:6px 9px;text-align:center}.nsS .fo{font:600 12px var(--f-mono);border:2px solid var(--warn);border-radius:10px;padding:6px 8px;color:var(--warn)}
+.nsS .yz{display:flex;gap:2px}.nsS .yz .msk{width:34px;height:34px}
+.nsF{display:grid;gap:8px}.nsF details{background:var(--card2);border-radius:14px;padding:0 16px;border:1px solid transparent}.nsF details[open]{border-color:var(--line)}
+.nsF summary{list-style:none;cursor:pointer;padding:14px 0;display:grid;grid-template-columns:30px 1fr 20px;gap:10px;align-items:center;font-weight:700;font-size:16px}.nsF summary::-webkit-details-marker{display:none}
+.nsF summary span{font-size:22px}.nsF summary::after{content:"+";font:700 22px var(--f-display);color:var(--mint)}.nsF details[open] summary::after{content:"–"}
+.nsF details p{padding:0 0 14px 40px;font-size:14.5px;color:#C7D6DA;line-height:1.55}
+@media (max-width:820px){.nsW{padding:12px 16px 18px}.nsT{gap:6px}.nsT button{grid-template-columns:1fr;justify-items:center;text-align:center;padding:10px 6px;gap:6px}.nsT .i{width:42px;height:42px;font-size:22px}.nsT b{font-size:15px;line-height:1.1}.nsT small{display:none}
+ .nsA,.nsI,.nsS{grid-template-columns:1fr 1fr}.nsA>div::after{display:none}.nsS>div{grid-template-columns:1fr;justify-items:center;text-align:center}}
 /* Eğitimler: öğrenme yolu (1→5) ve seçilince küçülen numaralı şerit */
 .ekW{grid-column:1/-1;min-width:0;padding:18px 24px 22px}
 .ekYol{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:22px;margin:8px 0 14px}
@@ -367,13 +394,7 @@ function panelAc(tur,kat){const P=$('#pn');P.classList.add('on');P.setAttribute(
  if(tur==='egitim'){$('#pnK').textContent='EĞİTİM KATALOĞU';$('#pnT').textContent='Eğitimler';egitimCiz(kat||null)}
  if(tur==='cihaz'){$('#pnK').textContent='SERBEST ÇALIŞMA';$('#pnT').textContent='Cihaz simülatörleri';
   $('#pb').innerHTML=`<div class="list" style="grid-column:1/-1"><div class="cd">Görev sırası olmadan, cihazı dilediğin gibi kullan.</div><div class="devs">${CIHAZ.map(c=>`<a href="${c[2]}"><small>${c[3]}</small><b>${c[0]} ${c[1]}</b><span>${c[4]}</span></a>`).join('')}</div></div>`}
- if(tur==='nasil'){$('#pnK').textContent='BAŞLARKEN';$('#pnT').textContent='Nasıl kullanılır?';
-  $('#pb').innerHTML=`<div class="list" style="grid-column:1/-1"><div class="how">
-   <div><b>🏛️ Laboratuvarı Tanı</b>Önce bir tur at: hangi oda nerede, hangi cihaz hangi tezgâhta. Cihaza tıklayınca kısa bilgi kartı açılır; simülatör açılmaz.</div>
-   <div><b>🎓 Eğitimler</b>Kategoriden bir konu seç. Her konunun alt basamakları var; istediğin basamaktan başlayabilirsin.</div>
-   <div><b>💾 İlerleme</b>Eğitimlerdeki ilerlemen bu tarayıcıda saklanır; aynı cihazdan kaldığın yerden devam edersin.</div>
-   <div><b>⌨️ Kontroller</b>3B sahnede sürükle: bak · W A S D: yürü · tekerlek: yakınlaş. Telefonda dokun ve kaydır.</div>
-   <div><b>⚡ Performans</b>Ekran takılıyorsa üstteki Performans modunu aç: gölgeler kapanır, akıcılık artar.</div></div></div>`}
+ if(tur==='nasil'){$('#pnK').textContent='BAŞLARKEN';$('#pnT').textContent='Nasıl kullanılır?';nasilCiz(kat||'bas')}
  if(tur==='hakkinda'){$('#pnK').textContent='HAKKINDA';$('#pnT').textContent='MY ToksiLab';
   $('#pb').innerHTML=`<article class="hak" style="grid-column:1/-1">
    <h2>MY ToksiLab’ın çıkış hikâyesi</h2>
@@ -412,6 +433,30 @@ function ekDetay(it){const y=ilerle(it),go=GO[it.ad]&&it.dr!=='y';let d=$('#ekDt
   ${it.s.length?`<ol>${it.s.map(x=>`<li>${x.ad}</li>`).join('')}</ol>`:''}
   <div class="bt">${go?`<a href="${GO[it.ad]}">${y===100?'✓ Tamamlandı · Tekrar et ›':y>0?'Kaldığın yerden devam ›':'Başla ›'}</a>`:'<a class="yok">Hazırlanıyor</a>'}<button data-kapat>Kapat</button></div></div>`;
  d.classList.add('on');d.onclick=e=>{if(e.target===d||e.target.dataset.kapat!==undefined)d.classList.remove('on')}}
+/* ---------- Nasıl kullanılır ---------- */
+const NS_T=[['bas','🚀','Başlarken','4 adımda siteyi tanı','#2BD9C0'],['isa','🔎','Ekrandaki işaretler','Halka, ✓, maskotlar','#F2B632'],['sss','❓','Sık sorulanlar','7 kısa cevap','#5B9BFF']];
+const NS_A=[['#2BD9C0','🏛️','Laboratuvarı tanı','Koridoru ve odaları gez; cihazların yerini gör. Cihaza dokununca kısa bilgi kartı açılır.'],
+ ['#5B9BFF','🎓','Öğrenme yolunu seç','Eğitimler’de 5 adımlık yol var. Sıradaki konu sarı etiketle işaretli; istediğin konuya da atlayabilirsin.'],
+ ['#F2B632','👆','Sarı halkayı izle','Derslerde yanıp sönen sarı halka nereye dokunacağını gösterir. Maskotun ipucu verir; hata yapmak serbest.'],
+ ['#FF6B7A','🧪','Serbest kullan','Dersi bitirince cihazı görev olmadan kullan, parametreleri dene. Sonra Adli Vakalar’da öğrendiklerini sına.']];
+const NS_I=[['💾','İlerleme','Bitirdiğin bölümler bu tarayıcıda saklanır; aynı cihazdan kaldığın yerden devam edersin.'],['⌨️','3B kontroller','Sürükle: bak · W A S D: yürü · tekerlek: yakınlaş. Telefonda dokun ve kaydır.'],['⚡','Performans','Ekran takılıyorsa üstteki Performans modunu aç: gölgeler kapanır, akıcılık artar.']];
+const NS_F=[['💾','İlerlemem nerede saklanıyor?','Bu tarayıcıda. Hesap ya da giriş gerekmez, kişisel bilgi toplanmaz. Başka tarayıcıda, başka bilgisayarda ya da gizli pencerede ilerleme görünmez; tarayıcı verilerini silersen ilerleme de silinir.'],
+ ['🧪','Yanlış yaparsam ne olur?','Hiçbir şey bozulmaz. Maskot ne yanlış gittiğine dair ipucu verir; tekrar denersin. Bir bölümü baştan almak için <b>☰ Bölümler</b>’den seçmen yeterli.'],
+ ['🧭','Nereden başlamalıyım?','Önce <b>Laboratuvarı Tanı</b> ile kısa bir tur, sonra <b>Eğitimler</b>’deki yolun 1. adımı: Temel beceriler. Ana sayfadaki <b>Devam et</b> her zaman sıradaki konuyu açar.'],
+ ['🐢','Ekran takılıyor ya da 3B sahne yavaş','Üstteki <b>⚡ Performans</b> modunu aç: gölgeler kapanır, sahne akıcılaşır. Mümkünse bilgisayardan ve güncel bir tarayıcıdan (Chrome, Edge, Firefox) kullan.'],
+ ['📱','Telefonda kullanabilir miyim?','Evet. Ders paneli ekranın altına geçer; 3B sahnede dokunup kaydırarak bakarsın. En rahat deneyim bilgisayarda.'],
+ ['⌨️','3B sahnede nasıl gezerim?','Sürükleyerek etrafına bak; <b>W A S D</b> ile yürü; fare tekerleğiyle yakınlaş. Telefonda dokun ve kaydır.'],
+ ['🎓','Rehberli ders ile serbest kullanım farkı ne?','Rehberli derste her adım sırayla ve açıklamalıdır; sarı halka yol gösterir. Serbest kullanımda görev yoktur: cihazı dilediğin gibi kullanır, parametreleri denersin.']];
+function nasilCiz(sek){const M=window.MASKOT,sp=d=>M?M.span(d,'','toksi'):'';
+ const NS_S=[['<span class="halka"></span>','Sarı halka','Derste dokunman gereken yer. Yanıp söner.'],['<span class="fo">C₁V₁</span>','Sarı çerçeveli formül','Bu soruda kullanacağın formül.'],
+  ['<span class="tik">✓</span>','Yeşil tik','Bitirdiğin konu ya da bölüm.'],['<span class="sr">SIRADAKİ</span>','Sıradaki','Öğrenme yolunda senin için önerilen konu.'],
+  ['<span class="yz">'+sp('bekle')+sp('bak')+'</span>','Maskot bekliyor / bakıyor','Açıklamayı oku ya da görevi yap.'],['<span class="yz">'+sp('dogru')+sp('yanlis')+'</span>','Maskot seviniyor / düşünüyor','Doğru yaptın · ipucunu okuyup yeniden dene.'],
+  ['<span class="dv">Devam ›</span>','Devam','Bir sonraki adıma geçer. Görev bitmeden açılmaz.'],['<span class="bl">☰ Bölümler</span>','Bölümler','Dersin bölüm listesine döner; istediğin bölüme atla.'],['<span class="bl">Serbest kullanım</span>','Serbest kullanım','Dersten çıkar; cihazı görev olmadan kullanırsın.']];
+ let h=`<div class="nsW"><div class="nsT" role="tablist">${NS_T.map(t=>`<button role="tab" aria-selected="${t[0]===sek}" data-ns="${t[0]}" class="${t[0]===sek?'on':''}" style="--c:${t[4]}"><span class="i">${t[1]}</span><span><b>${t[2]}</b><small>${t[3]}</small></span></button>`).join('')}</div>`;
+ if(sek==='bas')h+=`<div class="nsB">4 ADIMDA BAŞLA</div><div class="nsA">${NS_A.map((a,i)=>`<div style="--c:${a[0]}"><span class="ic">${a[1]}</span><span class="no">${i+1}</span><b>${a[2]}</b><p>${a[3]}</p></div>`).join('')}</div><div class="nsB">İPUÇLARI</div><div class="nsI">${NS_I.map(x=>`<div><span>${x[0]}</span><span><b>${x[1]}</b>${x[2]}</span></div>`).join('')}</div>`;
+ else if(sek==='isa')h+=`<div class="nsB">EKRANDA GÖRECEĞİN İŞARETLER</div><div class="nsS">${NS_S.map(x=>`<div><span class="g">${x[0]}</span><span><b>${x[1]}</b><p>${x[2]}</p></span></div>`).join('')}</div>`;
+ else h+=`<div class="nsB">SIK SORULANLAR</div><div class="nsF">${NS_F.map((x,i)=>`<details ${i?'':'open'}><summary><span>${x[0]}</span>${x[1]}</summary><p>${x[2]}</p></details>`).join('')}</div>`;
+ $('#pb').innerHTML=h+'</div>';$('#pb').querySelectorAll('[data-ns]').forEach(b=>b.onclick=()=>nasilCiz(b.dataset.ns))}
 function egitimCiz(aktif){EK=aktif&&KAT.some(x=>x.id===aktif)?aktif:null;const k=EK&&KAT.find(x=>x.id===EK),sr=siradaki(),M=window.MASKOT;
  const kart=(x,i)=>{const y=katY(x),h=x.it.filter(q=>q.dr!=='y').length;return `<button class="ekK ${x.id===EK?'on':''}" data-k="${x.id}" style="${ekSt(x.id)}" title="${x.ad} · ilerleme %${y}"><span class="no">${i+1}</span><span class="ic">${x.ic}</span><span><b>${x.ad}</b><small>${x.acik}</small></span><span class="sy">${h} hazır · ${x.it.length} konu</span><span class="pr"><i style="width:${y}%"></i></span></button>`};
  let h=`<div class="ekW"><div class="ekYol ${k?'kucuk':''}">${KAT.map(kart).join('')}</div>`;

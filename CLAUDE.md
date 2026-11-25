@@ -45,7 +45,10 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   (`anaCiz`, Eğitimler panelindeki `ilerle`/`siradaki`). İlerleme yalnızca tarayıcıda (localStorage); hesap/sunucu
   yok, kullanıcı şimdilik böyle istiyor.
 - Videolar şimdilik kapalı (kullanıcı isteği; dosyalar depoda): `index.html` ve `lab_giris.html`'de
-  `VIDEO_KAPALI=true`; `false` yapınca hoş geldiniz ve lab turu tanıtım videoları geri gelir. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+  `VIDEO_KAPALI=true`; `false` yapınca hoş geldiniz ve lab turu tanıtım videoları geri gelir.
+- "Nasıl kullanılır?" paneli (`nasilCiz`, adresle `#nasil`): üç büyük renkli sekme (Başlarken: 4 adım + 3 ipucu ·
+  Ekrandaki işaretler: sarı halka, formül çerçevesi, ✓, SIRADAKİ, maskot yüzleri, düğmeler · Sık sorulanlar: 7 soru).
+  Site değişince (yeni işaret, yeni özellik) bu içerikleri de güncelle. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.
