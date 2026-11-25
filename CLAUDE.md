@@ -40,10 +40,10 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   Başla). İlerleme `IZ` tablosuyla: cihaz/HS dersleri `toksilab_ders_v1` (ders kimlikleri), kalibrasyon
   `toksilab_kalibrasyon_v1` (8 bölüm), analiz modülü `TLE`. Yeni ders eklenince `IZ`'ye kimlikleriyle ekle.
 - Ana sayfa (`index.html`): karşılama "Bir laboratuvar. Sınırsız deneme. Gerçek bir deneyim." (anahtar kelimeler
-  turkuaz), Toksi balonu "Hazır mısın? Bugün laboratuvar senin!", sayaç (konu sayısı KAT'tan); bento kartlar
-  (Laboratuvarı Tanı büyük, Eğitimler ve Adli Vakalar küçük); ilerleme varsa "Kaldığın yer · Devam et" şeridi
-  (`anaCiz`, Eğitimler panelindeki `ilerle`/`siradaki`). İlerleme yalnızca tarayıcıda (localStorage); hesap/sunucu
-  yok, kullanıcı şimdilik böyle istiyor.
+  turkuaz) ve bento kartlar (Laboratuvarı Tanı büyük, Eğitimler ve Adli Vakalar küçük); 1366×768 ekrana sığacak kadar
+  sade. Kullanıcı isteğiyle kaldırılanlar: büyük Toksi ve balonu, sayaçlar, "ToksiLab ekibi" bölümü, üst menüdeki
+  "Hakkında" ve "Eğitimler" (Hakkında paneli `#hakkinda` adresiyle hâlâ açılır). İlerleme varsa "Kaldığın yer ·
+  Devam et" şeridi (`anaCiz`). İlerleme yalnızca tarayıcıda (localStorage); hesap/sunucu yok.
 - Videolar şimdilik kapalı (kullanıcı isteği; dosyalar depoda): `index.html` ve `lab_giris.html`'de
   `VIDEO_KAPALI=true`; `false` yapınca hoş geldiniz ve lab turu tanıtım videoları geri gelir.
 - "Nasıl kullanılır?" paneli (`nasilCiz`, adresle `#nasil`): üç büyük renkli sekme (Başlarken: 4 adım + 3 ipucu ·
