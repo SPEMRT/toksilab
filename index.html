@@ -78,6 +78,39 @@ body{overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer;border:0
 .ov.on{opacity:1;pointer-events:auto}
 .pn{position:fixed;z-index:31;top:0;right:0;bottom:0;width:min(1000px,100vw);background:#0C1518;border-left:1px solid var(--line);transform:translateX(100%);transition:transform .45s cubic-bezier(.2,.8,.2,1);display:grid;grid-template-rows:auto 1fr;box-shadow:-30px 0 60px rgba(0,0,0,.45)}
 .pn.on{transform:none}
+/* Eğitimler: öğrenme yolu (1→5) ve seçilince küçülen numaralı şerit */
+.ekW{grid-column:1/-1;min-width:0;padding:18px 24px 22px}
+.ekYol{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:22px;margin:8px 0 14px}
+.ekK{position:relative;border:0;border-radius:20px;padding:18px 14px;min-height:clamp(220px,40vh,330px);text-align:left;display:grid;align-content:space-between;gap:10px;color:#fff;cursor:pointer;background:linear-gradient(160deg,var(--c1),var(--c2));transition:transform .2s,box-shadow .2s,opacity .2s;font:inherit}
+.ekK:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.4)}.ekK .ic{font-size:46px;line-height:1}.ekK b{display:block;font:700 22px var(--f-display);line-height:1.05}.ekK small{display:block;font-size:13px;opacity:.9;margin-top:4px;line-height:1.35}
+.ekK .sy{font:600 11px var(--f-mono);background:rgba(0,0,0,.25);border-radius:999px;padding:3px 9px;justify-self:start}
+.ekK .no{position:absolute;top:-10px;left:-10px;width:34px;height:34px;border-radius:50%;background:#fff;color:#0C1518;display:grid;place-items:center;font:700 16px var(--f-mono);box-shadow:0 4px 10px rgba(0,0,0,.4)}
+.ekK .pr{display:block;height:6px;border-radius:9px;background:rgba(0,0,0,.3);overflow:hidden}.ekK .pr i{display:block;height:100%;background:#fff}
+.ekYol:not(.kucuk) .ekK:not(:last-child)::after{content:"›";position:absolute;right:-19px;top:50%;transform:translateY(-50%);font:700 30px var(--f-display);color:var(--mint)}
+.ekYol.kucuk{gap:14px;margin:4px 0 12px}
+.ekYol.kucuk .ekK{min-height:66px;padding:8px 10px 8px 26px;grid-template-columns:auto 1fr;align-items:center;align-content:center;column-gap:8px;row-gap:5px;border-radius:14px;opacity:.6}
+.ekYol.kucuk .ekK small,.ekYol.kucuk .ekK .sy{display:none}.ekYol.kucuk .ekK .ic{font-size:22px}.ekYol.kucuk .ekK b{font-size:15px}.ekYol.kucuk .ekK .pr{grid-column:1/-1;height:4px}
+.ekYol.kucuk .ekK .no{width:26px;height:26px;font-size:13px;top:50%;left:-8px;transform:translateY(-50%)}
+.ekYol.kucuk .ekK.on{opacity:1;box-shadow:0 0 0 3px #fff inset}.ekYol.kucuk .ekK:hover{opacity:.9;transform:none}
+.ekOner{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;background:var(--card2);border-radius:14px;padding:10px 14px}.ekOner .mskKart{background:none;border:0;padding:0}.ekOner .mskKart p{color:var(--ink)}
+.ekOner button,.ekDk .bt a{border:0;background:linear-gradient(90deg,#2BD9C0,#7CF2D8);color:#062126;font-weight:700;border-radius:12px;padding:10px 16px;white-space:nowrap;text-decoration:none;cursor:pointer;font-family:inherit;font-size:15px;text-align:center}
+.ekBas{display:flex;align-items:center;gap:10px;margin-bottom:10px;color:#B9CBD0;font-size:14px}.ekBas b{color:var(--ink);font:700 19px var(--f-display)}.ekBas button{margin-left:auto;border:0;background:var(--card2);color:var(--ink);border-radius:10px;padding:7px 12px;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.ekG{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.ekT{position:relative;background:var(--card2);border:1px solid transparent;border-radius:16px;padding:14px 12px 12px;text-align:left;display:grid;gap:6px;align-content:start;min-height:140px;color:var(--ink);cursor:pointer;font:inherit;transition:transform .15s,border-color .15s}
+.ekT:hover{border-color:var(--c);transform:translateY(-2px)}.ekT .ic{font-size:28px;line-height:1}.ekT b{font:700 18px var(--f-display);line-height:1.1}.ekT small{color:#B9CBD0;font-size:13px;line-height:1.3}
+.ekT .bd{position:absolute;top:10px;right:10px}.ekT .alt{margin-top:auto;font:600 11px var(--f-mono);color:var(--mint)}.ekT.y{opacity:.5;cursor:default}.ekT.y:hover{transform:none;border-color:transparent}
+.ekT.sira{border-color:var(--warn)}.ekT .sr{position:absolute;left:10px;top:-9px;font:600 10px var(--f-mono);background:var(--warn);color:#2A2000;border-radius:999px;padding:2px 7px}
+.ekT.bit::after{content:"✓";position:absolute;right:12px;bottom:10px;width:22px;height:22px;border-radius:50%;background:var(--ok);color:#062126;display:grid;place-items:center;font-weight:700;font-size:13px}
+.ekT .tp{display:block;height:4px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}.ekT .tp i{display:block;height:100%;background:var(--ok)}
+.ekDt{position:absolute;inset:0;z-index:5;background:rgba(4,8,10,.72);display:none;place-items:center;padding:16px}.ekDt.on{display:grid}
+.ekDk{background:#0C1518;border:1px solid var(--teal);border-radius:18px;padding:18px;width:min(560px,100%);display:grid;gap:12px;max-height:100%;overflow:auto}
+.ekDk .h{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:start}.ekDk .h .ic{font-size:40px}.ekDk .h b{font:700 24px var(--f-display)}.ekDk .h p{color:#C7D6DA;font-size:14.5px;line-height:1.45}
+.ekDk ol{list-style:none;display:grid;gap:6px;counter-reset:s;margin:0;padding:0}.ekDk li{display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:center;background:var(--card2);border-radius:10px;padding:8px 10px;font-size:14.5px}
+.ekDk li::before{counter-increment:s;content:counter(s);width:24px;height:24px;border-radius:50%;background:#33444C;display:grid;place-items:center;font:700 11px var(--f-mono)}
+.ekDk .bt{display:flex;gap:8px}.ekDk .bt a{flex:1;padding:12px}.ekDk .bt a.yok{background:var(--card2);color:var(--muted);cursor:default}.ekDk .bt button{border:0;background:var(--card2);color:var(--ink);border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;font-family:inherit}
+@media (max-width:760px){.ekW{padding:12px 16px 18px}.ekYol{grid-template-columns:1fr 1fr;gap:14px}.ekYol:not(.kucuk) .ekK:not(:last-child)::after{display:none}.ekK{min-height:170px}
+ .ekYol.kucuk{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.ekYol.kucuk .ekK{padding:6px;grid-template-columns:1fr;justify-items:center}.ekYol.kucuk .ekK b,.ekYol.kucuk .ekK .no{display:none}
+ .ekG{grid-template-columns:1fr 1fr;gap:8px}.ekT{min-height:0;padding:12px 10px 10px}.ekT small{display:none}.ekT b{font-size:16px}.ekOner{grid-template-columns:1fr}.ekBas{flex-wrap:wrap}}
 .hak{max-width:720px;margin:0 auto;padding:6px 4px 30px;font-size:16.5px;line-height:1.7;color:#D7E4E7}.hak h2{font:700 28px var(--f-display);color:var(--ink);margin-bottom:14px;line-height:1.15}
 .hak p{margin:0 0 14px}.hak p.soru{border-left:4px solid var(--teal);padding:6px 0 6px 14px;margin:20px 0}.hak p.soru b{color:var(--mint)}
 .hak p.vurgu{font-weight:700;color:var(--ink);background:rgba(43,217,192,.08);border-radius:12px;padding:12px 16px;margin:20px 0}
@@ -312,7 +345,7 @@ const GO={'KKD ve laboratuvar güvenliği':'egitim.html?m=etanol&tek=kkd','Anali
  'HS-GC-MS sistemi':'hsgcms_pilot.html?ders=hsgc','Veri analizi (Data Analysis)':'hsgcms_pilot.html?ders=da','GC-MS metot geliştirme':'hsgcms_pilot.html?mod=metot','Kanda alkol analizi (HS-GC-MS)':'egitim.html?m=etanol','Atık suda SPE':'spe_pilot.html'};
 
 function panelAc(tur,kat){const P=$('#pn');P.classList.add('on');P.setAttribute('aria-hidden','false');$('#ov').classList.add('on');
- if(tur==='egitim'){$('#pnK').textContent='EĞİTİM KATALOĞU';$('#pnT').textContent='Eğitimler';egitimCiz(kat||'beceri')}
+ if(tur==='egitim'){$('#pnK').textContent='EĞİTİM KATALOĞU';$('#pnT').textContent='Eğitimler';egitimCiz(kat||null)}
  if(tur==='cihaz'){$('#pnK').textContent='SERBEST ÇALIŞMA';$('#pnT').textContent='Cihaz simülatörleri';
   $('#pb').innerHTML=`<div class="list" style="grid-column:1/-1"><div class="cd">Görev sırası olmadan, cihazı dilediğin gibi kullan.</div><div class="devs">${CIHAZ.map(c=>`<a href="${c[2]}"><small>${c[3]}</small><b>${c[0]} ${c[1]}</b><span>${c[4]}</span></a>`).join('')}</div></div>`}
  if(tur==='nasil'){$('#pnK').textContent='BAŞLARKEN';$('#pnT').textContent='Nasıl kullanılır?';
@@ -337,18 +370,44 @@ function panelAc(tur,kat){const P=$('#pn');P.classList.add('on');P.setAttribute(
    <p>Umarım MY ToksiLab, laboratuvar yolculuğunuzda size faydalı bir arkadaş olur.</p>
    <div class="imza"><img src="avatar.jpg" alt=""><div><b>Uzman Biyolog Murat Yayla</b><span>Toksikoloji Laboratuvarı Analisti</span></div></div>
   </article>`}}
-function egitimCiz(aktif){const s=T?T.oku():{};
- $('#pb').innerHTML=`<nav class="cats">${KAT.map(k=>`<button data-k="${k.id}" class="${k.id===aktif?'on':''}"><span>${k.ic}</span>${k.ad}<em>${k.it.length}</em></button>`).join('')}</nav><div class="list" id="L"></div>`;
- const k=KAT.find(x=>x.id===aktif);
- $('#L').innerHTML=`<div class="ch">${k.ic} ${k.ad}</div><div class="cd">${k.acik}</div>`+k.it.map(it=>{let pr='';
-  if(it.modul&&T){const P=T.ilerleme(it.modul);pr=`<div class="prog" title="%${P.yuzde}"><i style="width:${P.yuzde}%"></i></div>`}
-  return `<div class="it"><div class="h"><div class="i">${it.ic}</div><div><b>${it.ad}</b><p>${it.d}</p></div><span class="bd ${BD[it.dr][1]}">${BD[it.dr][0]}</span></div>${pr}
-   ${it.s.length?`<div class="subs">${it.s.map((x,i)=>`<span><i>${i+1}</i>${x.ad}</span>`).join('')}</div>`:''}
-   ${GO[it.ad]&&it.dr!=='y'?(()=>{const tk=(GO[it.ad].match(/tek=(\w+)/)||[])[1],bit=tk&&T&&T.bitti('etanol',tk);return `<a class="basla${bit?' tamam':''}" href="${GO[it.ad]}">${bit?'✓ Tamamlandı · Tekrar dene ›':'Başla ›'}</a>`})():`<span class="basla yok">Hazırlanıyor</span>`}</div>`}).join('');
- $('#pb').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>egitimCiz(b.dataset.k))}
-function panelKapat(){$('#pn').classList.remove('on');$('#pn').setAttribute('aria-hidden','true');$('#ov').classList.remove('on')}
+/* ---------- Eğitimler: öğrenme yolu ----------
+   İlk açılışta kategoriler 1→5 bir yol gibi; birine dokununca kartlar üstte numaralı şeride küçülür, konular altta açılır.
+   İlerleme tarayıcıdaki kayıtlardan: cihaz ve HS-GC-MS dersleri (toksilab_ders_v1), kalibrasyon dersi (toksilab_kalibrasyon_v1),
+   analiz modülü (eğitim çubuğu, T). Kaydı olmayan konular (metot geliştirme, atık suda SPE) hesaba katılmaz. */
+const RENK={beceri:['#1F7A6F','#134640'],kalib:['#2E63B0','#1B3866'],ornek:['#7E52BB','#472A6E'],cihaz:['#BC6A2B','#6A3A17'],modul:['#B83B4A','#661F29']};
+const IZ={'KKD ve laboratuvar güvenliği':['mod','kkd'],'Analitik terazi':['d','terani terkal ter10'],'Otomatik pipet':['d','piptani pipsu pipkan pipstok pipdcm'],'Vorteks':['d','vortani vorkul vorlle'],
+ 'Santrifüj':['d','sentani senkan senlle senepp'],'Ultrasonik banyo':['d','ulttani ultdeg'],'Ultra saf su':['d','sutani sudol susiz'],'Gaz tüp odası':['d','gaztani gazoku gazhe gazar'],
+ 'Kalibrasyon çözeltisi hazırlama':['kal'],'Headspace vial hazırlama':['mod','hazirlama'],'Katı faz ekstraksiyonu (SPE)':['d','spetani spesart speyuk speelu'],
+ 'HS-GC-MS sistemi':['d','sistani hsyukle hstus gctus pctani pcsekans hsbaslat hsgctest'],'Veri analizi (Data Analysis)':['d','datani dakrom dasonuc'],'Kanda alkol analizi (HS-GC-MS)':['modul','etanol']};
+const lsOku=k=>{try{return JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){return {}}};
+function ilerle(it){const z=IZ[it.ad];if(!z||it.dr==='y')return null;
+ if(z[0]==='d'){const o=lsOku('toksilab_ders_v1');if(!o.sistani&&o.hstani&&o.hstani.bitti&&o.gctani&&o.gctani.bitti)o.sistani={bitti:1};const a=z[1].split(' ');return Math.round(100*a.filter(x=>o[x]&&o[x].bitti).length/a.length)}
+ if(z[0]==='kal'){const b=(lsOku('toksilab_kalibrasyon_v1').bitti)||{};return Math.round(100*Math.min(8,Object.keys(b).length)/8)}
+ if(!T)return null;if(z[0]==='mod')return T.bitti('etanol',z[1])?100:0;return T.ilerleme(z[1]).yuzde}
+const katY=k=>{const v=k.it.map(ilerle).filter(x=>x!=null);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0};
+function siradaki(){for(const k of KAT)for(const it of k.it){const y=ilerle(it);if(y!=null&&y<100)return {k,it}}return null}
+let EK=null;
+const ekSt=id=>`--c1:${RENK[id][0]};--c2:${RENK[id][1]};--c:${RENK[id][0]}`;
+function ekDetay(it){const y=ilerle(it),go=GO[it.ad]&&it.dr!=='y';let d=$('#ekDt');if(!d){d=document.createElement('div');d.id='ekDt';d.className='ekDt';$('#pn').appendChild(d)}
+ d.innerHTML=`<div class="ekDk" role="dialog" aria-label="${it.ad}"><div class="h"><span class="ic">${it.ic}</span><div><b>${it.ad}</b><p>${it.d}</p></div><span class="bd ${BD[it.dr][1]}">${BD[it.dr][0]}</span></div>
+  ${it.s.length?`<ol>${it.s.map(x=>`<li>${x.ad}</li>`).join('')}</ol>`:''}
+  <div class="bt">${go?`<a href="${GO[it.ad]}">${y===100?'✓ Tamamlandı · Tekrar et ›':y>0?'Kaldığın yerden devam ›':'Başla ›'}</a>`:'<a class="yok">Hazırlanıyor</a>'}<button data-kapat>Kapat</button></div></div>`;
+ d.classList.add('on');d.onclick=e=>{if(e.target===d||e.target.dataset.kapat!==undefined)d.classList.remove('on')}}
+function egitimCiz(aktif){EK=aktif&&KAT.some(x=>x.id===aktif)?aktif:null;const k=EK&&KAT.find(x=>x.id===EK),sr=siradaki(),M=window.MASKOT;
+ const kart=(x,i)=>{const y=katY(x),h=x.it.filter(q=>q.dr!=='y').length;return `<button class="ekK ${x.id===EK?'on':''}" data-k="${x.id}" style="${ekSt(x.id)}" title="${x.ad} · ilerleme %${y}"><span class="no">${i+1}</span><span class="ic">${x.ic}</span><span><b>${x.ad}</b><small>${x.acik}</small></span><span class="sy">${h} hazır · ${x.it.length} konu</span><span class="pr"><i style="width:${y}%"></i></span></button>`};
+ let h=`<div class="ekW"><div class="ekYol ${k?'kucuk':''}">${KAT.map(kart).join('')}</div>`;
+ if(!k){const t=sr?`${Object.keys(lsOku('toksilab_ders_v1')).length||katY(KAT[0])?'Kaldığın yer':'Başlamak için önerim'}: <b>${sr.k.ad}</b>. Sıradaki konu: <b>${sr.it.ad}</b>.`:'Tebrikler, bütün hazır konuları bitirdin!';
+  h+=`<div class="ekOner">${M?M.kart(sr?'bak':'dogru',t,'toksi'):`<p>${t}</p>`}${sr?'<button id="ekDevam">Devam et ›</button>':''}</div>`}
+ else h+=`<div class="ekBas"><span>${k.ic}</span><span><b>${k.ad}</b> · ${k.acik}</span><button id="ekYolB">⌂ Yol haritası</button></div><div class="ekG" style="${ekSt(k.id)}">${k.it.map((it,i)=>{const y=ilerle(it),bas=sr&&sr.it===it;
+  return `<button class="ekT ${it.dr==='y'?'y':''} ${y===100?'bit':''} ${bas?'sira':''}" data-i="${i}">${bas?'<span class="sr">SIRADAKİ</span>':''}<span class="bd ${BD[it.dr][1]}">${BD[it.dr][0]}</span><span class="ic">${it.ic}</span><b>${it.ad}</b><small>${it.d.length>72?it.d.slice(0,70)+'…':it.d}</small>${y>0&&y<100?`<span class="tp" title="%${y}"><i style="width:${y}%"></i></span>`:''}<span class="alt">${it.s.length?it.s.length+' bölüm':''}${y>0&&y<100?' · %'+y:''}</span></button>`}).join('')}</div>`;
+ $('#pb').innerHTML=h+'</div>';
+ $('#pb').querySelectorAll('.ekK').forEach(b=>b.onclick=()=>egitimCiz(b.dataset.k===EK?null:b.dataset.k));
+ if(k)$('#pb').querySelectorAll('.ekT').forEach(b=>b.onclick=()=>{const it=k.it[+b.dataset.i];if(it.dr!=='y')ekDetay(it)});
+ const yb=$('#ekYolB');if(yb)yb.onclick=()=>egitimCiz(null);
+ const dv=$('#ekDevam');if(dv)dv.onclick=()=>{egitimCiz(sr.k.id);setTimeout(()=>ekDetay(sr.it),250)}}
+function panelKapat(){const d=$('#ekDt');if(d)d.classList.remove('on');$('#pn').classList.remove('on');$('#pn').setAttribute('aria-hidden','true');$('#ov').classList.remove('on')}
 document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>panelAc(b.dataset.p));
-$('#pnX').onclick=panelKapat;$('#ov').onclick=panelKapat;addEventListener('keydown',e=>{if(e.key==='Escape'&&!introOn)panelKapat()});
+$('#pnX').onclick=panelKapat;$('#ov').onclick=panelKapat;addEventListener('keydown',e=>{if(e.key!=='Escape'||introOn)return;const d=$('#ekDt');if(d&&d.classList.contains('on')){d.classList.remove('on');return}panelKapat()});
 /* ---------- hoş geldiniz videosu (kendiliğinden başlamaz) ---------- */
 const VW=$('#vw'),VV=$('#vwV');
 function vwAc(){VW.hidden=false;void VW.offsetWidth;VW.classList.add('on');VV.currentTime=0;const p=VV.play();if(p&&p.catch)p.catch(()=>{})}

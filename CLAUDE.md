@@ -33,7 +33,12 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
 - HS-GC-MS serbest kullanım `hs_serbest.js`: `?serbest=hs|gc|pc` ya da parametresiz açılışta; üç sekme, alt düğmeler,
   sağda "Burada neler yapabilirsin?" + maskot (sayfanın `#say` uyarılarını aktarır). SOP ekranı (16 adım) yalnızca
   "Kanda etanol" modülü aktifken (localStorage `toksilab_egitim_v1`.aktif) ya da `?gorev=`/`?mod=`/`?egitim=`/`?sop=` ile.
-  Dersten "serbest kullanım"a geçişte bölümün cihazının sekmesi açılır. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+  Dersten "serbest kullanım"a geçişte bölümün cihazının sekmesi açılır.
+- Ana sayfa "Eğitimler" paneli (`index.html` → `egitimCiz`): ilk açılışta 5 kategori 1→5 öğrenme yolu (renkli kartlar,
+  ilerleme çubuğu, Toksi + "Devam et ›" sıradaki konuyu açar); kategoriye dokununca kartlar üstte numaralı şeride
+  küçülür, konular kare kartlar (✓ bitti, SIRADAKİ, kısmi %); karta dokununca ayrıntı penceresi (`#ekDt`, bölümler +
+  Başla). İlerleme `IZ` tablosuyla: cihaz/HS dersleri `toksilab_ders_v1` (ders kimlikleri), kalibrasyon
+  `toksilab_kalibrasyon_v1` (8 bölüm), analiz modülü `TLE`. Yeni ders eklenince `IZ`'ye kimlikleriyle ekle. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.
