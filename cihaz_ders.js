@@ -744,8 +744,10 @@ function akis(s){var r=rafta();return 'Basınç '+f1(s.p)+' psi · '+(r.length?r
 var KAFA=['✋✋ İki anahtara birlikte bas',function(){window.ikiAnahtar()}];
 /* öğrencinin son protokol sapması derste hemen gösterilir */
 function sapma(){var s=S(),x=s.log[0];return x&&!x.info&&s.time-x.t<150?'⚠ '+x.msg:''}
-function koc(t,ask,b,kaynak,html){return {bolum:{0:'Şartlandırma',1:'Şartlandırma',2:'Yükleme',3:'Yıkama',4:'Yıkama',6:'Elüsyon'}[t],ask:ask,dugme:KAFA,
- izin:kaynak.concat(['cart','stand','twoL','twoR','mode','knob','pull','pipstand','tipbox','tipwaste']),canli:function(){return 'Sıradaki: '+window.speKoc(t).is},halka:function(){return window.speKoc(t).h},
+/* koç adımları: sıradaki işi maskot söyler (ruh/canli), panelde yalnız ilerleme görünür */
+function yukDurum(){return E().filter(function(c){return c.k<2}).map(function(c){return 'K'+(c.k+1)+' ← N'+(c.k+1)+': '+f1(Math.min(10,c.yuk))+' / 10 mL yüklendi · kartuşta '+f1(vol(c))+' mL'}).join('\n')+'\nBasınç '+f1(S().p)+' psi'}
+function koc(t,ask,b,kaynak,html){return {bolum:{0:'Şartlandırma',1:'Şartlandırma',2:'Yükleme',3:'Yıkama',4:'Yıkama',6:'Elüsyon'}[t],ask:ask,dugme:KAFA,kocT:t,
+ izin:kaynak.concat(['cart','stand','twoL','twoR','mode','knob','pull','pipstand','tipbox','tipwaste']),canli:function(s){return t===2?yukDurum():akis(s)},halka:function(){return window.speKoc(t).h},
  ok:function(){return !!window.speKoc(t).bitti},hata:sapma,b:b,html:html}}
 var DERS={
 spetani:{ad:'Cihazı tanıma',ozet:'SPE nedir; kartuş, kolon rafı, atık ve toplama rafı, basınç kafası, anahtarlar, mod seçici, ADJ / MAX, rotametre.',baslik:'SPE · TANIMA',mod:'parts',gorev:'parts',
@@ -825,7 +827,7 @@ speyuk:{ad:'Numune yükleme',ozet:'10 mL numuneyi kendi kartuşuna yükle (N1 �
  {bolum:'Yükleme',ask:'<b>Uç kutusuna</b> tıklayın: pipete yeni uç takın.',oto:1,halka:H('tipbox',50),izin:['tipbox'],ok:function(s){return s.hand&&s.hand.type==='pip'&&!!s.hand.uc}},
  {bolum:'Yükleme',ask:'<b>N1</b> numune tüpüne tıklayın: pipetle 3 mL çekin. Bu numune yalnız <b>K1</b>’e gider.',oto:1,halka:H('src:n1',50),izin:['src:n1'],ok:function(s){return s.hand&&s.hand.type==='pip'&&s.hand.vol>0&&s.hand.src&&s.hand.src.id==='n1'}},
  {bolum:'Yükleme',ask:'<b>K1</b> kartuşuna tıklayın: numuneyi ekleyin.',oto:1,halka:H('cart:0',40),izin:['cart:0'],ok:function(){return E()[0].yuk>0}},
- koc(2,'Kalan numuneyi yükleyin: K1’e <b>N1</b>’den, K2’ye <b>N2</b>’den toplam <b>10’ar mL</b>. Akmayan kartuş olursa ADJ basıncını yavaşça artırın. Sıradaki işi sarı halka gösterir.',
+ koc(2,'Kalan numuneyi yükleyin: K1’e <b>N1</b>’den, K2’ye <b>N2</b>’den toplam <b>10’ar mL</b>. Kartuşun tamamen boşalmasını beklemeniz gerekmez: <b>yer açıldıkça</b> gazı kapatıp ekleyebilirsiniz. Sıradaki işi <b>Toksi</b> söyler, sarı halka gösterir.',
   'Yükleme tamam',['src:n1','src:n2','src:y1','src:y2'],
   function(){var c=E();return '<p>K1’e '+f1(c[0].yuk)+' mL, K2’ye '+f1(c[1].yuk)+' mL numune yüklendi. Analitler artık sorbente tutunmuş durumda.</p><p>Bulanık numuneler kartuşu tıkar: akış yavaşlar, sonunda durur. O zaman basınç birkaç psi artırılır (ADJ en fazla 15 psi).</p><p>Pipet her zaman kartuşun üstündeyken sıkılır: dökülen numune geri gelmez, sonuç eksik çıkar.</p>'}),
  {bolum:'Kontrol',test:1}],
@@ -1055,7 +1057,7 @@ css.textContent=
 '#dersP .ask{background:#F1F6F7;color:#16242A;border-radius:12px;padding:11px 13px;border-left:5px solid #F2B632;font-size:16px}'+
 '#dersP .ask.tamam{border-left-color:#2DBE5B;background:#E6F6EB}'+
 '#dersP .ask small{display:block;margin-top:5px;color:#B3261E;font-weight:600;font-size:13.5px}'+
-'#dersP .canli{font:600 13px "IBM Plex Mono",monospace;color:#7CF2D8;background:#16242A;border-radius:10px;padding:8px 10px}'+
+'#dersP .canli{font:600 13px "IBM Plex Mono",monospace;color:#7CF2D8;background:#16242A;border-radius:10px;padding:8px 10px;white-space:pre-line;line-height:1.5}'+
 '#dersP .kart{background:#25333A;border-radius:12px;padding:12px 13px;display:grid;gap:8px}'+
 '#dersP .kart h4{font:700 18px "Barlow Condensed",sans-serif;color:#2BD9C0;letter-spacing:.02em;margin:0}'+
 '#dersP .kart .dg{font:600 13px "IBM Plex Mono",monospace;color:#F2B632}'+
@@ -1194,13 +1196,15 @@ function ciz(){
  if(matchMedia('(max-width:900px)').matches)document.getElementById('dersK').scrollTop=0}
 /* maskotun ruh hâli ve sözü: görev bekliyor → halkaya bakar; hata → düşünür; geçti → sevinir */
 function ruh(a){
+ if(a.kocT!=null&&!gecti&&window.speKoc){var k=window.speKoc(a.kocT),ss=S(),lx=ss&&ss.log&&ss.log[0],sp=lx&&!lx.info&&ss.time-lx.t<150?'⚠ '+lx.msg:'';return [sp?'yanlis':k.ops?'bekle':k.h?'bak':'bekle',(sp?sp+'<br>':'')+k.is]}
  if(a.test){if(sn>=SORU.length)return ['dogru','Tebrikler! Bölümü bitirdin.'];if(cevap===null)return ['bekle','Soruyu dikkatle oku, sonra yanıtla.'];return cevap===SORU[sn][2]?['dogru','Doğru!']:['yanlis','Olmadı; doğru yanıt işaretlendi. Açıklamayı oku.']}
  if(uyari&&!gecti)return ['yanlis','Hmm… İpucunu okuyup bir daha dene.'];
  if(a.ask&&!gecti)return ['bak','Görevi yap: yanıp sönen <b>sarı halka</b> nereye dokunacağını gösterir.'];
  if(gecti)return ['dogru','Harika! Açıklamayı oku, sonra <b>Devam</b>’a bas.'];
  return ['bekle','Açıklamayı oku; hazırsan <b>Devam</b>’a bas.']}
 function dugmeler(a){return typeof a.dugme[0]==='string'?[a.dugme]:a.dugme}
-function canli(){var a=ADIM[i],e=P.querySelector('#dCanli');if(e&&a.canli)e.textContent=a.canli(S())}
+function canli(){var a=ADIM[i],e=P.querySelector('#dCanli');if(e&&a.canli)e.textContent=a.canli(S());
+ if(a&&a.kocT!=null&&!gecti&&MK){var r=ruh(a),m=P.querySelector('.mskYer .mskKart'),p=m&&m.querySelector('p');if(p&&p.innerHTML!==r[1]){p.innerHTML=r[1];var x=m.querySelector('.msk');if(x)MK.durum(x,r[0])}}}
 function test(){
  if(sn>=SORU.length){var k=SIRA.indexOf(D),sonra=SIRA[k+1];
   return '<div class="kart"><h4>Bölüm tamamlandı</h4><div class="dg">'+puan+' / '+SORU.length+' doğru</div><div><p><b>'+L.ad+'</b> bölümünü bitirdiniz.</p>'+(puan<SORU.length?'<p>Yanlış yanıtladığınız konular için bölümü yeniden izleyebilirsiniz.</p>':'')+(sonra?'<p>Sıradaki bölüm: <b>'+DERS[sonra].ad+'</b>.</p>':'<p>'+C.adTam+' bütün bölümlerini tamamladınız.</p>')+'</div></div><div class="alt"><button id="dTekrar">↺ Baştan</button><button class="p" id="dSonraki" data-d="'+(sonra||'liste')+'">'+(sonra?'Sonraki bölüm ›':'Bölümler ›')+'</button></div>'}

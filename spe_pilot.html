@@ -1970,7 +1970,7 @@ const kaynak = (c, t) => t !== 2 ? KAYNAK[t] : srcById['n' + (c.k + 1)].vol > 0.
 function speKoc(t) {
   const L = carts.filter(c => c.k < S.nCart), P = PROTO[t];
   const need = c => c.step < t || (c.step === t && c.added < P.ml - 0.02);
-  const dolu = c => cartVol(c) > 0.002, ad = c => 'K' + (c.k + 1);
+  const dolu = c => cartVol(c) > 0.002, ad = c => 'K' + (c.k + 1), yer = c => CART_CAP - cartVol(c);
   const rack = L.filter(c => c.where === 'rack'), stand = L.filter(c => c.where === 'stand');
   const H = (n, r) => [n, 0, r || 46], DG = ['#dersP [data-dg="0"]', 0, 0];
   const hp = S.hand && S.hand.type === 'pip' ? S.hand : null, hd = S.hand && S.hand.type === 'disp' ? S.hand : null, elCart = S.hand && S.hand.type === 'cart';
@@ -1995,6 +1995,8 @@ function speKoc(t) {
     /* tıkanan kartuş çok yavaşsa beklemek yetmez: basınç sınırına kadar halka ADJ / MAX düğmesini gösterir */
     const sinir = S.gm === 'adj' ? 15 : 30, ayar = S.gm === 'adj' ? S.adj : S.max;
     if (yav.length && ayar < sinir) return { is: `${yav.map(ad).join(', ')} tıkanıyor, çok yavaş akıyor (${yav.map(c => c.flow.toFixed(1).replace('.', ',')).join(' · ')} mL/dk): ${S.gm === 'adj' ? 'ADJ' : 'MAX'} düğmesine tıklayıp + ile basıncı 1–2 psi artırın.`, h: !regpop.hidden ? ['#regPlus', 0, 0] : H('knob:' + S.gm, 44) };
+    const acik = t === 2 ? rack.filter(c => need(c) && yer(c) >= 1.5 && dolu(c)) : [];
+    if (acik.length) { const c = acik[0], kal = 10 - c.yuk; return { is: `Kartuşlar akıyor. ${ad(c)}’de ${yer(c).toFixed(1).replace('.', ',')} mL yer açıldı (N${c.k + 1}’den ${kal.toFixed(1).replace('.', ',')} mL kaldı). İstersen şimdi ekle: gazı kapat (OFF), kafayı kaldır, rafı öne çek. Ya da boşalmasını bekle.`, h: null, ops: true }; }
     return { is: `Kartuşlar akıyor (${rack.map(c => ad(c) + ' ' + c.flow.toFixed(1).replace('.', ',')).join(' · ')} mL/dk). Bekleyin…`, h: null };
   }
   if (S.headDown) {
@@ -2002,10 +2004,14 @@ function speKoc(t) {
     if (bosRaf.length === rack.length) return { is: 'Kartuşlar boş: kafayı kaldırın (paneldeki ✋✋ düğmesi).', h: DG };
     if (bosRaf.length) return { is: `${bosRaf.map(ad).join(', ')} boş: kafayı kaldırın (paneldeki ✋✋ düğmesi); ${need(bosRaf[0]) ? 'sıradaki çözeltiyi ekleyeceksiniz' : 'biten kartuşu bekleme standına alacaksınız'}.`, h: DG };
     if (S.headT < 0.999) return { is: 'Kafa iniyor…', h: null };
+    const yerli = t === 2 ? rack.filter(c => need(c) && yer(c) >= 1.5) : [];
+    if (yerli.length) return { is: `Kafa kapalı: ADJ ile gazı açın (mod seçicinin sol tarafı). ${yerli.map(ad).join(', ')}’de yer var; önce eklemek isterseniz kafayı kaldırın.`, h: H('mode:adj', 36) };
     return { is: 'Kafa kapalı: mod seçicinin sol tarafına (ADJ) tıklayıp gazı açın.', h: H('mode:adj', 36) };
   }
   if (S.headT > 0.001) return { is: 'Kafa kalkıyor…', h: null };
-  const bekleyen = rack.filter(c => need(c) && !dolu(c)), bitmis = rack.filter(c => !need(c) && !dolu(c)), suren = rack.filter(c => need(c) || dolu(c));
+  /* yüklemede kartuş tamamen boşalmadan da yer açıldıkça (≥ 0,5 mL) numune eklenebilir: öğrenci gerçek laboratuvardaki gibi çalışır */
+  const ekle = c => need(c) && (t === 2 ? yer(c) >= 0.5 : !dolu(c));
+  const bekleyen = rack.filter(ekle), bitmis = rack.filter(c => !need(c) && !dolu(c)), suren = rack.filter(c => need(c) || dolu(c));
   if (!elCart && !rafOnde() && (bekleyen.length || (bitmis.length && suren.length) || (stand.length && !suren.length))) return { is: 'Rafı öne çekin: rafın ön yüzüne tıklayın. Kartuşlara kafanın altında dokunulmaz.', h: H('pull', 50) };
   if (bitmis.length && suren.length && !elCart) {
     const c = bitmis[0];
@@ -2017,6 +2023,7 @@ function speKoc(t) {
     if (!rafOnde()) return { is: 'Numuneyi vermek için rafı öne çekin: rafın ön yüzüne tıklayın.', h: H('pull', 50) };
     const hedef = bekleyen.find(c => hp.src.liq === 'sample' && hp.src.j === c.k);
     if (hedef) return { is: `Pipette ${hp.vol.toFixed(1).replace('.', ',')} mL ${hp.src.title}: ${ad(hedef)} kartuşuna tıklayıp verin.`, h: H('cart:' + hedef.k, 40) };
+    if (t === 2 && hp.src.liq === 'sample') { const c = rack.find(q => q.k === hp.src.j); if (c && need(c)) return { is: `${ad(c)} doldu, pipette ${hp.vol.toFixed(1).replace('.', ',')} mL ${hp.src.title} kaldı: ${hp.src.title} tüpüne tıklayıp geri bırakın; ${ad(c)}’de yer açılınca yeniden alırsınız.`, h: H('src:' + hp.src.id, 50) }; }
     return { is: `Pipetteki ${hp.src.title} şimdi kullanılmıyor: kendi tüpüne tıklayıp geri bırakın.`, h: H('src:' + hp.src.id, 50) };
   }
   if (bekleyen.length) {
@@ -2085,6 +2092,8 @@ window.serbestRapor = { ac: raporAc, ot: () => OT && { kayit: carts.filter(used)
 
 Object.assign(window, { speOdak, reset: dersReset, render, scrOf, speKoc, ikiAnahtar, swapRacks, setSpeed, setMode, serbestKur, carts, PROTO, cartVol });
 Object.defineProperty(window, 'S', { get: () => S });
+/* testler için: öğrenci işlemleri (sahneye tıklamadan) */
+window.__speTest = { aspirate, dispense, togglePull, pipetAl, ucTak, ucAt, setReg };
 window.__spe = 1;
 })();
 </script>

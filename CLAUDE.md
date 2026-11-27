@@ -48,7 +48,13 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   `VIDEO_KAPALI=true`; `false` yapınca hoş geldiniz ve lab turu tanıtım videoları geri gelir.
 - "Nasıl kullanılır?" paneli (`nasilCiz`, adresle `#nasil`): üç büyük renkli sekme (Başlarken: 4 adım + 3 ipucu ·
   Ekrandaki işaretler: sarı halka, formül çerçevesi, ✓, SIRADAKİ, maskot yüzleri, düğmeler · Sık sorulanlar: 7 soru).
-  Site değişince (yeni işaret, yeni özellik) bu içerikleri de güncelle. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+  Site değişince (yeni işaret, yeni özellik) bu içerikleri de güncelle.
+- SPE yükleme dersi (`speyuk`, koç adımı t=2; `spe_pilot.html` → `speKoc`): kartuş tamamen boşalmadan da yer açıldıkça
+  (≥ 0,5 mL) numune eklenebilir; akarken ≥ 1,5 mL yer açılınca Toksi "İstersen şimdi ekle…" der (isteğe bağlı, halka
+  yok); pipette artan numune kendi tüpüne geri bırakılır. Koç adımlarında (`koc`, `kocT`) sıradaki işi maskot söyler
+  (`ruh`/`canli` canlı günceller), panelde yalnız ilerleme (`yukDurum`: K1 ← N1 x / 10 mL). Test için sayfa işlevleri
+  `window.__speTest` (aspirate, dispense, togglePull, pipetAl, ucTak, ucAt, setReg). `tests/dersler.js` speyuk bu
+  makinede koç adımında takılıyor (değişiklikten önce de; 3B yavaşlığı). "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.
