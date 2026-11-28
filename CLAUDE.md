@@ -66,7 +66,11 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
 - SPE akış hızı kuralı (kullanıcının laboratuvar pratiği): istenen hızda akan kartuş rafta varken tıkanan kartuş için
   basınç ARTIRILMAZ; koç "Basıncı artırma… önce K1 bitsin, standa al" der. Basınç yalnız tıkanan kartuş rafta tek
   kalınca artırılır; sonraki adımda kartuşlar rafa dönünce koç ADJ'yi `S.adj0` değerine (derste 5 psi) indirtir.
-  Numune ya da elüsyon > 3 mL/dk akarsa kayıt "çok hızlı akıyor" (kartuş başına bir kez; serbestte −10). "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+  Numune ya da elüsyon > 3 mL/dk akarsa kayıt "çok hızlı akıyor" (kartuş başına bir kez; serbestte −10).
+- SPE MAX düğmesi açılışta 0 psi (yanlışlıkla MAX'a alınırsa sıvı fırlamaz); kurutma adımında öğrenci 20 psi yapar
+  (halka önce MAX düğmesi, sonra mod seçici). Mod seçicide ortada ölü bölge: gaz kapalıyken ortaya tıklama bir şey
+  açmaz; ADJ sol (x < −0,02), MAX sağ (x > 0,04). Sıvı adımında MAX seçilirse koç "MAX yalnız kurutmada" der.
+  Dispenserle adımın toplamından fazla verilmesi engellenmez (gerçekçi); "fazla hacim" kaydı ve Toksi uyarısı yeter. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.

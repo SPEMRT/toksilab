@@ -947,7 +947,7 @@ function mlzKur(liste) { MLZ.forEach(m => mlzGoster(m.id, !liste || liste.includ
 
 /* ---------- state ---------- */
 const S = {
-  headDown: false, headT: 0, gm: 'off', mode: 'use', done: {}, dispVol: 3, nCart: 5, ders: false, hizOnce: 0, dok: [], adj: 10, max: 20, speed: 10, time: 0,
+  headDown: false, headT: 0, gm: 'off', mode: 'use', done: {}, dispVol: 3, nCart: 5, ders: false, hizOnce: 0, dok: [], adj: 10, max: 0, speed: 10, time: 0,
   wasteT: 1, collT: 0, colLift: 0, busy: false, p: 0, gaugeL: 0, gaugeR: 0, flow: 0,
   waste: 0, tubeVol: new Float32Array(48), hand: null, arm: { L: -1e9, R: -1e9 },
   log: [], logSet: new Set(), mlz: {}, pulled: false, pullT: 0, spares: 5,
@@ -1540,7 +1540,12 @@ renderer.domElement.addEventListener('pointerup', e => {
   else if (a === 'pull') togglePull();
   else if (a === 'twoL') pressSide('L');
   else if (a === 'twoR') pressSide('R');
-  else if (a === 'mode') setMode(S.gm !== 'off' ? 'off' : sel.worldToLocal(h.point.clone()).x > 0 ? 'max' : 'adj');
+  else if (a === 'mode') {
+    if (S.gm !== 'off') setMode('off');
+    else { const x = sel.worldToLocal(h.point.clone()).x;
+      if (x > 0.04) setMode('max'); else if (x < -0.02) setMode('adj');
+      else toast('Gaz kapalı (OFF). Açmak için mod seçicinin sol tarafına (ADJ) ya da sağ tarafına (MAX) tıkla.'); }
+  }
   else if (a === 'platen') toast('Kafayı indirmek ya da kaldırmak için sağ ve sol anahtarlara aynı anda bas.');
   else if (e.pointerType !== 'mouse') toast(h.o.userData.label);
 });
@@ -1937,7 +1942,7 @@ function dersReset(g) {
   reset();
   S.ders = !!g && g !== 'free'; S.nCart = S.ders ? 2 : 5; S.hizOnce = 0;
   mlzKur({ bos: ['kutu', 'stand', 'meoh', 'water'], sart: ['stand', 'num', 'pip'], yuk: ['stand', 'water', 'mix', 'elu'], free: [] }[g]);
-  setSpeed(10); setMode('off'); setReg('max', 20);
+  setSpeed(10); setMode('off'); setReg('max', 0); /* MAX açılışta sıfır: yalnız kurutmada öğrenci kendisi 20 psi yapar */
   if (S.ders) {
     carts.forEach(c => { freshCart(c, false); c.gen = 0; c.Pth0 = 0.8; c.C = 0.3; });
     S.spares = 1;
@@ -2009,6 +2014,7 @@ function speKoc(t) {
   if (S.hand && S.hand.type === 'cart') return { is: `Elinizde ${ad(carts[S.hand.k])} var: bekleme standına tıklayıp bırakın.`, h: H('stand', 60) };
   if (S.gm !== 'off') {
     if (!sealed) return { is: 'Gaz açık ama kafa kapalı değil: mod seçicinin ortasına tıklayıp gazı kapatın (OFF).', h: H('mode', 40) };
+    if (S.gm === 'max') return { is: 'MAX seçildi: MAX yalnız <b>kurutmada</b> kullanılır, sıvılar ADJ ile damla damla geçirilir. Mod seçicinin ortasına tıklayıp kapatın (OFF), sonra sol tarafına (ADJ) tıklayın.', h: H('mode', 40) };
     const bos = rack.filter(c => !dolu(c));
     if (bos.length === rack.length) return { is: 'Kartuşlar boşaldı: gazı hemen kapatın (mod seçicinin ortası, OFF).', h: H('mode', 40) };
     if (bos.length) {
