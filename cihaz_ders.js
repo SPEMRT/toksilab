@@ -743,11 +743,12 @@ function rafta(){return E().filter(function(c){return c.k<2&&c.where==='rack'})}
 function akis(s){var r=rafta();return 'Basınç '+f1(s.p)+' psi · '+(r.length?r.map(function(c){return 'K'+(c.k+1)+' '+f1(vol(c))+' mL, '+f1(c.flow)+' mL/dk'}).join(' · '):'rafta kartuş yok')}
 var KAFA=['✋✋ İki anahtara birlikte bas',function(){window.ikiAnahtar()}];
 /* öğrencinin son protokol sapması derste hemen gösterilir */
-function sapma(){var s=S(),x=s.log[0];return x&&!x.info&&s.time-x.t<150?'⚠ '+x.msg:''}
+/* ciddi hata (yanlış numune) yalnız maskotta, kırmızı yazılır; panelde ikinci kez gösterilmez */
+function sapma(){var s=S(),x=s.log[0];return x&&!x.info&&!x.ciddi&&s.time-x.t<150?'⚠ '+x.msg:''}
 /* koç adımları: sıradaki işi maskot söyler (ruh/canli), panelde yalnız ilerleme görünür */
 function yukDurum(){return E().filter(function(c){return c.k<2}).map(function(c){return 'K'+(c.k+1)+' ← N'+(c.k+1)+': '+f1(Math.min(10,c.yuk))+' / 10 mL yüklendi · kartuşta '+f1(vol(c))+' mL'}).join('\n')+'\nBasınç '+f1(S().p)+' psi'}
 function koc(t,ask,b,kaynak,html){return {bolum:{0:'Şartlandırma',1:'Şartlandırma',2:'Yükleme',3:'Yıkama',4:'Yıkama',6:'Elüsyon'}[t],ask:ask,dugme:KAFA,kocT:t,
- izin:kaynak.concat(['cart','stand','twoL','twoR','mode','knob','pull','pipstand','tipbox','tipwaste']),canli:function(s){return t===2?yukDurum():akis(s)},halka:function(){return window.speKoc(t).h},
+ izin:kaynak.concat(['cart','stand','twoL','twoR','mode','knob','pull','pipstand','tipbox','tipwaste','dvol']),canli:function(s){return t===2?yukDurum():akis(s)},halka:function(){return window.speKoc(t).h},
  ok:function(){return !!window.speKoc(t).bitti},hata:sapma,b:b,html:html}}
 var DERS={
 spetani:{ad:'Cihazı tanıma',ozet:'SPE nedir; kartuş, kolon rafı, atık ve toplama rafı, basınç kafası, anahtarlar, mod seçici, ADJ / MAX, rotametre.',baslik:'SPE · TANIMA',mod:'parts',gorev:'parts',
@@ -1196,7 +1197,7 @@ function ciz(){
  if(matchMedia('(max-width:900px)').matches)document.getElementById('dersK').scrollTop=0}
 /* maskotun ruh hâli ve sözü: görev bekliyor → halkaya bakar; hata → düşünür; geçti → sevinir */
 function ruh(a){
- if(a.kocT!=null&&!gecti&&window.speKoc){var k=window.speKoc(a.kocT),ss=S(),lx=ss&&ss.log&&ss.log[0],sp=lx&&!lx.info&&ss.time-lx.t<150?'⚠ '+lx.msg:'';return [sp?'yanlis':k.ops?'bekle':k.h?'bak':'bekle',(sp?sp+'<br>':'')+k.is]}
+ if(a.kocT!=null&&!gecti&&window.speKoc){var k=window.speKoc(a.kocT),ss=S(),lx=ss&&ss.log&&ss.log[0],sp=lx&&!lx.info&&ss.time-lx.t<150?(lx.ciddi?'':'⚠ ')+lx.msg:'';return [sp?'yanlis':k.ops?'bekle':k.h?'bak':'bekle',(sp?'<b style="color:#B3261E">'+sp+'</b><br>':'')+k.is]}
  if(a.test){if(sn>=SORU.length)return ['dogru','Tebrikler! Bölümü bitirdin.'];if(cevap===null)return ['bekle','Soruyu dikkatle oku, sonra yanıtla.'];return cevap===SORU[sn][2]?['dogru','Doğru!']:['yanlis','Olmadı; doğru yanıt işaretlendi. Açıklamayı oku.']}
  if(uyari&&!gecti)return ['yanlis','Hmm… İpucunu okuyup bir daha dene.'];
  if(a.ask&&!gecti)return ['bak','Görevi yap: yanıp sönen <b>sarı halka</b> nereye dokunacağını gösterir.'];

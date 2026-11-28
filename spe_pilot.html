@@ -117,6 +117,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
   position: absolute; top: 10px; left: 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; z-index: 4;
   background: var(--panel); border: 1px solid var(--accent); border-radius: 6px; padding: 5px 5px 5px 10px; font-size: 12.5px; max-width: calc(100% - 20px);
 }
+.dvol button[aria-pressed="true"] { background: var(--accent); color: #062126; }
 .hand button { font: 600 12px var(--font-body); background: var(--chip); color: var(--fg); border: 0; border-radius: 4px; padding: 5px 8px; cursor: pointer; }
 .tip { position: absolute; pointer-events: none; transform: translate(12px, 12px); background: var(--fg); color: var(--bg); font: 500 12px var(--font-body); padding: 5px 8px; border-radius: 5px; max-width: 240px; z-index: 3; }
 .regpop {
@@ -289,6 +290,7 @@ html.dersOn body::after{content:"";position:fixed;z-index:19;top:0;right:0;botto
   <section class="stage" id="stage">
     <canvas id="c" tabindex="0" aria-label="CEREX 48 ve laboratuvar tezgâhının etkileşimli 3D modeli"></canvas>
     <div class="hint">Sürükle: döndür · Kaydır: yakınlaş · Nesneye tıkla</div>
+    <div class="hand dvol" id="dvol" hidden><span id="dvolT"></span><button type="button" id="dv1" data-dv="1">1 mL</button><button type="button" id="dv2" data-dv="2">2 mL</button><button type="button" id="dv3" data-dv="3">3 mL</button><button type="button" id="dvBirak">Bırak</button></div>
     <div class="hand" id="hand" hidden><span id="handTxt"></span><button type="button" id="btnHPlace" hidden>Rafa yerleştir</button><button type="button" id="btnDrop">Bırak</button></div>
     <div class="views" role="group" aria-label="Kamera açısı">
       <button id="vIso" type="button">Tezgâh</button>
@@ -422,8 +424,10 @@ const M = {
   glass:  new THREE.MeshStandardMaterial({ color: 0xe6f2ff, roughness: 0.05, transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide }),
   tubGlass: new THREE.MeshStandardMaterial({ color: 0xf4f8fb, roughness: 0.15, transparent: true, opacity: 0.32, depthWrite: false }),
   tub:    new THREE.MeshStandardMaterial({ color: 0xf3f4f2, roughness: 0.65, transparent: true, opacity: 0.72, depthWrite: false }),
-  pp:     new THREE.MeshStandardMaterial({ color: 0xf7f8f6, roughness: 0.4, transparent: true, opacity: 0.42, depthWrite: false }),
+  pp:     new THREE.MeshStandardMaterial({ color: 0xf7f8f6, roughness: 0.4, transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide }),
   ppSolid:new THREE.MeshStandardMaterial({ color: 0xf2f3f0, roughness: 0.45 }),
+  frit:   new THREE.MeshStandardMaterial({ color: 0x9aa3a8, roughness: 0.8 }),
+  ppRing: new THREE.MeshStandardMaterial({ color: 0xe9ecef, roughness: 0.45, side: THREE.DoubleSide }),
   card:   new THREE.MeshStandardMaterial({ color: 0xf1f2ee, roughness: 0.85 }),
   cardG:  new THREE.MeshStandardMaterial({ color: 0x2f8a5b, roughness: 0.8 }),
 };
@@ -719,25 +723,27 @@ const TUBE_CAP = 5;
 /* column rack */
 const COLR_L = 'Kolon rafı: elindeki kartuşu bir deliğe yerleştir';
 const colRack = new THREE.Group(); dev.add(colRack);
-const cTop = holedPlate(2.3, 0.9, 0.04, '#1e2024', '#050506', '#3a3d42', M.anod); cTop.position.y = 0.4;
+const cTop = holedPlate(2.3, 0.9, 0.04, '#1e2024', '#050506', '#3a3d42', M.anod); cTop.position.y = 0.79; /* kartuş başı (flanş) bu plakaya oturur */
 cTop.userData = { label: COLR_L, action: 'rackTop' }; colRack.add(cTop);
 const cMid = holedPlate(2.3, 0.9, 0.03, '#1e2024', '#050506', '#3a3d42', M.anod); cMid.position.y = 0.14; cMid.userData.label = '48 pozisyonlu kolon rafı'; colRack.add(cMid);
-colRack.add(mesh(box(2.3, 0.22, 0.03), M.anod, 0, 0.27, 0.44, 'Raf ön yüzü: tıkla, rafı öne çek / geri it', 'pull'));
-for (let c = 0; c < NX; c++) { const h = mesh(cyl(0.035, 0.035, 0.035, 14), M.rubber, holeX(c), 0.27, 0.452); h.rotation.x = Math.PI / 2; colRack.add(h); }
-[[-1.1, -0.38], [1.1, -0.38], [-1.1, 0.38], [1.1, 0.38]].forEach(([x, z]) => colRack.add(mesh(cyl(0.05, 0.05, 0.4, 16), M.alu, x, 0.2, z, '48 pozisyonlu kolon rafı')));
+colRack.add(mesh(box(2.3, 0.22, 0.03), M.anod, 0, 0.66, 0.44, 'Raf ön yüzü: tıkla, rafı öne çek / geri it', 'pull'));
+for (let c = 0; c < NX; c++) { const h = mesh(cyl(0.035, 0.035, 0.035, 14), M.rubber, holeX(c), 0.66, 0.452); h.rotation.x = Math.PI / 2; colRack.add(h); }
+[[-1.1, -0.38], [1.1, -0.38], [-1.1, 0.38], [1.1, 0.38]].forEach(([x, z]) => colRack.add(mesh(cyl(0.05, 0.05, 0.79, 16), M.alu, x, 0.395, z, '48 pozisyonlu kolon rafı')));
 
 /* ---------- cartridges (Oasis HLB 3 cc) ---------- */
-const CART_CAP = 3, LIQ_Y0 = 0.25, LIQ_H = 0.56;
-const barrelGeo = cyl(0.048, 0.048, 0.72, 16), flangeGeo = cyl(0.066, 0.066, 0.03, 18), tipGeo = cyl(0.011, 0.024, 0.12, 10), sorbGeo = cyl(0.045, 0.045, 0.08, 14);
+const CART_CAP = 3, LIQ_Y0 = 0.25, LIQ_H = 0.56, SORB0 = 0xe2cf96;
+const barrelGeo = new THREE.CylinderGeometry(0.048, 0.048, 0.72, 20, 1, true), flangeGeo = new THREE.CylinderGeometry(0.066, 0.066, 0.03, 20, 1, true), flangeRing = new THREE.RingGeometry(0.047, 0.066, 24), tipGeo = cyl(0.011, 0.024, 0.12, 10), sorbGeo = cyl(0.045, 0.045, 0.08, 14);
 const cLiqGeo = cyl(0.043, 0.043, 1, 14); cLiqGeo.translate(0, 0.5, 0);
 function cartMesh(label, action, liqMat, sorbMat) {
   const g = new THREE.Group();
   const b = mesh(barrelGeo, M.pp, 0, 0.48, 0, label, action); b.renderOrder = 6; b.castShadow = false; g.add(b);
-  g.add(mesh(flangeGeo, M.ppSolid, 0, 0.825, 0, label, action));
+  /* kartuş başı: açık halka (üstten bakınca içi ve sorbent görünür) */
+  g.add(mesh(flangeGeo, M.ppRing, 0, 0.825, 0, label, action));
+  [0.84, 0.81].forEach(y => { const r = mesh(flangeRing, M.ppRing, 0, y, 0, label, action); r.rotation.x = -Math.PI / 2; g.add(r); });
   g.add(mesh(tipGeo, M.ppSolid, 0, 0.07, 0, label, action));
-  g.add(mesh(cyl(0.046, 0.046, 0.012, 14), M.ppSolid, 0, 0.155, 0, label, action));
-  g.add(mesh(sorbGeo, sorbMat || new THREE.MeshStandardMaterial({ color: 0xf1efe8, roughness: 0.9 }), 0, 0.205, 0, label, action));
-  g.add(mesh(cyl(0.046, 0.046, 0.012, 14), M.ppSolid, 0, 0.252, 0, label, action));
+  g.add(mesh(cyl(0.046, 0.046, 0.012, 14), M.frit, 0, 0.155, 0, label, action));
+  g.add(mesh(sorbGeo, sorbMat || new THREE.MeshStandardMaterial({ color: SORB0, roughness: 0.95 }), 0, 0.205, 0, label, action));
+  g.add(mesh(cyl(0.046, 0.046, 0.012, 14), M.frit, 0, 0.252, 0, label, action));
   let l = null;
   if (liqMat) { l = mesh(cLiqGeo, liqMat, 0, LIQ_Y0, 0, label, action); l.renderOrder = 2; l.castShadow = false; l.visible = false; g.add(l); }
   return { g, l };
@@ -776,7 +782,7 @@ const erlenGeo = new THREE.LatheGeometry(erlenProfile, 40);
 const ERLEN_FILL = 0.48, rAt = y => 0.41 - (y - 0.1) / 0.85 * 0.27;
 const erlenLiqGeo = new THREE.LatheGeometry([[0.001, 0.02], [0.385, 0.02], [0.395, 0.1], [rAt(ERLEN_FILL) - 0.01, ERLEN_FILL], [0.001, ERLEN_FILL]].map(([r, y]) => new THREE.Vector2(r, y)), 40);
 SRC.filter(s => !s.j && s.j !== 0).forEach(s => {
-  const a = 'src:' + s.id, l = `${s.title} şişesi ve dispenseri: tıkla, dispenseri seç (3 mL)`;
+  const a = 'src:' + s.id, l = `${s.title} şişesi ve dispenseri: tıkla, dispenseri seç (1–3 mL ayarlanır)`;
   const g = new THREE.Group(); g.position.set(s.x, 0, -0.8);
   const e = mesh(erlenGeo, M.glass, 0, 0, 0, l, a); e.renderOrder = 6; e.castShadow = false; g.add(e);
   const lm = mesh(erlenLiqGeo, new THREE.MeshStandardMaterial({ color: LIQ[s.liq].color, roughness: 0.1, transparent: true, opacity: 0.75 }), 0, 0, 0, l, a);
@@ -941,7 +947,7 @@ function mlzKur(liste) { MLZ.forEach(m => mlzGoster(m.id, !liste || liste.includ
 
 /* ---------- state ---------- */
 const S = {
-  headDown: false, headT: 0, gm: 'off', mode: 'use', done: {}, nCart: 5, ders: false, hizOnce: 0, dok: [], adj: 10, max: 20, speed: 10, time: 0,
+  headDown: false, headT: 0, gm: 'off', mode: 'use', done: {}, dispVol: 3, nCart: 5, ders: false, hizOnce: 0, dok: [], adj: 10, max: 20, speed: 10, time: 0,
   wasteT: 1, collT: 0, colLift: 0, busy: false, p: 0, gaugeL: 0, gaugeR: 0, flow: 0,
   waste: 0, tubeVol: new Float32Array(48), hand: null, arm: { L: -1e9, R: -1e9 },
   log: [], logSet: new Set(), mlz: {}, pulled: false, pullT: 0, spares: 5,
@@ -949,7 +955,7 @@ const S = {
 const carts = [];
 for (let k = 0; k < 5; k++) {
   const liqMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, transparent: true, opacity: 0.88 });
-  const sorbMat = new THREE.MeshStandardMaterial({ color: 0xf1efe8, roughness: 0.9 });
+  const sorbMat = new THREE.MeshStandardMaterial({ color: SORB0, roughness: 0.95 });
   const m = cartMesh(`K${k + 1} kartuşu`, 'cart:' + k, liqMat, sorbMat);
   m.g.visible = false; colRack.add(m.g);
   const lc = document.createElement('canvas'); lc.width = 128; lc.height = 64;
@@ -1061,6 +1067,8 @@ function log(msg) {
   if (S.logSet.has(key)) return; S.logSet.add(key);
   S.log.unshift({ t: S.time, msg, k, gen }); renderLog(); if (!sessiz()) toast(msg);
 }
+/* derste ciddi hata: işleme izin verilmez, uyarı her denemede yeniden gösterilir (maskot kırmızı uyarır) */
+function uyar(msg) { S.log.unshift({ t: S.time, msg, k: -1, gen: 0, ciddi: 1 }); renderLog(); toast(msg); }
 function renderLog() {
   $('#log').innerHTML = S.log.map(e => `<li class="${e.info ? 'info' : e.fixed ? 'fixed' : 'err'}"><time>${fmtT(e.t)}</time><span>${e.msg}${e.fixed ? ' (kartuş yenilendi)' : ''}</span></li>`).join('');
   $('#logEmpty').hidden = S.log.length > 0;
@@ -1133,17 +1141,21 @@ function aspirate(id) {
     if (h && h.type === 'disp' && h.src === s) { S.hand = null; return toast(`${s.title} dispenseri bırakıldı.`); }
     if (s.vol < 0.01) return toast(`${s.title} boş.`);
     S.hand = { type: 'disp', src: s };
-    return toast(`${s.title} dispenseri seçildi: kartuşa tıklayınca 3 mL verir.`, true);
+    return toast(`${s.title} dispenseri seçildi: kartuşa tıklayınca ${S.dispVol} mL verir (hacmi üstteki kutudan 1–3 mL ayarla).`, true);
   }
   if (!h || h.type !== 'pip') return toast('Numune otomatik pipetle alınır: önce pipet standındaki P5000’i al.');
   if (!h.uc) return toast('Pipette uç yok: önce uç kutusundan yeni uç tak.');
   if (h.vol > 0.005) {
     if (h.src === s) { s.vol += h.vol; h.vol = 0; return toast(`Pipetteki ${s.title} tüpüne geri bırakıldı.`); }
+    if (h.src.j !== s.j) {
+      if (S.ders) return uyar(`⛔ Dur! Pipette N${h.src.j + 1} var. ${s.title} tüpüne boşaltırsan o numune kontamine olur: bu ciddi bir hata, izin veremem. Pipetteki numuneyi kendi tüpüne (N${h.src.j + 1}) bırak ya da K${h.src.j + 1} kartuşuna ver.`);
+      s.vol += h.vol; h.vol = 0; log(`K${s.j + 1}: N${s.j + 1} tüpüne N${h.src.j + 1} numunesi boşaltıldı (numune kontamine).`); return;
+    }
     return toast(`Pipette ${h.vol.toFixed(1)} mL ${h.src.title} var. Önce kartuşa ver ya da kendi tüpüne geri bırak.`);
   }
   if (!mlzVar('num')) return toast('Numune tüpleri tezgâhta değil: üstteki 🧰 Tezgâh düğmelerinden getir.');
   if (h.uc.j != null && h.uc.j !== s.j) {
-    if (S.ders) return toast(`Bu uç N${h.uc.j + 1} numunesine girdi: N${s.j + 1} tüpüne girerse çapraz kontaminasyon olur. Ucu uç atık kutusuna at, yeni uç tak.`);
+    if (S.ders) return uyar(`⛔ Dur! Bu uç N${h.uc.j + 1} numunesine girdi: N${s.j + 1} tüpüne girersen çapraz kontaminasyon olur. Bu ciddi bir hata, izin veremem. Ucu uç atık kutusuna at, yeni uç tak.`);
     log(`K${s.j + 1}: N${h.uc.j + 1} numunesinin ucuyla N${s.j + 1} tüpüne girildi (çapraz kontaminasyon).`);
   }
   if (s.vol < 0.01) return toast(`${s.title} boş.`);
@@ -1181,9 +1193,10 @@ function dispense(k) {
   if (dsp && hh.src.vol < 0.01) return toast(`${hh.src.title} bitti.`);
   if (!canTouch()) return toast('Kartuşlara çözelti eklemek için kafayı kaldır.');
   if (!rafOnde()) return toast(ONE);
+  if (S.ders && !dsp && hh.src.liq === 'sample' && hh.src.j !== k) return uyar(`⛔ Dur! Pipette N${hh.src.j + 1} var, K${k + 1} ise N${k + 1} içindir. Yanlış numuneyi yanlış kartuşa eklersen sonuç başka bir kişiye yazılır: bu ciddi bir hata, izin veremem. Numuneyi K${hh.src.j + 1} kartuşuna ver.`);
   const room = CART_CAP - cartVol(c);
   if (room < 0.02) return toast(`K${k + 1} dolu (3 mL). Akmasını bekle.`);
-  const src = hh.src, v = Math.min(room, dsp ? Math.min(3, src.vol) : hh.vol), L = LIQ[src.liq];
+  const src = hh.src, ver = dsp ? Math.min(S.dispVol || 3, src.vol) : hh.vol, v = Math.min(room, ver), tas = dsp ? ver - v : 0, L = LIQ[src.liq];
   let exp = PROTO[c.step];
   if (exp && exp.ml && c.added >= exp.ml - 0.02 && PROTO[c.step + 1] && PROTO[c.step + 1].liq === src.liq) {
     if (cartVol(c) > 0.02 && exp.liq !== src.liq) log(`K${k + 1}: önceki çözelti (${LIQ[exp.liq].name}) tamamen geçmeden ${L.name} eklendi.`);
@@ -1201,10 +1214,14 @@ function dispense(k) {
   if (last && last.liq === src.liq && last.j === (src.j ?? -1)) last.v += v; else c.layers.push({ liq: src.liq, j: src.j ?? -1, v });
   if (src.liq === 'sample' && src.j === k) c.yuk += v;
   c.overDry = 0;
-  if (dsp) src.vol -= v; else hh.vol -= v;
+  if (dsp) src.vol -= ver; else hh.vol -= v;
   const w = colRack.localToWorld(V3(holeX(c.hole % NX), 0.95, holeZ(Math.floor(c.hole / NX))));
   for (let i = 0; i < 6; i++) setTimeout(() => spawnDrop(w.x, w.y + 0.1, w.z, w.y - 0.5, L.color), i * 60);
-  if (!dsp && hh.vol > 0.01) toast(`K${k + 1} doldu; pipette ${hh.vol.toFixed(1)} mL kaldı.`);
+  if (tas > 0.02) {
+    for (let i = 0; i < 10; i++) setTimeout(() => spawnDrop(w.x + (Math.random() - 0.5) * 0.12, w.y - 0.05, w.z + (Math.random() - 0.5) * 0.12, w.y - 0.9, L.color), i * 50);
+    log(`K${k + 1}: kartuş taştı, ${tas.toFixed(1).replace('.', ',')} mL ${L.name} rafa döküldü (dispenser ${ver} mL verdi, kartuşta ${room.toFixed(1).replace('.', ',')} mL yer vardı).${src.liq === 'elu' ? ' Elüsyon eksik kalır.' : ''}`);
+  }
+  else if (!dsp && hh.vol > 0.01) toast(`K${k + 1} doldu; pipette ${hh.vol.toFixed(1)} mL kaldı.`);
   else toast(`K${k + 1} kartuşuna ${v.toFixed(1).replace('.', ',')} mL ${src.title} verildi.`, true);
   if (!dsp && hh.vol < 0.01) hh.vol = 0;
 }
@@ -1272,7 +1289,7 @@ function setMode(m) { S.gm = m; document.querySelectorAll('#modeSeg button').for
 function setSpeed(v) { S.speed = v; document.querySelectorAll('#speedSeg button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.speed === v))); }
 function reset() {
   if (S.busy) return;
-  Object.assign(S, { dok: [], hizOnce: 0, pulled: false, pullT: 0, headDown: false, headT: 0, wasteT: 1, collT: 0, colLift: 0, time: 0, waste: 0, hand: null, log: [], logSet: new Set() });
+  Object.assign(S, { dispVol: 3, dok: [], hizOnce: 0, pulled: false, pullT: 0, headDown: false, headT: 0, wasteT: 1, collT: 0, colLift: 0, time: 0, waste: 0, hand: null, log: [], logSet: new Set() });
   S.tubeVol.fill(0); setMode('off'); tubLiqMat.color.setHex(0xcfe6f5);
   dropS.forEach(d => d.on = false);
   puddles.forEach(q => { bench.remove(q.m); }); puddles.length = 0;
@@ -1313,6 +1330,8 @@ $('#btnTake').onclick = takeCart;
 $('#btnPlace').onclick = placeNext;
 $('#btnDrop').onclick = () => { if (izin('box')) dropHand(); };
 $('#btnHPlace').onclick = () => { if (izin('rackTop')) placeNext(); };
+document.querySelectorAll('#dvol [data-dv]').forEach(b => b.onclick = () => { if (!izin('dvol')) return; S.dispVol = +b.dataset.dv; toast(`Dispenser ${S.dispVol} mL’ye ayarlandı: her basışta ${S.dispVol} mL verir.`, true); updateUI(); });
+$('#dvBirak').onclick = () => { if (S.hand && S.hand.type === 'disp') { S.hand = null; updateUI(); } };
 $('#btnRack').onclick = swapRacks;
 $('#btnReset').onclick = reset;
 $('#btnPull').onclick = togglePull;
@@ -1726,7 +1745,7 @@ function frame(now) {
     const v = cartVol(c);
     c.l.visible = v > 0.002;
     if (c.l.visible) { c.l.scale.y = v / CART_CAP * LIQ_H; c.liqMat.color.setHex(LIQ[c.layers[c.layers.length - 1].liq].color); }
-    c.sorbMat.color.setHex(0xf1efe8).lerp(tmpC.setHex(0x7a5a24), c.sorb * 0.8);
+    c.sorbMat.color.setHex(SORB0).lerp(tmpC.setHex(0x7a5a24), c.sorb * 0.8);
     if (c.overDryTotal > 30) c.sorbMat.color.lerp(tmpC.setHex(0xfbf7e6), 0.5);
   }
   tubes.forEach((t, i) => {
@@ -1858,6 +1877,7 @@ function updateUI() {
   if (cbSprite.userData.n !== boxN) { cbSprite.userData.n = boxN; cbSprite.userData.draw('Oasis HLB 3 cc', boxN + ' kartuş'); }
 
   el.hand.hidden = !S.hand || S.hand.type === 'disp';
+  { const d = S.hand && S.hand.type === 'disp'; $('#dvol').hidden = !d; if (d) { $('#dvolT').textContent = `Dispenser: ${S.hand.src.title} · hacim`; document.querySelectorAll('#dvol [data-dv]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.dv === S.dispVol))); } }
   const hk = S.hand && S.hand.type === 'cart';
   $('#btnHPlace').hidden = !hk;
   $('#btnDrop').textContent = hk ? (used(carts[S.hand.k]) ? 'Standa koy' : 'Kutuya bırak') : S.hand && S.hand.type === 'pip' ? 'Standa koy' : 'Bırak';
@@ -1934,7 +1954,7 @@ function ikiAnahtar() { pressSide('L'); pressSide('R'); }
 function dunyaNoktasi(n) {
   const [ad, x] = n.split(':');
   if (ad === 'box') return CB.localToWorld(V3(0, 0.36, 0.1));
-  if (ad === 'hole') { const h = +x; return colRack.localToWorld(V3(holeX(h % NX), 0.42, holeZ(Math.floor(h / NX)))); }
+  if (ad === 'hole') { const h = +x; return colRack.localToWorld(V3(holeX(h % NX), 0.82, holeZ(Math.floor(h / NX)))); }
   if (ad === 'cart') { const c = carts[+x]; if (!c.g.visible) throw 0; return c.g.localToWorld(V3(0, 0.75, 0)); }
   if (ad === 'src') { const q = srcById[x]; return q.sprite.localToWorld(V3(0, 0, 0)); }
   if (ad === 'disp') return srcById[x].disp.localToWorld(V3(0, 0.3, 0.1));
@@ -1948,8 +1968,8 @@ function dunyaNoktasi(n) {
   if (ad === 'rm') return rmTube.localToWorld(V3(0, 0, 0));
   if (ad === 'platen') return platen.localToWorld(V3(0, 0.3, 0.8));
   if (ad === 'post') return V3(POST_X, (POST_TOP + DECK) / 2 + 0.6, POST_Z);
-  if (ad === 'pull') return colRack.localToWorld(V3(0.6, 0.27, 0.46));
-  if (ad === 'rack') return colRack.localToWorld(V3(-0.5, 0.42, 0));
+  if (ad === 'pull') return colRack.localToWorld(V3(0.6, 0.66, 0.46));
+  if (ad === 'rack') return colRack.localToWorld(V3(-0.5, 0.82, 0));
   if (ad === 'stand') return STAND.localToWorld(V3(0, 0.3, 0.05));
   if (ad === 'waste') return wasteRack.localToWorld(V3(0.6, 0.45, 0.4));
   if (ad === 'coll') return collRack.localToWorld(V3(0, 0.82, 0.3));
@@ -1971,6 +1991,8 @@ function speKoc(t) {
   const L = carts.filter(c => c.k < S.nCart), P = PROTO[t];
   const need = c => c.step < t || (c.step === t && c.added < P.ml - 0.02);
   const dolu = c => cartVol(c) > 0.002, ad = c => 'K' + (c.k + 1), yer = c => CART_CAP - cartVol(c);
+  const kal = c => c.step === t ? P.ml - c.added : P.ml;
+  const uygun = c => [3, 2, 1].find(v => v <= yer(c) + 0.02 && v <= kal(c) + 0.02) || 1;
   const rack = L.filter(c => c.where === 'rack'), stand = L.filter(c => c.where === 'stand');
   const H = (n, r) => [n, 0, r || 46], DG = ['#dersP [data-dg="0"]', 0, 0];
   const hp = S.hand && S.hand.type === 'pip' ? S.hand : null, hd = S.hand && S.hand.type === 'disp' ? S.hand : null, elCart = S.hand && S.hand.type === 'cart';
@@ -1995,8 +2017,10 @@ function speKoc(t) {
     /* tıkanan kartuş çok yavaşsa beklemek yetmez: basınç sınırına kadar halka ADJ / MAX düğmesini gösterir */
     const sinir = S.gm === 'adj' ? 15 : 30, ayar = S.gm === 'adj' ? S.adj : S.max;
     if (yav.length && ayar < sinir) return { is: `${yav.map(ad).join(', ')} tıkanıyor, çok yavaş akıyor (${yav.map(c => c.flow.toFixed(1).replace('.', ',')).join(' · ')} mL/dk): ${S.gm === 'adj' ? 'ADJ' : 'MAX'} düğmesine tıklayıp + ile basıncı 1–2 psi artırın.`, h: !regpop.hidden ? ['#regPlus', 0, 0] : H('knob:' + S.gm, 44) };
-    const acik = t === 2 ? rack.filter(c => need(c) && yer(c) >= 1.5 && dolu(c)) : [];
-    if (acik.length) { const c = acik[0], kal = 10 - c.yuk; return { is: `Kartuşlar akıyor. ${ad(c)}’de ${yer(c).toFixed(1).replace('.', ',')} mL yer açıldı (N${c.k + 1}’den ${kal.toFixed(1).replace('.', ',')} mL kaldı). İstersen şimdi ekle: gazı kapat (OFF), kafayı kaldır, rafı öne çek. Ya da boşalmasını bekle.`, h: null, ops: true }; }
+    const acik = rack.filter(c => need(c) && dolu(c) && yer(c) >= (t === 2 ? 1.5 : 1));
+    if (acik.length) { const c = acik[0], y = yer(c).toFixed(1).replace('.', ','), u = uygun(c);
+      if (t === 2) { const kl = 10 - c.yuk; return { is: `Kartuşlar akıyor. ${ad(c)}’de ${y} mL yer açıldı (N${c.k + 1}’den ${kl.toFixed(1).replace('.', ',')} mL kaldı). İstersen şimdi ekle: gazı kapat (OFF), kafayı kaldır, rafı öne çek. Ya da boşalmasını bekle.`, h: null, ops: true }; }
+      return { is: `Kartuşlar akıyor. ${ad(c)}’de ${y} mL yer açıldı. İstersen şimdi ekle: gazı kapat (OFF), kafayı kaldır, rafı öne çek ve dispenseri <b>${u} mL</b>’ye ayarla${u < 3 ? ' (3 mL verirsen taşar)' : ''}. Ya da boşalmasını bekle.`, h: null, ops: true }; }
     return { is: `Kartuşlar akıyor (${rack.map(c => ad(c) + ' ' + c.flow.toFixed(1).replace('.', ',')).join(' · ')} mL/dk). Bekleyin…`, h: null };
   }
   if (S.headDown) {
@@ -2004,13 +2028,13 @@ function speKoc(t) {
     if (bosRaf.length === rack.length) return { is: 'Kartuşlar boş: kafayı kaldırın (paneldeki ✋✋ düğmesi).', h: DG };
     if (bosRaf.length) return { is: `${bosRaf.map(ad).join(', ')} boş: kafayı kaldırın (paneldeki ✋✋ düğmesi); ${need(bosRaf[0]) ? 'sıradaki çözeltiyi ekleyeceksiniz' : 'biten kartuşu bekleme standına alacaksınız'}.`, h: DG };
     if (S.headT < 0.999) return { is: 'Kafa iniyor…', h: null };
-    const yerli = t === 2 ? rack.filter(c => need(c) && yer(c) >= 1.5) : [];
+    const yerli = rack.filter(c => need(c) && yer(c) >= (t === 2 ? 1.5 : 1) && dolu(c));
     if (yerli.length) return { is: `Kafa kapalı: ADJ ile gazı açın (mod seçicinin sol tarafı). ${yerli.map(ad).join(', ')}’de yer var; önce eklemek isterseniz kafayı kaldırın.`, h: H('mode:adj', 36) };
     return { is: 'Kafa kapalı: mod seçicinin sol tarafına (ADJ) tıklayıp gazı açın.', h: H('mode:adj', 36) };
   }
   if (S.headT > 0.001) return { is: 'Kafa kalkıyor…', h: null };
   /* yüklemede kartuş tamamen boşalmadan da yer açıldıkça (≥ 0,5 mL) numune eklenebilir: öğrenci gerçek laboratuvardaki gibi çalışır */
-  const ekle = c => need(c) && (t === 2 ? yer(c) >= 0.5 : !dolu(c));
+  const ekle = c => need(c) && (t === 2 ? yer(c) >= 0.5 : (!dolu(c) || yer(c) >= 1 - 0.02));
   const bekleyen = rack.filter(ekle), bitmis = rack.filter(c => !need(c) && !dolu(c)), suren = rack.filter(c => need(c) || dolu(c));
   if (!elCart && !rafOnde() && (bekleyen.length || (bitmis.length && suren.length) || (stand.length && !suren.length))) return { is: 'Rafı öne çekin: rafın ön yüzüne tıklayın. Kartuşlara kafanın altında dokunulmaz.', h: H('pull', 50) };
   if (bitmis.length && suren.length && !elCart) {
@@ -2036,7 +2060,11 @@ function speKoc(t) {
     }
     const c = bekleyen[0], q = srcById[KAYNAK[t]];
     if (hp) return hp.uc ? { is: 'Çözücüler dispenserle verilir: önce pipetin ucunu uç atık kutusuna atın.', h: H('tipwaste', 50) } : { is: 'Çözücüler dispenserle verilir: pipeti standına geri koyun.', h: H('pipstand', 50) };
-    if (hd && hd.src.id === q.id) return { is: `${q.title} dispenseri seçili: ${ad(c)} kartuşuna tıklayın (3 mL).`, h: H('cart:' + c.k, 40) };
+    if (hd && hd.src.id === q.id) {
+      const u = uygun(c), y = yer(c);
+      if (S.dispVol > y + 0.02 || (S.dispVol > kal(c) + 0.02 && S.dispVol > u)) return { is: `${ad(c)}’de ${y.toFixed(1).replace('.', ',')} mL yer var${kal(c) < y - 0.02 ? `, bu adımda ${kal(c).toFixed(1).replace('.', ',')} mL kaldı` : ''}; dispenser ${S.dispVol} mL’ye ayarlı${S.dispVol > y + 0.02 ? ': taşar' : ''}. Üstteki kutudan dispenseri <b>${u} mL</b>’ye ayarlayın.`, h: ['#dv' + u, 0, 0] };
+      return { is: `${q.title} dispenseri seçili (${S.dispVol} mL): ${ad(c)} kartuşuna tıklayın.`, h: H('cart:' + c.k, 40) };
+    }
     return { is: `${q.title} şişesinin dispenserine tıklayın.`, h: H('disp:' + q.id, 44) };
   }
   /* numune bitti: rafı itmeden ve kafayı indirmeden önce eller boşalır (uç atığa, pipet standa) */
@@ -2066,7 +2094,7 @@ function otKartus(c) {
   const kayip = /atık teknesine aktı/.test(L);
   e(c.eluate >= 2.7 && !kayip, `Elüsyon: tüpte ${f1(c.eluate)} mL eluat`, kayip ? 'Elüsyon MeOH’u atık teknesine aktı, eluat kayboldu: elüsyondan önce toplama rafına geçilir.' : `Elüsyon eksik: tüpte ${f1(c.eluate)} mL eluat var (3 mL MeOH ile elüe edilir).`, 25);
   e(!/toplama tüpüne aktı/.test(L), 'Eluat temiz: toplama tüpüne yalnız elüsyon çözeltisi aktı', 'Eluat kontamine: elüsyon dışında bir çözelti toplama tüpüne aktı.', 20);
-  const sira = [[/çapraz kontaminasyon/, 20, 'Çapraz kontaminasyon: numune tüpüne başka numunenin ucuyla girildi. Her numuneye yeni uç takılır.'], [/beklenen:/, 10, 'Bir adımda beklenmeyen çözelti eklendi (adım sırası bozuldu).'], [/tamamen geçmeden/, 5, 'Önceki çözelti kartuştan tamamen geçmeden yenisi eklendi.'], [/fazla hacim/, 5, 'Bir adımda fazla hacim eklendi.'], [/protokol bittikten sonra/, 5, 'Protokol bittikten sonra kartuşa çözelti eklendi.']].filter(q => q[0].test(L));
+  const sira = [[/kartuş taştı/, 5, 'Kartuş taştı: dispenser, kartuştaki boş yerden fazla hacme ayarlıydı.'], [/numunesi boşaltıldı/, 30, 'Pipetteki numune başka numunenin tüpüne boşaltıldı: o numune kontamine oldu.'], [/çapraz kontaminasyon/, 20, 'Çapraz kontaminasyon: numune tüpüne başka numunenin ucuyla girildi. Her numuneye yeni uç takılır.'], [/beklenen:/, 10, 'Bir adımda beklenmeyen çözelti eklendi (adım sırası bozuldu).'], [/tamamen geçmeden/, 5, 'Önceki çözelti kartuştan tamamen geçmeden yenisi eklendi.'], [/fazla hacim/, 5, 'Bir adımda fazla hacim eklendi.'], [/protokol bittikten sonra/, 5, 'Protokol bittikten sonra kartuşa çözelti eklendi.']].filter(q => q[0].test(L));
   e(!sira.length, 'Adımlar doğru sırada ve doğru hacimle yapıldı', sira.map(q => q[2]).join(' '), sira.reduce((a, q) => a + q[1], 0));
   if (c.gen) k.push([true, `Bozulan kartuş yenilendi (${c.gen} kez); değerlendirme son kartuşa göre yapıldı`, '']);
   return { ad: `K${c.k + 1} · N${c.k + 1}`, deger: st >= PROTO.length ? `eluat ${f1(c.eluate)} mL` : `${PROTO[st].short} adımında kaldı`, puan: Math.max(0, 100 - d), k };
@@ -2093,7 +2121,7 @@ window.serbestRapor = { ac: raporAc, ot: () => OT && { kayit: carts.filter(used)
 Object.assign(window, { speOdak, reset: dersReset, render, scrOf, speKoc, ikiAnahtar, swapRacks, setSpeed, setMode, serbestKur, carts, PROTO, cartVol });
 Object.defineProperty(window, 'S', { get: () => S });
 /* testler için: öğrenci işlemleri (sahneye tıklamadan) */
-window.__speTest = { aspirate, dispense, togglePull, pipetAl, ucTak, ucAt, setReg };
+window.__speTest = { aspirate, dispense, togglePull, pipetAl, ucTak, ucAt, setReg, mlzGoster };
 window.__spe = 1;
 })();
 </script>

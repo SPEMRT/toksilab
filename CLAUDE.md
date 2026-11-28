@@ -54,7 +54,15 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   yok); pipette artan numune kendi tüpüne geri bırakılır. Koç adımlarında (`koc`, `kocT`) sıradaki işi maskot söyler
   (`ruh`/`canli` canlı günceller), panelde yalnız ilerleme (`yukDurum`: K1 ← N1 x / 10 mL). Test için sayfa işlevleri
   `window.__speTest` (aspirate, dispense, togglePull, pipetAl, ucTak, ucAt, setReg). `tests/dersler.js` speyuk bu
-  makinede koç adımında takılıyor (değişiklikten önce de; 3B yavaşlığı). "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+  makinede koç adımında takılıyor (değişiklikten önce de; 3B yavaşlığı).
+- SPE dispenser ayarlanabilir (1 · 2 · 3 mL, `S.dispVol`, üstteki `#dvol` kutusu, izin anahtarı `dvol`). Dispenser
+  ayarlı hacmi verir; kartuşta yer yoksa taşar ("kartuş taştı" kaydı, raporda −5). Şartlandırma, yıkama ve elüsyonda
+  da kartuş boşalmadan (≥ 1 mL yer) eklenebilir; koç dispenseri yere göre ayarlatır (halka `#dv1..3`).
+- SPE yanlış numune: derste `uyar()` ile engellenir (yanlış kartuşa ekleme, pipetteki numuneyi başka tüpe boşaltma,
+  kullanılmış uçla başka tüpe girme); Toksi kırmızı "⛔ Dur!" der (`log` kaydında `ciddi`). Serbest kullanımda izin
+  verilir, kaydedilir ve puandan düşülür (numuneler karıştı −30, numune tüpü kontamine −30).
+- SPE modeli: kolon rafının üst plakası y = 0,79'da; kartuş başı (flanş) plakaya oturur, kafa inince arada boşluk
+  kalmaz. Kartuşun üstü açık (açık uçlu gövde, halka baş), sorbent açık bej (`SORB0`), fritler gri. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.
