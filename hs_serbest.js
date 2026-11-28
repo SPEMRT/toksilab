@@ -10,6 +10,8 @@ var Q;try{Q=new URLSearchParams(location.search)}catch(e){return}
 if(Q.get('ders')||Q.get('mod')||Q.get('gorev')||Q.get('egitim')||Q.get('sop'))return;
 /* "Kanda etanol" analiz modülü sürüyorsa SOP ekranı gösterilir */
 if(!Q.get('serbest')){try{var eg=JSON.parse(localStorage.getItem('toksilab_egitim_v1')||'{}');if(eg&&eg.aktif)return}catch(e){}}
+/* geri al motoru (geri_al.js) */
+if(!window.GERIAL&&!document.getElementById('geriAlJs')){var gj=document.createElement('script');gj.id='geriAlJs';gj.charset='utf-8';gj.src='geri_al.js?v='+Math.floor(Date.now()/3e5);(document.head||document.documentElement).appendChild(gj)}
 
 var SEK={
  hs:{ad:'♨️ HS örnekleyici',alt:'AGILENT 7694E',ders:'hsgc',
@@ -35,6 +37,7 @@ css.textContent=
 'body.serb .main{grid-template-columns:minmax(0,1fr) minmax(300px,360px)}'+
 '#serbSek{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px}#serbSek button{border:0;border-radius:12px;padding:10px 16px;font:700 16px "Source Sans 3",sans-serif;background:#25333A;color:#EAF2F3;cursor:pointer}'+
 '#serbSek button.on{background:#2BD9C0;color:#062126}'+
+'#serbSek button#serbGeri{margin-left:auto;background:#2F7DE1;color:#fff;font-size:14.5px}#serbSek button#serbGeri:disabled{opacity:.4;cursor:default}'+
 '#serbAlt{display:flex;gap:6px;flex-wrap:wrap}#serbAlt button{border:1px solid #34454D;border-radius:10px;padding:7px 12px;font:600 14px "Source Sans 3",sans-serif;background:transparent;color:#C7D6DA;cursor:pointer}'+
 '#serbAlt button.on{background:#2F7DE1;border-color:#2F7DE1;color:#fff}#serbAlt button.an{border-style:dashed;color:#7FDCD0}'+
 '#serbP{display:grid;gap:12px;align-content:start}#serbP h3{font:700 20px "Barlow Condensed",sans-serif;letter-spacing:.02em}#serbP h3 small{display:block;font:600 11px "IBM Plex Mono",monospace;color:#9BB0B6;letter-spacing:.08em}'+
@@ -55,7 +58,7 @@ function say2(t){sayT=t;sayZ=Date.now();yan()}
 function aktifV(){var T=SEK[sek],v=S.view;if(v==='pc'){var da=document.getElementById('appDA');return da&&da.classList.contains('on')?'pc:da':'pc:ic'}return v}
 function ciz(){
  var T=SEK[sek];
- document.querySelectorAll('#serbSek button').forEach(function(b){b.classList.toggle('on',b.dataset.s===sek)});
+ document.querySelectorAll('#serbSek button[data-s]').forEach(function(b){b.classList.toggle('on',b.dataset.s===sek)});
  var av=aktifV();
  document.getElementById('serbAlt').innerHTML=T.v.map(function(x){return '<button data-v="'+x[0]+'" class="'+(x[0].indexOf('an:')===0?'an ':'')+(x[0]===av?'on':'')+'">'+x[1]+'</button>'}).join('');
  document.querySelectorAll('#serbAlt button').forEach(function(b){b.onclick=function(){goster(b.dataset.v)}});
@@ -70,18 +73,28 @@ function sekme(s){if(!SEK[s])return;sek=s;var v=SEK[s].v[0][0];
  /* sekmeye geçince o sekmenin ilk görünümü açılır; bulunduğu görünüm zaten o sekmedeyse kalır */
  var av=aktifV(),icinde=SEK[s].v.some(function(x){return x[0]===av});if(!icinde)goster(v);else ciz();
  try{history.replaceState(null,'',location.pathname+'?serbest='+s)}catch(e){}}
+/* geri al: son işlem geri alınır (vial, tuş takımı değeri, sekans tablosu, yöntem, açık ekran); cihaz çalışırken kapalı */
+var GY=null;
+function geriAl(){if(!GY)return;if(GY.mesgul()){say2('Cihaz çalışıyor; analiz bitince geri alabilirsin.');return}if(GY.geri()){say2('↶ Son işlem geri alındı.');ciz()}}
+function geriKur(){var G=window.GERIAL,B=G.hsBag(A),YOK={seen:1,ovenA:1,inletA:1,auxA:1,za:1,rt:1,runLen:1,view:1};
+ /* serbest kullanımda ekran değiştirmek (görünüm, sekme, menü) tek başına işlem sayılmaz; geri alınca işlemin yapıldığı ekrana dönülür */
+ GY=G.Yigin({al:B.al,koy:B.koy,mesgul:B.mesgul,ayni:function(k){var n=B.al();return G.esit(k.v,n.v,YOK)&&n.gecersiz===k.gecersiz}});
+ G.dinle(GY,{kisayol:geriAl,eylemMi:function(){return true},disla:function(t){return !!t.closest('#serbP,#serbSek,#serbAlt,.snav,#nav')}});
+ var b=document.createElement('button');b.id='serbGeri';b.title='Son işlemi geri al (Ctrl+Z)';b.textContent='↶ Geri al';b.disabled=true;b.onclick=geriAl;document.getElementById('serbSek').appendChild(b);
+ setInterval(function(){var d=!GY.say();if(b.disabled!==d)b.disabled=d},400);
+ window.__geri={kopya:B.al,ayni:B.ayni,say:function(){return GY.say()},mesgul:function(){return GY.mesgul()}}}
 function basla(){
- if(!window.__hs||!document.querySelector('.side')){setTimeout(basla,150);return}
+ if(!window.__hs||!document.querySelector('.side')||!window.GERIAL){setTimeout(basla,150);return}
  A=window.__hs;S=A.S;MK=window.MASKOT;document.body.classList.add('serb');
  var sk=document.createElement('div');sk.id='serbSek';sk.innerHTML=Object.keys(SEK).map(function(k){return '<button data-s="'+k+'">'+SEK[k].ad+'</button>'}).join('');
  var nav=document.getElementById('nav');nav.parentNode.insertBefore(sk,nav);
  var al=document.createElement('div');al.id='serbAlt';var sw=document.getElementById('stageW');sw.parentNode.insertBefore(al,sw);
  P=document.createElement('div');P.id='serbP';document.querySelector('.side').appendChild(P);
- sk.querySelectorAll('button').forEach(function(b){b.onclick=function(){sekme(b.dataset.s)}});
+ sk.querySelectorAll('button[data-s]').forEach(function(b){b.onclick=function(){sekme(b.dataset.s)}});
  /* sayfanın kendi uyarıları maskot kartına yansır */
  var y=document.getElementById('say');if(y&&window.MutationObserver)new MutationObserver(function(){sayT=y.innerHTML;sayZ=Date.now();yan()}).observe(y,{childList:true,characterData:true,subtree:true});
  /* görünüm değişince (fotoğraftaki bölgeye dokunma, geri düğmesi) sekme ve alt düğmeler eşlenir */
  var son='';setInterval(function(){var av=aktifV();if(av===son)return;son=av;var s=VSEK[S.view];if(s&&s!==sek){sek=s;try{history.replaceState(null,'',location.pathname+'?serbest='+s)}catch(e){}}ciz()},250);
- sekme(sek);window.__hsSerbest={sekme:sekme,durum:function(){return {sek:sek,v:aktifV()}}}}
+ sekme(sek);geriKur();window.__hsSerbest={sekme:sekme,durum:function(){return {sek:sek,v:aktifV()}}}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',basla);else basla();
 })();

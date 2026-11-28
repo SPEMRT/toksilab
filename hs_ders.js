@@ -16,6 +16,8 @@ try{D=PILOT?(sessionStorage.getItem('toksilab_ders_git')||'hs'):new URLSearchPar
 if(!D)return;
 if(D==='hs'||D==='gc')D='hsgc';
 var BASE=/github\.io$/.test(location.hostname)?'':'https://spemrt.github.io/toksilab/';
+/* geri al motoru (geri_al.js) */
+if(!window.GERIAL&&!document.getElementById('geriAlJs')){var gj=document.createElement('script');gj.id='geriAlJs';gj.charset='utf-8';gj.src=(PILOT?BASE:'')+'geri_al.js?v='+Math.floor(Date.now()/3e5);(document.head||document.documentElement).appendChild(gj)}
 var LS='toksilab_ders_v1';
 var HS,S,A,P,G,SON=null,i=0,gecti=false,uyari='',puan=0,sn=0,cevap=null,kaydir=false,hataM='';
 function spd(v){if(A.spd)A.spd(v)}
@@ -783,14 +785,14 @@ function ciz(){
   if(a.anim&&!a.gorev&&gecti&&!document.querySelector('.ianim'))h+='<div class="alt"><button class="anim" id="dAnim">▶ '+a.animYazi+(a.deney?'':' (isteğe bağlı)')+'</button></div>';
   else if(a.faz!==undefined)h+=serit(a.faz);
   else if(a.prog!==undefined)h+=program(a.prog);
-  h+='<div class="alt"><button id="dGeri"'+(i&&!a.geriYok?'':' disabled')+'>‹ Geri</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
+  var gd=geriDurum();h+='<div class="alt"><button id="dGeri" class="geriAl"'+(gd?'':' disabled')+'>'+(gd==='al'?'↶ Geri al':'‹ Geri')+'</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
  h+=mkart.apply(null,ruh(a))+cikis;P.innerHTML=h;cikisBagla();
  var m=document.getElementById('dersM'),dar=matchMedia('(max-width:1000px)').matches,bekle=!!a.ask&&!gecti;
  if(m){var gm=bekle&&a.gorev&&AN&&AN.acik&&a.gorev[AN.n]?a.gorev[AN.n][1]:'';m.className=bekle?'on':'';m.innerHTML=bekle?(gm||a.ask)+(uyari?'<br><b style="color:#B3261E">'+uyari+'</b>':''):''}
  if(dar&&kaydir){kaydir=false;(bekle?document.getElementById(S.view==='pc'?'pcW':S.view==='hslid'&&!a.hot&&a.sec?'loadP':'stageW'):P).scrollIntoView({block:'start',behavior:'smooth'})}
  var da=P.querySelector('#dAnim');if(da)da.onclick=animAc;
  var g=P.querySelector('#dGeri'),n=P.querySelector('#dIleri');
- if(g)g.onclick=function(){git(i-1)};if(n)n.onclick=function(){git(i+1)};
+ if(g)g.onclick=geriAl;if(n)n.onclick=function(){adimKaydi();git(i+1)};
  P.querySelectorAll('[data-c]').forEach(function(b){b.onclick=function(){if(cevap!==null)return;cevap=+b.dataset.c;if(cevap===SORU[sn][2])puan++;ciz()}});
  var sd=P.querySelector('#dSoru');if(sd)sd.onclick=function(){sn++;cevap=null;if(sn>=SORU.length)kayit();ciz()};
  var tk=P.querySelector('#dTekrar');if(tk)tk.onclick=function(){ac(D)};
@@ -835,8 +837,34 @@ function pcKoruma(e){
  if(!bek||e.type!=='click')return;
  if(a.dok){var Dk=typeof a.dok==='function'?a.dok():[].slice.call(document.querySelectorAll(a.dok));if(icinde(Dk,t)){tamam();return}}
  if(!a.bekle){uyari='Yanıp sönen yere tıklayın.';ciz()}}
+/* ---------- geri al (geri_al.js) ----------
+   Her dokunuştan önce cihazın durumu (HS ve GC tuş takımı değerleri, vialler, sekans tablosu, yöntemler, açık ekran)
+   ve dersin yeri saklanır; dokunuş bir şeyi değiştirdiyse yığına konur. "↶ Geri al" son işlemi geri alır, o adımda
+   işlem kalmayınca "‹ Geri" önceki ekrana döner. Programda bir pencere (ör. sekans tablosu) açıkken yapılanlar pencereyle
+   birlikte tek işlem sayılır: geri alınca pencere açılmadan önceki hâle dönülür. Cihaz çalışırken (Start sonrası) geri alınmaz. */
+var GY=null;
+var GB=null; /* geri_al.js → hsBag: cihazın durumu */
+function gAl(){var k=GB.al();k.d={i:i,gecti:gecti};return k}
+function gAyni(k){return GB.ayni(k)}
+function gKoy(k){GB.koy(k);
+ var once=i;i=k.d.i;gecti=k.d.gecti;uyari='';hataM='';SON=null;animKapat();
+ var a=ADIM[i];document.body.classList.toggle('dersGeri',!!a.geri);document.body.classList.toggle('dersPC',k.view==='pc');
+ if(once!==i&&a.gir&&!a.geriYok)a.gir();
+ kaydir=true;ciz();isaret()}
+function geriKur(){var G=window.GERIAL;if(!G||GY||!L)return;GB=G.hsBag(A);
+ GY=G.Yigin({al:gAl,koy:gKoy,ayni:gAyni,onemli:function(k){return k.d.i!==i||k.d.gecti!==gecti},mesgul:GB.mesgul});
+ /* dokunuştan hemen sonra düğmenin yazısı güncellenir (yavaş makinede tik seyrek çalışabilir) */
+ ['pointerup','keyup'].forEach(function(n){document.addEventListener(n,function(){setTimeout(geriGuncelle,40)},true)});
+ G.dinle(GY,{kisayol:function(){geriAl()},disla:function(t){return !!t.closest('#dersP,#dersM,.snav,#mRapor,.geriAl')},eylemMi:function(){return true}});
+ window.__geri={kopya:gAl,ayni:gAyni,durum:geriDurum,say:function(){return GY.say()},mesgul:function(){return GY.mesgul()}}}
+function adimKaydi(){if(!GY)return;GY.isle();var k=GY.kopya();if(k.gecersiz)return;k.t='adim';GY.ekle(k)}
+/* 'al': son işlem bu adımda · 'geri': önceki ekrana dönülür · '': geri alınamaz */
+function geriDurum(){if(!GY||ADIM[i].geriYok)return '';var u=GY.ust();if(!u||ADIM[u.d.i].geriYok)return '';return u.t==='adim'||u.d.i!==i?'geri':'al'}
+function geriAl(){if(!GY||!geriDurum())return;if(GY.mesgul()){uyari='Cihaz çalışıyor; analiz bitince geri alabilirsin.';ciz();return}GY.geri()}
+function geriGuncelle(){var b=P&&P.querySelector('#dGeri');if(!b||!GY)return;var d=geriDurum(),y=d==='al'?'↶ Geri al':'‹ Geri';if(b.textContent!==y)b.textContent=y;if(b.disabled!==!d)b.disabled=!d}
 function tamam(){var a=ADIM[i];if(a.bitince)a.bitince();if(a.oto){git(i+1);return}gecti=true;uyari='';kaydir=true;ciz()}
 function tik(){
+ if(GY)geriGuncelle();
  var a=ADIM[i];if(a.test)return;animTik();
  var v=izinli(a);if(v.indexOf(S.view)<0)A.show(v[0]);
  if(a.ask&&!gecti){
@@ -859,7 +887,7 @@ function dokunus(e){
  if(ad===a.hot){if(a.kes){e.stopPropagation();e.preventDefault();tamam()}return}
  e.stopPropagation();e.preventDefault();uyari='Burası: <b>'+ad+'</b>. Yanıp sönen bölgeye dokunun.';ciz()}
 function basla(){
- if(!window.__hs||!document.querySelector('.side')){setTimeout(basla,150);return}
+ if(!window.__hs||!document.querySelector('.side')||!window.GERIAL){setTimeout(basla,150);return}
  A=window.__hs;S=A.S;HS=S.hs;G=S.gc;document.body.classList.add('ders');
  P=document.createElement('div');P.id='dersP';document.querySelector('.side').appendChild(P);
  var M=document.createElement('div');M.id='dersM';document.body.appendChild(M);
@@ -871,7 +899,7 @@ function basla(){
  var dk=document.getElementById('desk');if(dk)['mousedown','click','dblclick','contextmenu','pointerdown'].forEach(function(n){dk.addEventListener(n,pcKoruma,true)});
  st.addEventListener('pointerdown',function(e){if(e.target.closest('.hs.key'))dokunus(e)},true);
  st.addEventListener('click',function(e){if(!e.target.closest('.hs.key'))dokunus(e)},true);
- git(0);setInterval(tik,150);setTimeout(function(){dispatchEvent(new Event('resize'))},60);
+ git(0);geriKur();setInterval(tik,150);setTimeout(function(){dispatchEvent(new Event('resize'))},60);
  /* testler için: adıma git ve durumu oku */
  window.__hsDers={git:function(n){git(n)},tamam:function(){tamam()},animAc:function(){animAc()},bul:function(t){for(var k=0;k<ADIM.length;k++)if(ADIM[k].b===t||ADIM[k].ask===t)return k;return -1},durum:function(){return {i:i,gecti:gecti,b:ADIM[i]&&ADIM[i].b}}}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',basla);else basla();

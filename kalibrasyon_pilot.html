@@ -205,7 +205,7 @@ function ciz(){const a=ADIM[i],bi=bolumler.indexOf(a.bolum);
    if(!gecti)h+=`<div class="giris"><input id="cvp" inputmode="decimal" autocomplete="off" placeholder="cevap"><span class="u">${a.s.birim}</span></div><div class="hsat"><label>🧮 HESAP SATIRI · formülü yaz: 0,5 × 2000 / 2</label><div class="sat"><input id="hs" autocomplete="off" placeholder="ör. 1000 × 10 / 1000000"><output id="hso">—</output><button id="hsa" title="Sonucu cevap kutusuna yaz">↓</button></div></div><div class="alt"><button class="k" id="kontrol">✓ Kontrol et</button><button class="ince" id="goster">Çözümü göster</button></div>`;
    else h+=`<div class="kart"><h4>${a.b}</h4>${a.s.yol?'<div class="hes">'+a.s.yol+'</div>':''}${a.s.ac}</div>`}
   else h+=`<div class="kart"><h4>${a.b}</h4>${a.html}</div>`;
-  h+=`<div class="alt"><button id="geri" ${i?'':'disabled'}>‹ Geri</button>${sonAdim?'<button id="bolumler2">☰ Bölümler</button>':''}<button class="p" id="ileri" ${(a.s||a.sec)&&!gecti?'disabled':''}>${sonAdim?'Sonraki bölüm ›':'Devam ›'}</button></div>`}
+  const gy=(a.s||a.sec)&&gecti;h+=`<div class="alt"><button id="geri" ${i||gy?'':'disabled'}>${gy?'↶ Geri al':'‹ Geri'}</button>${sonAdim?'<button id="bolumler2">☰ Bölümler</button>':''}<button class="p" id="ileri" ${(a.s||a.sec)&&!gecti?'disabled':''}>${sonAdim?'Sonraki bölüm ›':'Devam ›'}</button></div>`}
  h+=mkart(ruh(),soz());
  P.innerHTML=h;goster(a.g||{plan:1});
  {const g=a.g||{},fl=(a.s||a.sec)?(g.f||(g.formul?['c']:[])):[];$$('[data-f]').forEach(e=>e.classList.toggle('on',fl.includes(e.dataset.f)));const ilk=$$('[data-f].on').find(e=>e.offsetParent);if(ilk&&matchMedia('(max-width:900px)').matches)setTimeout(()=>ilk.scrollIntoView({block:'center',behavior:'smooth'}),60)}
@@ -214,7 +214,7 @@ function ciz(){const a=ADIM[i],bi=bolumler.indexOf(a.bolum);
  P.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{if(+b.dataset.sk===a.sec.dogru){uyari='';gecti=true;TAM['sec'+i]=1;(a.sec.tam||[]).forEach(k=>TAM[k]=1);ciz()}else{uyari='Bir daha düşün: '+(a.sec.ipucu||'açıklamayı hatırla.');ciz()}});
  const hs=$('#hs');if(hs){const hsH=()=>{const r=hesapla(hs.value);$('#hso').textContent=isFinite(r)?fmt(r):'—'};hs.oninput=hsH;hs.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#hsa').click()}};$('#hsa').onclick=()=>{const r=hesapla(hs.value);if(isFinite(r)){c.value=String(+r.toPrecision(10)).replace('.',',');c.focus()}}}const g=$('#goster');if(g)g.onclick=()=>{uyari='';tamam()};
  ['#bolumler','#bolumler2'].forEach(q=>{const e=$(q);if(e)e.onclick=liste});P.querySelectorAll('[data-bk]').forEach(e=>e.onclick=()=>atla(bas(+e.dataset.bk)));
- const gr=$('#geri');if(gr)gr.onclick=()=>git(i-1);const il=$('#ileri');if(il)il.onclick=()=>git(i+1);
+ const gr=$('#geri');if(gr)gr.onclick=geriAl;const il=$('#ileri');if(il)il.onclick=()=>git(i+1);
  P.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{if(cevap!==null)return;cevap=+b.dataset.c;if(cevap===SORU[sn][2])puan++;ciz()});
  const sd=$('#dSoru');if(sd)sd.onclick=()=>{sn++;cevap=null;ciz()};const bt=$('#bastan');if(bt)bt.onclick=()=>{sn=0;puan=0;cevap=null;ciz()};const bl3=$('#bolumler3');if(bl3)bl3.onclick=liste}
 /* maskot (Molli): kart ve ruh hâli */
@@ -224,6 +224,11 @@ function soz(){const a=ADIM[i];if(a.test)return sn>=SORU.length?'Tebrikler! Kali
  if(uyari)return 'Hata yapmak öğrenmenin parçası. İpucuna bakıp bir daha dene.';if(a.s&&!gecti)return 'Sarı halkalı formülü kullan; aşağıdaki <b>hesap satırına</b> yazabilirsin.';if(gecti)return 'Harika! Plan tablosu doldu, bak.';return 'Hazırsan <b>Devam</b>’a bas.'}
 function hesapla(t){t=String(t||'').replace(/×|x/gi,'*').replace(/÷|:/g,'/').replace(/\s/g,'').replace(/(\d),(\d)/g,'$1.$2');if(!t||!/^[\d.+\-*/()]+$/.test(t))return NaN;try{const r=Function('"use strict";return ('+t+')')();return typeof r==='number'?r:NaN}catch(e){return NaN}}
 function kontrol(){const a=ADIM[i],v=num($('#cvp').value);if(near(v,a.s.dogru,a.s.tol??.01)){uyari='';tamam()}else{const o=(a.s.ip||[]).find(([r,,t])=>near(v/a.s.dogru,r,t??.02));uyari=o?o[1]:ipucu(v,a.s.dogru);ciz()}}
+/* geri al: önce bu adımda verilen yanıt silinir (soru yeniden sorulur, tablodaki satırı boşalır); yanıt yoksa bir önceki
+   adıma dönülür ve bu adımın açılırken tabloya eklediği satırlar kalkar. Arka arkaya basınca adım adım geriye gidilir. */
+function geriAl(){const a=ADIM[i];
+ if((a.s||a.sec)&&gecti){[...((a.s&&a.s.tam)||[]),...((a.sec&&a.sec.tam)||[]),'sec'+i].forEach(k=>delete TAM[k]);gecti=false;uyari='';ciz();return}
+ if(i<=0)return;const once=new Set();ADIM.forEach((b,j)=>{if(j<i)anah(b).forEach(k=>once.add(k))});(a.tam||[]).forEach(k=>{if(!once.has(k))delete TAM[k]});git(i-1)}
 function tamam(){const a=ADIM[i];gecti=true;(a.s.tam||[]).forEach(k=>TAM[k]=1);ciz()}
 function git(n){if(n<0||n>=ADIM.length)return;i=n;KY.son=n;kaydet();(ADIM[i].tam||[]).forEach(k=>TAM[k]=1);gecti=!!TAM['sec'+n]||!!(ADIM[i].s&&(ADIM[i].s.tam||[]).every(k=>TAM[k])&&(ADIM[i].s.tam||[]).length);uyari='';ciz();
  if(matchMedia('(max-width:900px)').matches)$('#dersK').scrollTop=0}

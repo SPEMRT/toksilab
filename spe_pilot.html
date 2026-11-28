@@ -2141,6 +2141,38 @@ Object.assign(window, { speOdak, reset: dersReset, render, scrOf, speKoc, ikiAna
 Object.defineProperty(window, 'S', { get: () => S });
 /* testler için: öğrenci işlemleri (sahneye tıklamadan) */
 window.__speTest = { aspirate, dispense, togglePull, pipetAl, ucTak, ucAt, setReg, mlzGoster };
+/* geri al (geri_al.js, cihaz_ders.js): SPE'nin durumu S dışında kartuşlarda, kaynaklarda (şişe/tüp hacimleri) ve döküntülerde de
+   tutulur; bu bağlayıcı hepsini kopyalar ve geri yükler. Elde tutulan şişe/tüp (S.hand.src) kimliğiyle saklanır. */
+window.__geriAdaptor = (function () {
+  const G = () => window.GERIAL;
+  const CART_DIS = { g: 1, l: 1, liqMat: 1, sorbMat: 1, lbl: 1 }, SRC_DIS = { disp: 1, sprite: 1, liqMesh: 1 };
+  const veri = (o, dis) => { const r = {}; for (const k in o) if (!dis[k]) r[k] = o[k]; return r; };
+  function al() {
+    const s = Object.assign({}, S);
+    if (S.hand) s.hand = Object.assign({}, S.hand, { src: S.hand.src ? S.hand.src.id : null });
+    return G().klon({ S: s, carts: carts.map(c => veri(c, CART_DIS)), src: SRC.map(q => veri(q, SRC_DIS)),
+      tub: tubLiqMat.color.getHex(), dok: puddles.filter(q => q.wipe < 0).length });
+  }
+  function koy(k) {
+    const g = G(), ks = g.klon(k), h = ks.S.hand; delete ks.S.hand;
+    tweens.length = 0;
+    g.yerinde(S, Object.assign({}, veri(S, { hand: 1 }), ks.S));
+    S.hand = h ? Object.assign(h, { src: h.src ? srcById[h.src] : null }) : null;
+    ks.carts.forEach((d, i) => { const c = carts[i]; Object.keys(d).forEach(a => { c[a] = d[a]; }); c.lbl.cls = null;
+      if (c.where === 'rack') { colRack.add(c.g); c.g.position.set(holeX(c.hole % NX), 0, holeZ(Math.floor(c.hole / NX))); c.dropT = 0; }
+      else if (c.where === 'stand') { STAND.add(c.g); c.g.position.set(standX(c.k), 0.05, 0); } });
+    ks.src.forEach((d, i) => Object.assign(SRC[i], d));
+    tubLiqMat.color.setHex(ks.tub);
+    /* geri alınan döküntüler kaldırılır (en yeniden başlayarak) */
+    let fazla = puddles.filter(q => q.wipe < 0).length - ks.dok;
+    for (let i = puddles.length - 1; i >= 0 && fazla > 0; i--) if (puddles[i].wipe < 0) { const q = puddles[i]; bench.remove(q.m); q.m.geometry.dispose(); q.m.material.dispose(); puddles.splice(i, 1); fazla--; }
+    Object.keys(S.mlz || {}).forEach(id => { const m = MLZ_BY[id]; if (m && m.o.visible !== !!S.mlz[id]) { m.o.visible = !!S.mlz[id]; m.yer.userData = S.mlz[id] ? {} : { label: `${m.ad}: tezgâha getirmek için tıkla`, action: 'mlz:' + id }; m.yer.material.opacity = S.mlz[id] ? 0.05 : 0.16; const b = document.querySelector(`[data-mlz="${id}"]`); if (b) b.setAttribute('aria-pressed', String(!!S.mlz[id])); } });
+    setMode(S.gm); setSpeed(S.speed); setReg('adj', S.adj); setReg('max', S.max);
+    renderLog(); render();
+  }
+  function ayni(k) { return G().esit(k, al(), { time: 1, p: 1, flow: 1, gaugeL: 1, gaugeR: 1, arm: 1, dropAcc: 1, dropT: 1, status: 1, headT: 1 }); }
+  return { al, koy, ayni, mesgul: () => S.busy || tweens.length > 0 };
+})();
 window.__spe = 1;
 })();
 </script>

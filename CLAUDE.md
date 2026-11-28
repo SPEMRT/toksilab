@@ -71,6 +71,17 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   (halka önce MAX düğmesi, sonra mod seçici). Mod seçicide ortada ölü bölge: gaz kapalıyken ortaya tıklama bir şey
   açmaz; ADJ sol (x < −0,02), MAX sağ (x > 0,04). Sıvı adımında MAX seçilirse koç "MAX yalnız kurutmada" der.
   Dispenserle adımın toplamından fazla verilmesi engellenmez (gerçekçi); "fazla hacim" kaydı ve Toksi uyarısı yeter. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+- Geri al (`geri_al.js`, ortak motor): derslerde "↶ Geri al" son işlemi tek tek geri alır; adımda işlem kalmayınca
+  "‹ Geri" önceki ekrana döner (Devam'a basılan an); geri alınan adımın görevi yeniden istenir. Yöntem: dokunuştan hemen
+  önce (`pointerdown`, yakalama evresi) cihaz durumunun kopyası alınır; dokunuş işlem yaptıysa (sayfa `__izin` ile izin verdi,
+  bir düğmeye basıldı ya da dersin yeri değişti) ve durum değiştiyse yığına konur (en çok 300). Sahneler `S`'ten çizildiği
+  için geri yükleme görüntüyü de düzeltir. `cihaz_ders.js` (8 cihaz + serbest kullanımda üst çubukta `#mGeri`), `hs_ders.js`
+  (HS-GC-MS; durum: S, PLAN, IC, METH, açık ekran ve menüler; programda pencere açıkken yapılanlar pencereyle birlikte tek
+  işlem; cihaz çalışırken kapalı), `kalibrasyon_pilot.html` (`geriAl`: önce verilen yanıt silinir, sonra önceki adım).
+  Hareket sürerken (`S.busy`, `S.anim`, SPE tween) geri alınmaz. Ctrl+Z da çalışır. Sayfanın `S` dışında durumu varsa
+  `window.__geriAdaptor` = {al, koy, ayni, mesgul} verir (SPE: kartuşlar, şişe/tüp hacimleri, döküntüler, `S.hand.src` kimlikle).
+  Kendi kendine değişen değerler karşılaştırmada sayılmaz (`YOKSAY`: terazi `disp`, gaz basınçları, santrifüj `lidA`…).
+  Yeni bir cihaz sayfasında durum `S` dışında tutuluyorsa adaptör ekle; test: `GERI=1 node tests/dersler.js <sayfa>`.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.
@@ -84,6 +95,7 @@ Testler `tests/` klasöründe; ayrıntı `tests/README.md`. İlk kullanımda bir
 | Bir cihazın dersi/sayfası | `node tests/dersler.js <cihaz>_pilot.html` |
 | `lab_giris.html` veya `gaz_pilot.html` | `node tests/labtur.js` |
 | `cihaz_ders.js` ortak kısmı, `anamenu.js`, `egitim_cubugu.js` | `node tests/dersler.js` (hepsi, uzun sürer: arka planda çalıştır) |
+| Geri al (`geri_al.js`, ders dosyalarındaki geri al kısmı, bir sayfanın durumu) | `GERI=1 node tests/dersler.js <sayfa>` · HS-GC-MS: `node tests/hs_geri.js` |
 
 - Sonucu kullanıcıya bildir; başarısız test varsa nedenini incele (simülasyon hatası mı, test robotunun eksiği mi) ve açıkça söyle.
 - Yeni bir derste halkanın göstermediği, öğrencinin karar verdiği bir adım varsa robot takılabilir:

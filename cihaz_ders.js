@@ -14,12 +14,14 @@
 'use strict';
 var Q=null;try{Q=new URLSearchParams(location.search)}catch(e){}
 if(!Q)return;
+/* geri al motoru (geri_al.js): sayfaya bir kez eklenir; basla() yüklenmesini bekler */
+if(!window.GERIAL&&!document.getElementById('geriAlJs')){var gj=document.createElement('script');gj.id='geriAlJs';gj.charset='utf-8';gj.src='geri_al.js?v='+Math.floor(Date.now()/3e5);(document.head||document.documentElement).appendChild(gj)}
 var SERB=Q.get('serbest')==='1'||Q.get('gorev')==='free',NOT='';
 /* maskot (maskot.js): rehber kartı; yoksa hiçbir şey eklenmez */
 var MK=window.MASKOT,MAD=MK?MK.AD:'UZM. MY';function mkart(d,t){return MK?'<div class="mskYer">'+MK.kart(d,t)+'</div>':''}
 var SAYFA=location.pathname.split('/').pop()||'';
 var LS='toksilab_ders_v1';
-var P,i=0,UST=0,ustG=false,gecti=false,uyari='',puan=0,sn=0,cevap=null,hataM='',SONP=null;
+var GIRIS=0,P,i=0,UST=0,ustG=false,gecti=false,uyari='',puan=0,sn=0,cevap=null,hataM='',SONP=null;
 function S(){return window.S}
 function adres(d){var q=new URLSearchParams(location.search);q.delete('gorev');q.delete('serbest');if(d)q.set('ders',d);else q.delete('ders');var s=q.toString();return location.pathname+(s?'?'+s:'')}
 function ac(d){location.href=adres(d==='liste'?'':d)}
@@ -889,7 +891,8 @@ var ADI={cyl:'gaz tüpü',cv:'tüp vanası',pig:'çelik kamçı',inl:'açma vana
 var PAN=['Azot-1','Argon-1','Argon-2','Helyum','Azot-2'];
 /* halka: önce kamerayı doğru görünüme al (-1 oda, -2 yedek tüpler, 0–4 panel), sonra parçayı göster */
 /* kamera her adımın başında bir kez ayarlanır; sonra öğrenci (panele tıklayıp) değiştirebilir */
-function B(gor,id,r){var bir=0;return function(){if(!bir&&window.kamera){window.kamera(gor);bir=1}return ['hot:'+id,0,r||44]}}
+/* kamera adıma her girişte (geri alınınca da: GIRIS) bir kez istasyona gider */
+function B(gor,id,r){var bir=-1;return function(){if(bir!==GIRIS&&window.kamera){window.kamera(gor);bir=GIRIS}return ['hot:'+id,0,r||44]}}
 function popAcik(){var b=document.getElementById('bpop');return b&&!b.hidden}
 /* açılır kutudaki düğme (varsa) ya da kutuyu açan parça */
 function P(sec,gor,id,r){var y=B(gor,id,r);return function(){return popAcik()&&document.querySelector(sec)?[sec,0,0]:y()}}
@@ -1026,6 +1029,7 @@ css.textContent=
 'body.sbk .sbGizle{display:none!important}#sbEk .sbVent{background:#B7791F;color:#fff;font-weight:700}#sbEk .sbVent[hidden]{display:none}'+
 '#sbEk .sbSes{font-size:12.5px;color:#D7E4E7;line-height:1.4;background:#25333A;border-radius:10px;padding:8px 10px;border-left:4px solid #2BD9C0}'+
 '#sbEk .sbBitir{background:#2DBE5B;color:#fff;font-weight:700}'+
+'#mGeri:disabled{opacity:.45;cursor:default}#mGeri.yuzen{position:fixed;left:14px;bottom:14px;z-index:30;border:0;border-radius:999px;padding:9px 15px;font:700 14px system-ui,sans-serif;background:#2F7DE1;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3)}'+
 '#mRapor.yeni{animation:rkY 1.2s 2}@keyframes rkY{50%{background:#2BD9C0;color:#062126}}'+
 '#raporK{position:fixed;inset:0;z-index:2147483100;background:rgba(5,10,12,.7);display:grid;place-items:start center;overflow:auto;padding:22px 12px}#raporK[hidden]{display:none}'+
 '#raporK .rk{background:#fff;color:#16242A;border-radius:14px;max-width:820px;width:100%;padding:18px 20px;font:14.5px/1.45 "Source Sans 3",system-ui,sans-serif}'+
@@ -1107,7 +1111,7 @@ function serbestCiz(){
   (C.serbest&&C.serbest.html||'')+
   '<div class="uyari" id="dUy" hidden></div>'+
   '<div class="not" id="dNot"'+(NOT?'':' hidden')+'><b class="nm">'+MAD+'</b><span id="dNotT">'+NOT+'</span></div>'+
-  '<div class="alt"><button class="ince" id="dListe">☰ Bölümler (rehberli ders)</button></div>';
+    '<div class="alt"><button class="ince" id="dListe">☰ Bölümler (rehberli ders)</button></div>';
  P.querySelector('#dListe').onclick=function(){ac('liste')};if(C.serbest&&C.serbest.bagla)C.serbest.bagla(P)}
 /* sayfanın kendi uzman notları (gizli mentor balonu) serbest kullanımda panele yansıtılır */
 function notIzle(){var y=document.getElementById('say');if(!y||!window.MutationObserver)return;new MutationObserver(function(){if(!SERB)return;NOT=y.innerHTML;['dNot','sbNot'].forEach(function(id){var n=document.getElementById(id),t=n&&n.querySelector('.nt');if(n&&t){t.innerHTML=NOT;n.hidden=!NOT}})}).observe(y,{childList:true,characterData:true,subtree:true})}
@@ -1184,12 +1188,12 @@ function ciz(){
   if(bek&&a.tut)h+='<div class="alt"><button class="is" id="dTut">✋ Bastır (basılı tutun)</button></div>';
   if(bek&&a.dugme)h+='<div class="alt">'+dugmeler(a).map(function(d,k){return '<button class="is" data-dg="'+k+'">'+d[0]+'</button>'}).join('')+'</div>';
   if(!a.ask||gecti)h+=aciklama(a);
-  h+='<div class="alt"><button id="dGeri"'+(i?'':' disabled')+'>‹ Geri</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
+  var gd=geriDurum();h+='<div class="alt"><button id="dGeri" class="geriAl"'+(gd?'':' disabled')+'>'+(gd==='al'?'↶ Geri al':'‹ Geri')+'</button><button class="p" id="dIleri"'+(a.ask&&!gecti?' disabled':'')+'>Devam ›</button></div>'}
  h+=mkart.apply(null,ruh(a))+cikis();P.innerHTML=h;cikisBagla();canli();
  var g=P.querySelector('#dGeri'),n=P.querySelector('#dIleri');
- if(g)g.onclick=function(){ac(D)};if(i&&g)g.onclick=function(){geri()};if(n)n.onclick=function(){git(i+1)};
+ if(g)g.onclick=geriAl;if(n)n.onclick=function(){adimKaydi();git(i+1)};
  var t=P.querySelector('#dTut');if(t){t.addEventListener('pointerdown',function(e){e.preventDefault();try{t.setPointerCapture(e.pointerId)}catch(_){}window.startPress()});['pointerup','pointercancel'].forEach(function(ev){t.addEventListener(ev,function(){window.endPress()})})}
- P.querySelectorAll('[data-dg]').forEach(function(b){b.onclick=function(){dugmeler(a)[+b.dataset.dg][1]()}});
+ P.querySelectorAll('[data-dg]').forEach(function(b){b.onclick=function(){if(GY){GY.once();GY.eylem()}dugmeler(a)[+b.dataset.dg][1]()}});
  P.querySelectorAll('[data-c]').forEach(function(b){b.onclick=function(){if(cevap!==null)return;cevap=+b.dataset.c;if(cevap===SORU[sn][2])puan++;ciz()}});
  var sd=P.querySelector('#dSoru');if(sd)sd.onclick=function(){sn++;cevap=null;if(sn>=SORU.length){kayit();if(L.bitti)L.bitti()}ciz()};
  var tk=P.querySelector('#dTekrar');if(tk)tk.onclick=function(){ac(D)};
@@ -1214,15 +1218,59 @@ function test(){
  h+='</div>'+(cevap!==null?'<div class="acl">'+(cevap===s[2]?'✓ Doğru. ':'✗ Doğru yanıt işaretlendi. ')+s[3]+'</div>':'')+'</div>';
  if(cevap!==null)h+='<div class="alt"><button class="p" id="dSoru">'+(sn+1<SORU.length?'Sonraki soru ›':'Sonucu gör ›')+'</button></div>';
  return h}
-/* geri: cihazın durumu adım adım geri sarılamadığı için bir önceki açıklama gösterilir */
-function geri(){if(i<=0)return;var k=i-1;while(k>0&&ADIM[k].oto)k--;i=k;gecti=!!ADIM[i].ask;uyari='';hataM='';ciz()}
-/* Geri ile dönülen adımlar yalnızca okunur: cihaz geri sarılamadığı için yapılmış işler yeniden istenmez.
-   Devam, ulaşılan en ileri adıma (UST) kadar açıklamalı adımlar üzerinden ilerler. */
-function git(n){if(n<0||n>=ADIM.length)return;
+/* ---------- geri al (geri_al.js) ----------
+   Her işlemden önce cihazın durumu ve dersin yeri (adım, geçti mi) saklanır. "↶ Geri al" son işlemi geri alır;
+   o adımda geri alınacak işlem kalmayınca "‹ Geri" bir önceki ekrana döner (Devam'a basılan an).
+   Geri alınan adımın görevi yeniden istenir. Serbest kullanımda aynı yığın "↶ Geri al" düğmesiyle çalışır. */
+var GY=null,GAD=null;
+/* geri alındıktan sonra sayfanın S dışında tuttuğu küçük pencereler: terazide ayak penceresi kapanır (adım onu açmayı ister) */
+var SONRA={'terazi_pilot.html':function(){var f=document.getElementById('fpop');if(f)f.hidden=true}};
+var YOKSAY={'su_pilot.html':{R:1,wet:1},'pipet_pilot.html':{air:1},'ultra_pilot.html':{act:1},'santrifuj_pilot.html':{lidA:1},'terazi_pilot.html':{disp:1,hand:1},'gaz_pilot.html':{lp:1,hp:1,p:1,pigP:1},'spe_pilot.html':{time:1,p:1,flow:1,gaugeL:1,gaugeR:1,arm:1}};
+function geriKur(){
+ var G=window.GERIAL;if(!G||GY)return;var ad=window.__geriAdaptor||{},yok=ad.yoksay||YOKSAY[SAYFA]||null;GAD=ad;
+ /* seen, part: parçanın üstüne gelince (fareyle) işaretlenir; tek başına bir işlem sayılmaz */
+ yok=Object.assign({seen:1,part:1},yok||{});
+ var al=ad.al||function(){return G.klon(S())},koy=ad.koy||function(k){G.yerinde(S(),G.klon(k))},ayni=ad.ayni||function(k){return G.esit(k,S(),yok)};
+ GY=G.Yigin({
+  al:function(){return {s:al(),d:SERB||!L?null:{i:i,gecti:gecti}}},
+  ayni:function(k){return ayni(k.s)&&(!k.d||(k.d.i===i&&k.d.gecti===gecti))},
+  onemli:function(k){return !!k.d&&(k.d.i!==i||k.d.gecti!==gecti)},
+  koy:function(k){koy(k.s);
+   GIRIS++;if(k.d){i=k.d.i;gecti=k.d.gecti;UST=i;ustG=gecti;uyari='';hataM='';SONP=null}
+   try{if(window.render)window.render()}catch(e){}var so=ad.sonra||SONRA[SAYFA];if(so)try{so()}catch(e){}
+   if(!SERB&&L)ciz()},
+  mesgul:ad.mesgul||function(){var s=S();return !!(s&&(s.busy||s.anim))}});
+ /* dokunuştan hemen sonra düğmenin yazısı güncellenir (yavaş makinede tik seyrek çalışabilir) */
+ ['pointerup','keyup'].forEach(function(n){document.addEventListener(n,function(){setTimeout(geriGuncelle,40)},true)});
+ G.dinle(GY,{kisayol:function(){geriAl()},disla:function(t){
+  if(t.closest('.geriAl,#mGeri,#dersMini,#dersX,#raporK,.snav,#sbDers,#mRapor'))return true;
+  if(t.closest('#dersK'))return !t.closest('[data-dg],#dTut');
+  return false}});
+ /* sayfa bir işleme izin verdiyse (sahnede bir parçaya dokunuldu) bu dokunuş bir işlemdir */
+ var iz=window.__izin;window.__izin=function(h){var r=iz(h);if(r&&GY)GY.eylem();return r}
+ geriDugmeEk();
+ /* testler için (tests/dersler.js, GERI=1) */
+ window.__geri={kopya:function(){return al()},ayni:function(k){return ayni(k)},durum:geriDurum,say:function(){return GY.say()},mesgul:function(){return GY.mesgul()}}}
+/* Devam'a basıldı: şimdiki ekran geri dönülecek yer olarak saklanır */
+function adimKaydi(){if(!GY||!L)return;GY.isle();var k=GY.kopya();k.t='adim';GY.ekle(k)}
+/* 'al': son işlem bu adımda (↶ Geri al) · 'geri': önceki ekrana dönülür (‹ Geri) · '': geri alınacak bir şey yok */
+function geriDurum(){if(!GY)return '';var u=GY.ust();if(!u)return '';return u.t==='adim'||(u.d&&u.d.i!==i)?'geri':'al'}
+function geriAl(){if(!GY)return;
+ if(GY.mesgul()){if(SERB){NOT='Hareket bitince geri alabilirsin.';var n=document.getElementById('sbNot')||document.getElementById('dNot');if(n){var t=n.querySelector('.nt')||n.querySelector('#dNotT');if(t)t.innerHTML=NOT;n.hidden=false}}else{uyari='Hareket sürüyor; bitince geri alabilirsin.';ciz()}return}
+ GY.geri();geriGuncelle()}
+/* düğmelerin yazısı ve etkinliği (panel her işlemde yeniden çizilmediği için tik içinde güncellenir) */
+
+function geriGuncelle(){if(!GY)return;var d=geriDurum();
+ document.querySelectorAll('.geriAl').forEach(function(b){if(b.id==='dGeri'){var y=d==='al'?'↶ Geri al':'‹ Geri';if(b.textContent!==y)b.textContent=y}if(b.disabled!==!d)b.disabled=!d})}
+/* serbest kullanımda "↶ Geri al" üst menü çubuğunda (Rapor düğmesinin yanında) durur; çubuk yoksa sol altta */
+function geriDugmeEk(){if(!SERB||document.getElementById('mGeri'))return;var b=document.createElement('button');b.id='mGeri';b.className='geriAl';b.title='Son işlemi geri al';b.innerHTML='<span>↶</span>Geri al';b.disabled=true;b.onclick=geriAl;
+ var nav=document.querySelector('.snav');if(nav)nav.insertBefore(b,document.getElementById('mRapor'));else{b.classList.add('yuzen');document.body.appendChild(b)}}
+function git(n){if(n<0||n>=ADIM.length)return;GIRIS++;
  if(n<=UST&&i<UST){while(n<UST&&ADIM[n].oto)n++;i=n;gecti=n<UST?!!ADIM[n].ask:ustG;uyari='';hataM='';ciz();return}
  i=n;UST=Math.max(UST,n);ustG=false;gecti=false;uyari='';hataM='';SONP=null;ciz()}
 function tamam(){var a=ADIM[i];if(a.oto){git(i+1);return}gecti=true;if(i===UST)ustG=true;uyari='';ciz()}
 function tik(){
+ if(GY)geriGuncelle();
  if(SERB)return;var a=ADIM[i],s=S();if(!s||!a||a.test)return;
  if(s.mode!==L.mod){s.mode=L.mod;window.render()}
  if(a.ask&&!gecti){
@@ -1251,7 +1299,7 @@ window.__izin=function(h){if(SERB||!L)return true;var a=ADIM[i];if(!a||a.test||!
  return a.izin.some(function(p){return h===p||h.indexOf(p+':')===0})};
 window.__izinUyari=function(){var a=ADIM[i];uyari=!a||!a.ask||gecti?'Bu adımda cihazla işlem yapılmaz: önce açıklamayı okuyup <b>Devam</b>’a basın.':'Bu adımda o parçayla işlem yapılmaz. Yanıp sönen sarı halkanın gösterdiği yere tıklayın.';hataM=uyari;ciz()};
 function basla(){
- if(!window[C.hazir]||!window.S||!window.scrOf){setTimeout(basla,150);return}
+ if(!window[C.hazir]||!window.S||!window.scrOf||!window.GERIAL){setTimeout(basla,150);return}
  document.body.classList.add('cders');if(C.sonucKarti)document.body.classList.add('resOk');document.documentElement.classList.remove('dersOn');
  var K=document.createElement('div');K.id='dersK';P=document.createElement('div');P.id='dersP';K.appendChild(P);document.body.appendChild(K);
  var X=document.createElement('button');X.id='dersX';X.title='Paneli küçült';X.textContent='—';X.onclick=function(){kucult(true)};K.appendChild(X);
@@ -1262,10 +1310,10 @@ function basla(){
  var H=document.createElement('div');H.id='dersHalka';document.body.appendChild(H);
  /* önceki bölümlerin kaydı sayfanın görev durumuna da işlenir (eğitim modülü takibi için) */
  var o=oku(),s=S();C.senkron(s,o);if(C.kur)C.kur();
- if(SERB){serbestBasla();return}
+ if(SERB){serbestBasla();geriKur();setInterval(tik,120);return}
  if(!L){s.mode='parts';window.render();liste();dispatchEvent(new Event('resize'));return}
  if(L.once)L.once(s);window.reset(L.gorev||'free');s=S();s.mode=L.mod;if(L.kur)L.kur();window.render();
  var cv=document.querySelector(C.tuval||'#cv3 canvas');if(cv)cv.addEventListener('pointerup',parcaTik);
- git(0);setInterval(tik,120);requestAnimationFrame(halka);dispatchEvent(new Event('resize'))}
+ git(0);geriKur();setInterval(tik,120);requestAnimationFrame(halka);dispatchEvent(new Event('resize'))}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',basla);else basla();
 })();
