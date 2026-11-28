@@ -62,7 +62,11 @@ Toksikoloji laboratuvarı eğitim simülatörü. Derleme yok: düz HTML/JS, GitH
   kullanılmış uçla başka tüpe girme); Toksi kırmızı "⛔ Dur!" der (`log` kaydında `ciddi`). Serbest kullanımda izin
   verilir, kaydedilir ve puandan düşülür (numuneler karıştı −30, numune tüpü kontamine −30).
 - SPE modeli: kolon rafının üst plakası y = 0,79'da; kartuş başı (flanş) plakaya oturur, kafa inince arada boşluk
-  kalmaz. Kartuşun üstü açık (açık uçlu gövde, halka baş), sorbent açık bej (`SORB0`), fritler gri. "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
+  kalmaz. Kartuşun üstü açık (açık uçlu gövde, halka baş), sorbent açık bej (`SORB0`), fritler gri.
+- SPE akış hızı kuralı (kullanıcının laboratuvar pratiği): istenen hızda akan kartuş rafta varken tıkanan kartuş için
+  basınç ARTIRILMAZ; koç "Basıncı artırma… önce K1 bitsin, standa al" der. Basınç yalnız tıkanan kartuş rafta tek
+  kalınca artırılır; sonraki adımda kartuşlar rafa dönünce koç ADJ'yi `S.adj0` değerine (derste 5 psi) indirtir.
+  Numune ya da elüsyon > 3 mL/dk akarsa kayıt "çok hızlı akıyor" (kartuş başına bir kez; serbestte −10). "Nasıl kullanılır?" panelinden "Analiz modülleri" kartı kullanıcı isteğiyle kaldırıldı.
 - `modeller/*.glb`: lab turundaki (Örnek Hazırlama odası) cihaz modelleri; cihaz sayfalarından
   `node araclar/model_cikar.js [cihaz]` ile çıkarılır. Bir cihaz sayfasında 3B model değişirse bu aracı
   o cihaz için yeniden çalıştır ve lab turunu kontrol et.

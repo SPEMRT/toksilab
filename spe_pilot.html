@@ -1674,6 +1674,7 @@ function frame(now) {
     const Pth = c.Pth0 + c.clog * 1.0;
     const cond = c.C * L.f / (1 + c.clog * 0.25);
     c.flow = Math.max(0, S.p - Pth) * cond; // mL/min
+    if ((layer.liq === 'sample' || layer.liq === 'elu') && c.flow > 3) log(`K${c.k + 1}: ${layer.liq === 'sample' ? 'numune' : 'elüsyon MeOH’u'} çok hızlı akıyor (3 mL/dk’nın üstünde; istenen 1–2 mL/dk). Analitler sorbente tutunamayabilir: basıncı düşür.`);
     const dv = Math.min(layer.v, c.flow / 60 * sdt);
     if (dv <= 0) continue;
     layer.v -= dv; if (layer.v < 1e-4) c.layers.shift();
@@ -1942,9 +1943,11 @@ function dersReset(g) {
     S.spares = 1;
     srcById.n1.dirt = 0.04; srcById.n2.dirt = 0.35;
     setReg('adj', g === 'sart' || g === 'yuk' ? 5 : 10);
+    S.adj0 = S.adj;
     if (g === 'sart') carts.slice(0, 2).forEach((c, i) => cartKur(c, HOLES[i], 2));
     if (g === 'yuk') carts.slice(0, 2).forEach((c, i) => { cartKur(c, HOLES[i], 3, { sorb: 1, yuk: 10, clog: i ? 1.0 : 0.3 }); srcById['n' + (i + 1)].vol = 0; });
   } else setReg('adj', 10);
+  S.adj0 = S.adj;
   render();
 }
 function render() { updateUI(); }
@@ -2013,6 +2016,14 @@ function speKoc(t) {
       return { is: need(c) ? `${ad(c)} boşaldı, diğeri hâlâ akıyor: gazı kapatın (OFF); sonra ${ad(c)}’e sıradaki çözeltiyi ekleyeceksiniz.` : `${ad(c)} bu adımı bitirdi, diğeri hâlâ akıyor: gazı kapatın (OFF); ${ad(c)} basınç altında boş kalırsa kurur.`, h: H('mode', 40) };
     }
     const dur = rack.filter(c => c.status === 'stop'), yav = Math.abs(S.p - (S.gm === 'adj' ? S.adj : S.max)) < 0.6 ? rack.filter(c => c.status === 'slow' && c.flow < 0.5 && c.clog > 1) : [];
+    /* SPE'de akış yavaş olmalı: istenen hızda akan kartuş varken basınç artırılırsa o da hızlanır, analitler tutunamaz.
+       Önce akanlar biter ve standa alınır; basınç yalnız tıkanan kartuş rafta kalınca artırılır. */
+    const akan = rack.filter(c => dolu(c) && !dur.includes(c) && !yav.includes(c) && c.flow >= 0.3);
+    if ((dur.length || yav.length) && akan.length) {
+      const tk = dur.concat(yav), f = q => q.flow.toFixed(1).replace('.', ',');
+      const yerli = rack.filter(c => akan.includes(c) && need(c) && yer(c) >= (t === 2 ? 1.5 : 1));
+      return { is: `${tk.map(ad).join(', ')} bu basınçta ${dur.length ? 'akmıyor' : 'çok yavaş akıyor'}. <b>Basıncı artırma</b>: ${akan.map(ad).join(', ')} istenen hızda akıyor (${akan.map(f).join(' · ')} mL/dk); basınç artarsa o da hızlanır ve analitler sorbente tutunamaz. Önce ${akan.map(ad).join(', ')} bitsin, bekleme standına al; sonra yalnız ${tk.map(ad).join(', ')} için basıncı yavaş yavaş artır.${yerli.length ? ` Bu arada ${ad(yerli[0])}’de ${yer(yerli[0]).toFixed(1).replace('.', ',')} mL yer açıldı; istersen ekleyebilirsin.` : ''}`, h: null, ops: true };
+    }
     if (dur.length) return { is: `${dur.map(ad).join(', ')} bu basınçta akmıyor: ${S.gm === 'adj' ? 'ADJ' : 'MAX'} düğmesine tıklayıp + ile basıncı yavaş yavaş artırın.`, h: !regpop.hidden ? ['#regPlus', 0, 0] : H('knob:' + S.gm, 44) };
     /* tıkanan kartuş çok yavaşsa beklemek yetmez: basınç sınırına kadar halka ADJ / MAX düğmesini gösterir */
     const sinir = S.gm === 'adj' ? 15 : 30, ayar = S.gm === 'adj' ? S.adj : S.max;
@@ -2028,6 +2039,8 @@ function speKoc(t) {
     if (bosRaf.length === rack.length) return { is: 'Kartuşlar boş: kafayı kaldırın (paneldeki ✋✋ düğmesi).', h: DG };
     if (bosRaf.length) return { is: `${bosRaf.map(ad).join(', ')} boş: kafayı kaldırın (paneldeki ✋✋ düğmesi); ${need(bosRaf[0]) ? 'sıradaki çözeltiyi ekleyeceksiniz' : 'biten kartuşu bekleme standına alacaksınız'}.`, h: DG };
     if (S.headT < 0.999) return { is: 'Kafa iniyor…', h: null };
+    const a0 = S.adj0 || 5;
+    if (rack.length > 1 && S.adj > a0 + 0.5) return { is: `ADJ ${S.adj} psi’de kaldı (tıkanan kartuş için artırmıştınız). Bu basınçta diğer kartuşlar çok hızlı akar: gazı açmadan önce ADJ düğmesine tıklayıp − ile basıncı <b>${a0} psi</b>’ye indirin.`, h: !regpop.hidden ? ['#regMinus', 0, 0] : H('knob:adj', 44) };
     const yerli = rack.filter(c => need(c) && yer(c) >= (t === 2 ? 1.5 : 1) && dolu(c));
     if (yerli.length) return { is: `Kafa kapalı: ADJ ile gazı açın (mod seçicinin sol tarafı). ${yerli.map(ad).join(', ')}’de yer var; önce eklemek isterseniz kafayı kaldırın.`, h: H('mode:adj', 36) };
     return { is: 'Kafa kapalı: mod seçicinin sol tarafına (ADJ) tıklayıp gazı açın.', h: H('mode:adj', 36) };
@@ -2094,7 +2107,7 @@ function otKartus(c) {
   const kayip = /atık teknesine aktı/.test(L);
   e(c.eluate >= 2.7 && !kayip, `Elüsyon: tüpte ${f1(c.eluate)} mL eluat`, kayip ? 'Elüsyon MeOH’u atık teknesine aktı, eluat kayboldu: elüsyondan önce toplama rafına geçilir.' : `Elüsyon eksik: tüpte ${f1(c.eluate)} mL eluat var (3 mL MeOH ile elüe edilir).`, 25);
   e(!/toplama tüpüne aktı/.test(L), 'Eluat temiz: toplama tüpüne yalnız elüsyon çözeltisi aktı', 'Eluat kontamine: elüsyon dışında bir çözelti toplama tüpüne aktı.', 20);
-  const sira = [[/kartuş taştı/, 5, 'Kartuş taştı: dispenser, kartuştaki boş yerden fazla hacme ayarlıydı.'], [/numunesi boşaltıldı/, 30, 'Pipetteki numune başka numunenin tüpüne boşaltıldı: o numune kontamine oldu.'], [/çapraz kontaminasyon/, 20, 'Çapraz kontaminasyon: numune tüpüne başka numunenin ucuyla girildi. Her numuneye yeni uç takılır.'], [/beklenen:/, 10, 'Bir adımda beklenmeyen çözelti eklendi (adım sırası bozuldu).'], [/tamamen geçmeden/, 5, 'Önceki çözelti kartuştan tamamen geçmeden yenisi eklendi.'], [/fazla hacim/, 5, 'Bir adımda fazla hacim eklendi.'], [/protokol bittikten sonra/, 5, 'Protokol bittikten sonra kartuşa çözelti eklendi.']].filter(q => q[0].test(L));
+  const sira = [[/çok hızlı akıyor/, 10, 'Numune ya da elüsyon çok hızlı geçirildi (> 3 mL/dk): analitler sorbente tutunamayabilir.'], [/kartuş taştı/, 5, 'Kartuş taştı: dispenser, kartuştaki boş yerden fazla hacme ayarlıydı.'], [/numunesi boşaltıldı/, 30, 'Pipetteki numune başka numunenin tüpüne boşaltıldı: o numune kontamine oldu.'], [/çapraz kontaminasyon/, 20, 'Çapraz kontaminasyon: numune tüpüne başka numunenin ucuyla girildi. Her numuneye yeni uç takılır.'], [/beklenen:/, 10, 'Bir adımda beklenmeyen çözelti eklendi (adım sırası bozuldu).'], [/tamamen geçmeden/, 5, 'Önceki çözelti kartuştan tamamen geçmeden yenisi eklendi.'], [/fazla hacim/, 5, 'Bir adımda fazla hacim eklendi.'], [/protokol bittikten sonra/, 5, 'Protokol bittikten sonra kartuşa çözelti eklendi.']].filter(q => q[0].test(L));
   e(!sira.length, 'Adımlar doğru sırada ve doğru hacimle yapıldı', sira.map(q => q[2]).join(' '), sira.reduce((a, q) => a + q[1], 0));
   if (c.gen) k.push([true, `Bozulan kartuş yenilendi (${c.gen} kez); değerlendirme son kartuşa göre yapıldı`, '']);
   return { ad: `K${c.k + 1} · N${c.k + 1}`, deger: st >= PROTO.length ? `eluat ${f1(c.eluate)} mL` : `${PROTO[st].short} adımında kaldı`, puan: Math.max(0, 100 - d), k };
