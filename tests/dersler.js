@@ -1,6 +1,8 @@
 // Rehberli dersleri bir öğrenci gibi baştan sona oynatır: yanıp sönen sarı halkaya
 // tıklar, ders düğmelerine basar, soruları yanıtlar. Bir adımda takılırsa ya da
 // JavaScript hatası çıkarsa o dersi başarısız sayar.
+// GERI=1 ile her görevli adım bitince "Geri al"a basılır: cihaz adımın başındaki hâline dönmeli,
+// görev yeniden istenmeli, "‹ Geri" bir önceki ekrana götürmeli; sonra robot adımı yeniden yapar.
 // Kullanım: node tests/dersler.js                 (tüm dersler)
 //           node tests/dersler.js spe_pilot.html   (bir sayfanın dersleri)
 //           node tests/dersler.js spe_pilot.html?ders=speyuk
@@ -87,6 +89,43 @@ const EKRAN_DISI = {
   'santrifuj_pilot.html': () => window.toggleLid(),
 };
 
+// "↶ Geri al" yazısı "‹ Geri"ye dönene kadar basar; cihaz adımın başındaki hâline dönmüş olmalı.
+// Sonra "‹ Geri" ile bir önceki ekrana gider (robot Devam'a basıp bu adıma döner ve adımı yeniden yapar).
+async function geriDene(sayfa, no, coz) {
+  let n = 0;
+  // hareket sürerken (raf kayıyor, uç takılıyor) geri alma kapalıdır: bitmesini bekle
+  for (let k = 0; k < 1200 && await sayfa.evaluate(() => window.__geri && window.__geri.mesgul()); k++) await sayfa.waitForTimeout(250);
+  for (; n < 60; n++) {
+    const y = await sayfa.evaluate(() => { const b = document.querySelector('#dGeri'); return b ? (b.disabled ? '' : b.textContent) : null; });
+    if (y !== '↶ Geri al') break;
+    for (let k = 0; k < 1200 && await sayfa.evaluate(() => window.__geri.mesgul()); k++) await sayfa.waitForTimeout(250);
+    await sayfa.evaluate(() => document.querySelector('#dGeri').click());
+    await sayfa.waitForTimeout(350);
+  }
+  const r = await sayfa.evaluate(() => {
+    const P = document.getElementById('dersP'), no = (P.querySelector('.ust span') || {}).textContent || '';
+    const il = P.querySelector('#dIleri');
+    if (!window.__gtBas) return { atla: 1 };
+    const ayni = window.__geri.ayni(window.__gtBas);
+    let fark = [];
+    if (!ayni) { const a = window.__gtBas, b = window.__geri.kopya();
+      const gez = (x, y, yol) => { if (fark.length > 6) return; if (x && y && typeof x === 'object' && typeof y === 'object') { for (const k of new Set([...Object.keys(x), ...Object.keys(y)])) gez(x[k], y[k], yol + '.' + k); } else if (x !== y && !(typeof x === 'number' && typeof y === 'number' && Math.abs(x - y) < 1e-6)) fark.push(yol + ': ' + JSON.stringify(x) + ' → ' + JSON.stringify(y)); };
+      gez(a.s || a, b.s || b, ''); }
+    return { no, kilitli: !il || il.disabled, ayni, fark, yazi: (document.querySelector('#dGeri') || {}).textContent };
+  });
+  if (r.atla || !n) return 'atla'; // bu adımda geri alınacak işlem yok (ör. yalnızca izleme adımı)
+  if (r.no !== no) return 'adım değişti (' + no + ' → ' + r.no + ')';
+  if (!r.ayni && !coz) return 'cihaz adımın başındaki hâline dönmedi: ' + r.fark.join(' | ');
+  if (!r.kilitli) return 'görev yeniden istenmedi (Devam açık)';
+  if (r.yazi === '‹ Geri') {
+    await sayfa.evaluate(() => document.querySelector('#dGeri').click());
+    await sayfa.waitForTimeout(300);
+    const n2 = await sayfa.evaluate(() => (document.querySelector('#dersP .ust span') || {}).textContent || '');
+    if (parseInt(n2) >= parseInt(no)) return '‹ Geri önceki ekrana gitmedi (' + no + ' → ' + n2 + ')';
+  }
+  return '';
+}
+
 async function dersOynat(tarayici, port, hedef) {
   const sayfa = await tarayici.newPage({ viewport: { width: 1280, height: 800 } });
   const hatalar = [];
@@ -101,6 +140,7 @@ async function dersOynat(tarayici, port, hedef) {
     }
     await sayfa.waitForSelector('#dersP .ust', { timeout: 90000 });
     let canliTik = '', sonCanli = '', sonAnahtar = '', adimBasi = Date.now(), sonTik = 0, deneme = 0;
+    let gNo = '', gCoz = false; const gYapildi = new Set(); sonuc.geri = 0;
     while (true) {
       if (hatalar.length) break;
       const hz = HIZLANDIR[hedef.split('?')[0]]; if (hz) await sayfa.evaluate(hz).catch(() => {});
@@ -125,6 +165,17 @@ async function dersOynat(tarayici, port, hedef) {
         };
       });
       if (d.bitti) { sonuc.tamam = true; break; }
+      // GERI=1: adım değişince cihazın durumu saklanır; görev bitince geri alınıp karşılaştırılır.
+      // (adımın başı, öğrencinin ilk dokunuşundan hemen önce saklanır: kendiliğinden olanlar, ör. değerin durması, sayılmaz)
+      if (process.env.GERI && d.no !== gNo) { gNo = d.no; gCoz = false; await sayfa.evaluate(() => { window.__gtBas = null; }); }
+      if (process.env.GERI && d.ileri && d.ask && !gYapildi.has(d.no)) {
+        gYapildi.add(d.no);
+        const g = await geriDene(sayfa, d.no, gCoz);
+        if (g === 'atla') { sonuc.geriAtla = (sonuc.geriAtla || 0) + 1; }
+        else if (g) { hatalar.push(`Geri al (${d.no} ${d.ask}): ${g}`); break; }
+        else if (!gCoz) sonuc.geri++;
+        continue;
+      }
       const anahtar = d.no + '|' + d.ask + '|' + d.cevaplandi + '|' + d.ileri;
       if (anahtar !== sonAnahtar) {
         sonTik = Date.now() - 700; canliTik = d.canli; // kamera yerine otursun diye ilk tıklamadan önce kısa bekleme
@@ -151,9 +202,10 @@ async function dersOynat(tarayici, port, hedef) {
         canliTik = d.canli;
         // Adım öğrenciden bir işlem bekliyor: düğme, basılı tutma ya da halkaya tıklama.
         sonTik = Date.now(); deneme++;
+        if (process.env.GERI) await sayfa.evaluate(() => { if (!window.__gtBas && window.__geri) window.__gtBas = window.__geri.kopya(); });
         const sayfaAdi = hedef.split('?')[0];
         const coz = COZUM.find(c => c.sayfa === sayfaAdi && c.ask.test(d.ask) && !(c.degil && c.degil.test(d.ask)));
-        if (coz && (await sayfa.evaluate(coz.fn)) !== 'halka') { /* çözüm uygulandı */ }
+        if (coz && (await sayfa.evaluate(coz.fn)) !== 'halka') { gCoz = true; /* çözüm uygulandı (sayfa işleviyle: geri al testi bu adımda karşılaştırma yapmaz) */ }
         else if (coz) { const [x, y] = d.halkalar[0] || []; if (x != null) await sayfa.mouse.click(x, y); }
         else if (d.dugme) await bas(`#dersP [data-dg="${(deneme - 1) % d.dugme}"]`);
         else if (d.tut) {
@@ -201,7 +253,7 @@ async function dersOynat(tarayici, port, hedef) {
       const r = await dersOynat(tarayici, port, h);
       const iyi = r.tamam && !r.hatalar.length;
       if (!iyi) kotu++;
-      console.log(`${iyi ? '✓' : '✗'} ${h}  (${r.sure} sn)` +
+      console.log(`${iyi ? '✓' : '✗'} ${h}  (${r.sure} sn)` + (process.env.GERI ? `  · ${r.geri} adım geri alındı${r.geriAtla ? ', ' + r.geriAtla + ' adımda geri alınacak işlem yoktu' : ''}` : '') +
         (iyi ? '' : '\n    son adım: ' + r.adim + r.hatalar.map(x => '\n    ' + x).join('')) +
         r.uyarilar.map(x => '\n    ⚠ ' + x).join(''));
     }

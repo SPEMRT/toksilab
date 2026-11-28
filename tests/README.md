@@ -33,6 +33,16 @@ takıldığını yazar ve `tests/ekran/ders_*.png` ekran görüntüsünü kayded
 `⚠` satırları dersi bozmayan ama öğrenciyi zorlayabilecek bulgulardır
 (ör. halka ekranın dışında). Ayrıntı için: `AYRINTI=1`, paralel sayısı: `PARALEL=3`.
 
+## Geri al testi
+
+    GERI=1 node tests/dersler.js vorteks_pilot.html
+    node tests/hs_geri.js                    # HS-GC-MS dersleri (sistani hsyukle hstus gctus pctani pcsekans)
+
+`GERI=1` ile robot her görevli adım bitince "↶ Geri al"a basar: cihaz adımın başındaki
+hâline dönmeli, görev yeniden istenmeli, "‹ Geri" bir önceki ekrana götürmeli. Sonra adımı
+yeniden yapar. Çıktıda kaç adımın geri alındığı yazılır. `hs_geri.js` robotunun çözemediği
+adımda (ör. hücreye yazı yazmak, animasyon görevi) durur; bu hata sayılmaz.
+
 ## Lab turu testi
 
     node tests/labtur.js
